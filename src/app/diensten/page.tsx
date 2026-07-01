@@ -1,73 +1,58 @@
 import type { Metadata } from "next";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/PageHero";
+import ServiceCard from "@/components/ServiceCard";
+import StockImage from "@/components/StockImage";
+import { services } from "@/lib/content";
+import { stockImages } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Diensten | Helping Hands Agency",
   description:
-    "Event crew, horeca support, stagehands, productie assistentie, logistiek en teamcaptains.",
+    "Event crew, horeca support, stagehands, productie assistentie, logistiek en teamcaptains voor evenementen en producties.",
 };
-
-const services = [
-  {
-    title: "Event crew",
-    description:
-      "Representatieve medewerkers voor publieksstromen, op- en afbouw en operationele ondersteuning tijdens festivals, congressen en bedrijfsevenementen.",
-  },
-  {
-    title: "Horeca support",
-    description:
-      "Flexibele versterking voor bars, bediening, runners en gastvrije service op piekmomenten in de horeca.",
-  },
-  {
-    title: "Stagehands",
-    description:
-      "Aanpakkers voor laden, lossen, bouwen en breken met oog voor veiligheid, tempo en samenwerking op locatie.",
-  },
-  {
-    title: "Productie assistentie",
-    description:
-      "Ondersteuning voor productieplanningen, crewcoördinatie en praktische uitvoering op de werkvloer.",
-  },
-  {
-    title: "Logistieke ondersteuning",
-    description:
-      "Betrouwbare handen voor transportbewegingen, materiaalstromen en back-of-house processen.",
-  },
-  {
-    title: "Teamcaptains",
-    description:
-      "Ervaren aanspreekpunten die teams aansturen, briefings bewaken en snel schakelen met de opdrachtgever.",
-  },
-];
 
 export default function DienstenPage() {
   return (
     <>
       <PageHero
         eyebrow="Diensten"
-        title="Crew en ondersteuning voor elke fase van de operatie."
-        description="Helping Hands Agency levert praktische mensen die begrijpen wat er op locatie nodig is: tempo, communicatie en betrouwbaarheid."
+        title="Crew en ondersteuning voor elke fase van de productie."
+        description="Van hospitality en floor support tot stagehands en logistiek — praktische mensen die begrijpen wat er op locatie nodig is."
+        image={stockImages.servicesStagehands}
+        imageAlt="Stagehands bij productie"
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
-            <article
-              key={service.title}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <div className="mb-5 h-2 w-12 rounded-full bg-[#F28C28]" />
-              <h2 className="text-xl font-black text-[#173A8A]">{service.title}</h2>
-              <p className="mt-3 leading-7 text-slate-600">{service.description}</p>
-            </article>
+            <ServiceCard key={service.title} service={service} showUsage showCta />
           ))}
         </div>
       </section>
 
+      <section className="bg-[#0B1F4D] py-16 text-white">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <h2 className="text-3xl font-black">Snel de juiste functie ingezet</h2>
+            <p className="mt-4 leading-8 text-white/75">
+              Vertel ons welke crew je nodig hebt — wij denken mee over bezetting, briefing en
+              planning op locatie.
+            </p>
+          </div>
+          <StockImage
+            src={stockImages.productionBackstage}
+            alt="Backstage productie"
+            fill
+            className="relative aspect-video w-full rounded-2xl"
+            placeholderLabel="Productie"
+          />
+        </div>
+      </section>
+
       <CTASection
-        eyebrow="Crew nodig?"
-        title="Vertel ons welke functies, tijden en locatie je nodig hebt. Wij denken mee over de juiste bezetting."
+        title="Welke crew heb jij nodig?"
+        description="Stuur je datum, locatie, tijden, functies en aantal mensen door."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
       />

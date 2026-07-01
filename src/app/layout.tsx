@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Helping Hands Agency | Crew voor evenementen en productie",
+  title: "Helping Hands Agency | Crew voor evenementen, horeca en productie",
   description:
-    "Betrouwbare crew voor evenementen, horeca, stagebouw, productie en logistiek.",
+    "Helping Hands Agency levert betrouwbare eventcrew, stagehands, horeca support en productieondersteuning voor evenementen, festivals, stadions, beurzen en horecalocaties.",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="nl"
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-[#F5F7FA] text-slate-950">
+      <body className="flex min-h-full flex-col bg-[#F5F7FA] text-[#101828]">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

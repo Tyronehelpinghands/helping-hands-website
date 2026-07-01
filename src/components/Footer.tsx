@@ -81,7 +81,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/medewerkers" className="transition hover:text-white">
-                  Werken bij Helping Hands
+                  Aanmelden als medewerker
                 </Link>
               </li>
             </ul>
@@ -89,7 +89,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} Helping Hands Agency</p>
+          <p>&copy; 2026 Helping Hands Agency</p>
           <p>Event staffing &amp; crew voor de live branche</p>
         </div>
       </div>

@@ -21,17 +21,31 @@ html {
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #101828;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.stock-image-placeholder {
+  background:
+    radial-gradient(ellipse 80% 80% at 20% 20%, rgba(242, 140, 40, 0.35), transparent 55%),
+    linear-gradient(145deg, #0b1f4d 0%, #173a8a 55%, #122a5c 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  min-height: 100%;
 }
 
 .hero-gradient {
   background:
-    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(242, 140, 40, 0.14), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(255, 255, 255, 0.08), transparent 50%),
-    linear-gradient(160deg, #0b1f4d 0%, #173a8a 45%, #1e4aa8 100%);
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(242, 140, 40, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(255, 255, 255, 0.06), transparent 50%),
+    linear-gradient(160deg, #0b1f4d 0%, #173a8a 50%, #122f6e 100%);
+}
+
+.section-dark {
+  background: linear-gradient(180deg, #0b1f4d 0%, #173a8a 100%);
 }
 
 .card-shine {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
 }

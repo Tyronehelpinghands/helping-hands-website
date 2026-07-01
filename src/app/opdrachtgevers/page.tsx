@@ -1,33 +1,55 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/PageHero";
+import { services } from "@/lib/content";
+import { stockImages } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Opdrachtgevers | Helping Hands Agency",
   description:
-    "Personeel aanvragen voor evenementen, horeca, stagebouw, productie en logistiek.",
+    "Personeel aanvragen voor evenementen, festivals, stadions, beurzen en horecalocaties.",
 };
 
-const benefits = [
+const clientTypes = [
+  "Event- en productiebedrijven",
+  "Festival- en concertorganisatoren",
+  "Horeca- en cateringpartijen",
+  "Beurzen en zakelijke events",
+  "Stadion- en locatieproducties",
+];
+
+const requestInfo = [
+  "Datum",
+  "Locatie",
+  "Start- en eindtijd",
+  "Functie(s)",
+  "Aantal mensen",
+  "Kledingvoorschriften",
+  "Contactpersoon op locatie",
+  "Eventuele briefing",
+];
+
+const process = [
   {
-    title: "Snel schakelen",
-    description:
-      "Korte lijnen en duidelijke afspraken, zodat je op korte termijn crew kunt inzetten wanneer de planning verandert.",
+    step: "01",
+    title: "Aanvraag",
+    text: "Je deelt datum, locatie, tijden, functies en aantal mensen.",
   },
   {
-    title: "Eén vast aanspreekpunt",
-    description:
-      "Je spreekt rechtstreeks met Helping Hands Agency over bezetting, briefing en aanwezigheid op locatie.",
+    step: "02",
+    title: "Bezetting",
+    text: "Wij stemmen crew af op ervaring, beschikbaarheid en type productie.",
   },
   {
-    title: "Praktische selectie",
-    description:
-      "We kijken naar ervaring, houding en beschikbaarheid, passend bij de functie en de omgeving.",
+    step: "03",
+    title: "Briefing",
+    text: "Heldere afspraken over aankomst, kleding, taken en aanspreekpunten.",
   },
   {
-    title: "Heldere communicatie",
-    description:
-      "Van aanvraag tot aankomst: functie, timing, kleding en aanspreekpunten worden vooraf afgestemd.",
+    step: "04",
+    title: "Uitvoering",
+    text: "Crew op locatie — met één vast aanspreekpunt bij Helping Hands.",
   },
 ];
 
@@ -36,37 +58,80 @@ export default function OpdrachtgeversPage() {
     <>
       <PageHero
         eyebrow="Opdrachtgevers"
-        title="Betrouwbare crew wanneer jouw planning vraagt om flexibiliteit."
-        description="Voor productieleiders, eventmanagers en horeca-organisatoren die mensen nodig hebben die direct aan de slag kunnen."
+        title="Personeel aanvragen voor je event of productie."
+        description="Voor productieleiders, eventmanagers en organisatoren die snel betrouwbare crew nodig hebben op locatie."
+        image={stockImages.clientsBriefing}
+        imageAlt="Briefing met opdrachtgever"
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="max-w-2xl">
-          <h2 className="text-3xl font-black tracking-tight text-[#173A8A]">
-            Zo werken we samen
-          </h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
-            Je deelt je vraag, wij denken mee over bezetting en zorgen voor een duidelijke briefing
-            richting de crew. Zo houd jij grip op de operatie.
-          </p>
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="grid gap-12 lg:grid-cols-2">
+          <div>
+            <h2 className="text-2xl font-black text-[#0B1F4D]">Voor wie wij werken</h2>
+            <ul className="mt-6 space-y-3">
+              {clientTypes.map((item) => (
+                <li key={item} className="flex gap-3 text-[#101828]/80">
+                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#F28C28]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-[#0B1F4D]">Welke functies wij leveren</h2>
+            <ul className="mt-6 space-y-2">
+              {services.map((s) => (
+                <li key={s.title} className="font-semibold text-[#173A8A]">
+                  {s.title}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {benefits.map((benefit) => (
-            <article
-              key={benefit.title}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 className="text-xl font-black text-[#173A8A]">{benefit.title}</h3>
-              <p className="mt-3 leading-7 text-slate-600">{benefit.description}</p>
-            </article>
-          ))}
+        <div className="mt-16">
+          <h2 className="text-2xl font-black text-[#0B1F4D]">Hoe het aanvraagproces werkt</h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {process.map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl bg-[#0B1F4D] p-6 text-white shadow-lg"
+              >
+                <span className="text-sm font-black text-[#F28C28]">{item.step}</span>
+                <h3 className="mt-2 text-lg font-black">{item.title}</h3>
+                <p className="mt-2 text-sm text-white/75">{item.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+          <h2 className="text-2xl font-black text-[#0B1F4D]">
+            Welke informatie wij nodig hebben
+          </h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {requestInfo.map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-xl bg-[#F5F7FA] px-4 py-3 text-sm font-semibold text-[#101828]"
+              >
+                <span className="h-2 w-2 rounded-full bg-[#F28C28]" />
+                {item}
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/contact"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+          >
+            Personeel aanvragen
+          </Link>
         </div>
       </section>
 
       <CTASection
-        eyebrow="Personeel aanvragen"
-        title="Neem contact op en bespreek je planning, functies en beschikbaarheid."
+        title="Crew nodig op korte termijn?"
+        description="Stuur je planning door en wij denken mee over de juiste bezetting."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
       />
