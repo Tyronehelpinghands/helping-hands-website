@@ -1,20 +1,10 @@
-import StockImage from "@/components/StockImage";
-
 type PageHeroProps = {
   eyebrow?: string;
   title: string;
   description: string;
-  image?: string;
-  imageAlt?: string;
 };
 
-export default function PageHero({
-  eyebrow,
-  title,
-  description,
-  image,
-  imageAlt,
-}: PageHeroProps) {
+export default function PageHero({ eyebrow, title, description }: PageHeroProps) {
   return (
     <section className="hero-gradient relative overflow-hidden text-white">
       <div className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[#F28C28]/15 blur-3xl" />
@@ -28,18 +18,37 @@ export default function PageHero({
           <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-tight sm:text-5xl">
             {title}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/85">{description}</p>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/85">
+            {description}
+          </p>
         </div>
-        {image && (
-          <StockImage
-            src={image}
-            alt={imageAlt ?? title}
-            fill
-            className="relative aspect-[16/10] w-full rounded-2xl shadow-2xl"
-            placeholderLabel={eyebrow}
-            sizes="(max-width: 1024px) 100vw, 40vw"
-          />
-        )}
+
+        <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-8 shadow-2xl backdrop-blur-sm">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#F28C28]/20 blur-2xl" />
+          <div className="relative">
+            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F28C28] text-xl font-black text-white shadow-lg">
+              HH
+            </span>
+            <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+              Event staffing
+            </p>
+            <p className="mt-3 text-2xl font-black leading-tight">
+              Crew die begrijpt wat er op locatie nodig is.
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              {["Planning", "Briefing", "Uitvoering", "Terugkoppeling"].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm font-bold"
+                  >
+                    {item}
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

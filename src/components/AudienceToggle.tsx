@@ -27,8 +27,8 @@ const options = {
       "Afwisselende opdrachten",
       "Doorgroeien naar teamcaptain",
     ],
-    cta: "Aanmelden als crewlid",
-    href: "/medewerkers",
+    cta: "Bekijk vacatures",
+    href: "/vacatures",
   },
 } as const;
 

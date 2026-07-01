@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import CTASection from "@/components/CTASection";
+import LogoShowcase from "@/components/LogoShowcase";
 import PageHero from "@/components/PageHero";
-import StockImage from "@/components/StockImage";
-import { projectCategories } from "@/lib/content";
-import { stockImages } from "@/lib/images";
+import { projectCategories, services } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Projecten | Helping Hands Agency",
@@ -16,53 +15,72 @@ export default function ProjectenPage() {
     <>
       <PageHero
         eyebrow="Projecten"
-        title="Ingezet waar producties draaien."
-        description="Helping Hands Agency wordt ingezet bij evenementen, producties, horeca-opdrachten, stadions, beurzen en festivals."
-        image={stockImages.festivals}
-        imageAlt="Festival productie"
+        title="Projectervaring & inzetgebieden"
+        description="Helping Hands Agency levert crew voor producties waar timing, communicatie en inzet moeten kloppen."
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <p className="max-w-3xl text-lg leading-8 text-[#101828]/75">
-          Wij ondersteunen uiteenlopende producties met crew die begrijpt wat er op locatie nodig is.
-          Hieronder vind je de categorieën waarin wij worden ingezet — zonder verzonnen
-          klantcases, wel met duidelijke context.
+          Onze crew is ingezet bij festivals, concerten, stadionproducties,
+          beurzen, horeca-events, load-in/load-out en backstage ondersteuning.
+          Specifieke logo&apos;s en namen tonen wij alleen wanneer dit past
+          binnen de samenwerking.
         </p>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {projectCategories.map((category) => (
-            <article
-              key={category.title}
-              className="rounded-2xl border border-slate-200 bg-white p-7 shadow-lg transition hover:border-[#173A8A]/30 hover:shadow-xl"
-            >
-              <div className="mb-4 h-1 w-10 rounded-full bg-[#F28C28]" />
-              <h2 className="text-xl font-black text-[#0B1F4D]">{category.title}</h2>
-              <p className="mt-3 leading-7 text-[#101828]/75">{category.description}</p>
-            </article>
-          ))}
+        <div className="mt-16">
+          <LogoShowcase />
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2">
-          <StockImage
-            src={stockImages.horecaSupport}
-            alt="Horeca support op event"
-            fill
-            className="relative aspect-video w-full rounded-2xl shadow-xl"
-            placeholderLabel="Horeca"
-          />
-          <StockImage
-            src={stockImages.productionBackstage}
-            alt="Backstage productie"
-            fill
-            className="relative aspect-video w-full rounded-2xl shadow-xl"
-            placeholderLabel="Productie"
-          />
+        <div className="mt-20">
+          <h2 className="text-3xl font-black text-[#0B1F4D]">
+            Producties waar wij ervaring mee hebben
+          </h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {projectCategories.map((category) => (
+              <article
+                key={category.title}
+                className="rounded-2xl border border-slate-200 bg-white p-7 shadow-lg transition hover:-translate-y-1 hover:border-[#F28C28]/40 hover:shadow-xl"
+              >
+                <div className="mb-4 h-1 w-10 rounded-full bg-[#F28C28]" />
+                <h3 className="text-xl font-black text-[#0B1F4D]">
+                  {category.title}
+                </h3>
+                <p className="mt-3 leading-7 text-[#101828]/75">
+                  {category.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-20">
+          <h2 className="text-3xl font-black text-[#0B1F4D]">
+            Functies die wij leveren
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <article
+                key={service.title}
+                className="rounded-2xl border border-slate-200 bg-[#F5F7FA] p-6 transition hover:border-[#173A8A]/30 hover:bg-white hover:shadow-lg"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#173A8A] to-[#0B1F4D] text-sm font-black text-white">
+                  {service.initials}
+                </div>
+                <h3 className="mt-4 text-lg font-black text-[#0B1F4D]">
+                  {service.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[#101828]/75">
+                  {service.description}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       <CTASection
-        title="Jouw productie, onze crew."
-        description="Vertel ons over je planning en wij denken mee over de juiste bezetting."
+        title="Crew nodig voor je volgende productie?"
+        description="Deel je planning en wij denken mee over de juiste bezetting op locatie."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
       />

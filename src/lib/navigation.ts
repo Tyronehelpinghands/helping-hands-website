@@ -3,12 +3,14 @@ export const navLinks = [
   { href: "/diensten", label: "Diensten" },
   { href: "/opdrachtgevers", label: "Opdrachtgevers" },
   { href: "/medewerkers", label: "Medewerkers" },
+  { href: "/vacatures", label: "Vacatures" },
   { href: "/projecten", label: "Projecten" },
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
 export const contactEmail = "info@helpinghandsagency.nl";
+export const applicationsEmail = "aanmeldingen@helpinghandsagency.nl";
 
 export type DropdownItem = {
   title: string;
@@ -100,14 +102,14 @@ export const navDropdowns: NavDropdownConfig[] = [
     panelTitle: "Werken bij Helping Hands",
     items: [
       {
-        title: "Aanmelden als crewlid",
-        description: "Meld je aan voor events, horeca en producties.",
-        href: "/medewerkers",
+        title: "Bekijk vacatures",
+        description: "Openstaande functies voor events, horeca en producties.",
+        href: "/vacatures",
       },
       {
-        title: "Functies",
-        description: "Event crew, stagehands, horeca support en productie.",
-        href: "/medewerkers",
+        title: "Aanmelden als crewlid",
+        description: "Meld je aan voor events, horeca en producties.",
+        href: "/vacatures",
       },
       {
         title: "Doorgroeien",
@@ -115,12 +117,13 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/medewerkers",
       },
     ],
-    cta: { label: "Aanmelden", href: "/medewerkers" },
+    cta: { label: "Aanmelden", href: "/vacatures" },
   },
 ];
 
 export const simpleNavLinks = [
   { href: "/", label: "Home" },
+  { href: "/vacatures", label: "Vacatures" },
   { href: "/projecten", label: "Projecten" },
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },

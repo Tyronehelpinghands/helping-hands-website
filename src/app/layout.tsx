@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Helping Hands Agency | Crew voor evenementen, horeca en productie",
   description:
-    "Helping Hands Agency levert betrouwbare eventcrew, stagehands, horeca support en productieondersteuning voor evenementen, festivals, stadions, beurzen en horecalocaties.",
+    "Helping Hands Agency levert eventcrew, stagehands, horeca support en productieondersteuning voor festivals, stadions, beurzen, concerten en horecalocaties.",
 };
 
 export default function RootLayout({

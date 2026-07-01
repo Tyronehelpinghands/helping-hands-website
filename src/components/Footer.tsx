@@ -1,6 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
-import { contactEmail, navLinks } from "@/lib/navigation";
+import {
+  applicationsEmail,
+  contactEmail,
+  navLinks,
+} from "@/lib/navigation";
 
 const serviceLinks = [
   { href: "/diensten", label: "Event crew" },
@@ -18,18 +21,16 @@ export default function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Image
-                src="/hh-logo.png"
-                alt="Helping Hands Agency logo"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain brightness-0 invert"
-              />
-              <span className="text-base font-extrabold tracking-tight">Helping Hands Agency</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F28C28] text-sm font-black text-white">
+                HH
+              </span>
+              <span className="text-base font-extrabold tracking-tight">
+                Helping Hands Agency
+              </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
-              Crew voor evenementen, horeca, stagebouw, productie en logistiek. Snel inzetbaar op
-              locatie.
+              Crew voor evenementen, horeca, stagebouw, productie en logistiek.
+              Snel inzetbaar op locatie.
             </p>
           </div>
 
@@ -64,14 +65,30 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F28C28]">Contact</p>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+              Contact
+            </p>
+            <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  Algemene vragen &amp; personeelsaanvragen
+                </p>
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="transition hover:text-white"
+                  className="mt-1 block transition hover:text-white"
                 >
                   {contactEmail}
+                </a>
+              </li>
+              <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  Crew aanmelden &amp; sollicitaties
+                </p>
+                <a
+                  href={`mailto:${applicationsEmail}`}
+                  className="mt-1 block transition hover:text-white"
+                >
+                  {applicationsEmail}
                 </a>
               </li>
               <li>
@@ -80,9 +97,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/medewerkers" className="transition hover:text-white">
-                  Aanmelden als medewerker
+                <Link href="/vacatures" className="transition hover:text-white">
+                  Vacatures
                 </Link>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${applicationsEmail}`}
+                  className="transition hover:text-white"
+                >
+                  Aanmelden als medewerker
+                </a>
               </li>
             </ul>
           </div>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/PageHero";
 import { services } from "@/lib/content";
-import { stockImages } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Opdrachtgevers | Helping Hands Agency",
@@ -60,8 +59,6 @@ export default function OpdrachtgeversPage() {
         eyebrow="Opdrachtgevers"
         title="Personeel aanvragen voor je event of productie."
         description="Voor productieleiders, eventmanagers en organisatoren die snel betrouwbare crew nodig hebben op locatie."
-        image={stockImages.clientsBriefing}
-        imageAlt="Briefing met opdrachtgever"
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">

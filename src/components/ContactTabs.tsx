@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { contactEmail } from "@/lib/navigation";
+import { applicationsEmail, contactEmail } from "@/lib/navigation";
 
 const clientFields = [
   { label: "Bedrijfsnaam", type: "text" },
@@ -103,18 +103,34 @@ export default function ContactTabs() {
         {submittedTab ? (
           <div className="rounded-2xl bg-[#0B1F4D] p-8 text-white">
             <p className="text-2xl font-black">
-              {submittedTab === "client" ? "Aanvraag voorbereid." : "Aanmelding voorbereid."}
+              {submittedTab === "client"
+                ? "Aanvraag voorbereid."
+                : "Aanmelding voorbereid."}
             </p>
             <p className="mt-3 leading-7 text-white/75">
-              Dit formulier hoeft nu nog niet echt te verzenden. Koppel het later aan HubSpot,
-              e-mail of een formulierprovider. Voor direct contact:{" "}
-              <a
-                href={`mailto:${contactEmail}`}
-                className="font-bold text-[#F28C28] underline-offset-4 hover:underline"
-              >
-                {contactEmail}
-              </a>
-              .
+              {submittedTab === "client" ? (
+                <>
+                  Stuur deze gegevens naar{" "}
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="font-bold text-[#F28C28] underline-offset-4 hover:underline"
+                  >
+                    {contactEmail}
+                  </a>{" "}
+                  of koppel dit later aan HubSpot.
+                </>
+              ) : (
+                <>
+                  Stuur je gegevens naar{" "}
+                  <a
+                    href={`mailto:${applicationsEmail}`}
+                    className="font-bold text-[#F28C28] underline-offset-4 hover:underline"
+                  >
+                    {applicationsEmail}
+                  </a>
+                  .
+                </>
+              )}
             </p>
             <button
               type="button"
@@ -133,14 +149,30 @@ export default function ContactTabs() {
             </div>
 
             <div className="mt-6 rounded-2xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/75">
-              Formulier nog niet gekoppeld. Voor nu kun je ook direct mailen naar{" "}
-              <a
-                href={`mailto:${contactEmail}`}
-                className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
-              >
-                {contactEmail}
-              </a>
-              .
+              {isClient ? (
+                <>
+                  Formulier nog niet gekoppeld. Voor personeelsaanvragen mail je
+                  naar{" "}
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                  >
+                    {contactEmail}
+                  </a>
+                  .
+                </>
+              ) : (
+                <>
+                  Voor werken bij Helping Hands mail je naar{" "}
+                  <a
+                    href={`mailto:${applicationsEmail}`}
+                    className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                  >
+                    {applicationsEmail}
+                  </a>
+                  .
+                </>
+              )}
             </div>
 
             <button

@@ -49,3 +49,20 @@ body {
 .card-shine {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
 }
+
+@keyframes logo-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-carousel-track {
+  animation: logo-scroll 45s linear infinite;
+}
+
+.logo-carousel-track:hover {
+  animation-play-state: paused;
+}

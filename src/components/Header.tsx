@@ -276,7 +276,7 @@ export default function Header() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/medewerkers"
+            href="/vacatures"
             className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-[#173A8A] transition hover:bg-[#F5F7FA] hover:text-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:inline-flex"
           >
             Crew aanmelden
@@ -443,7 +443,7 @@ export default function Header() {
               Personeel aanvragen
             </Link>
             <Link
-              href="/medewerkers"
+              href="/vacatures"
               onClick={closeAll}
               className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
             >

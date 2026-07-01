@@ -11,7 +11,7 @@ export default function FloatingCTA() {
           Personeel aanvragen
         </Link>
         <Link
-          href="/medewerkers"
+          href="/vacatures"
           className="mt-2 block rounded-full px-5 py-2 text-center text-xs font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 focus:ring-offset-[#0B1F4D]"
         >
           Crew aanmelden
@@ -27,7 +27,7 @@ export default function FloatingCTA() {
             Personeel
           </Link>
           <Link
-            href="/medewerkers"
+            href="/vacatures"
             className="rounded-full border border-white/20 bg-white/10 px-4 py-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#F28C28]"
           >
             Werken

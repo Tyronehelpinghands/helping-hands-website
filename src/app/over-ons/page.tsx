@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/PageHero";
-import StockImage from "@/components/StockImage";
-import { stockImages } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Over ons | Helping Hands Agency",
@@ -44,31 +42,21 @@ export default function OverOnsPage() {
         eyebrow="Over ons"
         title="Praktische mensen voor producties waar alles moet kloppen."
         description="Helping Hands Agency is een Nederlands personeelsbureau voor evenementen, horeca, stagebouw, productie en logistiek."
-        image={stockImages.crewWorking}
-        imageAlt="Helping Hands crew"
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-          <div className="max-w-xl">
-            <h2 className="text-3xl font-black text-[#0B1F4D]">Wie wij zijn</h2>
-            <p className="mt-5 text-lg leading-8 text-[#101828]/75">
-              Helping Hands Agency is gebouwd vanuit praktijkervaring in de live branche. Wij
-              begrijpen dat evenementen draaien op timing, communicatie en inzet — niet op
-              ingewikkelde processen.
-            </p>
-            <p className="mt-4 text-lg leading-8 text-[#101828]/75">
-              Wij leveren geen anonieme handjes, maar mensen die weten hoe ze zich op locatie moeten
-              gedragen. Met één aanspreekpunt, duidelijke afspraken en betrouwbare uitvoering.
-            </p>
-          </div>
-          <StockImage
-            src={stockImages.heroEvent}
-            alt="Event productie"
-            fill
-            className="relative aspect-[16/10] w-full rounded-2xl shadow-xl"
-            placeholderLabel="Events"
-          />
+        <div className="max-w-3xl">
+          <h2 className="text-3xl font-black text-[#0B1F4D]">Wie wij zijn</h2>
+          <p className="mt-5 text-lg leading-8 text-[#101828]/75">
+            Helping Hands Agency is gebouwd vanuit praktijkervaring in de live
+            branche. Wij begrijpen dat evenementen draaien op timing,
+            communicatie en inzet — niet op ingewikkelde processen.
+          </p>
+          <p className="mt-4 text-lg leading-8 text-[#101828]/75">
+            Wij leveren geen anonieme handjes, maar mensen die weten hoe ze zich
+            op locatie moeten gedragen. Met één aanspreekpunt, duidelijke
+            afspraken en betrouwbare uitvoering.
+          </p>
         </div>
 
         <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -87,9 +75,11 @@ export default function OverOnsPage() {
 
       <CTASection
         title="Samenwerken met Helping Hands?"
-        description="Vraag crew aan of meld je aan als medewerker."
+        description="Vraag crew aan of bekijk vacatures om mee te draaien op locatie."
         buttonLabel="Neem contact op"
         buttonHref="/contact"
+        secondaryLabel="Bekijk vacatures"
+        secondaryHref="/vacatures"
       />
     </>
   );
