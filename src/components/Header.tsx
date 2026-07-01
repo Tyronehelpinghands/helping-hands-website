@@ -1,14 +1,95 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { navLinks } from "@/lib/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  contactEmail,
+  navDropdowns,
+  simpleNavLinks,
+  type NavDropdownConfig,
+} from "@/lib/navigation";
+
+type DropdownId = NavDropdownConfig["id"] | null;
+
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg
+      className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+function DropdownCard({
+  title,
+  description,
+  href,
+  onNavigate,
+}: {
+  title: string;
+  description: string;
+  href: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="group block rounded-xl border border-slate-100 bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:bg-[#F28C28]/5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+    >
+      <p className="font-bold text-[#101828] transition group-hover:text-[#F28C28]">
+        {title}
+      </p>
+      <p className="mt-1 text-sm leading-5 text-slate-600">{description}</p>
+    </Link>
+  );
+}
 
 export default function Header() {
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<DropdownId>(null);
+  const [mobileAccordion, setMobileAccordion] = useState<DropdownId>(null);
+
+  const closeAll = useCallback(() => {
+    setMenuOpen(false);
+    setOpenDropdown(null);
+    setMobileAccordion(null);
+  }, []);
+
+  const isDropdownActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+
+  const isLinkActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  const navLinkClass = (active: boolean) =>
+    `relative rounded-lg px-2.5 py-2 text-[0.8125rem] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+      active
+        ? "bg-[#F28C28]/10 text-[#173A8A] after:absolute after:bottom-0.5 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-[#F28C28]"
+        : "text-slate-600 hover:bg-[#F5F7FA] hover:text-[#173A8A]"
+    }`;
+
+  const toggleDropdown = (id: DropdownId) => {
+    setOpenDropdown((current) => (current === id ? null : id));
+  };
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -17,51 +98,192 @@ export default function Header() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!openDropdown) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        headerRef.current &&
+        !headerRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown]);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeAll();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [closeAll]);
+
+  const renderDesktopDropdown = (config: NavDropdownConfig) => {
+    const isMega = config.id === "diensten";
+    const isOpen = openDropdown === config.id;
+    const active = isDropdownActive(config.href);
+
+    return (
+      <div
+        key={config.id}
+        className="relative"
+        onMouseEnter={() => setOpenDropdown(config.id)}
+        onMouseLeave={() => setOpenDropdown(null)}
+      >
+        <button
+          type="button"
+          id={`nav-${config.id}-button`}
+          aria-expanded={isOpen}
+          aria-controls={`nav-${config.id}-panel`}
+          aria-haspopup="true"
+          onClick={() => toggleDropdown(config.id)}
+          className={`inline-flex cursor-pointer items-center gap-1 ${navLinkClass(active)}`}
+        >
+          {config.label}
+          <ChevronDown open={isOpen} />
+        </button>
+
+        {isOpen && (
+          <div
+            id={`nav-${config.id}-panel`}
+            role="region"
+            aria-labelledby={`nav-${config.id}-button`}
+            className={`absolute top-full z-50 pt-3 ${
+              isMega ? "left-1/2 w-[min(100vw-2rem,56rem)] -translate-x-1/2" : "left-0 w-80"
+            }`}
+          >
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-[#0B1F4D]/10">
+              <div className={`p-5 ${isMega ? "sm:p-6" : ""}`}>
+                <div className={isMega ? "mb-5 max-w-2xl" : "mb-4"}>
+                  <p className="text-base font-black text-[#173A8A]">
+                    {config.panelTitle}
+                  </p>
+                  {config.panelDescription && (
+                    <p className="mt-1 text-sm text-slate-600">
+                      {config.panelDescription}
+                    </p>
+                  )}
+                </div>
+
+                <div
+                  className={
+                    isMega
+                      ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                      : "grid gap-2"
+                  }
+                >
+                  {config.items.map((item) => (
+                    <DropdownCard
+                      key={item.title}
+                      {...item}
+                      onNavigate={() => setOpenDropdown(null)}
+                    />
+                  ))}
+                </div>
+
+                {config.cta && (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <Link
+                      href={config.cta.href}
+                      onClick={() => setOpenDropdown(null)}
+                      className="inline-flex rounded-full bg-[#F28C28] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                    >
+                      {config.cta.label}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/95 shadow-[0_1px_20px_rgba(11,31,77,0.06)] backdrop-blur-md">
-      <div className="mx-auto flex h-[4.25rem] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+    <header
+      ref={headerRef}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "border-b border-slate-200/80 bg-white/90 shadow-[0_4px_24px_rgba(11,31,77,0.08)] backdrop-blur-md"
+          : "border-b border-slate-200/50 bg-white/95 shadow-[0_1px_20px_rgba(11,31,77,0.05)] backdrop-blur-sm"
+      }`}
+    >
+      <div
+        className={`mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 transition-all duration-300 sm:px-6 lg:px-8 ${
+          scrolled ? "h-[3.75rem]" : "h-[4.75rem]"
+        }`}
+      >
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2.5"
+          onClick={closeAll}
+          className="group flex shrink-0 items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 rounded-lg"
           aria-label="Helping Hands Agency home"
         >
-          <Image
-            src="/hh-logo.png"
-            alt="Helping Hands Agency logo"
-            width={40}
-            height={40}
-            className="h-9 w-9 object-contain sm:h-10 sm:w-10"
-            priority
-          />
-          <span className="text-sm font-extrabold tracking-tight text-[#173A8A] sm:text-base">
-            Helping Hands Agency
+          <span
+            className={`flex shrink-0 items-center justify-center rounded-xl bg-[#F28C28] font-black text-white shadow-lg shadow-[#F28C28]/30 transition group-hover:scale-105 ${
+              scrolled ? "h-9 w-9 text-sm" : "h-10 w-10 text-base"
+            }`}
+          >
+            HH
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span
+              className={`font-extrabold tracking-tight text-[#173A8A] transition ${
+                scrolled ? "text-sm" : "text-base"
+              }`}
+            >
+              Helping Hands
+            </span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs">
+              Event staffing
+            </span>
           </span>
         </Link>
 
         <nav
-          className="hidden items-center gap-4 text-[0.8125rem] font-semibold text-slate-600 xl:flex"
+          className="hidden items-center gap-1 xl:flex"
           aria-label="Hoofdnavigatie"
         >
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
+          {simpleNavLinks
+            .filter((link) => link.href === "/")
+            .map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-lg px-2 py-1.5 transition hover:bg-[#F5F7FA] hover:text-[#173A8A] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
-                  isActive ? "bg-[#F5F7FA] text-[#173A8A]" : ""
-                }`}
+                className={navLinkClass(isLinkActive(link.href))}
               >
                 {link.label}
               </Link>
-            );
-          })}
+            ))}
+
+          {navDropdowns.map(renderDesktopDropdown)}
+
+          {simpleNavLinks
+            .filter((link) => link.href !== "/")
+            .map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={navLinkClass(isLinkActive(link.href))}
+              >
+                {link.label}
+              </Link>
+            ))}
         </nav>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/medewerkers"
+            className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-[#173A8A] transition hover:bg-[#F5F7FA] hover:text-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:inline-flex"
+          >
+            Crew aanmelden
+          </Link>
           <Link
             href="/contact"
-            className="hidden rounded-full bg-[#F28C28] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-sm"
+            className="hidden rounded-full bg-[#F28C28] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:scale-[1.03] hover:bg-[#de7c1f] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-sm"
           >
             Personeel aanvragen
           </Link>
@@ -103,32 +325,137 @@ export default function Header() {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="border-t border-slate-200 bg-white px-4 py-4 shadow-lg xl:hidden"
+          className={`fixed inset-x-0 bottom-0 z-40 flex flex-col overflow-hidden bg-white xl:hidden ${
+            scrolled ? "top-[3.75rem]" : "top-[4.75rem]"
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobiel menu"
         >
-          <nav className="flex flex-col gap-0.5" aria-label="Mobiele navigatie">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+          <nav
+            className="flex-1 overflow-y-auto overscroll-contain px-4 py-4"
+            aria-label="Mobiele navigatie"
+          >
+            <Link
+              href="/"
+              onClick={closeAll}
+              className={`block rounded-xl px-4 py-3.5 text-base font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+                isLinkActive("/")
+                  ? "bg-[#F28C28]/10 text-[#173A8A]"
+                  : "text-[#101828] hover:bg-[#F5F7FA]"
+              }`}
+            >
+              Home
+            </Link>
+
+            {navDropdowns.map((config) => {
+              const expanded = mobileAccordion === config.id;
               return (
+                <div key={config.id} className="border-b border-slate-100">
+                  <button
+                    type="button"
+                    aria-expanded={expanded}
+                    aria-controls={`mobile-${config.id}-panel`}
+                    onClick={() =>
+                      setMobileAccordion((current) =>
+                        current === config.id ? null : config.id,
+                      )
+                    }
+                    className="flex w-full cursor-pointer items-center justify-between rounded-xl px-4 py-3.5 text-left text-base font-semibold text-[#101828] transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                  >
+                    <span
+                      className={
+                        isDropdownActive(config.href) ? "text-[#173A8A]" : ""
+                      }
+                    >
+                      {config.label}
+                    </span>
+                    <ChevronDown open={expanded} />
+                  </button>
+
+                  {expanded && (
+                    <div
+                      id={`mobile-${config.id}-panel`}
+                      className="space-y-2 px-2 pb-4"
+                    >
+                      <p className="px-2 text-sm font-bold text-[#173A8A]">
+                        {config.panelTitle}
+                      </p>
+                      {config.panelDescription && (
+                        <p className="px-2 text-sm text-slate-600">
+                          {config.panelDescription}
+                        </p>
+                      )}
+                      {config.items.map((item) => (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          onClick={closeAll}
+                          className="block rounded-xl border border-slate-100 px-4 py-3 transition hover:border-[#F28C28]/40 hover:bg-[#F28C28]/5 focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                        >
+                          <p className="font-bold text-[#101828]">
+                            {item.title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-slate-600">
+                            {item.description}
+                          </p>
+                        </Link>
+                      ))}
+                      {config.cta && (
+                        <Link
+                          href={config.cta.href}
+                          onClick={closeAll}
+                          className="mx-2 mt-2 inline-flex rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
+                        >
+                          {config.cta.label}
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {simpleNavLinks
+              .filter((link) => link.href !== "/")
+              .map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
-                    isActive ? "bg-[#F5F7FA] text-[#173A8A]" : "text-slate-700"
+                  onClick={closeAll}
+                  className={`block rounded-xl px-4 py-3.5 text-base font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+                    isLinkActive(link.href)
+                      ? "bg-[#F28C28]/10 text-[#173A8A]"
+                      : "text-[#101828] hover:bg-[#F5F7FA]"
                   }`}
                 >
                   {link.label}
                 </Link>
-              );
-            })}
+              ))}
+          </nav>
+
+          <div className="shrink-0 space-y-3 border-t border-slate-200 bg-white px-4 py-5 pb-8">
             <Link
               href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="mt-3 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+              onClick={closeAll}
+              className="flex w-full items-center justify-center rounded-full bg-[#F28C28] px-5 py-3.5 text-base font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
             >
               Personeel aanvragen
             </Link>
-          </nav>
+            <Link
+              href="/medewerkers"
+              onClick={closeAll}
+              className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+            >
+              Aanmelden als crewlid
+            </Link>
+            <a
+              href={`mailto:${contactEmail}`}
+              className="block text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:text-[#173A8A] hover:underline"
+            >
+              {contactEmail}
+            </a>
+          </div>
         </div>
       )}
     </header>
