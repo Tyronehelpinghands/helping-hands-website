@@ -109,6 +109,35 @@ export default function Footer() {
                   Aanmelden als medewerker
                 </a>
               </li>
+              <li>
+                <Link href="/login" className="transition hover:text-white">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/login?type=intern"
+                  className="transition hover:text-white"
+                >
+                  Intern portaal
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/login?type=medewerker"
+                  className="transition hover:text-white"
+                >
+                  Medewerkersportaal
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/login?type=opdrachtgever"
+                  className="transition hover:text-white"
+                >
+                  Opdrachtgeversportaal
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
