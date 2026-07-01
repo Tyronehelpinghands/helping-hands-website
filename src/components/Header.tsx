@@ -11,10 +11,6 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -52,7 +48,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-lg px-2 py-1.5 transition hover:bg-[#F5F7FA] hover:text-[#173A8A] ${
+                className={`rounded-lg px-2 py-1.5 transition hover:bg-[#F5F7FA] hover:text-[#173A8A] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
                   isActive ? "bg-[#F5F7FA] text-[#173A8A]" : ""
                 }`}
               >
@@ -65,14 +61,14 @@ export default function Header() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/contact"
-            className="hidden rounded-full bg-[#F28C28] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] sm:inline-flex sm:px-5 sm:py-2.5 sm:text-sm"
+            className="hidden rounded-full bg-[#F28C28] px-4 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-sm"
           >
             Personeel aanvragen
           </Link>
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 text-[#173A8A] transition hover:border-slate-300 hover:bg-[#F5F7FA] xl:hidden"
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200/80 text-[#173A8A] transition hover:border-slate-300 hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 xl:hidden"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? "Menu sluiten" : "Menu openen"}
@@ -116,7 +112,8 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-[#F5F7FA] ${
+                  onClick={() => setMenuOpen(false)}
+                  className={`rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
                     isActive ? "bg-[#F5F7FA] text-[#173A8A]" : "text-slate-700"
                   }`}
                 >
@@ -126,7 +123,8 @@ export default function Header() {
             })}
             <Link
               href="/contact"
-              className="mt-3 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+              onClick={() => setMenuOpen(false)}
+              className="mt-3 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
             >
               Personeel aanvragen
             </Link>

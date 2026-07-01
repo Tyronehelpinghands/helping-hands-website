@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Footer from "@/components/Footer";
+import FloatingCTA from "@/components/FloatingCTA";
 import Header from "@/components/Header";
 import "./globals.css";
 
@@ -30,10 +31,11 @@ export default function RootLayout({
       lang="nl"
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-[#F5F7FA] text-[#101828]">
+      <body className="flex min-h-full flex-col bg-[#F5F7FA] pb-20 text-[#101828] lg:pb-0">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <FloatingCTA />
       </body>
     </html>
   );

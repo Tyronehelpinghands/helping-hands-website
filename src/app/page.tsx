@@ -1,16 +1,13 @@
 import Link from "next/link";
+import AudienceToggle from "@/components/AudienceToggle";
 import CTASection from "@/components/CTASection";
-import ImageCard from "@/components/ImageCard";
-import ProcessStep from "@/components/ProcessStep";
-import ServiceCard from "@/components/ServiceCard";
+import InteractiveHeroDashboard from "@/components/InteractiveHeroDashboard";
+import ProcessAccordion from "@/components/ProcessAccordion";
+import QuickRequestForm from "@/components/QuickRequestForm";
+import SectorCards from "@/components/SectorCards";
+import ServiceFilter from "@/components/ServiceFilter";
 import StockImage from "@/components/StockImage";
-import {
-  dashboardSteps,
-  deployments,
-  processSteps,
-  sectors,
-  services,
-} from "@/lib/content";
+import { deployments, services } from "@/lib/content";
 import { stockImages } from "@/lib/images";
 
 const heroBadges = ["Event crew", "Stagehands", "Horeca support", "Productie"];
@@ -27,12 +24,6 @@ const deploymentImages: Record<string, string> = {
   stagehands: stockImages.stagehands,
   horecaSupport: stockImages.horecaSupport,
   productionBackstage: stockImages.productionBackstage,
-};
-
-const statusStyles: Record<string, string> = {
-  Voltooid: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
-  Actief: "bg-[#F28C28]/25 text-[#F28C28] border-[#F28C28]/40",
-  Gepland: "bg-white/10 text-white/70 border-white/15",
 };
 
 export default function Home() {
@@ -104,64 +95,14 @@ export default function Home() {
               placeholderLabel="Event crew"
               sizes="(max-width: 1024px) 100vw, 45vw"
             />
-            <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-[#0B1F4D]/90 p-4 shadow-2xl backdrop-blur-md sm:inset-x-6 sm:bottom-6 sm:p-5">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-[#F28C28] sm:text-xs">
-                    Live status
-                  </p>
-                  <h2 className="text-lg font-black sm:text-xl">Crewplanning in één overzicht</h2>
-                </div>
-                <span className="shrink-0 rounded-full bg-[#F28C28] px-2.5 py-1 text-[0.65rem] font-bold sm:text-xs">
-                  4 stappen
-                </span>
-              </div>
-              <div className="mt-3 space-y-2">
-                {dashboardSteps.map((step, index) => (
-                  <div
-                    key={step.label}
-                    className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
-                      step.done
-                        ? "border-[#F28C28]/25 bg-[#F28C28]/10"
-                        : "border-white/10 bg-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[0.65rem] font-black ${
-                          step.done ? "bg-[#F28C28]" : "bg-white/10 text-white/60"
-                        }`}
-                      >
-                        {index + 1}
-                      </span>
-                      <p className="text-xs font-bold sm:text-sm">{step.label}</p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase sm:text-[0.65rem] ${statusStyles[step.status]}`}
-                    >
-                      {step.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-4 lg:absolute lg:inset-x-6 lg:bottom-6 lg:mt-0">
+              <InteractiveHeroDashboard />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Sectorenbalk */}
-      <section className="border-y border-[#F28C28]/20 bg-[#0B1F4D]">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-3 px-4 py-6 sm:px-6 lg:gap-4 lg:px-8">
-          {sectors.map((sector) => (
-            <span
-              key={sector}
-              className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:border-[#F28C28]/40 hover:bg-[#F28C28]/15"
-            >
-              {sector}
-            </span>
-          ))}
-        </div>
-      </section>
+      <SectorCards />
 
       {/* Diensten */}
       <section className="bg-[#F5F7FA] py-24 sm:py-32">
@@ -195,10 +136,8 @@ export default function Home() {
             />
           </div>
 
-          <div className="mt-16 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard key={service.title} service={service} />
-            ))}
+          <div className="mt-16">
+            <ServiceFilter services={services} />
           </div>
         </div>
       </section>
@@ -263,26 +202,8 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-2">
-            <ImageCard
-              image={stockImages.clientsBriefing}
-              imageAlt="Briefing met opdrachtgever"
-              eyebrow="Voor opdrachtgevers"
-              title="Voor opdrachtgevers"
-              description="Personeel nodig voor een festival, event, beurs, stadionproductie of horecalocatie? Helping Hands schakelt snel en levert mensen die begrijpen dat timing, houding en communicatie alles bepalen."
-              href="/contact"
-              ctaLabel="Personeel aanvragen"
-            />
-            <ImageCard
-              image={stockImages.crewWorking}
-              imageAlt="Crew aan het werk"
-              eyebrow="Voor medewerkers"
-              title="Voor medewerkers"
-              description="Wil je werken op evenementen, in horeca of bij producties? Sluit je aan bij een crew waar duidelijkheid, inzet en doorgroeien centraal staan."
-              href="/medewerkers"
-              ctaLabel="Aanmelden als crewlid"
-              dark={false}
-            />
+          <div className="mt-14">
+            <AudienceToggle />
           </div>
         </div>
       </section>
@@ -301,19 +222,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-16 flex flex-col gap-6 lg:grid lg:grid-cols-5 lg:gap-4">
-            {processSteps.map((item, index) => (
-              <ProcessStep
-                key={item.title}
-                step={item.step}
-                title={item.title}
-                description={item.description}
-                isLast={index === processSteps.length - 1}
-              />
-            ))}
+          <div className="mt-16">
+            <ProcessAccordion />
           </div>
         </div>
       </section>
+
+      <QuickRequestForm />
 
       <CTASection
         title="Personeel nodig voor je volgende productie?"
