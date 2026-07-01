@@ -7,7 +7,7 @@ import { projectCategories, services } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Projecten | Helping Hands Agency",
   description:
-    "Helping Hands Agency wordt ingezet bij evenementen, producties, horeca-opdrachten, stadions, beurzen en festivals.",
+    "Projectervaring en inzetgebieden van Helping Hands Agency bij festivals, concerten, stadions, beurzen en producties.",
 };
 
 export default function ProjectenPage() {
@@ -28,7 +28,12 @@ export default function ProjectenPage() {
         </p>
 
         <div className="mt-16">
-          <LogoShowcase />
+          <h2 className="text-2xl font-black text-[#0B1F4D] sm:text-3xl">
+            Ervaring in de live branche
+          </h2>
+          <div className="mt-8">
+            <LogoShowcase />
+          </div>
         </div>
 
         <div className="mt-20">
@@ -80,9 +85,11 @@ export default function ProjectenPage() {
 
       <CTASection
         title="Crew nodig voor je volgende productie?"
-        description="Deel je planning en wij denken mee over de juiste bezetting op locatie."
+        description="Stuur je datum, locatie, tijden, functies en aantal mensen door. Wij denken mee over de juiste bezetting en briefing."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
+        secondaryLabel="Bekijk diensten"
+        secondaryHref="/diensten"
       />
     </>
   );

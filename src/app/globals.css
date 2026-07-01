@@ -60,7 +60,7 @@ body {
 }
 
 .logo-carousel-track {
-  animation: logo-scroll 45s linear infinite;
+  animation: logo-scroll 80s linear infinite;
 }
 
 .logo-carousel-track:hover {
