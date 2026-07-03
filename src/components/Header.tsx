@@ -214,7 +214,7 @@ export default function Header() {
     >
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 transition-all duration-300 sm:px-6 lg:px-8 ${
-          scrolled ? "h-[3.75rem]" : "h-[4.75rem]"
+          scrolled ? "h-16" : "h-20"
         }`}
       >
         <HeaderBrandLogo scrolled={scrolled} onNavigate={closeAll} />

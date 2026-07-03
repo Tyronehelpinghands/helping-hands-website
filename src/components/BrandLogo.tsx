@@ -26,17 +26,23 @@ export function BrandLogoImage({
 }: Omit<BrandLogoProps, "href" | "onClick">) {
   const src = sources[variant];
   const isMark = variant === "mark" || variant === "markWhite";
+  const width = isMark ? 278 : 640;
+  const height = 272;
 
   return (
-    <span className={`inline-flex ${className}`}>
+    <span className={`inline-flex shrink-0 ${className}`}>
       <Image
         src={src}
         alt={brandAlt}
-        width={isMark ? 128 : 640}
-        height={isMark ? 128 : 160}
+        width={width}
+        height={height}
         priority={priority}
-        sizes={isMark ? "40px" : "(max-width: 1024px) 160px, 210px"}
-        className={`h-auto object-contain object-left ${imageClassName}`}
+        sizes={
+          isMark
+            ? "40px"
+            : "(max-width: 639px) 150px, (max-width: 1023px) 165px, 210px"
+        }
+        className={`block h-auto w-auto max-w-full object-contain object-left ${imageClassName}`}
       />
     </span>
   );
@@ -82,9 +88,9 @@ export function HeaderBrandLogo({
   scrolled: boolean;
   onNavigate?: () => void;
 }) {
-  const logoHeight = scrolled
-    ? "h-8 max-w-[150px] sm:max-w-[165px] lg:max-w-[180px]"
-    : "h-9 max-w-[150px] sm:max-w-[160px] lg:max-w-[210px]";
+  const logoWidth = scrolled
+    ? "w-[135px] sm:w-[145px] lg:w-[170px] max-h-[52px]"
+    : "w-[150px] sm:w-[160px] lg:w-[200px] max-h-[72px]";
 
   return (
     <>
@@ -93,19 +99,19 @@ export function HeaderBrandLogo({
         onClick={onNavigate}
         priority
         variant="full"
-        className="hidden min-[420px]:inline-flex"
-        imageClassName={logoHeight}
+        className="hidden min-[400px]:inline-flex"
+        imageClassName={logoWidth}
       />
       <Link
         href="/"
         onClick={onNavigate}
-        className="inline-flex min-[420px]:hidden shrink-0 items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+        className="inline-flex min-[400px]:hidden shrink-0 items-center gap-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
         aria-label={`${brandAlt} home`}
       >
         <BrandLogoImage
           variant="mark"
           priority
-          imageClassName="h-9 w-9"
+          imageClassName="h-10 w-10"
         />
         <span className="flex flex-col leading-tight">
           <span className="text-sm font-extrabold tracking-tight text-[#173A8A]">

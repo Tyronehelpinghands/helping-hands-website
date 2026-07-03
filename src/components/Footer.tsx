@@ -22,14 +22,14 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-flex max-w-[210px]">
+            <Link href="/" className="inline-flex">
               <Image
                 src={brandImages.logoWhite}
                 alt={brandAlt}
                 width={640}
-                height={160}
-                sizes="210px"
-                className="h-auto w-full max-w-[200px] object-contain object-left"
+                height={272}
+                sizes="(max-width: 640px) 180px, 220px"
+                className="h-auto w-[180px] max-w-full object-contain object-left sm:w-[200px]"
               />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
