@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Footer from "@/components/Footer";
 import FloatingCTA from "@/components/FloatingCTA";
 import Header from "@/components/Header";
+import { brandImages } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,6 +20,10 @@ export const metadata: Metadata = {
   title: "Helping Hands Agency | Crew voor evenementen, horeca en productie",
   description:
     "Helping Hands Agency levert eventcrew, stagehands, horeca support en productieondersteuning voor festivals, stadions, beurzen, concerten en horecalocaties.",
+  icons: {
+    icon: brandImages.favicon,
+    apple: brandImages.favicon,
+  },
 };
 
 export default function RootLayout({

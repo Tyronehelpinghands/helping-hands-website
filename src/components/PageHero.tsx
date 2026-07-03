@@ -1,3 +1,5 @@
+import { BrandLogoImage } from "@/components/BrandLogo";
+
 type PageHeroProps = {
   eyebrow?: string;
   title: string;
@@ -26,9 +28,10 @@ export default function PageHero({ eyebrow, title, description }: PageHeroProps)
         <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-8 shadow-2xl backdrop-blur-sm">
           <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#F28C28]/20 blur-2xl" />
           <div className="relative">
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F28C28] text-xl font-black text-white shadow-lg">
-              HH
-            </span>
+            <BrandLogoImage
+              variant="markWhite"
+              imageClassName="h-12 w-12"
+            />
             <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-[#F28C28]">
               Event staffing
             </p>

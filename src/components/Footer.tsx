@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { brandAlt, brandImages } from "@/lib/brand";
 import {
   applicationsEmail,
   contactEmail,
@@ -20,13 +22,15 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F28C28] text-sm font-black text-white">
-                HH
-              </span>
-              <span className="text-base font-extrabold tracking-tight">
-                Helping Hands Agency
-              </span>
+            <Link href="/" className="inline-flex max-w-[210px]">
+              <Image
+                src={brandImages.logoWhite}
+                alt={brandAlt}
+                width={640}
+                height={160}
+                sizes="210px"
+                className="h-auto w-full max-w-[200px] object-contain object-left"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
               Crew voor evenementen, horeca, stagebouw, productie en logistiek.

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { HeaderBrandLogo } from "@/components/BrandLogo";
 import {
   contactEmail,
   navDropdowns,
@@ -216,32 +217,7 @@ export default function Header() {
           scrolled ? "h-[3.75rem]" : "h-[4.75rem]"
         }`}
       >
-        <Link
-          href="/"
-          onClick={closeAll}
-          className="group flex shrink-0 items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 rounded-lg"
-          aria-label="Helping Hands Agency home"
-        >
-          <span
-            className={`flex shrink-0 items-center justify-center rounded-xl bg-[#F28C28] font-black text-white shadow-lg shadow-[#F28C28]/30 transition group-hover:scale-105 ${
-              scrolled ? "h-9 w-9 text-sm" : "h-10 w-10 text-base"
-            }`}
-          >
-            HH
-          </span>
-          <span className="flex flex-col leading-tight">
-            <span
-              className={`font-extrabold tracking-tight text-[#173A8A] transition ${
-                scrolled ? "text-sm" : "text-base"
-              }`}
-            >
-              Helping Hands
-            </span>
-            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs">
-              Event staffing
-            </span>
-          </span>
-        </Link>
+        <HeaderBrandLogo scrolled={scrolled} onNavigate={closeAll} />
 
         <nav
           className="hidden items-center gap-1 xl:flex"
