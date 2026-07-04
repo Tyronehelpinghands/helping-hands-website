@@ -1,5 +1,7 @@
+import type { ServiceIconKey } from "@/lib/service-icons";
+
 export type Service = {
-  initials: string;
+  icon: ServiceIconKey;
   title: string;
   description: string;
   usage: string;
@@ -7,42 +9,42 @@ export type Service = {
 
 export const services: Service[] = [
   {
-    initials: "EC",
+    icon: "event-crew",
     title: "Event crew",
     description:
       "Floor support, publieksstromen, runners, garderobe en algemene eventondersteuning.",
     usage: "Festivals, concerten, beurzen, stadions en corporate events.",
   },
   {
-    initials: "HS",
+    icon: "horeca-support",
     title: "Horeca support",
     description:
       "Barbacks, runners, bediening, uitgifte en hospitality tijdens piekmomenten.",
     usage: "Bars, catering, VIP-areas en horeca-events op locatie.",
   },
   {
-    initials: "SH",
+    icon: "stagehands",
     title: "Stagehands",
     description:
       "Laden, lossen, opbouw, afbouw en materiaalhandling voor producties.",
     usage: "Concerten, producties, load-in/load-out en technische opbouw.",
   },
   {
-    initials: "PA",
+    icon: "productie-assistentie",
     title: "Productie assistentie",
     description:
       "Ondersteuning voor productieleiders, crewcoördinatie, backstage en praktische uitvoering.",
     usage: "Backstage, productiekantoor en ondersteuning op de werkvloer.",
   },
   {
-    initials: "LO",
+    icon: "logistiek",
     title: "Logistieke ondersteuning",
     description:
       "Materiaalstromen, transportbewegingen, back-of-house en runners.",
     usage: "Magazijn, transport, materiaalbewegingen en back-of-house.",
   },
   {
-    initials: "TC",
+    icon: "teamcaptains",
     title: "Teamcaptains",
     description:
       "Aanspreekpunt op locatie, aansturing van crew, briefing en snelle terugkoppeling.",

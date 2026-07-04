@@ -1,7 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { contactEmail } from "@/lib/navigation";
+import { getServiceIconKey } from "@/lib/service-icons";
 
 const deploymentTypes = [
   "Event crew",
@@ -71,20 +73,28 @@ export default function QuickRequestForm() {
               <div>
                 <label className="text-sm font-black text-[#0B1F4D]">Type inzet</label>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {deploymentTypes.map((item) => (
+                  {deploymentTypes.map((item) => {
+                    const iconKey = getServiceIconKey(item);
+                    return (
                     <button
                       key={item}
                       type="button"
                       onClick={() => setType(item)}
-                      className={`cursor-pointer rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
                         type === item
                           ? "border-[#F28C28] bg-[#F28C28] text-white"
                           : "border-slate-200 bg-[#F5F7FA] text-[#173A8A] hover:border-[#173A8A]/40"
                       }`}
                     >
+                      {iconKey && (
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-current/15 bg-white/10">
+                          <ServiceIcon icon={iconKey} className="h-4 w-4" />
+                        </span>
+                      )}
                       {item}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

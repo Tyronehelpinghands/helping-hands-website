@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/PageHero";
+import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { services } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -76,9 +77,12 @@ export default function OpdrachtgeversPage() {
           </div>
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Welke functies wij leveren</h2>
-            <ul className="mt-6 space-y-2">
+            <ul className="mt-6 space-y-3">
               {services.map((s) => (
-                <li key={s.title} className="font-semibold text-[#173A8A]">
+                <li key={s.title} className="flex items-center gap-3 font-semibold text-[#173A8A]">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#173A8A]/15 bg-[#F5F7FA] text-[#173A8A]">
+                    <ServiceIcon icon={s.icon} className="h-4 w-4" />
+                  </span>
                   {s.title}
                 </li>
               ))}

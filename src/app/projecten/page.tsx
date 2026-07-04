@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import CTASection from "@/components/CTASection";
 import LogoShowcase from "@/components/LogoShowcase";
 import PageHero from "@/components/PageHero";
+import ServiceIconBadge from "@/components/ServiceIconBadge";
 import { projectCategories, services } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -66,11 +67,9 @@ export default function ProjectenPage() {
             {services.map((service) => (
               <article
                 key={service.title}
-                className="rounded-2xl border border-slate-200 bg-[#F5F7FA] p-6 transition hover:border-[#173A8A]/30 hover:bg-white hover:shadow-lg"
+                className="group rounded-2xl border border-slate-200 bg-[#F5F7FA] p-6 transition hover:-translate-y-1 hover:border-[#173A8A]/30 hover:bg-white hover:shadow-lg"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#173A8A] to-[#0B1F4D] text-sm font-black text-white">
-                  {service.initials}
-                </div>
+                <ServiceIconBadge icon={service.icon} size="sm" interactive />
                 <h3 className="mt-4 text-lg font-black text-[#0B1F4D]">
                   {service.title}
                 </h3>
