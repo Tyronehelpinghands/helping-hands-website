@@ -10,9 +10,8 @@ export type PortalConfig = {
   dashboardHref: string;
 };
 
-// TODO: Later koppelen aan echte authentication.
-// Mogelijke opties: Supabase Auth, Auth.js, Clerk of custom auth.
-// Later rollen toevoegen: admin, planner, medewerker, opdrachtgever.
+// Authenticatie via Supabase Auth + profiles.role
+// Rollen: admin, planner, medewerker, opdrachtgever
 
 export const portals: PortalConfig[] = [
   {
@@ -28,7 +27,7 @@ export const portals: PortalConfig[] = [
     ],
     buttonLabel: "Intern inloggen",
     href: "/login?type=intern",
-    dashboardHref: "/portaal/intern",
+    dashboardHref: "/dashboard/intern",
   },
   {
     id: "medewerker",
@@ -43,7 +42,7 @@ export const portals: PortalConfig[] = [
     ],
     buttonLabel: "Medewerker login",
     href: "/login?type=medewerker",
-    dashboardHref: "/portaal/medewerkers",
+    dashboardHref: "/dashboard/medewerker",
   },
   {
     id: "opdrachtgever",
@@ -58,7 +57,7 @@ export const portals: PortalConfig[] = [
     ],
     buttonLabel: "Opdrachtgever login",
     href: "/login?type=opdrachtgever",
-    dashboardHref: "/portaal/opdrachtgevers",
+    dashboardHref: "/dashboard/opdrachtgever",
   },
 ];
 
