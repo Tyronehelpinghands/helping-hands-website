@@ -8,13 +8,14 @@ import { services } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Opdrachtgevers | Helping Hands Agency",
   description:
-    "Personeel aanvragen voor evenementen, festivals, stadions, beurzen en horecalocaties.",
+    "Personeel aanvragen voor evenementen, festivals, stadions, beurzen, restaurants en horecalocaties.",
 };
 
 const clientTypes = [
   "Event- en productiebedrijven",
   "Festival- en concertorganisatoren",
   "Horeca- en cateringpartijen",
+  "Restaurants en horecalocaties",
   "Beurzen en zakelijke events",
   "Stadion- en locatieproducties",
 ];
@@ -88,6 +89,23 @@ export default function OpdrachtgeversPage() {
               ))}
             </ul>
           </div>
+        </div>
+
+        <div className="mt-16 rounded-2xl border border-slate-200/80 bg-[#F5F7FA] p-8">
+          <h2 className="text-2xl font-black text-[#0B1F4D]">
+            Personeel voor restaurants en horeca
+          </h2>
+          <p className="mt-4 max-w-3xl leading-7 text-[#101828]/75">
+            Heb je tijdelijk extra personeel nodig voor bediening, keuken, bar of
+            afwas? Helping Hands levert praktische mensen voor piekmomenten,
+            ziekte, events, terrasdrukte en tijdelijke bezetting.
+          </p>
+          <Link
+            href="/contact"
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-[#173A8A] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
+          >
+            Restaurantpersoneel aanvragen
+          </Link>
         </div>
 
         <div className="mt-16">

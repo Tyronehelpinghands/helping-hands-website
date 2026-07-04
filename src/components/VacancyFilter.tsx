@@ -12,6 +12,9 @@ import {
 const categoryColors: Record<Vacancy["category"], string> = {
   Event: "from-[#173A8A] to-[#0B1F4D]",
   Horeca: "from-[#F28C28] to-[#de7c1f]",
+  Restaurant: "from-[#173A8A] to-[#122a5c]",
+  Keuken: "from-[#0B1F4D] to-[#173A8A]",
+  Bar: "from-[#38bdf8] to-[#173A8A]",
   Stagebouw: "from-[#0B1F4D] to-[#173A8A]",
   Productie: "from-[#173A8A] to-[#122a5c]",
   Leidinggevend: "from-[#0B1F4D] to-[#101828]",
