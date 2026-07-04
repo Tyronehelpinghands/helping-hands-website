@@ -27,10 +27,11 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; error?: string }>;
+  searchParams: Promise<{ type?: string; error?: string; next?: string }>;
 }) {
   const params = await searchParams;
   const initialType = getPortalByType(params.type ?? null);
+  const redirectTo = params.next ?? null;
   const configError = !isSupabaseConfigured()
     ? "Supabase is nog niet geconfigureerd op deze omgeving."
     : (params.error ? errorMessages[params.error] : null);
@@ -77,6 +78,7 @@ export default async function LoginPage({
           key={initialType}
           initialType={initialType}
           configError={configError}
+          redirectTo={redirectTo}
         />
       </section>
     </>

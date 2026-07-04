@@ -1,40 +1,45 @@
 import type { Metadata } from "next";
-import DashboardMetricCards from "@/components/dashboard/DashboardMetricCards";
+import CrewAvailabilityCard from "@/components/dashboard/CrewAvailabilityCard";
+import NotificationsList from "@/components/dashboard/NotificationsList";
+import OpenActionsTable from "@/components/dashboard/OpenActionsTable";
 import ProjectStatusChart from "@/components/dashboard/ProjectStatusChart";
-import RecentRequestsTable from "@/components/dashboard/RecentRequestsTable";
+import QuickActions from "@/components/dashboard/QuickActions";
 import RevenueChart from "@/components/dashboard/RevenueChart";
-import DashboardShell from "@/components/DashboardShell";
-import { getSessionProfile } from "@/lib/auth-server";
+import { StatCardsGrid } from "@/components/dashboard/StatCard";
 import {
-  projectStatusBreakdown,
-  revenueByMonth,
-} from "@/lib/dashboard-data";
-import { internDashboard } from "@/lib/portals";
+  crewAvailability,
+  dashboardNotifications,
+  internKpiCards,
+  openActions,
+  projectStatusDonut,
+  quickActions,
+  revenueByWeek,
+} from "@/data/dashboardMockData";
 
 export const metadata: Metadata = {
   title: "Intern dashboard | Helping Hands Agency",
-  description: "Intern overzicht voor planning, crew en projectadministratie.",
+  description:
+    "Intern overzicht voor planning, sales, crew, projecten en administratie.",
 };
 
-export default async function InternDashboardPage() {
-  const { profile } = await getSessionProfile();
-
-  if (!profile) {
-    return null;
-  }
-
+export default function InternDashboardPage() {
   return (
-    <DashboardShell
-      profile={profile}
-      title="Intern portaal"
-      description="Overzicht voor planning, aanvragen, crew en projectadministratie."
-    >
-      <DashboardMetricCards cards={internDashboard} />
+    <>
+      <StatCardsGrid cards={internKpiCards} />
+
+      <RevenueChart data={revenueByWeek} />
+
       <div className="grid gap-6 xl:grid-cols-2">
-        <RevenueChart data={revenueByMonth} />
-        <ProjectStatusChart data={projectStatusBreakdown} />
+        <OpenActionsTable actions={openActions} />
+        <ProjectStatusChart data={projectStatusDonut} />
       </div>
-      <RecentRequestsTable />
-    </DashboardShell>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <CrewAvailabilityCard data={crewAvailability} />
+        <NotificationsList notifications={dashboardNotifications} />
+      </div>
+
+      <QuickActions actions={quickActions} />
+    </>
   );
 }

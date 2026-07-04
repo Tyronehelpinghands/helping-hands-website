@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  canAccessDashboardPath,
   getDashboardPathForRole,
   isValidRole,
   PORTAL_INTROS,
@@ -40,11 +41,13 @@ const portalFeatureIcons: Record<PortalType, LucideIcon> = {
 type LoginSelectorProps = {
   initialType: PortalType;
   configError?: string | null;
+  redirectTo?: string | null;
 };
 
 export default function LoginSelector({
   initialType,
   configError = null,
+  redirectTo = null,
 }: LoginSelectorProps) {
   const router = useRouter();
   const [activePortal, setActivePortal] = useState<PortalType>(initialType);
@@ -97,7 +100,12 @@ export default function LoginSelector({
         return;
       }
 
-      router.push(getDashboardPathForRole(profile.role));
+      const destination =
+        redirectTo && canAccessDashboardPath(profile.role, redirectTo)
+          ? redirectTo
+          : getDashboardPathForRole(profile.role);
+
+      router.push(destination);
       router.refresh();
     } catch {
       setError("Er ging iets mis bij het inloggen. Probeer het later opnieuw.");

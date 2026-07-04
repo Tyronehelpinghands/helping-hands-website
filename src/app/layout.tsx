@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Footer from "@/components/Footer";
-import SiteChromeExtras from "@/components/SiteChromeExtras";
-import Header from "@/components/Header";
+import ConditionalSiteChrome from "@/components/ConditionalSiteChrome";
 import { brandImages } from "@/lib/brand";
 import "./globals.css";
 
@@ -37,10 +35,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[#F5F7FA] pb-20 text-[#101828] lg:pb-0">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <SiteChromeExtras />
+        <ConditionalSiteChrome>
+          <main className="flex-1">{children}</main>
+        </ConditionalSiteChrome>
       </body>
     </html>
   );

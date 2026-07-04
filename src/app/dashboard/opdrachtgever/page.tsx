@@ -29,8 +29,9 @@ export default async function OpdrachtgeverDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <RevenueChart
           data={revenueByMonth.map((item) => ({
-            ...item,
+            label: item.month,
             omzet: Math.round(item.omzet * 0.35),
+            aanvragen: Math.max(1, Math.round(item.omzet / 5000)),
           }))}
           title="Inzetvolume"
           description="Maandelijks ingezette crew-uren (demo-data)"

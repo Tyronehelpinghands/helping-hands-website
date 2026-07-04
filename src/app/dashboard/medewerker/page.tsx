@@ -35,8 +35,9 @@ export default async function MedewerkerDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <RevenueChart
           data={medewerkerShiftTrend.map((item) => ({
-            month: item.week,
+            label: item.week,
             omzet: item.shifts * 1000,
+            aanvragen: item.shifts,
           }))}
           title="Shiftoverzicht"
           description="Geplande shifts per week (demo-data)"
