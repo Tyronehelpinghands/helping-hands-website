@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import DashboardMetricCards from "@/components/dashboard/DashboardMetricCards";
+import ProjectStatusChart from "@/components/dashboard/ProjectStatusChart";
+import RecentRequestsTable from "@/components/dashboard/RecentRequestsTable";
+import RevenueChart from "@/components/dashboard/RevenueChart";
 import DashboardShell from "@/components/DashboardShell";
-import PortalDashboard from "@/components/PortalDashboard";
 import { getSessionProfile } from "@/lib/auth-server";
+import {
+  projectStatusBreakdown,
+  revenueByMonth,
+} from "@/lib/dashboard-data";
 import { internDashboard } from "@/lib/portals";
 
 export const metadata: Metadata = {
@@ -22,7 +29,12 @@ export default async function InternDashboardPage() {
       title="Intern portaal"
       description="Overzicht voor planning, aanvragen, crew en projectadministratie."
     >
-      <PortalDashboard cards={internDashboard} />
+      <DashboardMetricCards cards={internDashboard} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <RevenueChart data={revenueByMonth} />
+        <ProjectStatusChart data={projectStatusBreakdown} />
+      </div>
+      <RecentRequestsTable />
     </DashboardShell>
   );
 }

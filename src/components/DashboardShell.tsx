@@ -1,5 +1,4 @@
-import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import type { Profile } from "@/lib/auth";
 
 type DashboardShellProps = {
@@ -16,40 +15,24 @@ export default function DashboardShell({
   children,
 }: DashboardShellProps) {
   return (
-    <>
-      <section className="hero-gradient text-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8 lg:py-14">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
-              Dashboard
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-              {title}
-            </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
-              {description}
-            </p>
-            <p className="mt-3 text-sm text-white/55">
-              Ingelogd als{" "}
-              <span className="font-semibold text-white/80">
-                {profile.full_name ?? profile.email ?? "gebruiker"}
-              </span>
-            </p>
-          </div>
-          <div className="flex shrink-0 flex-col gap-3 sm:items-end">
-            <LogoutButton />
-            <Link
-              href="/"
-              className="text-sm font-semibold text-white/70 underline-offset-4 transition hover:text-white hover:underline"
-            >
-              Terug naar website
-            </Link>
-          </div>
+    <div className="-mx-4 flex min-h-[calc(100vh-4rem)] flex-col lg:-mx-8 lg:min-h-[calc(100vh-5rem)] lg:flex-row">
+      <DashboardSidebar profile={profile} />
+      <div className="flex min-w-0 flex-1 flex-col bg-[#F5F7FA]">
+        <header className="border-b border-slate-200/80 bg-white px-4 py-6 sm:px-6 lg:px-8">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#38bdf8]">
+            Dashboard
+          </p>
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#0B1F4D] sm:text-3xl">
+            {title}
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#101828]/70 sm:text-base">
+            {description}
+          </p>
+        </header>
+        <div className="flex-1 space-y-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {children}
         </div>
-      </section>
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        {children}
-      </section>
-    </>
+      </div>
+    </div>
   );
 }

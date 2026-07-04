@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import DashboardMetricCards from "@/components/dashboard/DashboardMetricCards";
+import ProjectStatusChart from "@/components/dashboard/ProjectStatusChart";
+import RevenueChart from "@/components/dashboard/RevenueChart";
 import DashboardShell from "@/components/DashboardShell";
-import PortalDashboard from "@/components/PortalDashboard";
 import { getSessionProfile } from "@/lib/auth-server";
+import { opdrachtgeverRequestStatus, revenueByMonth } from "@/lib/dashboard-data";
 import { opdrachtgeverDashboard } from "@/lib/portals";
 
 export const metadata: Metadata = {
@@ -22,7 +25,22 @@ export default async function OpdrachtgeverDashboardPage() {
       title="Opdrachtgeversportaal"
       description="Overzicht voor personeelsaanvragen, projectinformatie en contact met planning."
     >
-      <PortalDashboard cards={opdrachtgeverDashboard} />
+      <DashboardMetricCards cards={opdrachtgeverDashboard} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <RevenueChart
+          data={revenueByMonth.map((item) => ({
+            ...item,
+            omzet: Math.round(item.omzet * 0.35),
+          }))}
+          title="Inzetvolume"
+          description="Maandelijks ingezette crew-uren (demo-data)"
+        />
+        <ProjectStatusChart
+          data={opdrachtgeverRequestStatus}
+          title="Status aanvragen"
+          description="Verdeling van je personeelsaanvragen"
+        />
+      </div>
     </DashboardShell>
   );
 }
