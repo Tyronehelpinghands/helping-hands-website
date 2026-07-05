@@ -27,6 +27,14 @@ export type SalesLead = {
   hubspotId?: string;
 };
 
+export type PipelineDeal = {
+  id: string;
+  title: string;
+  bedrijf: string;
+  waarde: number;
+  stageId: string;
+};
+
 export type SalesFollowUp = {
   id: string;
   taak: string;
@@ -157,6 +165,51 @@ export const salesLeads: SalesLead[] = [
     eigenaar: "Tyrone",
     bron: "Cold outreach",
     laatsteContact: "1 week geleden",
+  },
+];
+
+export const pipelineDeals: PipelineDeal[] = [
+  {
+    id: "deal-1",
+    title: "Festival crew Q3",
+    bedrijf: "Festival Zomerlicht",
+    waarde: 12500,
+    stageId: "nieuw",
+  },
+  {
+    id: "deal-2",
+    title: "Terras support",
+    bedrijf: "Restaurant De Haven",
+    waarde: 3200,
+    stageId: "contact",
+  },
+  {
+    id: "deal-3",
+    title: "Event load-in",
+    bedrijf: "Eventbedrijf Noord",
+    waarde: 4800,
+    stageId: "offerte",
+  },
+  {
+    id: "deal-4",
+    title: "Stadion bezetting",
+    bedrijf: "Stadion Events",
+    waarde: 8900,
+    stageId: "offerte",
+  },
+  {
+    id: "deal-5",
+    title: "Horeca team weekend",
+    bedrijf: "Grand Café Centrum",
+    waarde: 5400,
+    stageId: "onderhandeling",
+  },
+  {
+    id: "deal-6",
+    title: "Catering productie",
+    bedrijf: "Catering Groep BV",
+    waarde: 6100,
+    stageId: "gewonnen",
   },
 ];
 

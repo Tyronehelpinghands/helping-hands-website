@@ -5,25 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { PipelineStage } from "@/data/salesMockData";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+import type { PipelineDeal, PipelineStage } from "@/data/salesMockData";
+import { formatSalesCurrency } from "@/lib/sales-utils";
 
 type SalesPipelineOverviewProps = {
   stages: PipelineStage[];
+  deals: PipelineDeal[];
 };
 
 export default function SalesPipelineOverview({
   stages,
+  deals,
 }: SalesPipelineOverviewProps) {
   const totalValue = stages.reduce((sum, stage) => sum + stage.value, 0);
-  const activeStages = stages.filter((stage) => stage.id !== "verloren");
+  const totalCount = stages.reduce((sum, stage) => sum + stage.count, 0);
 
   return (
     <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
@@ -32,45 +27,73 @@ export default function SalesPipelineOverview({
           Pipeline overzicht
         </CardTitle>
         <CardDescription>
-          Leads en kansen per fase — totaal {formatCurrency(totalValue)}
+          {totalCount} kansen — totaal {formatSalesCurrency(totalValue)}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {activeStages.map((stage) => {
-          const percentage =
-            totalValue > 0 ? Math.round((stage.value / totalValue) * 100) : 0;
+      <CardContent>
+        <div className="-mx-2 overflow-x-auto pb-2">
+          <div className="flex min-w-[720px] gap-3 px-2">
+            {stages.map((stage) => {
+              const percentage =
+                totalValue > 0
+                  ? Math.round((stage.value / totalValue) * 100)
+                  : 0;
+              const stageDeals = deals.filter((deal) => deal.stageId === stage.id);
 
-          return (
-            <div key={stage.id}>
-              <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: stage.fill }}
-                  />
-                  <span className="font-semibold text-[#0B1F4D]">
-                    {stage.label}
-                  </span>
-                  <span className="text-xs text-[#101828]/50">
-                    {stage.count} leads
-                  </span>
-                </div>
-                <span className="font-bold text-[#173A8A]">
-                  {formatCurrency(stage.value)}
-                </span>
-              </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+              return (
                 <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${Math.max(percentage, stage.count > 0 ? 4 : 0)}%`,
-                    backgroundColor: stage.fill,
-                  }}
-                />
-              </div>
-            </div>
-          );
-        })}
+                  key={stage.id}
+                  className="flex min-w-[140px] flex-1 flex-col rounded-xl border border-slate-100 bg-[#F5F7FA]/50"
+                >
+                  <div
+                    className="rounded-t-xl px-3 py-2"
+                    style={{ borderTop: `3px solid ${stage.fill}` }}
+                  >
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#0B1F4D]">
+                      {stage.label}
+                    </p>
+                    <div className="mt-1 flex items-baseline justify-between gap-1">
+                      <span className="text-lg font-black text-[#173A8A]">
+                        {stage.count}
+                      </span>
+                      <span className="text-[10px] font-semibold text-[#101828]/50">
+                        {percentage}%
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#101828]/65">
+                      {formatSalesCurrency(stage.value)}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-2 p-2">
+                    {stageDeals.length > 0 ? (
+                      stageDeals.map((deal) => (
+                        <div
+                          key={deal.id}
+                          className="rounded-lg border border-slate-100 bg-white px-2.5 py-2 shadow-sm"
+                        >
+                          <p className="truncate text-xs font-semibold text-[#0B1F4D]">
+                            {deal.title}
+                          </p>
+                          <p className="truncate text-[10px] text-[#101828]/55">
+                            {deal.bedrijf}
+                          </p>
+                          <p className="mt-1 text-xs font-bold text-[#173A8A]">
+                            {formatSalesCurrency(deal.waarde)}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-200 px-2 py-4 text-center text-[10px] text-[#101828]/40">
+                        Geen deals
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

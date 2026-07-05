@@ -14,36 +14,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { SalesFollowUp } from "@/data/salesMockData";
+import type { LeadFollowUp } from "@/data/leadsMockData";
+import { leadPriorityLabels, leadPriorityStyles } from "@/lib/leads-utils";
 import { cn } from "@/lib/utils";
 
-const statusStyles: Record<SalesFollowUp["status"], string> = {
+const statusStyles: Record<LeadFollowUp["status"], string> = {
   Vandaag: "border-[#173A8A]/20 bg-[#173A8A]/10 text-[#173A8A]",
   Morgen: "border-[#38bdf8]/20 bg-[#38bdf8]/10 text-[#0284c7]",
   "Deze week": "border-slate-200 bg-slate-100 text-slate-600",
   "Te laat": "border-red-200 bg-red-50 text-red-700",
+  Gepland: "border-slate-200 bg-[#F5F7FA] text-[#101828]/60",
 };
 
-const priorityStyles: Record<SalesFollowUp["prioriteit"], string> = {
-  hoog: "border-[#F28C28]/20 bg-[#F28C28]/10 text-[#c96f1a]",
-  normaal: "border-slate-200 bg-slate-100 text-slate-600",
-  laag: "border-slate-200 bg-[#F5F7FA] text-[#101828]/60",
+type FollowUpsListProps = {
+  tasks: LeadFollowUp[];
 };
 
-type SalesFollowUpTasksProps = {
-  tasks: SalesFollowUp[];
-};
-
-export default function SalesFollowUpTasks({ tasks }: SalesFollowUpTasksProps) {
+export default function FollowUpsList({ tasks }: FollowUpsListProps) {
   return (
     <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-black text-[#0B1F4D]">
-          Follow-up taken
+          Follow-ups
         </CardTitle>
-        <CardDescription>
-          Opvolging per lead met deadline en prioriteit
-        </CardDescription>
+        <CardDescription>Geplande opvolgtaken per lead</CardDescription>
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <div className="overflow-x-auto">
@@ -51,7 +45,7 @@ export default function SalesFollowUpTasks({ tasks }: SalesFollowUpTasksProps) {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-6">Taak</TableHead>
-                <TableHead>Bedrijf</TableHead>
+                <TableHead>Lead / bedrijf</TableHead>
                 <TableHead>Eigenaar</TableHead>
                 <TableHead>Deadline</TableHead>
                 <TableHead>Prioriteit</TableHead>
@@ -64,17 +58,18 @@ export default function SalesFollowUpTasks({ tasks }: SalesFollowUpTasksProps) {
                   <TableCell className="max-w-[200px] truncate pl-6 font-medium text-[#0B1F4D]">
                     {task.taak}
                   </TableCell>
-                  <TableCell className="max-w-[140px] truncate text-[#101828]/75">
-                    {task.lead}
-                  </TableCell>
+                  <TableCell className="text-[#101828]/75">{task.lead}</TableCell>
                   <TableCell className="text-[#101828]/75">{task.eigenaar}</TableCell>
                   <TableCell className="text-[#101828]/75">{task.deadline}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={cn("text-xs font-semibold", priorityStyles[task.prioriteit])}
+                      className={cn(
+                        "text-xs font-semibold",
+                        leadPriorityStyles[task.prioriteit],
+                      )}
                     >
-                      {task.prioriteit}
+                      {leadPriorityLabels[task.prioriteit]}
                     </Badge>
                   </TableCell>
                   <TableCell className="pr-6">

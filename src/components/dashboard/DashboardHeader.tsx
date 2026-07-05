@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { Bell, Calendar, ChevronDown, Loader2, LogOut, Settings, User } from "lucide-react";
@@ -24,6 +25,7 @@ import {
 import type { Profile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 import { dashboardNotifications } from "@/data/dashboardMockData";
+import { getInternPageMeta } from "@/lib/intern-page-meta";
 
 type DashboardHeaderProps = {
   profile: Profile;
@@ -75,6 +77,10 @@ export default function DashboardHeader({
   title = "Intern dashboard",
   subtitle = "Overzicht van Helping Hands Agency",
 }: DashboardHeaderProps) {
+  const pathname = usePathname();
+  const pageMeta = pathname ? getInternPageMeta(pathname) : null;
+  const headerTitle = pageMeta?.title ?? title;
+  const headerSubtitle = pageMeta?.subtitle ?? subtitle;
   const initials = (profile.full_name ?? profile.email ?? "HH")
     .split(" ")
     .map((part) => part[0])
@@ -92,9 +98,9 @@ export default function DashboardHeader({
             Helping Hands Agency
           </p>
           <h1 className="mt-1 text-xl font-black tracking-tight text-[#0B1F4D] sm:text-2xl">
-            {title}
+            {headerTitle}
           </h1>
-          <p className="mt-1 text-sm text-[#101828]/65">{subtitle}</p>
+          <p className="mt-1 text-sm text-[#101828]/65">{headerSubtitle}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
