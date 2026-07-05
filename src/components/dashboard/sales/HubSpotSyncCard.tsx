@@ -41,7 +41,11 @@ export default function HubSpotSyncCard({
       }
 
       setStatus("connected");
-      setMessage(data.message ?? "HubSpot connectie succesvol");
+      setMessage(
+        data.region
+          ? `${data.message ?? "HubSpot connectie succesvol"} (${data.region})`
+          : (data.message ?? "HubSpot connectie succesvol"),
+      );
     } catch {
       setStatus("error");
       setMessage("Kon HubSpot niet bereiken. Controleer je netwerk.");

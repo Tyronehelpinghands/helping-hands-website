@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireInternApiAccess } from "@/lib/api-auth";
-import { isHubSpotConfigured, testHubSpotConnection } from "@/lib/hubspot";
+import {
+  formatHubSpotError,
+  isHubSpotConfigured,
+  testHubSpotConnection,
+} from "@/lib/hubspot";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +31,7 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "HubSpot connectie mislukt",
+        error: formatHubSpotError(error),
       },
       { status: 502 },
     );

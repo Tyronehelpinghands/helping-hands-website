@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireInternApiAccess } from "@/lib/api-auth";
 import {
+  formatHubSpotError,
   isHubSpotConfigured,
   syncDealToHubSpot,
   type HubSpotDealInput,
@@ -56,8 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error ? error.message : "Deal synchronisatie mislukt",
+        error: formatHubSpotError(error),
       },
       { status: 502 },
     );

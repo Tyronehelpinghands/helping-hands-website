@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireInternApiAccess } from "@/lib/api-auth";
-import { isHubSpotConfigured, syncAllToHubSpot } from "@/lib/hubspot";
+import { formatHubSpotError, isHubSpotConfigured, syncAllToHubSpot } from "@/lib/hubspot";
 import { salesLeads } from "@/data/salesMockData";
 
 export const dynamic = "force-dynamic";
@@ -44,10 +44,7 @@ export async function POST() {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Bulk synchronisatie mislukt",
+        error: formatHubSpotError(error),
       },
       { status: 502 },
     );
