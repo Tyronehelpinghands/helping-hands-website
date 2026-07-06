@@ -13,6 +13,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Beheer nieuwe kansen, contactmomenten en opvolging voor Helping Hands Agency.",
   },
+  "/dashboard/intern/projecten": {
+    title: "Projecten",
+    subtitle:
+      "Beheer actieve projecten, planning, crewbezetting en projectstatus.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
