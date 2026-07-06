@@ -23,6 +23,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Plan crew op events, restaurants en producties met overzicht per dag, week en project.",
   },
+  "/dashboard/intern/crew": {
+    title: "Crew",
+    subtitle:
+      "Beheer crewleden, beschikbaarheid, functies, certificaten en profielen.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
