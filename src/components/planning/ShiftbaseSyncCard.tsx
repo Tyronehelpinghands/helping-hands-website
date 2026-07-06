@@ -43,6 +43,25 @@ export default function ShiftbaseSyncCard({
   const [loading, setLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    async function checkConfig() {
+      try {
+        const res = await fetch("/api/shiftbase/config-status");
+        const data = await res.json();
+        if (res.ok && data.configured) {
+          setStatus("untested");
+          setMessage(null);
+        } else if (res.ok && !data.configured) {
+          setStatus("no_token");
+          setMessage(data.hint ?? "SHIFTBASE_API_TOKEN ontbreekt in server-runtime.");
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    void checkConfig();
+  }, []);
+
+  useEffect(() => {
     function handleSync(event: Event) {
       const detail = (event as CustomEvent<{
         ok: boolean;
