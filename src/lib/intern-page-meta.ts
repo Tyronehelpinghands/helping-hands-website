@@ -28,6 +28,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Beheer crewleden, beschikbaarheid, functies, certificaten en profielen.",
   },
+  "/dashboard/intern/urenregistratie": {
+    title: "Urenregistratie",
+    subtitle:
+      "Controleer uren per project en crewlid, keur goed en bereid facturatie voor.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
