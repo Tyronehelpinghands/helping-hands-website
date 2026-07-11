@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import InternPlaceholderPage from "@/components/dashboard/InternPlaceholderPage";
+import FinanceDashboardClient from "@/components/dashboard/financien/FinanceDashboardClient";
 
 export const metadata: Metadata = {
   title: "Financiën | Intern dashboard",
+  description:
+    "Inzicht in omzet, kosten, marge, btw, openstaande facturen en financiële acties.",
 };
 
+// TODO: later alleen interne admins/planners toegang geven via echte auth/rollen
+
 export default function InternFinancienPage() {
-  return (
-    <InternPlaceholderPage
-      title="Financiën"
-      description="Financieel overzicht, omzet, kosten en rapportages."
-    />
-  );
+  return <FinanceDashboardClient />;
 }

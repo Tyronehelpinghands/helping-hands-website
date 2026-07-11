@@ -38,6 +38,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Maak factuurconcepten op basis van goedgekeurde uren, reiskosten en projectafspraken.",
   },
+  "/dashboard/intern/financien": {
+    title: "Financiën",
+    subtitle:
+      "Inzicht in omzet, kosten, marge, btw, openstaande facturen en financiële acties.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
