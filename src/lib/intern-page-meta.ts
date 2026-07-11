@@ -33,6 +33,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Controleer uren per project en crewlid, keur goed en bereid facturatie voor.",
   },
+  "/dashboard/intern/facturatie": {
+    title: "Facturatie",
+    subtitle:
+      "Maak factuurconcepten op basis van goedgekeurde uren, reiskosten en projectafspraken.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
