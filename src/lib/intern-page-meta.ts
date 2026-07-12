@@ -48,6 +48,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Beheer operationele risico's, openstaande acties, deadlines en opvolging.",
   },
+  "/dashboard/intern/berichten": {
+    title: "Berichten",
+    subtitle:
+      "Beheer communicatie met crew, opdrachtgevers, sollicitanten en interne planning.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
