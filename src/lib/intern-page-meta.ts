@@ -53,6 +53,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Beheer communicatie met crew, opdrachtgevers, sollicitanten en interne planning.",
   },
+  "/dashboard/intern/instellingen": {
+    title: "Instellingen",
+    subtitle:
+      "Beheer bedrijfsgegevens, tarieven, e-mails, koppelingen, meldingen en dashboardvoorkeuren.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {
