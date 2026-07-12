@@ -8,6 +8,15 @@
 // TODO: Opdrachtgever uren laten accorderen
 // TODO: later koppelen aan echte auth/rollen zodat alleen interne admins/planners uren kunnen bekijken
 
+import {
+  formatEuro,
+  roundToTwo as round2,
+} from "@/lib/dashboardHelpers";
+import {
+  DEFAULT_TRAVEL_RATE_PER_KM,
+  ROLE_CLIENT_RATES,
+} from "@/lib/rates";
+
 export type HoursStatus =
   | "Concept"
   | "Ingediend"
@@ -91,21 +100,8 @@ export const HOURS_EMPLOYMENT_TYPES: HoursEmploymentType[] = [
   "Onbekend",
 ];
 
-export const DEFAULT_TRAVEL_RATE_PER_KM = 0.25;
-
-export const DEFAULT_ROLE_RATES: Record<string, number> = {
-  Eventmedewerker: 31.5,
-  "Horeca support": 31.5,
-  Stagehand: 35,
-  "Productie assistent": 34.5,
-  "Logistiek medewerker": 35,
-  Teamcaptain: 42.5,
-  "Zelfstandig werkend kok": 40,
-  "Hulp kok / keukenhulp": 32.5,
-  Bartender: 34.5,
-  Barback: 30.5,
-  "Runner / bediening support": 29.5,
-};
+export { DEFAULT_TRAVEL_RATE_PER_KM };
+export const DEFAULT_ROLE_RATES = ROLE_CLIENT_RATES;
 
 export const DEMO_CREW_NAMES = [
   "Demo Crew 1",
@@ -146,16 +142,7 @@ export type HoursStats = {
   toInvoiceAmount: number;
 };
 
-export function round2(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-export function formatEuro(amount: number): string {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-}
+export { formatEuro, round2 };
 
 export function parseTimeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);

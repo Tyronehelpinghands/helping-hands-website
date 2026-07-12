@@ -8,12 +8,14 @@
 // TODO: Shiftbase uren import
 // TODO: Google Maps reiskosten
 // TODO: Fooks/payroll kostencontrole
-// TODO: Later goedgekeurde uren uit Supabase ophalen
-// TODO: Groeperen per klant/project/week
-// TODO: Automatisch Moneybird factuurconcept maken
 // TODO: later alleen interne admins/planners toegang geven via echte auth/rollen
 
 import { demoHoursEntries, type HoursEntry } from "@/lib/hours";
+import {
+  calculateVat,
+  formatCurrency,
+  roundToTwo as round2,
+} from "@/lib/dashboardHelpers";
 
 export type InvoiceLine = {
   id: string;
@@ -95,16 +97,7 @@ export type InvoiceFormData = {
   lines: InvoiceLine[];
 };
 
-export function round2(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-}
+export { formatCurrency };
 
 export function formatDisplayDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-");
@@ -115,9 +108,7 @@ export function calculateLineTotal(quantity: number, price: number): number {
   return round2(quantity * price);
 }
 
-export function calculateVat(subtotalExVat: number, rate = 21): number {
-  return round2(subtotalExVat * (rate / 100));
-}
+export { calculateVat };
 
 export function calculateInvoiceTotals(lines: InvoiceLine[]): {
   subtotalExVat: number;

@@ -26,6 +26,7 @@ import InvoiceDraftTable, {
 import InvoiceFiltersBar from "@/components/dashboard/facturatie/InvoiceFilters";
 import InvoiceStatsCards from "@/components/dashboard/facturatie/InvoiceStats";
 import MoneybirdSyncPanel from "@/components/dashboard/facturatie/MoneybirdSyncPanel";
+import IntegrationHealthPanel from "@/components/dashboard/shared/IntegrationHealthPanel";
 import {
   computeInvoiceStats,
   defaultInvoiceFilters,
@@ -276,6 +277,8 @@ export default function InvoiceDashboardClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <IntegrationHealthPanel compact title="Integratiestatus" />
     </div>
   );
 }

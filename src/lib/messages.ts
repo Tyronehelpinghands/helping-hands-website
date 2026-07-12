@@ -11,6 +11,8 @@
 // TODO: Factuurherinneringen via Moneybird status
 // TODO: later koppelen aan echte auth/rollen zodat alleen interne admins/planners communicatie kunnen beheren
 
+import { MODULE_LINKS as DASHBOARD_MODULE_LINKS } from "@/lib/dashboardNavigation";
+
 export type MessageChannel =
   | "E-mail"
   | "WhatsApp"
@@ -156,13 +158,13 @@ export const MESSAGE_MODULES: MessageRelatedModule[] = [
 ];
 
 export const MODULE_LINKS: Record<MessageRelatedModule, string> = {
-  Planning: "/dashboard/intern/planning",
-  Crew: "/dashboard/intern/crew",
-  Projecten: "/dashboard/intern/projecten",
-  Sales: "/dashboard/intern/sales",
-  Leads: "/dashboard/intern/leads",
-  Urenregistratie: "/dashboard/intern/urenregistratie",
-  Facturatie: "/dashboard/intern/facturatie",
+  Planning: DASHBOARD_MODULE_LINKS.Planning,
+  Crew: DASHBOARD_MODULE_LINKS.Crew,
+  Projecten: DASHBOARD_MODULE_LINKS.Projecten,
+  Sales: DASHBOARD_MODULE_LINKS.Sales,
+  Leads: DASHBOARD_MODULE_LINKS.Leads,
+  Urenregistratie: DASHBOARD_MODULE_LINKS.Urenregistratie,
+  Facturatie: DASHBOARD_MODULE_LINKS.Facturatie,
 };
 
 export type MessageStats = {

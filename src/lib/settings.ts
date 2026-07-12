@@ -16,6 +16,18 @@
 // TODO: Audit logs
 
 import { demoMessageTemplates, type MessageTemplate } from "@/lib/messages";
+import {
+  calculateMargin,
+  formatCurrency as formatEuro,
+  formatPercentage,
+} from "@/lib/dashboardHelpers";
+import {
+  DEFAULT_CLIENT_HOURLY_RATE,
+  DEFAULT_CREW_HOURLY_RATE,
+  DEFAULT_ROLE_RATES,
+  DEFAULT_TRAVEL_RATE_PER_KM,
+  DEFAULT_VAT_RATE,
+} from "@/lib/rates";
 
 export type CompanySettings = {
   companyName: string;
@@ -148,19 +160,7 @@ export const SETTINGS_TABS: { id: SettingsTabId; label: string }[] = [
   { id: "security", label: "Security" },
 ];
 
-const defaultRoleRates: RoleRate[] = [
-  { role: "Eventmedewerker", clientRate: 31.5, active: true },
-  { role: "Horeca support", clientRate: 31.5, active: true },
-  { role: "Stagehand", clientRate: 35.0, active: true },
-  { role: "Productie assistent", clientRate: 34.5, active: true },
-  { role: "Logistiek medewerker", clientRate: 35.0, active: true },
-  { role: "Teamcaptain", clientRate: 42.5, active: true },
-  { role: "Zelfstandig werkend kok", clientRate: 40.0, active: true },
-  { role: "Hulp kok / keukenhulp", clientRate: 32.5, active: true },
-  { role: "Bartender", clientRate: 34.5, active: true },
-  { role: "Barback", clientRate: 30.5, active: true },
-  { role: "Runner / bediening support", clientRate: 29.5, active: true },
-];
+const defaultRoleRates: RoleRate[] = DEFAULT_ROLE_RATES.map((r) => ({ ...r }));
 
 const defaultUserRoles: UserRole[] = [
   {
@@ -262,13 +262,13 @@ export const defaultSettings: AppSettings = {
     salesEmail: "sales@helpinghandsagency.nl",
   },
   rates: {
-    defaultClientHourlyRate: 35.0,
-    defaultCrewHourlyRate: 25.0,
-    vatRate: 21,
+    defaultClientHourlyRate: DEFAULT_CLIENT_HOURLY_RATE,
+    defaultCrewHourlyRate: DEFAULT_CREW_HOURLY_RATE,
+    vatRate: DEFAULT_VAT_RATE,
     roles: defaultRoleRates.map((r) => ({ ...r })),
   },
   travel: {
-    defaultTravelRatePerKm: 0.25,
+    defaultTravelRatePerKm: DEFAULT_TRAVEL_RATE_PER_KM,
     calculateReturnTripByDefault: true,
     googleMapsEnabled: true,
     defaultOriginAddress: "Arnhem, Nederland",
@@ -277,7 +277,7 @@ export const defaultSettings: AppSettings = {
   },
   invoice: {
     paymentTermDays: 14,
-    defaultVatRate: 21,
+    defaultVatRate: DEFAULT_VAT_RATE,
     defaultCurrency: "EUR",
     invoicePrefix: "HH",
     moneybirdEnabled: false,
@@ -313,21 +313,14 @@ export function calculateRateMargin(
   clientRate: number,
   crewRate?: number,
 ): { margin: number; marginPercent: number } | null {
-  if (crewRate === undefined || crewRate <= 0 || clientRate <= 0) return null;
-  const margin = clientRate - crewRate;
-  const marginPercent = (margin / clientRate) * 100;
-  return { margin, marginPercent };
+  if (crewRate === undefined) return null;
+  return calculateMargin(clientRate, crewRate);
 }
 
-export function formatEuro(value: number): string {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-}
+export { formatEuro };
 
 export function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return formatPercentage(value);
 }
 
 export const INTEGRATION_DEFINITIONS = [

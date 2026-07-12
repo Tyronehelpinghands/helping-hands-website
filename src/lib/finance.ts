@@ -11,6 +11,12 @@
 // TODO: Automatische herinneringen via Moneybird
 // TODO: later koppelen aan echte auth/rollen zodat alleen interne admins financiële data kunnen bekijken
 
+import {
+  formatCurrency,
+  formatPercentage,
+  roundToTwo as round2,
+} from "@/lib/dashboardHelpers";
+
 export type FinancePeriod =
   | "Deze maand"
   | "Vorige maand"
@@ -156,20 +162,7 @@ export type FinanceAction = {
   href: string;
 };
 
-export function round2(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-}
-
-export function formatPercentage(value: number): string {
-  return `${round2(value).toFixed(1)}%`;
-}
+export { formatCurrency, formatPercentage, round2 };
 
 function calcVat(exVat: number): number {
   return round2(exVat * 0.21);

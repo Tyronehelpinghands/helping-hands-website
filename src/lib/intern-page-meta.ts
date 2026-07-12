@@ -4,6 +4,11 @@ export type InternPageMeta = {
 };
 
 const pageMeta: Record<string, InternPageMeta> = {
+  "/dashboard/intern": {
+    title: "Dashboard",
+    subtitle:
+      "Centrale cockpit voor planning, crew, uren, facturatie en communicatie.",
+  },
   "/dashboard/intern/sales": {
     title: "Sales dashboard",
     subtitle: "Beheer leads, deals, follow-ups en HubSpot synchronisatie.",

@@ -21,6 +21,7 @@ import MoneybirdFinanceSyncPanel from "@/components/dashboard/financien/Moneybir
 import OpenInvoicesTable from "@/components/dashboard/financien/OpenInvoicesTable";
 import RevenueExpenseChart from "@/components/dashboard/financien/RevenueExpenseChart";
 import VatSummaryPanel from "@/components/dashboard/financien/VatSummaryPanel";
+import IntegrationHealthPanel from "@/components/dashboard/shared/IntegrationHealthPanel";
 import {
   buildFinanceActions,
   calculateFinanceMetrics,
@@ -250,6 +251,8 @@ export default function FinanceDashboardClient() {
           />
         </CardContent>
       </Card>
+
+      <IntegrationHealthPanel compact title="Integratiestatus" />
     </div>
   );
 }

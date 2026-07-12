@@ -10,6 +10,8 @@
 // TODO: Audit log per actie
 // TODO: later koppelen aan echte auth/rollen zodat alleen interne admins/planners risico's en acties kunnen bekijken
 
+import { MODULE_LINKS } from "@/lib/dashboardNavigation";
+
 export type RiskCategory =
   | "Planning"
   | "Crew"
@@ -180,16 +182,12 @@ export type RiskFormData = {
   notes: string;
 };
 
-export const MODULE_LINKS: Record<RelatedModule, string> = {
-  Planning: "/dashboard/intern/planning",
-  Crew: "/dashboard/intern/crew",
-  Urenregistratie: "/dashboard/intern/urenregistratie",
-  Facturatie: "/dashboard/intern/facturatie",
-  "Financiën": "/dashboard/intern/financien",
-  Projecten: "/dashboard/intern/projecten",
-  Sales: "/dashboard/intern/sales",
-  Leads: "/dashboard/intern/leads",
-};
+export { MODULE_LINKS };
+
+export function getModuleLink(module?: RelatedModule): string | null {
+  if (!module) return null;
+  return MODULE_LINKS[module] ?? null;
+}
 
 function item(
   id: string,
@@ -889,9 +887,4 @@ export function downloadRiskCsv(content: string, filename?: string): void {
   link.download = filename ?? "risk-actions-helping-hands.csv";
   link.click();
   URL.revokeObjectURL(url);
-}
-
-export function getModuleLink(module?: RelatedModule): string | null {
-  if (!module) return null;
-  return MODULE_LINKS[module] ?? null;
 }
