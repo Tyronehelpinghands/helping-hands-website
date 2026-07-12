@@ -14,6 +14,7 @@ const hoursStyles: Record<string, string> = {
   Goedgekeurd: "border-green-200 bg-green-50 text-green-700",
   Afgekeurd: "border-red-200 bg-red-50 text-red-700",
   Gefactureerd: "border-[#0B1F4D]/20 bg-[#0B1F4D]/10 text-[#0B1F4D]",
+  "Correctie aangevraagd": "border-orange-200 bg-orange-50 text-orange-700",
 };
 
 const documentStyles: Record<string, string> = {

@@ -1,7 +1,17 @@
 "use client";
 
+/**
+ * Medewerkersportaal uren — alleen bekijken en correcties doorgeven.
+ *
+ * TODO: Medewerker mag alleen eigen uren bekijken
+ * TODO: Medewerker mag alleen correctieverzoek maken
+ * TODO: Medewerker mag nooit status Goedgekeurd zetten
+ * TODO: Alleen interne admin/planning mag uren goedkeuren via /dashboard/intern/urenregistratie
+ * TODO: Later afdwingen met Supabase Auth + Row Level Security
+ */
+
 import { useState } from "react";
-import { Check, Eye, MessageSquare } from "lucide-react";
+import { Eye, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,16 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
   Table,
   TableBody,
   TableCell,
@@ -29,8 +29,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
+import HoursCorrectionModal, {
+  buildCorrectionRequest,
+  type HoursCorrectionFormData,
+} from "@/components/employee-portal/HoursCorrectionModal";
+import HoursDetailDrawer from "@/components/employee-portal/HoursDetailDrawer";
 import type { EmployeeHoursEntry } from "@/lib/employeePortal";
-import { DEMO_EMPLOYEE_HOURS, formatShiftDate } from "@/lib/employeePortal";
+import {
+  canEmployeeSubmitHoursCorrection,
+  DEMO_EMPLOYEE_HOURS,
+  formatShiftDate,
+} from "@/lib/employeePortal";
 
 export default function HoursCheckTable({
   entries = DEMO_EMPLOYEE_HOURS,
@@ -40,24 +49,43 @@ export default function HoursCheckTable({
   const [localEntries, setLocalEntries] = useState(entries);
   const [correctionEntry, setCorrectionEntry] = useState<EmployeeHoursEntry | null>(null);
   const [correctionOpen, setCorrectionOpen] = useState(false);
-  const [correctionSaved, setCorrectionSaved] = useState(false);
   const [viewEntry, setViewEntry] = useState<EmployeeHoursEntry | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
 
-  function markApproved(id: string) {
-    setLocalEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "Goedgekeurd" as const } : e)),
-    );
+  function openView(entry: EmployeeHoursEntry) {
+    setViewEntry(entry);
+    setViewOpen(true);
   }
 
   function openCorrection(entry: EmployeeHoursEntry) {
     setCorrectionEntry(entry);
-    setCorrectionSaved(false);
     setCorrectionOpen(true);
   }
 
-  function submitCorrection(event: React.FormEvent) {
-    event.preventDefault();
-    setCorrectionSaved(true);
+  function handleCorrectionSubmit(entryId: string, data: HoursCorrectionFormData) {
+    const correctionRequest = buildCorrectionRequest(data);
+    setLocalEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              status: "Correctie aangevraagd" as const,
+              correctionRequest,
+            }
+          : entry,
+      ),
+    );
+    if (viewEntry?.id === entryId) {
+      setViewEntry((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "Correctie aangevraagd",
+              correctionRequest,
+            }
+          : prev,
+      );
+    }
   }
 
   return (
@@ -66,7 +94,8 @@ export default function HoursCheckTable({
         <CardHeader>
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Mijn uren</CardTitle>
           <CardDescription>
-            Controleer je gewerkte uren en geef akkoord of vraag een correctie aan.
+            Bekijk je gewerkte uren. Klopt er iets niet? Geef een wijziging door — planning
+            beoordeelt dit in het interne dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -101,8 +130,7 @@ export default function HoursCheckTable({
                     <TableCell className="text-right">
                       <HoursActions
                         entry={entry}
-                        onView={() => setViewEntry(entry)}
-                        onApprove={() => markApproved(entry.id)}
+                        onView={() => openView(entry)}
                         onCorrection={() => openCorrection(entry)}
                       />
                     </TableCell>
@@ -132,8 +160,7 @@ export default function HoursCheckTable({
                 <div className="mt-3">
                   <HoursActions
                     entry={entry}
-                    onView={() => setViewEntry(entry)}
-                    onApprove={() => markApproved(entry.id)}
+                    onView={() => openView(entry)}
                     onCorrection={() => openCorrection(entry)}
                     stacked
                   />
@@ -144,86 +171,19 @@ export default function HoursCheckTable({
         </CardContent>
       </Card>
 
-      <Dialog open={Boolean(viewEntry)} onOpenChange={() => setViewEntry(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
-          {viewEntry ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>{viewEntry.projectName}</DialogTitle>
-                <DialogDescription>{formatShiftDate(viewEntry.date)}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-2 text-sm">
-                <p>
-                  <strong>Tijden:</strong> {viewEntry.startTime} – {viewEntry.endTime}
-                </p>
-                <p>
-                  <strong>Pauze:</strong> {viewEntry.breakMinutes} minuten
-                </p>
-                <p>
-                  <strong>Gewerkt:</strong> {viewEntry.workedHours.toFixed(2)} uur
-                </p>
-                {viewEntry.notes ? (
-                  <p>
-                    <strong>Opmerking:</strong> {viewEntry.notes}
-                  </p>
-                ) : null}
-                <EmployeeStatusBadge status={viewEntry.status} variant="hours" />
-              </div>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <HoursDetailDrawer
+        entry={viewEntry}
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        onRequestCorrection={openCorrection}
+      />
 
-      <Dialog open={correctionOpen} onOpenChange={setCorrectionOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Correctie aanvragen</DialogTitle>
-            <DialogDescription>
-              {correctionEntry?.projectName} — {correctionEntry && formatShiftDate(correctionEntry.date)}
-            </DialogDescription>
-          </DialogHeader>
-          {correctionSaved ? (
-            <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-3 text-sm text-green-700">
-              Correctieverzoek voorbereid. Later wordt dit doorgestuurd naar planning/administratie.
-            </p>
-          ) : (
-            <form onSubmit={submitCorrection} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="corr-issue">Wat klopt er niet?</Label>
-                <Input id="corr-issue" required placeholder="Bijv. eindtijd onjuist" />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="corr-start">Gewenste starttijd</Label>
-                  <Input id="corr-start" type="time" defaultValue={correctionEntry?.startTime} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="corr-end">Gewenste eindtijd</Label>
-                  <Input id="corr-end" type="time" defaultValue={correctionEntry?.endTime} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="corr-break">Pauze (minuten)</Label>
-                <Input
-                  id="corr-break"
-                  type="number"
-                  min={0}
-                  defaultValue={correctionEntry?.breakMinutes}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="corr-note">Toelichting</Label>
-                <Input id="corr-note" placeholder="Extra toelichting voor planning" />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="bg-[#173A8A] hover:bg-[#0B1F4D]">
-                  Verzoek voorbereiden
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      <HoursCorrectionModal
+        entry={correctionEntry}
+        open={correctionOpen}
+        onOpenChange={setCorrectionOpen}
+        onSubmit={handleCorrectionSubmit}
+      />
     </>
   );
 }
@@ -231,17 +191,15 @@ export default function HoursCheckTable({
 function HoursActions({
   entry,
   onView,
-  onApprove,
   onCorrection,
   stacked = false,
 }: {
   entry: EmployeeHoursEntry;
   onView: () => void;
-  onApprove: () => void;
   onCorrection: () => void;
   stacked?: boolean;
 }) {
-  const canAct = entry.status === "Ingediend" || entry.status === "Concept";
+  const canCorrect = canEmployeeSubmitHoursCorrection(entry);
 
   return (
     <div className={stacked ? "flex flex-col gap-2" : "flex justify-end gap-1"}>
@@ -249,17 +207,17 @@ function HoursActions({
         <Eye className="mr-1 h-4 w-4" />
         Bekijken
       </Button>
-      {canAct ? (
-        <>
-          <Button type="button" variant="ghost" size="sm" onClick={onApprove}>
-            <Check className="mr-1 h-4 w-4" />
-            Akkoord
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onCorrection}>
-            <MessageSquare className="mr-1 h-4 w-4" />
-            Correctie
-          </Button>
-        </>
+      {canCorrect ? (
+        <Button
+          type="button"
+          variant={stacked ? "outline" : "ghost"}
+          size="sm"
+          className={stacked ? "border-[#F28C28]/30 text-[#c46a12] hover:bg-[#F28C28]/10" : ""}
+          onClick={onCorrection}
+        >
+          <PencilLine className="mr-1 h-4 w-4" />
+          Wijziging doorgeven
+        </Button>
       ) : null}
     </div>
   );

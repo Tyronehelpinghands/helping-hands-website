@@ -41,7 +41,7 @@ export const employeePortalNavItems: EmployeePortalNavItem[] = [
     label: "Mijn uren",
     href: `${EMPLOYEE_PORTAL_BASE}/uren`,
     icon: Clock,
-    description: "Gewerkte uren controleren en accorderen",
+    description: "Gewerkte uren bekijken en wijzigingen doorgeven",
   },
   {
     label: "Berichten",
@@ -90,7 +90,7 @@ export const employeePortalPageMeta: Record<string, EmployeePortalPageMeta> = {
   },
   [`${EMPLOYEE_PORTAL_BASE}/uren`]: {
     title: "Mijn uren",
-    subtitle: "Controleer en accordeer je gewerkte uren.",
+    subtitle: "Bekijk je gewerkte uren en geef wijzigingen door aan planning.",
   },
   [`${EMPLOYEE_PORTAL_BASE}/berichten`]: {
     title: "Berichten",

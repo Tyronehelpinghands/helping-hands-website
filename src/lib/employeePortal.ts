@@ -70,6 +70,16 @@ export type EmployeeAvailability = {
   notes?: string;
 };
 
+export type EmployeeHoursCorrectionRequest = {
+  reason: string;
+  requestedStartTime?: string;
+  requestedEndTime?: string;
+  requestedBreakMinutes?: number;
+  explanation: string;
+  requestedAt: string;
+  status: "Ingediend" | "In behandeling" | "Afgehandeld";
+};
+
 export type EmployeeHoursEntry = {
   id: string;
   shiftId?: string;
@@ -79,9 +89,21 @@ export type EmployeeHoursEntry = {
   endTime: string;
   breakMinutes: number;
   workedHours: number;
-  status: "Concept" | "Ingediend" | "Goedgekeurd" | "Afgekeurd" | "Gefactureerd";
+  status:
+    | "Concept"
+    | "Ingediend"
+    | "Goedgekeurd"
+    | "Afgekeurd"
+    | "Gefactureerd"
+    | "Correctie aangevraagd";
   notes?: string;
+  correctionRequest?: EmployeeHoursCorrectionRequest;
 };
+
+/** Medewerker mag geen uren goedkeuren — alleen correctie indienen indien nog geen open verzoek. */
+export function canEmployeeSubmitHoursCorrection(entry: EmployeeHoursEntry): boolean {
+  return entry.status !== "Correctie aangevraagd";
+}
 
 export type EmployeeMessage = {
   id: string;
@@ -312,7 +334,36 @@ export const DEMO_EMPLOYEE_HOURS: EmployeeHoursEntry[] = [
     breakMinutes: 30,
     workedHours: 5.5,
     status: "Afgekeurd",
-    notes: "Eindtijd gecorrigeerd door planning",
+    notes: "Planning heeft eindtijd aangepast — neem contact op bij vragen.",
+    correctionRequest: {
+      reason: "Eindtijd klopt niet",
+      requestedStartTime: "12:00",
+      requestedEndTime: "19:00",
+      requestedBreakMinutes: 30,
+      explanation: "Ik ben doorgebleven voor afbouw.",
+      requestedAt: "2026-06-21T10:00:00",
+      status: "Afgehandeld",
+    },
+  },
+  {
+    id: "hrs-006",
+    projectName: "GelreDome Arnhem — Soundcheck support",
+    date: "2026-07-09",
+    startTime: "13:00",
+    endTime: "19:30",
+    breakMinutes: 15,
+    workedHours: 6.25,
+    status: "Correctie aangevraagd",
+    notes: "Wacht op beoordeling door planning.",
+    correctionRequest: {
+      reason: "Eindtijd later dan geregistreerd",
+      requestedStartTime: "13:00",
+      requestedEndTime: "19:30",
+      requestedBreakMinutes: 15,
+      explanation: "Soundcheck liep uit door technische vertraging.",
+      requestedAt: "2026-07-10T08:30:00",
+      status: "In behandeling",
+    },
   },
 ];
 
@@ -328,8 +379,8 @@ export const DEMO_EMPLOYEE_MESSAGES: EmployeeMessage[] = [
   },
   {
     id: "msg-002",
-    title: "Uren ter controle — restaurant shift",
-    body: "Je uren van 12 juli staan klaar ter controle. Check start- en eindtijd en geef akkoord of vraag een correctie aan.",
+    title: "Uren geregistreerd — restaurant shift",
+    body: "Je uren van 12 juli zijn ingediend. Controleer de tijden en geef een wijziging door als iets niet klopt. Goedkeuring gebeurt door planning.",
     type: "Uren",
     status: "Nieuw",
     createdAt: "2026-07-12T22:15:00",
@@ -472,7 +523,7 @@ export function getEmployeePortalStats(
     messages.filter((m) => m.status === "Actie nodig" || m.status === "Nieuw").length +
     documents.filter((d) => d.status === "Niet ingeleverd" || d.status === "Verloopt binnenkort")
       .length +
-    hours.filter((h) => h.status === "Ingediend" || h.status === "Concept").length;
+    hours.filter((h) => h.status === "Ingediend" || h.status === "Concept" || h.status === "Afgekeurd").length;
 
   return {
     upcomingShifts: upcoming.length,
@@ -508,9 +559,9 @@ export function getPendingActions(
     }
   }
   for (const entry of hours) {
-    if (entry.status === "Ingediend") {
+    if (entry.status === "Ingediend" || entry.status === "Afgekeurd") {
       actions.push({
-        label: `Uren controleren: ${entry.projectName}`,
+        label: `Uren bekijken: ${entry.projectName}`,
         href: "/portaal/medewerkers/uren",
         type: "Uren",
       });

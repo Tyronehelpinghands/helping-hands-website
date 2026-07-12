@@ -14,7 +14,11 @@ import { DEMO_EMPLOYEE_HOURS, formatShiftDate } from "@/lib/employeePortal";
 export default function HoursSummary() {
   const recent = DEMO_EMPLOYEE_HOURS.slice(0, 3);
   const pending = DEMO_EMPLOYEE_HOURS.filter(
-    (h) => h.status === "Ingediend" || h.status === "Concept",
+    (h) =>
+      h.status === "Ingediend" ||
+      h.status === "Concept" ||
+      h.status === "Afgekeurd" ||
+      h.status === "Correctie aangevraagd",
   ).length;
 
   return (
@@ -24,8 +28,8 @@ export default function HoursSummary() {
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Urenstatus</CardTitle>
           <CardDescription>
             {pending > 0
-              ? `${pending} registratie(s) wachten op jouw controle`
-              : "Geen openstaande urencontroles"}
+              ? `${pending} registratie(s) wachten op beoordeling door planning`
+              : "Geen openstaande urenwijzigingen"}
           </CardDescription>
         </div>
         <Link
