@@ -4,6 +4,8 @@ import {
   getShiftbaseApiBaseUrl,
   getShiftbaseApiToken,
   isShiftbaseConfigured,
+  resolveShiftbaseUrl,
+  SHIFTBASE_ENDPOINTS,
 } from "@/lib/shiftbase";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +36,13 @@ export async function GET() {
       baseUrl: getShiftbaseApiBaseUrl(),
       baseUrlFromEnv: Boolean(process.env.SHIFTBASE_API_BASE_URL?.trim()),
       rawKeyPresent: Boolean(process.env.SHIFTBASE_API_TOKEN),
+      endpoints: {
+        test: SHIFTBASE_ENDPOINTS.test,
+        employees: SHIFTBASE_ENDPOINTS.employees,
+        shifts: SHIFTBASE_ENDPOINTS.shifts,
+        timesheets: SHIFTBASE_ENDPOINTS.timesheets,
+      },
+      resolvedTestUrl: resolveShiftbaseUrl(SHIFTBASE_ENDPOINTS.test),
     },
     hint: configured
       ? "Token is zichtbaar in deze server-runtime. Gebruik /api/shiftbase/test voor de API-check."

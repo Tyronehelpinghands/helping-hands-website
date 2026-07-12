@@ -10,19 +10,26 @@
 import type { PlanningShift } from "@/data/planningMockData";
 import { buildShiftbaseDescription } from "@/lib/planning-utils";
 
-const DEFAULT_BASE_URL = "https://api.shiftbase.com/api";
+const DEFAULT_BASE_URL = "https://api.shiftbase.com/api/v1";
 
 /** Configureerbare endpoints — pas aan indien Shiftbase andere paths gebruikt */
 export const SHIFTBASE_ENDPOINTS = {
-  employees: process.env.SHIFTBASE_ENDPOINT_EMPLOYEES ?? "/employees",
+  employees: process.env.SHIFTBASE_ENDPOINT_EMPLOYEES ?? "/employee",
   employee: (id: string) =>
-    (process.env.SHIFTBASE_ENDPOINT_EMPLOYEE ?? "/employees/{id}").replace("{id}", id),
-  shifts: process.env.SHIFTBASE_ENDPOINT_SHIFTS ?? "/shifts",
+    (process.env.SHIFTBASE_ENDPOINT_EMPLOYEE ?? "/employee/{id}").replace("{id}", id),
+  shifts: process.env.SHIFTBASE_ENDPOINT_SHIFTS ?? "/shift",
   shift: (id: string) =>
-    (process.env.SHIFTBASE_ENDPOINT_SHIFT ?? "/shifts/{id}").replace("{id}", id),
-  timesheets: process.env.SHIFTBASE_ENDPOINT_TIMESHEETS ?? "/timesheets",
-  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/account",
+    (process.env.SHIFTBASE_ENDPOINT_SHIFT ?? "/shift/{id}").replace("{id}", id),
+  timesheets: process.env.SHIFTBASE_ENDPOINT_TIMESHEETS ?? "/timesheet",
+  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/employee?limit=1",
 } as const;
+
+const SHIFTBASE_TEST_FALLBACKS = [
+  SHIFTBASE_ENDPOINTS.test,
+  `${SHIFTBASE_ENDPOINTS.employees}?limit=1`,
+  "/employee?limit=1",
+  "/department?limit=1",
+] as const;
 
 export type ShiftbaseEmployeeAddress = {
   shiftbaseEmployeeId: string;
@@ -71,7 +78,18 @@ export function getShiftbaseApiToken(): string | undefined {
 
 export function getShiftbaseApiBaseUrl(): string {
   const raw = process.env.SHIFTBASE_API_BASE_URL?.trim();
-  return (raw || DEFAULT_BASE_URL).replace(/\/$/, "");
+  let base = (raw || DEFAULT_BASE_URL).replace(/\/$/, "");
+  // Legacy env: https://api.shiftbase.com/api → voeg /v1 toe
+  if (base.endsWith("/api") && !/\/api\/v\d+$/i.test(base)) {
+    base = `${base}/v1`;
+  }
+  return base;
+}
+
+export function resolveShiftbaseUrl(endpoint: string): string {
+  const baseUrl = getShiftbaseApiBaseUrl();
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  return `${baseUrl}${path}`;
 }
 
 export function isShiftbaseConfigured(): boolean {
@@ -82,7 +100,7 @@ export function formatShiftbaseError(error: unknown): string {
   if (error instanceof Error) {
     const msg = error.message;
     if (msg.includes("401") || msg.includes("403")) {
-      return "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_TOKEN.";
+      return "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_TOKEN (Settings → App center → Public API).";
     }
     if (msg.includes("429")) {
       return "Shiftbase rate limit bereikt. Probeer later opnieuw.";
@@ -90,7 +108,10 @@ export function formatShiftbaseError(error: unknown): string {
     if (msg.includes("niet geconfigureerd")) {
       return "SHIFTBASE_API_TOKEN is niet geconfigureerd op de server.";
     }
-    if (msg.includes("Shiftbase API fout")) {
+    if (msg.includes("404")) {
+      return `${msg} Tip: gebruik SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api/v1 en controleer of App Center Plus actief is.`;
+    }
+    if (msg.includes("Shiftbase API fout") || msg.includes("Shiftbase endpoint")) {
       return msg;
     }
   }
@@ -121,9 +142,8 @@ export async function shiftbaseRequest<T = unknown>(
     throw new Error("SHIFTBASE_API_TOKEN is niet geconfigureerd");
   }
 
-  const baseUrl = getShiftbaseApiBaseUrl();
   const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = `${baseUrl}${path}`;
+  const url = resolveShiftbaseUrl(endpoint);
 
   const response = await fetch(url, {
     ...options,
@@ -143,7 +163,7 @@ export async function shiftbaseRequest<T = unknown>(
       path,
       body.slice(0, 500),
     );
-    throw new Error(`Shiftbase API fout (${response.status})`);
+    throw new Error(`Shiftbase API fout (${response.status}) op ${path}`);
   }
 
   const text = await response.text();
@@ -200,12 +220,74 @@ function extractList<T>(data: unknown, mapper: (item: Record<string, unknown>) =
   return [];
 }
 
+async function probeShiftbaseEndpoint(endpoint: string): Promise<{
+  ok: boolean;
+  status: number;
+  path: string;
+}> {
+  const token = getShiftbaseApiToken();
+  if (!token) {
+    throw new Error("SHIFTBASE_API_TOKEN is niet geconfigureerd");
+  }
+
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = resolveShiftbaseUrl(endpoint);
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `API ${token}`,
+    },
+  });
+
+  return { ok: response.ok, status: response.status, path };
+}
+
 export async function testShiftbaseConnection(): Promise<{
   ok: boolean;
   message: string;
+  endpoint?: string;
 }> {
-  await shiftbaseRequest(SHIFTBASE_ENDPOINTS.test);
-  return { ok: true, message: "Shiftbase koppeling actief." };
+  const customTest = process.env.SHIFTBASE_ENDPOINT_TEST?.trim();
+  const candidates = [
+    ...(customTest ? [customTest] : []),
+    ...SHIFTBASE_TEST_FALLBACKS,
+  ].filter((value, index, all) => all.indexOf(value) === index);
+
+  let lastStatus = 0;
+  let lastPath = SHIFTBASE_ENDPOINTS.test;
+
+  for (const endpoint of candidates) {
+    const result = await probeShiftbaseEndpoint(endpoint);
+    lastStatus = result.status;
+    lastPath = result.path;
+
+    if (result.ok) {
+      return {
+        ok: true,
+        message: "Shiftbase koppeling actief.",
+        endpoint: result.path,
+      };
+    }
+
+    if (result.status === 401 || result.status === 403) {
+      throw new Error(
+        `Shiftbase authenticatie mislukt (${result.status}) op ${result.path}`,
+      );
+    }
+
+    if (result.status === 429) {
+      throw new Error(`Shiftbase rate limit bereikt (429) op ${result.path}`);
+    }
+
+    if (result.status !== 404) {
+      throw new Error(`Shiftbase API fout (${result.status}) op ${result.path}`);
+    }
+  }
+
+  throw new Error(
+    `Shiftbase endpoint niet gevonden (404) op ${lastPath}. Geprobeerde base URL: ${getShiftbaseApiBaseUrl()}`,
+  );
 }
 
 export async function getShiftbaseEmployees(): Promise<ShiftbaseEmployee[]> {
