@@ -1,19 +1,30 @@
 import { NextResponse } from "next/server";
 import { requireInternApiAccess } from "@/lib/api-auth";
-import { isMoneybirdConfigured } from "@/lib/server/moneybird";
 
 export const dynamic = "force-dynamic";
+
+function getMissingMoneybirdVars(): string[] {
+  const missing: string[] = [];
+  if (!process.env.MONEYBIRD_ACCESS_TOKEN?.trim()) {
+    missing.push("MONEYBIRD_ACCESS_TOKEN");
+  }
+  if (!process.env.MONEYBIRD_ADMINISTRATION_ID?.trim()) {
+    missing.push("MONEYBIRD_ADMINISTRATION_ID");
+  }
+  return missing;
+}
 
 export async function GET() {
   const auth = await requireInternApiAccess();
   if ("error" in auth && auth.error) return auth.error;
 
-  if (!isMoneybirdConfigured()) {
+  const missing = getMissingMoneybirdVars();
+  if (missing.length > 0) {
     return NextResponse.json({
       ok: false,
       configured: false,
-      message:
-        "Moneybird configuratie ontbreekt. Controleer Vercel Environment Variables.",
+      message: `Moneybird configuratie ontbreekt: ${missing.join(", ")}`,
+      missing,
     });
   }
 

@@ -120,42 +120,22 @@ export default function IntegrationHealthPanel({
     if (!url) return;
     setLoadingId(id);
     try {
-      if (url === "/api/kilometers/status") {
-        const res = await fetch(url);
-        if (res.status === 404) {
-          setStates((prev) => ({
-            ...prev,
-            [id]: {
-              status: "Voorbereid",
-              message: "Nog niet gebouwd",
-            },
-          }));
-          return;
-        }
-        const data = (await res.json()) as { ok?: boolean; message?: string };
-        setStates((prev) => ({
-          ...prev,
-          [id]: {
-            status: data.ok ? "Actief" : "Voorbereid",
-            message: data.message ?? "Koppeling voorbereid",
-          },
-        }));
-        return;
-      }
-
       const res = await fetch(url);
       const data = (await res.json()) as {
         ok?: boolean;
         configured?: boolean;
         error?: string;
         message?: string;
+        missing?: string[];
       };
 
       let message = data.message ?? data.error;
-      if (data.configured === false) {
-        message = "Niet geconfigureerd";
+      if (data.missing && data.missing.length > 0) {
+        message = `Ontbrekend: ${data.missing.join(", ")}`;
+      } else if (data.configured === false) {
+        message = message ?? "Niet geconfigureerd";
       } else if (data.ok === true) {
-        message = "Koppeling voorbereid";
+        message = message ?? "Koppeling voorbereid";
       }
 
       setStates((prev) => ({

@@ -32,18 +32,21 @@ export default function TravelSettingsPanel({ settings, onChange }: Props) {
     setTestResult(null);
     try {
       const res = await fetch("/api/kilometers/status");
-      if (res.status === 404) {
-        setTestResult("Kilometer endpoint nog niet gebouwd.");
-        return;
-      }
-      const data = (await res.json()) as { ok?: boolean; message?: string; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        configured?: boolean;
+        message?: string;
+        error?: string;
+      };
       if (data.ok) {
         setTestResult(data.message ?? "Google Maps koppeling is beschikbaar.");
       } else {
-        setTestResult(data.error ?? data.message ?? "Koppeling niet beschikbaar.");
+        setTestResult(
+          data.message ?? data.error ?? "Koppeling niet beschikbaar.",
+        );
       }
     } catch {
-      setTestResult("Kilometer endpoint nog niet gebouwd.");
+      setTestResult("Google Maps statuscontrole mislukt.");
     } finally {
       setTesting(false);
     }
