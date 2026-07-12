@@ -33,7 +33,7 @@ export function getDashboardPathForRole(role: UserRole): string {
     case "planner":
       return "/dashboard/intern";
     case "medewerker":
-      return "/dashboard/medewerker";
+      return "/portaal/medewerkers";
     case "opdrachtgever":
       return "/dashboard/opdrachtgever";
     default:
@@ -49,6 +49,9 @@ export function canAccessDashboardPath(
     return isInternRole(role);
   }
   if (pathname.startsWith("/dashboard/medewerker")) {
+    return role === "medewerker";
+  }
+  if (pathname.startsWith("/portaal/medewerkers")) {
     return role === "medewerker";
   }
   if (pathname.startsWith("/dashboard/opdrachtgever")) {

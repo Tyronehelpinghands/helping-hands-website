@@ -41,7 +41,7 @@ function getNavItems(role: UserRole): NavItem[] {
       ];
     case "medewerker":
       return [
-        { href: "/dashboard/medewerker", label: "Mijn shifts", icon: CalendarDays },
+        { href: "/portaal/medewerkers", label: "Mijn shifts", icon: CalendarDays },
       ];
     case "opdrachtgever":
       return [

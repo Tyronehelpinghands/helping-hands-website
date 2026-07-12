@@ -42,7 +42,7 @@ export const portals: PortalConfig[] = [
     ],
     buttonLabel: "Medewerker login",
     href: "/login?type=medewerker",
-    dashboardHref: "/dashboard/medewerker",
+    dashboardHref: "/portaal/medewerkers",
   },
   {
     id: "opdrachtgever",
