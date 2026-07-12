@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { BrandLogoImage } from "@/components/BrandLogo";
 import LoginSelector from "@/components/LoginSelector";
 import {
-  getDashboardPathForRole,
   isValidRole,
+  resolveLoginDestination,
 } from "@/lib/auth";
 import { getSessionProfile } from "@/lib/auth-server";
 import { getPortalByType } from "@/lib/portals";
@@ -40,7 +40,9 @@ export default async function LoginPage({
     try {
       const { user, profile } = await getSessionProfile();
       if (user && profile && isValidRole(profile.role)) {
-        redirect(getDashboardPathForRole(profile.role));
+        redirect(
+          resolveLoginDestination(profile.role, initialType, redirectTo),
+        );
       }
     } catch {
       // Supabase niet bereikbaar — toon loginpagina met foutmelding.

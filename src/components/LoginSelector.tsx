@@ -14,12 +14,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  canAccessDashboardPath,
-  getDashboardPathForRole,
   isValidRole,
   PORTAL_INTROS,
   PORTAL_LOGIN_TITLES,
   PROFILE_INCOMPLETE_MESSAGE,
+  resolveLoginDestination,
 } from "@/lib/auth";
 import { contactEmail } from "@/lib/navigation";
 import { portals, type PortalType } from "@/lib/portals";
@@ -100,10 +99,11 @@ export default function LoginSelector({
         return;
       }
 
-      const destination =
-        redirectTo && canAccessDashboardPath(profile.role, redirectTo)
-          ? redirectTo
-          : getDashboardPathForRole(profile.role);
+      const destination = resolveLoginDestination(
+        profile.role,
+        activePortal,
+        redirectTo,
+      );
 
       router.push(destination);
       router.refresh();
@@ -263,8 +263,8 @@ export default function LoginSelector({
         </div>
 
         <p className="relative mt-4 text-xs leading-5 text-white/45">
-          De gekozen portal is alleen voor navigatie. Je toegang wordt bepaald door
-          het rollenprofiel in je account.
+          Je wordt na inloggen doorgestuurd naar het portaal dat je hebt gekozen,
+          als je rol daarvoor toegang heeft. Anders naar je standaard dashboard.
         </p>
       </div>
     </div>

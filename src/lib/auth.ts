@@ -1,4 +1,4 @@
-import type { PortalType } from "@/lib/portals";
+import { getPortalDashboardPath, type PortalType } from "@/lib/portals";
 
 export const USER_ROLES = [
   "admin",
@@ -52,12 +52,41 @@ export function canAccessDashboardPath(
     return role === "medewerker";
   }
   if (pathname.startsWith("/portaal/medewerkers")) {
-    return role === "medewerker";
+    return role === "medewerker" || isInternRole(role);
   }
   if (pathname.startsWith("/dashboard/opdrachtgever")) {
     return role === "opdrachtgever";
   }
   return false;
+}
+
+/** Mag deze rol inloggen op het gekozen portaal? */
+export function canAccessPortal(role: UserRole, portalType: PortalType): boolean {
+  switch (portalType) {
+    case "intern":
+      return isInternRole(role);
+    case "medewerker":
+      return role === "medewerker" || isInternRole(role);
+    case "opdrachtgever":
+      return role === "opdrachtgever";
+    default:
+      return false;
+  }
+}
+
+/** Bepaal redirect na login op basis van gekozen portaal, rol en optionele next-URL. */
+export function resolveLoginDestination(
+  role: UserRole,
+  portalType: PortalType,
+  redirectTo?: string | null,
+): string {
+  if (redirectTo && canAccessDashboardPath(role, redirectTo)) {
+    return redirectTo;
+  }
+  if (canAccessPortal(role, portalType)) {
+    return getPortalDashboardPath(portalType);
+  }
+  return getDashboardPathForRole(role);
 }
 
 export const PORTAL_LOGIN_TITLES: Record<PortalType, string> = {

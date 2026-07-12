@@ -166,6 +166,10 @@ export const opdrachtgeverDashboard: DashboardCard[] = [
   },
 ];
 
+export function getPortalDashboardPath(type: PortalType): string {
+  return portals.find((portal) => portal.id === type)?.dashboardHref ?? "/login";
+}
+
 export function getPortalByType(type: string | null): PortalType {
   if (type === "intern" || type === "medewerker" || type === "opdrachtgever") {
     return type;
