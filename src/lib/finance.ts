@@ -620,7 +620,7 @@ export function buildFinanceActions(
       title: `Payroll/Fooks kosten controleren (${reviewExpenses} regels)`,
       priority: reviewExpenses > 0 ? "Hoog" : "Laag",
       status: reviewExpenses > 0 ? "Open" : "Afgerond",
-      href: "/dashboard/intern/risico",
+      href: "/dashboard/intern/risico-acties",
     },
   ];
 }

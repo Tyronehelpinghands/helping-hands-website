@@ -43,6 +43,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Inzicht in omzet, kosten, marge, btw, openstaande facturen en financiële acties.",
   },
+  "/dashboard/intern/risico-acties": {
+    title: "Risico & Acties",
+    subtitle:
+      "Beheer operationele risico's, openstaande acties, deadlines en opvolging.",
+  },
 };
 
 export function getInternPageMeta(pathname: string): InternPageMeta | null {

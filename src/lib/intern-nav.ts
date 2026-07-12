@@ -35,7 +35,7 @@ export const internNavItems: InternNavItem[] = [
   { href: "/dashboard/intern/facturatie", label: "Facturatie", icon: FileText },
   { href: "/dashboard/intern/financien", label: "Financiën", icon: Wallet },
   {
-    href: "/dashboard/intern/risico",
+    href: "/dashboard/intern/risico-acties",
     label: "Risico & Acties",
     icon: AlertTriangle,
   },
