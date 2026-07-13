@@ -3,10 +3,9 @@ import { redirect } from "next/navigation";
 import { BrandLogoImage } from "@/components/BrandLogo";
 import LoginSelector from "@/components/LoginSelector";
 import {
-  isValidRole,
-  resolveLoginDestination,
   canAccessDashboardPath,
   getDashboardPathForRole,
+  isValidRole,
 } from "@/lib/auth";
 import { getSessionProfile } from "@/lib/auth-server";
 import { getPortalByType } from "@/lib/portals";
@@ -42,13 +41,14 @@ export default async function LoginPage({
     try {
       const { user, profile } = await getSessionProfile();
       if (user && profile && isValidRole(profile.role)) {
-        const portalType = params.type ? getPortalByType(params.type) : null;
-        const destination = portalType
-          ? resolveLoginDestination(profile.role, portalType, redirectTo)
-          : redirectTo && canAccessDashboardPath(profile.role, redirectTo)
-            ? redirectTo
-            : getDashboardPathForRole(profile.role);
-        redirect(destination);
+        // Met ?type= op de loginpagina blijven — gebruiker kiest demo of ander portaal.
+        if (!params.type) {
+          const destination =
+            redirectTo && canAccessDashboardPath(profile.role, redirectTo)
+              ? redirectTo
+              : getDashboardPathForRole(profile.role);
+          redirect(destination);
+        }
       }
     } catch {
       // Supabase niet bereikbaar — toon loginpagina met foutmelding.

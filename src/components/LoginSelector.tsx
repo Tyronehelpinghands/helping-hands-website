@@ -56,9 +56,18 @@ export default function LoginSelector({
     LOGIN_PORTAL_CARDS[0];
 
   function handleDemoLogin(demoRole: DemoUserRole) {
-    persistDemoRole(demoRole);
-    router.push(getRedirectForRole(demoRole));
-    router.refresh();
+    void (async () => {
+      if (supabaseEnabled) {
+        try {
+          const supabase = createClient();
+          await supabase.auth.signOut();
+        } catch {
+          // Demo-login mag doorgaan zonder Supabase-sessie.
+        }
+      }
+      persistDemoRole(demoRole);
+      window.location.assign(getRedirectForRole(demoRole));
+    })();
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
