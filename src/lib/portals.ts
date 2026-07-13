@@ -16,9 +16,9 @@ export type PortalConfig = {
 export const portals: PortalConfig[] = [
   {
     id: "intern",
-    title: "Intern portaal",
+    title: "Intern dashboard",
     description:
-      "Voor planning, crewbeheer, aanvragen, projecten en interne administratie.",
+      "Voor planning, crewbeheer, urenregistratie, facturatie, sales en administratie.",
     features: [
       "Aanvragen beheren",
       "Crewplanning bekijken",
@@ -33,7 +33,7 @@ export const portals: PortalConfig[] = [
     id: "medewerker",
     title: "Medewerkersportaal",
     description:
-      "Voor crewleden die hun shifts, briefings, beschikbaarheid en uren willen bekijken.",
+      "Voor crewleden om planning, beschikbaarheid, uren, berichten en documenten te bekijken.",
     features: [
       "Beschikbaarheid doorgeven",
       "Shifts bekijken",
@@ -48,7 +48,7 @@ export const portals: PortalConfig[] = [
     id: "opdrachtgever",
     title: "Opdrachtgeversportaal",
     description:
-      "Voor opdrachtgevers die aanvragen, projectgegevens en crewplanning willen beheren.",
+      "Bekijk aanvragen, projecten, briefings, planning en facturen.",
     features: [
       "Personeel aanvragen",
       "Lopende aanvragen bekijken",
@@ -57,7 +57,7 @@ export const portals: PortalConfig[] = [
     ],
     buttonLabel: "Opdrachtgever login",
     href: "/login?type=opdrachtgever",
-    dashboardHref: "/dashboard/opdrachtgever",
+    dashboardHref: "/portaal/opdrachtgevers",
   },
 ];
 

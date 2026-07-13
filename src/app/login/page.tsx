@@ -5,6 +5,8 @@ import LoginSelector from "@/components/LoginSelector";
 import {
   isValidRole,
   resolveLoginDestination,
+  canAccessDashboardPath,
+  getDashboardPathForRole,
 } from "@/lib/auth";
 import { getSessionProfile } from "@/lib/auth-server";
 import { getPortalByType } from "@/lib/portals";
@@ -40,9 +42,13 @@ export default async function LoginPage({
     try {
       const { user, profile } = await getSessionProfile();
       if (user && profile && isValidRole(profile.role)) {
-        redirect(
-          resolveLoginDestination(profile.role, initialType, redirectTo),
-        );
+        const portalType = params.type ? getPortalByType(params.type) : null;
+        const destination = portalType
+          ? resolveLoginDestination(profile.role, portalType, redirectTo)
+          : redirectTo && canAccessDashboardPath(profile.role, redirectTo)
+            ? redirectTo
+            : getDashboardPathForRole(profile.role);
+        redirect(destination);
       }
     } catch {
       // Supabase niet bereikbaar — toon loginpagina met foutmelding.

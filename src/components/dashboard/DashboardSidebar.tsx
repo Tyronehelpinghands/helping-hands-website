@@ -45,7 +45,7 @@ function getNavItems(role: UserRole): NavItem[] {
       ];
     case "opdrachtgever":
       return [
-        { href: "/dashboard/opdrachtgever", label: "Projecten", icon: Building2 },
+        { href: "/portaal/opdrachtgevers", label: "Projecten", icon: Building2 },
       ];
     default:
       return [];

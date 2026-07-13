@@ -35,7 +35,7 @@ export function getDashboardPathForRole(role: UserRole): string {
     case "medewerker":
       return "/portaal/medewerkers";
     case "opdrachtgever":
-      return "/dashboard/opdrachtgever";
+      return "/portaal/opdrachtgevers";
     default:
       return "/login";
   }
@@ -54,8 +54,11 @@ export function canAccessDashboardPath(
   if (pathname.startsWith("/portaal/medewerkers")) {
     return role === "medewerker" || isInternRole(role);
   }
+  if (pathname.startsWith("/portaal/opdrachtgevers")) {
+    return role === "opdrachtgever" || isInternRole(role);
+  }
   if (pathname.startsWith("/dashboard/opdrachtgever")) {
-    return role === "opdrachtgever";
+    return role === "opdrachtgever" || isInternRole(role);
   }
   return false;
 }
@@ -80,11 +83,12 @@ export function resolveLoginDestination(
   portalType: PortalType,
   redirectTo?: string | null,
 ): string {
-  if (redirectTo && canAccessDashboardPath(role, redirectTo)) {
-    return redirectTo;
-  }
+  // Gekozen portaal op de loginpagina heeft voorrang boven ?next=
   if (canAccessPortal(role, portalType)) {
     return getPortalDashboardPath(portalType);
+  }
+  if (redirectTo && canAccessDashboardPath(role, redirectTo)) {
+    return redirectTo;
   }
   return getDashboardPathForRole(role);
 }
@@ -101,5 +105,5 @@ export const PORTAL_INTROS: Record<PortalType, string> = {
   medewerker:
     "Voor shifts, beschikbaarheid, briefings, uren en kilometerregistratie.",
   opdrachtgever:
-    "Voor aanvragen, lopende projecten, crewplanning en contact met Helping Hands.",
+    "Bekijk aanvragen, projecten, briefings, planning en facturen.",
 };

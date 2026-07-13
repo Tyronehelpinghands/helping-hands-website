@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { clearDemoRole } from "@/lib/authRedirects";
 import { cn } from "@/lib/utils";
 
 type LogoutButtonProps = {
@@ -22,6 +23,7 @@ export default function LogoutButton({
   async function handleLogout() {
     setLoading(true);
     try {
+      clearDemoRole();
       const supabase = createClient();
       await supabase.auth.signOut();
       router.push("/login");

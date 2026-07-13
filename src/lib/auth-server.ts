@@ -6,7 +6,26 @@ import {
   type Profile,
   type UserRole,
 } from "@/lib/auth";
+import {
+  DEMO_ROLE_COOKIE,
+  isDemoUserRole,
+  type DemoUserRole,
+} from "@/lib/authRedirects";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+
+const DEMO_INTERNAL_PROFILE: Profile = {
+  id: "demo-internal",
+  email: "demo@helpinghands.nl",
+  role: "admin",
+  full_name: "Demo Admin",
+};
+
+export async function getDemoRoleFromCookies(): Promise<DemoUserRole | null> {
+  const cookieStore = await cookies();
+  const value = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
+  return isDemoUserRole(value) ? value : null;
+}
 
 export async function getSessionProfile(): Promise<{
   user: { id: string; email?: string } | null;
@@ -38,6 +57,15 @@ export async function getSessionProfile(): Promise<{
 }
 
 export async function requireDashboardAccess(allowedRoles: UserRole[]) {
+  const demoRole = await getDemoRoleFromCookies();
+  if (
+    demoRole === "internal" &&
+    allowedRoles.some((role) => role === "admin" || role === "planner")
+  ) {
+  // TODO: Vervang demo-profiel door echte Supabase Auth + rolcontrole
+    return DEMO_INTERNAL_PROFILE;
+  }
+
   const { user, profile } = await getSessionProfile();
 
   if (!user) {

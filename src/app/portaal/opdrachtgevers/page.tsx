@@ -1,35 +1,118 @@
 import Link from "next/link";
-import PortalBanner from "@/components/PortalBanner";
-import PortalDashboard from "@/components/PortalDashboard";
-import PortalHeroMark from "@/components/PortalHeroMark";
-import { opdrachtgeverDashboard } from "@/lib/portals";
+import {
+  CalendarDays,
+  ClipboardList,
+  ListChecks,
+  MessageSquare,
+  Receipt,
+} from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import ClientContactPanel from "@/components/client-portal/ClientContactPanel";
+import ClientDocuments from "@/components/client-portal/ClientDocuments";
+import ClientIntegrationStatus from "@/components/client-portal/ClientIntegrationStatus";
+import ClientPlanningOverview from "@/components/client-portal/ClientPlanningOverview";
+import ClientRequestTable from "@/components/client-portal/ClientRequestTable";
+import ClientStats from "@/components/client-portal/ClientStats";
+import { NextProjectHighlight } from "@/components/client-portal/ClientProjectCards";
+import { getClientPendingActions, getNextClientProject } from "@/lib/clientPortal";
+import { cn } from "@/lib/utils";
 
-export const metadata = {
-  title: "Opdrachtgeversportaal | Helping Hands Agency",
-  description: "Demo-dashboard voor opdrachtgevers: aanvragen en projectinformatie.",
-};
+export default function ClientPortalOverviewPage() {
+  const nextProject = getNextClientProject();
+  const actions = getClientPendingActions();
 
-export default function OpdrachtgeversPortaalPage() {
   return (
-    <>
-      <PortalBanner />
-      <PortalHeroMark
-        label="Opdrachtgevers"
-        title="Opdrachtgeversportaal"
-        description="Overzicht voor personeelsaanvragen, projectinformatie en contact met planning."
-        action={
-          <Link
-            href="/contact"
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#F28C28] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
-          >
-            Personeel aanvragen
-          </Link>
-        }
-      />
+    <div className="space-y-6">
+      <ClientStats />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <PortalDashboard cards={opdrachtgeverDashboard} />
-      </section>
-    </>
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
+          {nextProject ? <NextProjectHighlight project={nextProject} /> : null}
+          <ClientRequestTable compact />
+          <ClientPlanningOverview compact />
+        </div>
+        <div className="space-y-6">
+          <Card className="border-slate-200/80 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg font-black text-[#0B1F4D]">
+                <ListChecks className="h-5 w-5 text-[#F28C28]" />
+                Openstaande acties
+              </CardTitle>
+              <CardDescription>Onderdelen die aandacht nodig hebben</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {actions.length === 0 ? (
+                <p className="text-sm text-slate-500">Geen openstaande acties.</p>
+              ) : (
+                actions.map((action) => (
+                  <Link
+                    key={`${action.type}-${action.label}`}
+                    href={action.href}
+                    className="block rounded-lg border border-slate-200 px-3 py-2.5 text-sm transition hover:border-[#173A8A]/30 hover:bg-slate-50"
+                  >
+                    <p className="font-semibold text-[#0B1F4D]">{action.label}</p>
+                    <p className="text-xs text-slate-500">{action.type}</p>
+                  </Link>
+                ))
+              )}
+            </CardContent>
+          </Card>
+          <ClientContactPanel compact />
+        </div>
+      </div>
+
+      <ClientDocuments compact />
+
+      <Card className="border-slate-200/80 bg-white shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-black text-[#0B1F4D]">Snelle acties</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-3">
+          <Link
+            href="/portaal/opdrachtgevers/aanvragen"
+            className={cn(buttonVariants(), "bg-[#173A8A] text-white hover:bg-[#0B1F4D]")}
+          >
+            <ClipboardList className="mr-2 h-4 w-4" />
+            Nieuwe aanvraag doen
+          </Link>
+          <Link
+            href="/portaal/opdrachtgevers/briefings"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Briefing aanleveren
+          </Link>
+          <Link
+            href="/portaal/opdrachtgevers/planning"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <CalendarDays className="mr-2 h-4 w-4" />
+            Planning bekijken
+          </Link>
+          <Link
+            href="/portaal/opdrachtgevers/facturen"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <Receipt className="mr-2 h-4 w-4" />
+            Facturen bekijken
+          </Link>
+          <Link
+            href="/portaal/opdrachtgevers/contact"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Contact opnemen
+          </Link>
+        </CardContent>
+      </Card>
+
+      <ClientIntegrationStatus />
+    </div>
   );
 }

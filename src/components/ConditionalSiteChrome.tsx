@@ -13,7 +13,8 @@ export default function ConditionalSiteChrome({
   const pathname = usePathname();
   const isDashboard =
     pathname?.startsWith("/dashboard") ||
-    pathname?.startsWith("/portaal/medewerkers");
+    pathname?.startsWith("/portaal/medewerkers") ||
+    pathname?.startsWith("/portaal/opdrachtgevers");
 
   if (isDashboard) {
     return children;
