@@ -10,6 +10,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/portaal/medewerkers",
+    "/portaal/medewerkers/:path*",
+    "/portaal/opdrachtgevers",
+    "/portaal/opdrachtgevers/:path*",
     "/login",
     "/forgot-password",
     "/update-password",

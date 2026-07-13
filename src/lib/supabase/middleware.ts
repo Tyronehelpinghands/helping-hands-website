@@ -1,20 +1,36 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { DEMO_ROLE_COOKIE, isDemoUserRole } from "@/lib/authRedirects";
+import {
+  DEMO_ROLE_COOKIE,
+  getProtectedPortal,
+  isDemoUserRole,
+} from "@/lib/authRedirects";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 
 export async function updateSession(request: NextRequest) {
   const url = getSupabaseUrl();
   const key = getSupabaseAnonKey();
   const pathname = request.nextUrl.pathname;
+  const protectedPortal = getProtectedPortal(pathname);
 
-  // TODO: Supabase Auth koppelen — verwijder demo cookie bypass
+  // TODO: Supabase Auth koppelen — vervang demo cookie door echte rolcontrole
   // TODO: Role-based redirects server-side afdwingen per rol
   const demoRole = request.cookies.get(DEMO_ROLE_COOKIE)?.value;
-  const isDemoInternal =
-    isDemoUserRole(demoRole) && demoRole === "internal" && pathname.startsWith("/dashboard/intern");
+  const hasMatchingDemoRole =
+    protectedPortal &&
+    isDemoUserRole(demoRole) &&
+    demoRole === protectedPortal.demoRole;
 
   if (!url || !key) {
+    if (protectedPortal && !hasMatchingDemoRole) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = new URLSearchParams({
+        type: protectedPortal.loginType,
+        next: pathname,
+      }).toString();
+      return NextResponse.redirect(loginUrl);
+    }
     return NextResponse.next({ request });
   }
 
@@ -41,17 +57,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isProtected = pathname.startsWith("/dashboard");
+  if (protectedPortal) {
+    const isInternDashboard = protectedPortal.demoRole === "internal";
+    const hasSupabaseAccess = Boolean(user) && isInternDashboard;
 
-  if (isProtected && !user && isDemoInternal) {
+    if (!hasMatchingDemoRole && !hasSupabaseAccess) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = new URLSearchParams({
+        type: protectedPortal.loginType,
+        next: pathname,
+      }).toString();
+      return NextResponse.redirect(loginUrl);
+    }
+
     return supabaseResponse;
-  }
-
-  if (isProtected && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;

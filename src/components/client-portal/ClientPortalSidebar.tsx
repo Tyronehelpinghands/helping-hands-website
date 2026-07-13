@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { DEMO_CLIENT_PROFILE } from "@/lib/clientPortal";
+import { performPortalLogout } from "@/lib/authRedirects";
 import {
   clientPortalNavItems,
   isClientPortalNavActive,
@@ -83,6 +84,7 @@ function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?:
           variant="outline"
           size="sm"
           className="mt-3 w-full border-white/20 bg-transparent text-white hover:bg-white/10"
+          onClick={() => void performPortalLogout("opdrachtgever")}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Uitloggen

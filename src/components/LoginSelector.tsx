@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   Building2,
   Loader2,
@@ -16,6 +16,7 @@ import {
   resolveLoginDestination,
 } from "@/lib/auth";
 import {
+  clearDemoRole,
   getRedirectForRole,
   LOGIN_PORTAL_CARDS,
   persistDemoRole,
@@ -54,6 +55,11 @@ export default function LoginSelector({
   const activeCard =
     LOGIN_PORTAL_CARDS.find((card) => card.portalType === activePortal) ??
     LOGIN_PORTAL_CARDS[0];
+
+  // Op loginpagina altijd opnieuw inloggen — verwijder oude demo-sessie.
+  useEffect(() => {
+    clearDemoRole();
+  }, []);
 
   function handleDemoLogin(demoRole: DemoUserRole) {
     void (async () => {

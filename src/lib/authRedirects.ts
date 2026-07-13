@@ -56,11 +56,11 @@ export function demoRoleToPortalType(role: DemoUserRole): PortalType {
   }
 }
 
-/** Client-side: sla demo-rol op voor refresh en server middleware. */
+/** Client-side: sla demo-rol op (sessie-cookie, verloopt bij browser sluiten). */
 export function persistDemoRole(role: DemoUserRole): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(DEMO_ROLE_STORAGE_KEY, role);
-  document.cookie = `${DEMO_ROLE_COOKIE}=${role};path=/;max-age=604800;SameSite=Lax`;
+  document.cookie = `${DEMO_ROLE_COOKIE}=${role};path=/;SameSite=Lax`;
 }
 
 /** Client-side: verwijder demo-rol bij uitloggen. */
@@ -74,6 +74,44 @@ export function readDemoRoleFromStorage(): DemoUserRole | null {
   if (typeof window === "undefined") return null;
   const value = localStorage.getItem(DEMO_ROLE_STORAGE_KEY);
   return isDemoUserRole(value) ? value : null;
+}
+
+export type ProtectedPortal = {
+  prefix: string;
+  demoRole: DemoUserRole;
+  loginType: PortalType;
+};
+
+export const PROTECTED_PORTALS: ProtectedPortal[] = [
+  { prefix: "/dashboard/intern", demoRole: "internal", loginType: "intern" },
+  { prefix: "/portaal/medewerkers", demoRole: "employee", loginType: "medewerker" },
+  { prefix: "/portaal/opdrachtgevers", demoRole: "client", loginType: "opdrachtgever" },
+];
+
+export function getProtectedPortal(pathname: string): ProtectedPortal | null {
+  return PROTECTED_PORTALS.find((portal) => pathname.startsWith(portal.prefix)) ?? null;
+}
+
+export function getLoginUrlForPortal(portal: ProtectedPortal, nextPath?: string): string {
+  const params = new URLSearchParams({ type: portal.loginType });
+  if (nextPath) params.set("next", nextPath);
+  return `/login?${params.toString()}`;
+}
+
+/** Client-side uitloggen uit demo-portaal. */
+export async function performPortalLogout(loginType?: PortalType): Promise<void> {
+  clearDemoRole();
+  const { createClient } = await import("@/lib/supabase/client");
+  const { isSupabaseConfigured } = await import("@/lib/supabase/env");
+  if (isSupabaseConfigured()) {
+    try {
+      await createClient().auth.signOut();
+    } catch {
+      // Uitloggen gaat door.
+    }
+  }
+  const loginUrl = loginType ? `/login?type=${loginType}` : "/login";
+  window.location.assign(loginUrl);
 }
 
 export type LoginPortalCard = {

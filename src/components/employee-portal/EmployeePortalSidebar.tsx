@@ -18,6 +18,7 @@ import {
   isEmployeePortalNavActive,
 } from "@/lib/employeePortalNavigation";
 import { DEMO_EMPLOYEE_PROFILE } from "@/lib/employeePortal";
+import { performPortalLogout } from "@/lib/authRedirects";
 import { cn } from "@/lib/utils";
 
 function SidebarNav({
@@ -100,9 +101,7 @@ function SidebarInner({
           variant="outline"
           size="sm"
           className="w-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
-          onClick={() => {
-            /* TODO: Supabase Auth uitloggen */
-          }}
+          onClick={() => void performPortalLogout("medewerker")}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Uitloggen
