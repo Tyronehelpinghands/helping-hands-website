@@ -107,7 +107,8 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo-carousel-track {
+  .logo-carousel-track,
+  .project-logo-carousel-track {
     animation: none;
   }
 
@@ -159,6 +160,14 @@ svg {
 }
 
 .logo-carousel-track:hover {
+  animation-play-state: paused;
+}
+
+.project-logo-carousel-track {
+  animation: logo-scroll 70s linear infinite;
+}
+
+.project-logo-carousel-track:hover {
   animation-play-state: paused;
 }
 
