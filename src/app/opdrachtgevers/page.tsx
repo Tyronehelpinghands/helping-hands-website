@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
-import PageHero from "@/components/PageHero";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { services } from "@/lib/content";
 
@@ -57,11 +58,7 @@ const process = [
 export default function OpdrachtgeversPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Opdrachtgevers"
-        title="Personeel aanvragen voor je event of productie."
-        description="Voor productieleiders, eventmanagers en organisatoren die snel betrouwbare crew nodig hebben op locatie."
-      />
+      <PageHero content={getPageHeroContent("/opdrachtgevers")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-2">

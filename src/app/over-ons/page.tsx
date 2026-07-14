@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import CTASection from "@/components/CTASection";
-import PageHero from "@/components/PageHero";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export const metadata: Metadata = {
   title: "Over ons | Helping Hands Agency",
@@ -38,11 +39,7 @@ const pillars = [
 export default function OverOnsPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Over ons"
-        title="Praktische mensen voor producties waar alles moet kloppen."
-        description="Helping Hands Agency is een Nederlands personeelsbureau voor evenementen, horeca, stagebouw, productie en logistiek."
-      />
+      <PageHero content={getPageHeroContent("/over-ons")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="max-w-3xl">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ContactTabs from "@/components/ContactTabs";
-import PageHero from "@/components/PageHero";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail, contactEmail } from "@/lib/navigation";
 
 export const metadata: Metadata = {
@@ -12,11 +13,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Contact"
-        title="Neem contact op met Helping Hands Agency."
-        description="Voor personeelsaanvragen, aanmeldingen als crewlid of vragen over samenwerking."
-      />
+      <PageHero content={getPageHeroContent("/contact")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <ContactTabs />

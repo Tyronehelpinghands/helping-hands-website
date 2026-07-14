@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import ProjectCta from "@/components/projects/ProjectCta";
 import ProjectExperienceStats from "@/components/projects/ProjectExperienceStats";
-import ProjectHero from "@/components/projects/ProjectHero";
 import ProjectLogoCarousel from "@/components/projects/ProjectLogoCarousel";
 import ProjectLogoGrid from "@/components/projects/ProjectLogoGrid";
 import ProjectSectorCards from "@/components/projects/ProjectSectorCards";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export const metadata: Metadata = {
   title: "Projecten & ervaring | Helping Hands Agency",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function ProjectenPage() {
   return (
     <>
-      <ProjectHero />
+      <PageHero content={getPageHeroContent("/projecten")} />
       <ProjectExperienceStats />
       <ProjectLogoCarousel />
       <ProjectLogoGrid />

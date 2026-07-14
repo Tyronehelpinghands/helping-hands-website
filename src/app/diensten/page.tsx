@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
-import PageHero from "@/components/PageHero";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 import ServiceCard from "@/components/ServiceCard";
 import { services } from "@/lib/content";
 
@@ -14,11 +15,7 @@ export const metadata: Metadata = {
 export default function DienstenPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Diensten"
-        title="Crew en ondersteuning voor elke fase van de productie."
-        description="Van hospitality en floor support tot stagehands en logistiek — praktische mensen die begrijpen wat er op locatie nodig is."
-      />
+      <PageHero content={getPageHeroContent("/diensten")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">

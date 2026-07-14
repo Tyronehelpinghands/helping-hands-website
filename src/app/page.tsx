@@ -1,90 +1,19 @@
 import Link from "next/link";
 import AudienceToggle from "@/components/AudienceToggle";
 import CTASection from "@/components/CTASection";
-import InteractiveHeroDashboard from "@/components/InteractiveHeroDashboard";
 import LogoCarousel from "@/components/LogoCarousel";
 import ProcessAccordion from "@/components/ProcessAccordion";
 import QuickRequestForm from "@/components/QuickRequestForm";
+import PageHero from "@/components/sections/PageHero";
 import SectorCards from "@/components/SectorCards";
 import ServiceFilter from "@/components/ServiceFilter";
 import { deployments, services } from "@/lib/content";
-
-const heroBadges = ["Event crew", "Stagehands", "Horeca support", "Productie"];
-
-const promises = [
-  "Snel schakelen",
-  "Duidelijke briefing",
-  "Betrouwbare crew",
-  "Eén vast aanspreekpunt",
-];
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export default function Home() {
   return (
     <>
-      <section className="hero-gradient relative overflow-hidden text-white">
-        <div className="pointer-events-none absolute -left-32 top-20 h-80 w-80 rounded-full bg-[#F28C28]/15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-[#F28C28]/8 blur-3xl" />
-
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-28">
-          <div>
-            <div className="mb-6 flex flex-wrap gap-2">
-              {heroBadges.map((badge) => (
-                <span
-                  key={badge}
-                  className="rounded-full border border-[#F28C28]/40 bg-[#F28C28]/15 px-4 py-1.5 text-xs font-bold text-[#F28C28]"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
-
-            <h1 className="max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Snel inzetbare crew voor events, horeca en productie.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/80 sm:text-xl sm:leading-9">
-              Helping Hands Agency levert betrouwbare mensen voor opbouw, afbouw,
-              hospitality, floor support, stagehands en productieondersteuning.
-              Duidelijke communicatie, korte lijnen en crew die weet wat er op
-              locatie nodig is.
-            </p>
-
-            <div className="mt-7 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-              {promises.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur-sm"
-                >
-                  <span className="mb-1.5 block h-1 w-6 rounded-full bg-[#F28C28]" />
-                  <p className="text-xs font-bold leading-snug sm:text-sm">
-                    {item}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/contact"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#F28C28] px-9 py-4 text-base font-bold text-white shadow-xl shadow-black/30 transition hover:bg-[#de7c1f] sm:w-auto"
-              >
-                Personeel aanvragen
-              </Link>
-              <Link
-                href="/vacatures"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-full border-2 border-white/35 bg-white/5 px-9 py-4 text-base font-bold backdrop-blur-sm transition hover:bg-white hover:text-[#0B1F4D] sm:w-auto"
-              >
-                Aanmelden als crewlid
-              </Link>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="rounded-[2rem] border border-white/15 bg-white/5 p-6 shadow-2xl backdrop-blur-sm">
-              <InteractiveHeroDashboard />
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero content={getPageHeroContent("/")} />
 
       <SectorCards />
 

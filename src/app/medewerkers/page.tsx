@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
-import PageHero from "@/components/PageHero";
+import PageHero from "@/components/sections/PageHero";
+import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail } from "@/lib/navigation";
 
 export const metadata: Metadata = {
@@ -38,11 +39,7 @@ const roles = [
 export default function MedewerkersPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Medewerkers"
-        title="Werken op events, horeca en producties"
-        description="Bij Helping Hands Agency werk je op locaties waar geen dag hetzelfde is. Van festivals en concerten tot horeca-events, stadions en backstage producties."
-      />
+      <PageHero content={getPageHeroContent("/medewerkers")} />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row">
