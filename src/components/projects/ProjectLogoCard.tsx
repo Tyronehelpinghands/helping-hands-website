@@ -13,32 +13,48 @@ const categoryStyles: Record<ProjectLogo["category"], string> = {
   Locaties: "bg-[#38bdf8]/10 text-[#0284c7]",
 };
 
+type ProjectLogoCardVariant = "default" | "compact" | "carousel";
+
 type ProjectLogoCardProps = {
   logo: ProjectLogo;
   interactive?: boolean;
   compact?: boolean;
+  variant?: ProjectLogoCardVariant;
 };
 
 export default function ProjectLogoCard({
   logo,
   interactive = true,
   compact = false,
+  variant,
 }: ProjectLogoCardProps) {
+  const resolvedVariant: ProjectLogoCardVariant =
+    variant ?? (compact ? "compact" : "default");
+  const isCarousel = resolvedVariant === "carousel";
+  const isCompact = resolvedVariant === "compact";
+  const showFooter = resolvedVariant === "default";
+
   const [imageError, setImageError] = useState(false);
   const initials = getProjectLogoInitials(logo.name);
+  const alt = logo.altText ?? `${logo.name} logo`;
+  const isOpdrachtgever = logo.category === "Opdrachtgevers";
 
   return (
     <article
       className={cn(
-        "group flex flex-col rounded-2xl border border-slate-200/80 bg-white shadow-sm transition",
-        interactive && "hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:shadow-lg",
-        compact ? "p-3" : "p-4 sm:p-5",
+        "group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300",
+        interactive &&
+          "hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:shadow-lg hover:shadow-[#173A8A]/5",
+        isCarousel && "p-6 sm:p-8",
+        isCompact && "p-3",
+        resolvedVariant === "default" && "p-4 sm:p-5",
       )}
     >
       <span
         className={cn(
           "inline-flex w-fit rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide",
           categoryStyles[logo.category],
+          isCarousel && "text-[0.6rem]",
         )}
       >
         {logo.category}
@@ -46,46 +62,62 @@ export default function ProjectLogoCard({
 
       <div
         className={cn(
-          "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-[#F5F7FA]/50",
-          compact ? "h-16 px-3" : "h-24 px-4 sm:h-28",
+          "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100",
+          isOpdrachtgever ? "bg-white" : "bg-[#F5F7FA]/50",
+          isCarousel && "h-28 min-h-28 p-4 sm:h-32 sm:p-5 lg:h-36",
+          isCompact && "h-16 min-h-16 p-3",
+          resolvedVariant === "default" && "h-20 min-h-20 p-3 sm:h-24",
         )}
       >
         {!imageError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={logo.logoPath}
-            alt={logo.name}
+            alt={alt}
             className={cn(
-              "max-h-14 w-auto max-w-full object-contain transition duration-300",
-              interactive && "grayscale group-hover:grayscale-0",
-              compact && "max-h-10",
+              "w-auto max-w-full object-contain transition duration-300",
+              isCarousel && "max-h-14 sm:max-h-16 lg:max-h-20",
+              isCompact && "max-h-12",
+              resolvedVariant === "default" && "max-h-16",
+              interactive &&
+                !isOpdrachtgever &&
+                "grayscale group-hover:grayscale-0 group-hover:scale-105",
+              interactive && isOpdrachtgever && "opacity-95 group-hover:opacity-100 group-hover:scale-105",
             )}
             onError={() => setImageError(true)}
           />
         ) : (
           <div
-            className="flex h-full w-full flex-col items-center justify-center gap-1 px-2"
+            className="flex h-full w-full flex-col items-center justify-center gap-2 px-3 text-center"
             role="img"
-            aria-label={`${logo.name} logo placeholder`}
+            aria-label={alt}
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173A8A]/10 text-xs font-black text-[#173A8A]">
+            <span
+              className={cn(
+                "flex items-center justify-center rounded-full bg-[#173A8A]/10 font-black text-[#173A8A]",
+                isCarousel ? "h-12 w-12 text-sm" : "h-10 w-10 text-xs",
+              )}
+            >
               {initials}
             </span>
-            {!compact ? (
-              <span className="text-center text-[0.65rem] font-semibold text-[#101828]/55">
-                Logo volgt
-              </span>
-            ) : null}
+            <span
+              className={cn(
+                "font-bold leading-tight text-[#0B1F4D]",
+                isCarousel ? "text-sm" : "text-xs",
+              )}
+            >
+              {logo.name}
+            </span>
           </div>
         )}
       </div>
 
-      {!compact ? (
+      {showFooter ? (
         <>
           <p className="mt-3 text-center text-sm font-bold text-[#0B1F4D]">{logo.name}</p>
           {logo.tags && logo.tags.length > 0 ? (
             <div className="mt-2 flex flex-wrap justify-center gap-1">
-              {logo.tags.slice(0, 2).map((tag) => (
+              {logo.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className="rounded-md bg-slate-100 px-2 py-0.5 text-[0.65rem] font-medium text-slate-600"

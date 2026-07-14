@@ -121,6 +121,14 @@ svg {
   }
 }
 
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+body.mobile-menu-open [data-mobile-sticky-cta] {
+  display: none;
+}
+
 .stock-image-placeholder {
   background:
     radial-gradient(ellipse 80% 80% at 20% 20%, rgba(242, 140, 40, 0.35), transparent 55%),
@@ -156,7 +164,7 @@ svg {
 }
 
 .logo-carousel-track {
-  animation: logo-scroll 80s linear infinite;
+  animation: logo-scroll 90s linear infinite;
 }
 
 .logo-carousel-track:hover {

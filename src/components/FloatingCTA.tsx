@@ -18,7 +18,10 @@ export default function FloatingCTA() {
         </Link>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/20 bg-[#0B1F4D]/95 p-3 shadow-2xl backdrop-blur-md lg:hidden">
+      <div
+        data-mobile-sticky-cta
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/20 bg-[#0B1F4D]/95 p-3 shadow-2xl backdrop-blur-md lg:hidden"
+      >
         <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
           <Link
             href="/contact"

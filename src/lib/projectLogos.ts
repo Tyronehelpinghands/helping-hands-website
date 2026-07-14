@@ -15,6 +15,7 @@ export type ProjectLogo = {
   name: string;
   category: ProjectLogoCategory;
   logoPath: string;
+  altText?: string;
   description?: string;
   tags?: string[];
   featured?: boolean;
@@ -36,7 +37,8 @@ export const projectLogos: ProjectLogo[] = [
     name: "Crewstars",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/crewstars.png",
-    tags: ["Productie", "Crew"],
+    altText: "Crewstars logo",
+    tags: ["Eventcrew", "Planning", "Productie"],
     featured: true,
   },
   {
@@ -44,14 +46,17 @@ export const projectLogos: ProjectLogo[] = [
     name: "TAP Crew",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/tap-crew.png",
-    tags: ["Crew", "Events"],
+    altText: "TAP Crew logo",
+    tags: ["Horeca", "Events", "Crew"],
+    featured: true,
   },
   {
     id: "backstage-masters",
     name: "Backstage Masters",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/backstage-masters.png",
-    tags: ["Productie", "Backstage"],
+    altText: "Backstage Masters logo",
+    tags: ["Backstage", "Productie", "Event support"],
     featured: true,
   },
   {
@@ -59,14 +64,17 @@ export const projectLogos: ProjectLogo[] = [
     name: "Factor F",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/factor-f.png",
-    tags: ["Productie", "Crew"],
+    altText: "Factor F logo",
+    tags: ["Festivals", "Productie", "Crewervaring"],
+    featured: true,
   },
   {
     id: "mojo",
     name: "MOJO",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/mojo.png",
-    tags: ["Events", "Productie"],
+    altText: "MOJO logo",
+    tags: ["Concerten", "Live events", "Productie"],
     featured: true,
   },
   {
@@ -118,7 +126,8 @@ export const projectLogos: ProjectLogo[] = [
     name: "Q-dance",
     category: "Opdrachtgevers",
     logoPath: "/images/logos/opdrachtgevers/q-dance.png",
-    tags: ["Events", "Festivals"],
+    altText: "Q-dance logo",
+    tags: ["Festivals", "Dance events", "Productie"],
     featured: true,
   },
 
@@ -343,7 +352,48 @@ export const projectLogos: ProjectLogo[] = [
 ];
 
 export function getFeaturedProjectLogos(): ProjectLogo[] {
-  return projectLogos.filter((logo) => logo.featured);
+  const featured = projectLogos.filter((logo) => logo.featured);
+  const priorityIds = new Set([
+    "crewstars",
+    "tap-crew",
+    "backstage-masters",
+    "factor-f",
+    "mojo",
+    "q-dance",
+  ]);
+  const priority = featured.filter((logo) => priorityIds.has(logo.id));
+  const rest = featured.filter((logo) => !priorityIds.has(logo.id));
+  return [...priority, ...rest];
+}
+
+const HOMEPAGE_CAROUSEL_EXCLUDED_IDS = new Set([
+  "id-t",
+  "ironman-westfriesland",
+  "the-good-guyz",
+  "your-productions",
+  "loc7000",
+]);
+
+const HOMEPAGE_CAROUSEL_PRIORITY_IDS = [
+  "crewstars",
+  "tap-crew",
+  "backstage-masters",
+  "factor-f",
+  "mojo",
+  "q-dance",
+] as const;
+
+/** Featured logo's voor de homepage-carousel (gefilterd, zonder uitgesloten merken). */
+export function getHomepageFeaturedLogos(): ProjectLogo[] {
+  const featured = projectLogos.filter(
+    (logo) => logo.featured && !HOMEPAGE_CAROUSEL_EXCLUDED_IDS.has(logo.id),
+  );
+  const prioritySet = new Set<string>(HOMEPAGE_CAROUSEL_PRIORITY_IDS);
+  const priority = HOMEPAGE_CAROUSEL_PRIORITY_IDS.map((id) =>
+    featured.find((logo) => logo.id === id),
+  ).filter((logo): logo is ProjectLogo => logo != null);
+  const rest = featured.filter((logo) => !prioritySet.has(logo.id));
+  return [...priority, ...rest];
 }
 
 export function filterProjectLogos(filter: ProjectLogoFilter): ProjectLogo[] {
