@@ -203,7 +203,13 @@ function HoursActions({
 
   return (
     <div className={stacked ? "flex flex-col gap-2" : "flex justify-end gap-1"}>
-      <Button type="button" variant="ghost" size="sm" onClick={onView}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className={stacked ? "min-h-11 w-full justify-center" : ""}
+        onClick={onView}
+      >
         <Eye className="mr-1 h-4 w-4" />
         Bekijken
       </Button>
@@ -212,7 +218,11 @@ function HoursActions({
           type="button"
           variant={stacked ? "outline" : "ghost"}
           size="sm"
-          className={stacked ? "border-[#F28C28]/30 text-[#c46a12] hover:bg-[#F28C28]/10" : ""}
+          className={
+            stacked
+              ? "min-h-11 w-full justify-center border-[#F28C28]/30 text-[#c46a12] hover:bg-[#F28C28]/10"
+              : ""
+          }
           onClick={onCorrection}
         >
           <PencilLine className="mr-1 h-4 w-4" />

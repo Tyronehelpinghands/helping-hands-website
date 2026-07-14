@@ -49,6 +49,7 @@ import {
   leadStatusStyles,
 } from "@/lib/sales-utils";
 import { cn } from "@/lib/utils";
+import ResponsiveTable from "@/components/dashboard/shared/ResponsiveTable";
 
 export type LeadAction =
   | "view"
@@ -154,8 +155,8 @@ export default function SalesLeadsTable({ leads, onAction }: SalesLeadsTableProp
           </Select>
         </div>
 
-        <div className="-mx-4 overflow-x-auto sm:-mx-6">
-          <Table className="min-w-[880px]">
+        <ResponsiveTable tableMinWidthClass="min-w-[880px]">
+          <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-6">Bedrijf</TableHead>
@@ -252,7 +253,7 @@ export default function SalesLeadsTable({ leads, onAction }: SalesLeadsTableProp
               )}
             </TableBody>
           </Table>
-        </div>
+        </ResponsiveTable>
       </CardContent>
     </Card>
   );

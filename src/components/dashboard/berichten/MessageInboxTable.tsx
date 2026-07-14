@@ -125,7 +125,7 @@ export default function MessageInboxTable({
         )}
       </div>
 
-      <div className="-mx-4 hidden overflow-x-auto sm:-mx-6 lg:block">
+      <div className="hidden w-full max-w-full overflow-x-auto lg:block">
         <Table className="min-w-[1400px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">

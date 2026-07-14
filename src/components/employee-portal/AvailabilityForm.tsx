@@ -136,7 +136,7 @@ export default function AvailabilityForm({ onSave }: AvailabilityFormProps) {
             </p>
           ) : null}
 
-          <Button type="submit" className="w-full bg-[#173A8A] hover:bg-[#0B1F4D] sm:w-auto">
+          <Button type="submit" className="min-h-11 w-full bg-[#173A8A] hover:bg-[#0B1F4D] sm:w-auto">
             Opslaan
           </Button>
         </form>

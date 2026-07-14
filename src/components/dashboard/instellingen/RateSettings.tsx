@@ -151,7 +151,7 @@ export default function RateSettingsPanel({ settings, onChange, onSave }: Props)
           </div>
         </CardHeader>
         <CardContent>
-          <div className="-mx-4 overflow-x-auto sm:-mx-6">
+          <div className="w-full max-w-full overflow-x-auto">
             <Table className="min-w-[720px]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">

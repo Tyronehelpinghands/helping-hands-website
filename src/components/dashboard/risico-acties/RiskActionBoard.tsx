@@ -33,7 +33,7 @@ export default function RiskActionBoard({
         })}
       </div>
 
-      <div className="-mx-4 hidden overflow-x-auto pb-2 lg:block">
+      <div className="hidden w-full max-w-full overflow-x-auto pb-2 lg:block">
         <div className="flex min-w-[1200px] gap-3 px-4">
           {RISK_STATUSES.map((status) => {
             const column = actions.filter((a) => a.status === status);

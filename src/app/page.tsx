@@ -38,7 +38,7 @@ export default function Home() {
               ))}
             </div>
 
-            <h1 className="max-w-2xl text-[2.5rem] font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               Snel inzetbare crew voor events, horeca en productie.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/80 sm:text-xl sm:leading-9">
@@ -65,13 +65,13 @@ export default function Home() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-full bg-[#F28C28] px-9 py-4 text-base font-bold text-white shadow-xl shadow-black/30 transition hover:bg-[#de7c1f]"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#F28C28] px-9 py-4 text-base font-bold text-white shadow-xl shadow-black/30 transition hover:bg-[#de7c1f] sm:w-auto"
               >
                 Personeel aanvragen
               </Link>
               <Link
                 href="/vacatures"
-                className="inline-flex items-center justify-center rounded-full border-2 border-white/35 bg-white/5 px-9 py-4 text-base font-bold backdrop-blur-sm transition hover:bg-white hover:text-[#0B1F4D]"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-full border-2 border-white/35 bg-white/5 px-9 py-4 text-base font-bold backdrop-blur-sm transition hover:bg-white hover:text-[#0B1F4D] sm:w-auto"
               >
                 Aanmelden als crewlid
               </Link>

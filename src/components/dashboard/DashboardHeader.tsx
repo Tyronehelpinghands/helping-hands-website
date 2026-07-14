@@ -104,7 +104,7 @@ export default function DashboardHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200/80 bg-[#F5F7FA] px-3 py-1.5">
+          <div className="hidden items-center gap-2 rounded-lg border border-slate-200/80 bg-[#F5F7FA] px-3 py-1.5 sm:flex">
             <Calendar className="h-4 w-4 text-[#173A8A]" aria-hidden="true" />
             <Select defaultValue="month">
               <SelectTrigger className="h-7 min-w-[120px] border-0 bg-transparent shadow-none focus-visible:ring-0">
@@ -125,7 +125,7 @@ export default function DashboardHeader({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="relative border-slate-200/80 bg-white"
+                  className="relative h-11 w-11 border-slate-200/80 bg-white"
                   aria-label="Meldingen"
                 />
               }

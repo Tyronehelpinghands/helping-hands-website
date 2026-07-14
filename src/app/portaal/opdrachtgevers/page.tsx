@@ -74,38 +74,41 @@ export default function ClientPortalOverviewPage() {
         <CardHeader>
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Snelle acties</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/portaal/opdrachtgevers/aanvragen"
-            className={cn(buttonVariants(), "bg-[#173A8A] text-white hover:bg-[#0B1F4D]")}
+            className={cn(
+              buttonVariants(),
+              "min-h-11 w-full justify-center bg-[#173A8A] text-white hover:bg-[#0B1F4D] sm:w-auto",
+            )}
           >
             <ClipboardList className="mr-2 h-4 w-4" />
             Nieuwe aanvraag doen
           </Link>
           <Link
             href="/portaal/opdrachtgevers/briefings"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <MessageSquare className="mr-2 h-4 w-4" />
             Briefing aanleveren
           </Link>
           <Link
             href="/portaal/opdrachtgevers/planning"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <CalendarDays className="mr-2 h-4 w-4" />
             Planning bekijken
           </Link>
           <Link
             href="/portaal/opdrachtgevers/facturen"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <Receipt className="mr-2 h-4 w-4" />
             Facturen bekijken
           </Link>
           <Link
             href="/portaal/opdrachtgevers/contact"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             Contact opnemen
           </Link>

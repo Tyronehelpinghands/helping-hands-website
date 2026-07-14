@@ -53,8 +53,9 @@ export default function ClientInvoiceTable({
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Facturen</CardTitle>
           <CardDescription>Overzicht van facturen en betaalstatus.</CardDescription>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
+        <CardContent className="space-y-4">
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Factuurnummer</TableHead>
@@ -107,6 +108,52 @@ export default function ClientInvoiceTable({
               })}
             </TableBody>
           </Table>
+          </div>
+
+          <div className="space-y-3 md:hidden">
+            {invoices.map((invoice) => {
+              const amounts = formatInvoiceAmounts(invoice);
+              return (
+                <div
+                  key={invoice.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50/50 p-4"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-bold text-[#0B1F4D]">{invoice.invoiceNumber}</p>
+                      <p className="truncate text-sm text-slate-600">{invoice.projectName}</p>
+                    </div>
+                    <ClientStatusBadge status={invoice.status} variant="invoice" />
+                  </div>
+                  <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <dt className="text-slate-500">Factuurdatum</dt>
+                      <dd className="font-medium">{formatClientDate(invoice.invoiceDate)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-slate-500">Vervaldatum</dt>
+                      <dd className="font-medium">{formatClientDate(invoice.dueDate)}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="text-slate-500">Totaal incl. btw</dt>
+                      <dd className="text-lg font-bold text-[#173A8A]">{amounts.inclVat}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-11 w-full"
+                      onClick={() => openInvoice(invoice)}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Bekijken
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 

@@ -38,6 +38,7 @@ import {
   leadStatusStyles,
 } from "@/lib/leads-utils";
 import { cn } from "@/lib/utils";
+import ResponsiveTable from "@/components/dashboard/shared/ResponsiveTable";
 
 export type LeadTableAction =
   | "view"
@@ -79,8 +80,8 @@ export default function LeadsTable({
   }
 
   return (
-    <div className="-mx-4 overflow-x-auto sm:-mx-6">
-      <Table className="min-w-[1100px]">
+    <ResponsiveTable tableMinWidthClass="min-w-[1100px]">
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-10 pl-6">
@@ -229,6 +230,6 @@ export default function LeadsTable({
           )}
         </TableBody>
       </Table>
-    </div>
+    </ResponsiveTable>
   );
 }

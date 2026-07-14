@@ -36,6 +36,7 @@ import {
   shiftbaseSyncStyles,
 } from "@/lib/planning-utils";
 import { cn } from "@/lib/utils";
+import ResponsiveTable from "@/components/dashboard/shared/ResponsiveTable";
 
 export type PlanningTableAction =
   | "view"
@@ -53,8 +54,8 @@ type PlanningTableProps = {
 
 export default function PlanningTable({ shifts, onAction }: PlanningTableProps) {
   return (
-    <div className="-mx-4 overflow-x-auto sm:-mx-6">
-      <Table className="min-w-[1100px]">
+    <ResponsiveTable tableMinWidthClass="min-w-[1100px]">
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="pl-6">Datum</TableHead>
@@ -165,6 +166,6 @@ export default function PlanningTable({ shifts, onAction }: PlanningTableProps) 
           )}
         </TableBody>
       </Table>
-    </div>
+    </ResponsiveTable>
   );
 }

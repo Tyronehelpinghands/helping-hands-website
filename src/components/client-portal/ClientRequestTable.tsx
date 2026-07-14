@@ -58,7 +58,8 @@ export default function ClientRequestTable({
             <CardDescription>Status en details van ingediende aanvragen.</CardDescription>
           ) : null}
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="space-y-4">
+          <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -108,6 +109,45 @@ export default function ClientRequestTable({
               )}
             </TableBody>
           </Table>
+          </div>
+
+          <div className="space-y-3 md:hidden">
+            {displayRequests.length === 0 ? (
+              <p className="text-center text-sm text-slate-500">Geen aanvragen gevonden.</p>
+            ) : (
+              displayRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50/50 p-4"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="break-words font-bold text-[#0B1F4D]">
+                        {request.title}
+                        {request.urgent ? (
+                          <span className="ml-2 text-xs font-bold text-red-600">Spoed</span>
+                        ) : null}
+                      </p>
+                      <p className="text-sm text-slate-600">{formatClientDate(request.eventDate)}</p>
+                    </div>
+                    <ClientRequestStatusBadge status={request.status} />
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {request.locationName} · {request.numberOfPeople} personen
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-3 min-h-11 w-full"
+                    onClick={() => openRequest(request)}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Bekijken
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 

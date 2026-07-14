@@ -10,7 +10,7 @@ type EmployeePortalShellProps = {
 
 export default function EmployeePortalShell({ children }: EmployeePortalShellProps) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex min-h-screen flex-col overflow-x-hidden lg:flex-row">
       <EmployeePortalSidebar />
       <div className="flex min-w-0 flex-1 flex-col bg-[#F5F7FA]">
         <EmployeePortalHeader />

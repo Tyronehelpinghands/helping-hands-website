@@ -14,7 +14,7 @@ export default function WeekPlanningBoard({ shifts, onAction }: WeekPlanningBoar
   const grouped = groupShiftsByWeekDay(shifts);
 
   return (
-    <div className="-mx-2 overflow-x-auto pb-2">
+    <div className="w-full max-w-full overflow-x-auto pb-2">
       <div className="flex min-w-[900px] gap-3 px-2">
         {WEEK_DAYS.map((day) => (
           <div key={day} className="min-w-[130px] flex-1">

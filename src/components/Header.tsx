@@ -425,6 +425,13 @@ export default function Header() {
             >
               Aanmelden als crewlid
             </Link>
+            <Link
+              href="/login"
+              onClick={closeAll}
+              className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A]/30 bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+            >
+              Inloggen
+            </Link>
             <a
               href={`mailto:${contactEmail}`}
               className="block text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:text-[#173A8A] hover:underline"

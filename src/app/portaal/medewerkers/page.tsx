@@ -53,7 +53,7 @@ export default function EmployeePortalOverviewPage() {
                   <Link
                     key={`${action.type}-${action.label}`}
                     href={action.href}
-                    className="block rounded-lg border border-slate-200 px-3 py-2.5 text-sm transition hover:border-[#173A8A]/30 hover:bg-slate-50"
+                    className="block min-h-11 rounded-lg border border-slate-200 px-3 py-3 text-sm transition hover:border-[#173A8A]/30 hover:bg-slate-50"
                   >
                     <p className="font-semibold text-[#0B1F4D]">{action.label}</p>
                     <p className="text-xs text-slate-500">{action.type}</p>
@@ -75,31 +75,34 @@ export default function EmployeePortalOverviewPage() {
         <CardHeader>
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Snelle acties</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/portaal/medewerkers/planning"
-            className={cn(buttonVariants(), "bg-[#173A8A] text-white hover:bg-[#0B1F4D]")}
+            className={cn(
+              buttonVariants(),
+              "min-h-11 w-full justify-center bg-[#173A8A] text-white hover:bg-[#0B1F4D] sm:w-auto",
+            )}
           >
             <CalendarDays className="mr-2 h-4 w-4" />
             Mijn planning bekijken
           </Link>
           <Link
             href="/portaal/medewerkers/beschikbaarheid"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <CalendarCheck className="mr-2 h-4 w-4" />
             Beschikbaarheid doorgeven
           </Link>
           <Link
             href="/portaal/medewerkers/uren"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <Clock className="mr-2 h-4 w-4" />
             Uren controleren
           </Link>
           <Link
             href="/portaal/medewerkers/documenten"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
           >
             <FileText className="mr-2 h-4 w-4" />
             Documenten bekijken

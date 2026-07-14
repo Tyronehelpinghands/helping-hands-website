@@ -41,6 +41,7 @@ import {
   projectTypeStyles,
 } from "@/lib/projects-utils";
 import { cn } from "@/lib/utils";
+import ResponsiveTable from "@/components/dashboard/shared/ResponsiveTable";
 
 export type ProjectTableAction =
   | "view"
@@ -61,8 +62,8 @@ type ProjectsTableProps = {
 
 export default function ProjectsTable({ projects, onAction }: ProjectsTableProps) {
   return (
-    <div className="-mx-4 overflow-x-auto sm:-mx-6">
-      <Table className="min-w-[1200px]">
+    <ResponsiveTable tableMinWidthClass="min-w-[1200px]">
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="pl-6">Project</TableHead>
@@ -212,6 +213,6 @@ export default function ProjectsTable({ projects, onAction }: ProjectsTableProps
           )}
         </TableBody>
       </Table>
-    </div>
+    </ResponsiveTable>
   );
 }

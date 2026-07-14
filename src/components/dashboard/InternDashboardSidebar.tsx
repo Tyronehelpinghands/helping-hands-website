@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Home, Menu } from "lucide-react";
 import { BrandLogoImage } from "@/components/BrandLogo";
 import LogoutButton from "@/components/LogoutButton";
@@ -48,7 +49,7 @@ function SidebarNav({
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition",
+              "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition",
               active
                 ? "bg-[#173A8A] text-white shadow-sm shadow-[#38bdf8]/10"
                 : "text-white/70 hover:bg-white/10 hover:text-white",
@@ -129,6 +130,11 @@ function SidebarContent({
 
 export default function InternDashboardSidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function closeMenu() {
+    setMenuOpen(false);
+  }
 
   return (
     <>
@@ -141,13 +147,13 @@ export default function InternDashboardSidebar({ profile }: { profile: Profile }
           <BrandLogoImage variant="markWhite" imageClassName="h-8 w-8" />
           <span className="text-sm font-bold text-white">Intern portaal</span>
         </div>
-        <Sheet>
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger
             render={
               <Button
                 variant="outline"
                 size="icon"
-                className="border-white/20 bg-transparent text-white hover:bg-white/10"
+                className="h-11 w-11 border-white/20 bg-transparent text-white hover:bg-white/10"
               />
             }
           >
@@ -156,12 +162,12 @@ export default function InternDashboardSidebar({ profile }: { profile: Profile }
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-72 border-[#173A8A]/40 bg-[#0B1F4D] p-0 text-white"
+            className="w-full max-w-full border-[#173A8A]/40 bg-[#0B1F4D] p-0 text-white sm:max-w-xs"
           >
             <SheetHeader className="sr-only">
               <SheetTitle>Dashboard navigatie</SheetTitle>
             </SheetHeader>
-            <SidebarContent profile={profile} pathname={pathname} />
+            <SidebarContent profile={profile} pathname={pathname} onNavigate={closeMenu} />
           </SheetContent>
         </Sheet>
       </div>

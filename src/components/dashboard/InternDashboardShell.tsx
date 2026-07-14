@@ -16,7 +16,7 @@ export default function InternDashboardShell({
   subtitle,
 }: InternDashboardShellProps) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex min-h-screen flex-col overflow-x-hidden lg:flex-row">
       <InternDashboardSidebar profile={profile} />
       <div className="flex min-w-0 flex-1 flex-col bg-[#F5F7FA]">
         <DashboardHeader profile={profile} title={title} subtitle={subtitle} />

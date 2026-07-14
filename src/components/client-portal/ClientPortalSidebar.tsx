@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Home, LogOut, Menu } from "lucide-react";
 import { BrandLogoImage } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ function SidebarNav({ pathname, onNavigate }: { pathname: string; onNavigate?: (
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition",
+              "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition",
               active
                 ? "bg-[#173A8A] text-white shadow-sm"
                 : "text-white/70 hover:bg-white/10 hover:text-white",
@@ -96,6 +97,11 @@ function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?:
 
 export default function ClientPortalSidebar() {
   const pathname = usePathname() ?? "";
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function closeMenu() {
+    setMenuOpen(false);
+  }
 
   return (
     <>
@@ -112,25 +118,25 @@ export default function ClientPortalSidebar() {
             <p className="text-sm font-bold text-white">Helping Hands</p>
           </div>
         </Link>
-        <Sheet>
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger
             render={
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="border-white/20 bg-transparent text-white hover:bg-white/10"
+                className="h-11 w-11 border-white/20 bg-transparent text-white hover:bg-white/10"
               />
             }
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Menu openen</span>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[min(100%,20rem)] border-0 bg-[#0B1F4D] p-0 text-white">
+          <SheetContent side="left" className="w-full max-w-full border-0 bg-[#0B1F4D] p-0 text-white sm:max-w-xs">
             <SheetHeader className="sr-only">
               <SheetTitle>Opdrachtgeversportaal menu</SheetTitle>
             </SheetHeader>
-            <SidebarInner pathname={pathname} />
+            <SidebarInner pathname={pathname} onNavigate={closeMenu} />
           </SheetContent>
         </Sheet>
       </div>

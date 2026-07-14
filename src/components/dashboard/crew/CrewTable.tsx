@@ -102,7 +102,7 @@ export default function CrewTable({ members, onAction }: CrewTableProps) {
         )}
       </div>
 
-      <div className="-mx-4 hidden overflow-x-auto sm:-mx-6 lg:block">
+      <div className="hidden w-full max-w-full overflow-x-auto lg:block">
         <Table className="min-w-[1100px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">

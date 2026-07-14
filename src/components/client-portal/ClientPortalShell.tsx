@@ -6,7 +6,7 @@ import ClientPortalSidebar from "@/components/client-portal/ClientPortalSidebar"
 
 export default function ClientPortalShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex min-h-screen flex-col overflow-x-hidden lg:flex-row">
       <ClientPortalSidebar />
       <div className="flex min-w-0 flex-1 flex-col bg-[#F5F7FA]">
         <ClientPortalHeader />
