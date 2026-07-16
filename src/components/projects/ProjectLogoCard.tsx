@@ -22,6 +22,13 @@ type ProjectLogoCardProps = {
   variant?: ProjectLogoCardVariant;
 };
 
+function logoAreaBackground(logo: ProjectLogo): string {
+  if (logo.logoTone === "dark") return "bg-[#0B1F4D]";
+  if (logo.logoTone === "brand") return "bg-transparent";
+  if (logo.category === "Opdrachtgevers") return "bg-white";
+  return "bg-[#F5F7FA]/50";
+}
+
 export default function ProjectLogoCard({
   logo,
   interactive = true,
@@ -38,6 +45,7 @@ export default function ProjectLogoCard({
   const initials = getProjectLogoInitials(logo.name);
   const alt = logo.altText ?? `${logo.name} logo`;
   const isOpdrachtgever = logo.category === "Opdrachtgevers";
+  const tone = logo.logoTone ?? "light";
 
   return (
     <article
@@ -63,10 +71,11 @@ export default function ProjectLogoCard({
       <div
         className={cn(
           "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100",
-          isOpdrachtgever ? "bg-white" : "bg-[#F5F7FA]/50",
+          logoAreaBackground(logo),
+          tone === "dark" && "border-transparent",
           isCarousel && "h-28 min-h-28 p-4 sm:h-32 sm:p-5 lg:h-36",
-          isCompact && "h-16 min-h-16 p-3",
-          resolvedVariant === "default" && "h-20 min-h-20 p-3 sm:h-24",
+          isCompact && "h-16 min-h-16 p-2.5",
+          resolvedVariant === "default" && "h-24 min-h-24 p-4 sm:h-28",
         )}
       >
         {!imageError ? (
@@ -76,13 +85,15 @@ export default function ProjectLogoCard({
             alt={alt}
             className={cn(
               "w-auto max-w-full object-contain transition duration-300",
-              isCarousel && "max-h-14 sm:max-h-16 lg:max-h-20",
+              isCarousel && "max-h-16 sm:max-h-[4.5rem] lg:max-h-20",
               isCompact && "max-h-12",
-              resolvedVariant === "default" && "max-h-16",
+              resolvedVariant === "default" && "max-h-[4.5rem] sm:max-h-20",
               interactive &&
                 !isOpdrachtgever &&
                 "grayscale group-hover:grayscale-0 group-hover:scale-105",
-              interactive && isOpdrachtgever && "opacity-95 group-hover:opacity-100 group-hover:scale-105",
+              interactive &&
+                isOpdrachtgever &&
+                "opacity-95 group-hover:opacity-100 group-hover:scale-105",
             )}
             onError={() => setImageError(true)}
           />
@@ -94,7 +105,10 @@ export default function ProjectLogoCard({
           >
             <span
               className={cn(
-                "flex items-center justify-center rounded-full bg-[#173A8A]/10 font-black text-[#173A8A]",
+                "flex items-center justify-center rounded-full font-black",
+                tone === "dark"
+                  ? "bg-white/15 text-white"
+                  : "bg-[#173A8A]/10 text-[#173A8A]",
                 isCarousel ? "h-12 w-12 text-sm" : "h-10 w-10 text-xs",
               )}
             >
@@ -102,7 +116,8 @@ export default function ProjectLogoCard({
             </span>
             <span
               className={cn(
-                "font-bold leading-tight text-[#0B1F4D]",
+                "font-bold leading-tight",
+                tone === "dark" ? "text-white" : "text-[#0B1F4D]",
                 isCarousel ? "text-sm" : "text-xs",
               )}
             >

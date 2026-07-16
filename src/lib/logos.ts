@@ -59,7 +59,7 @@ export const logos: LogoItem[] = [
   {
     name: "Factor F",
     slug: "factor-f",
-    file: "factor-f.png",
+    file: "factor-f.svg",
     type: "opdrachtgever",
     category: "Opdrachtgever",
     folder: "opdrachtgevers",
@@ -67,7 +67,7 @@ export const logos: LogoItem[] = [
   {
     name: "MOJO",
     slug: "mojo",
-    file: "mojo.png",
+    file: "mojo.svg",
     type: "opdrachtgever",
     category: "Productiepartner",
     folder: "opdrachtgevers",

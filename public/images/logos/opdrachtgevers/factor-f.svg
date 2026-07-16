@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" role="img" aria-label="Factor F">
+  <rect width="360" height="140" rx="16" fill="#FFFFFF"/>
+  <text
+    x="180"
+    y="82"
+    text-anchor="middle"
+    font-family="Arial Black, Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="52"
+    font-weight="900"
+    fill="#0B1F4D"
+    letter-spacing="-1"
+  >Factor F</text>
+  <rect x="132" y="98" width="96" height="4" rx="2" fill="#F28C28"/>
+</svg>

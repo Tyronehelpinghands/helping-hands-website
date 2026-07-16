@@ -19,6 +19,8 @@ export type ProjectLogo = {
   description?: string;
   tags?: string[];
   featured?: boolean;
+  /** Achtergrond in de logo-card: light (wit), dark (donker), brand (eigen merkvlak). */
+  logoTone?: "light" | "dark" | "brand";
 };
 
 export type ProjectLogoFilter = "Alle" | ProjectLogoCategory;
@@ -40,6 +42,7 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Crewstars logo",
     tags: ["Eventcrew", "Planning", "Productie"],
     featured: true,
+    logoTone: "dark",
   },
   {
     id: "tap-crew",
@@ -49,6 +52,7 @@ export const projectLogos: ProjectLogo[] = [
     altText: "TAP Crew logo",
     tags: ["Horeca", "Events", "Crew"],
     featured: true,
+    logoTone: "light",
   },
   {
     id: "backstage-masters",
@@ -58,24 +62,27 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Backstage Masters logo",
     tags: ["Backstage", "Productie", "Event support"],
     featured: true,
+    logoTone: "dark",
   },
   {
     id: "factor-f",
     name: "Factor F",
     category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/factor-f.png",
+    logoPath: "/images/logos/opdrachtgevers/factor-f.svg",
     altText: "Factor F logo",
     tags: ["Festivals", "Productie", "Crewervaring"],
     featured: true,
+    logoTone: "light",
   },
   {
     id: "mojo",
     name: "MOJO",
     category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/mojo.png",
+    logoPath: "/images/logos/opdrachtgevers/mojo.svg",
     altText: "MOJO logo",
     tags: ["Concerten", "Live events", "Productie"],
     featured: true,
+    logoTone: "brand",
   },
   {
     id: "loc7000",

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" role="img" aria-label="MOJO">
+  <rect width="360" height="140" rx="16" fill="#0057B8"/>
+  <text
+    x="180"
+    y="88"
+    text-anchor="middle"
+    font-family="Arial Black, Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="58"
+    font-weight="900"
+    fill="#FFFFFF"
+    letter-spacing="4"
+  >MOJO</text>
+</svg>
