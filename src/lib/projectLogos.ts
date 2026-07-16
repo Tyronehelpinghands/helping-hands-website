@@ -21,6 +21,12 @@ export type ProjectLogo = {
   featured?: boolean;
   /** Achtergrond in de logo-card: light (wit), dark (donker), brand (eigen merkvlak). */
   logoTone?: "light" | "dark" | "brand";
+  /** CSS-wordmark i.p.v. afbeelding — altijd zichtbaar en groot. */
+  wordmark?: {
+    background: string;
+    color: string;
+    accent?: string;
+  };
 };
 
 export type ProjectLogoFilter = "Alle" | ProjectLogoCategory;
@@ -48,11 +54,15 @@ export const projectLogos: ProjectLogo[] = [
     id: "tap-crew",
     name: "TAP Crew",
     category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/tap-crew.png",
+    logoPath: "/images/logos/opdrachtgevers/tap-crew.svg",
     altText: "TAP Crew logo",
     tags: ["Horeca", "Events", "Crew"],
     featured: true,
-    logoTone: "light",
+    logoTone: "brand",
+    wordmark: {
+      background: "#5B2C8A",
+      color: "#FFFFFF",
+    },
   },
   {
     id: "backstage-masters",
@@ -72,7 +82,12 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Factor F logo",
     tags: ["Festivals", "Productie", "Crewervaring"],
     featured: true,
-    logoTone: "light",
+    logoTone: "brand",
+    wordmark: {
+      background: "#0B1F4D",
+      color: "#FFFFFF",
+      accent: "#F28C28",
+    },
   },
   {
     id: "mojo",
@@ -83,6 +98,10 @@ export const projectLogos: ProjectLogo[] = [
     tags: ["Concerten", "Live events", "Productie"],
     featured: true,
     logoTone: "brand",
+    wordmark: {
+      background: "#0057B8",
+      color: "#FFFFFF",
+    },
   },
   {
     id: "loc7000",

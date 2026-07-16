@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" role="img" aria-label="TAP Crew">
+  <rect width="400" height="160" rx="20" fill="#5B2C8A"/>
+  <text
+    x="200"
+    y="100"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="58"
+    font-weight="900"
+    fill="#FFFFFF"
+    letter-spacing="1"
+  >TAP Crew</text>
+</svg>

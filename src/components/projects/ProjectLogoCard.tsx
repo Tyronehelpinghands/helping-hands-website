@@ -23,10 +23,52 @@ type ProjectLogoCardProps = {
 };
 
 function logoAreaBackground(logo: ProjectLogo): string {
+  if (logo.wordmark) return "bg-transparent border-transparent p-0";
   if (logo.logoTone === "dark") return "bg-[#0B1F4D]";
   if (logo.logoTone === "brand") return "bg-transparent";
   if (logo.category === "Opdrachtgevers") return "bg-white";
   return "bg-[#F5F7FA]/50";
+}
+
+function LogoWordmark({
+  logo,
+  isCarousel,
+  isCompact,
+}: {
+  logo: ProjectLogo;
+  isCarousel: boolean;
+  isCompact: boolean;
+}) {
+  const mark = logo.wordmark!;
+  return (
+    <div
+      className={cn(
+        "flex h-full w-full flex-col items-center justify-center rounded-xl px-3 text-center",
+        isCompact ? "gap-0" : "gap-1.5",
+      )}
+      style={{ backgroundColor: mark.background, color: mark.color }}
+      role="img"
+      aria-label={logo.altText ?? `${logo.name} logo`}
+    >
+      <span
+        className={cn(
+          "font-black leading-none tracking-tight",
+          isCarousel && "text-2xl sm:text-3xl",
+          isCompact && "text-sm sm:text-base",
+          !isCarousel && !isCompact && "text-xl sm:text-2xl lg:text-3xl",
+        )}
+      >
+        {logo.name}
+      </span>
+      {mark.accent && !isCompact ? (
+        <span
+          className="mt-1 h-1 w-12 rounded-full sm:w-16"
+          style={{ backgroundColor: mark.accent }}
+          aria-hidden="true"
+        />
+      ) : null}
+    </div>
+  );
 }
 
 export default function ProjectLogoCard({
@@ -46,6 +88,7 @@ export default function ProjectLogoCard({
   const alt = logo.altText ?? `${logo.name} logo`;
   const isOpdrachtgever = logo.category === "Opdrachtgevers";
   const tone = logo.logoTone ?? "light";
+  const useWordmark = Boolean(logo.wordmark);
 
   return (
     <article
@@ -53,7 +96,7 @@ export default function ProjectLogoCard({
         "group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300",
         interactive &&
           "hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:shadow-lg hover:shadow-[#173A8A]/5",
-        isCarousel && "p-6 sm:p-8",
+        isCarousel && "p-5 sm:p-6",
         isCompact && "p-3",
         resolvedVariant === "default" && "p-4 sm:p-5",
       )}
@@ -72,22 +115,25 @@ export default function ProjectLogoCard({
         className={cn(
           "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100",
           logoAreaBackground(logo),
-          tone === "dark" && "border-transparent",
-          isCarousel && "h-28 min-h-28 p-4 sm:h-32 sm:p-5 lg:h-36",
-          isCompact && "h-16 min-h-16 p-2.5",
-          resolvedVariant === "default" && "h-24 min-h-24 p-4 sm:h-28",
+          tone === "dark" && !useWordmark && "border-transparent",
+          isCarousel && "h-32 min-h-32 p-3 sm:h-36 sm:p-4 lg:h-40",
+          isCompact && "h-20 min-h-20 p-2",
+          resolvedVariant === "default" && "h-28 min-h-28 p-3 sm:h-32 sm:p-4",
+          useWordmark && "border-0 p-0",
         )}
       >
-        {!imageError ? (
+        {useWordmark ? (
+          <LogoWordmark logo={logo} isCarousel={isCarousel} isCompact={isCompact} />
+        ) : !imageError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={logo.logoPath}
             alt={alt}
             className={cn(
               "w-auto max-w-full object-contain transition duration-300",
-              isCarousel && "max-h-16 sm:max-h-[4.5rem] lg:max-h-20",
-              isCompact && "max-h-12",
-              resolvedVariant === "default" && "max-h-[4.5rem] sm:max-h-20",
+              isCarousel && "max-h-20 sm:max-h-24 lg:max-h-28",
+              isCompact && "max-h-14",
+              resolvedVariant === "default" && "max-h-20 sm:max-h-24",
               interactive &&
                 !isOpdrachtgever &&
                 "grayscale group-hover:grayscale-0 group-hover:scale-105",
