@@ -19,8 +19,6 @@ export type ProjectLogo = {
   description?: string;
   tags?: string[];
   featured?: boolean;
-  /** Achtergrond in de logo-card: light (wit), dark (donker), brand (eigen merkvlak). */
-  logoTone?: "light" | "dark" | "brand";
 };
 
 export type MissingProjectLogo = {
@@ -54,7 +52,6 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Crewstars logo",
     tags: ["Eventcrew", "Planning", "Productie"],
     featured: true,
-    logoTone: "dark",
   },
   {
     id: "tap-crew",
@@ -64,7 +61,6 @@ export const projectLogos: ProjectLogo[] = [
     altText: "TAP Crew logo",
     tags: ["Horeca", "Events", "Crew"],
     featured: true,
-    logoTone: "dark",
   },
   {
     id: "backstage-masters",
@@ -74,7 +70,6 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Backstage Masters logo",
     tags: ["Backstage", "Productie", "Event support"],
     featured: true,
-    logoTone: "dark",
   },
   {
     id: "factor-f",
@@ -84,7 +79,6 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Factor F logo",
     tags: ["Festivals", "Productie", "Crewervaring"],
     featured: true,
-    logoTone: "dark",
   },
   {
     id: "jaarbeurs",
@@ -174,7 +168,6 @@ export const projectLogos: ProjectLogo[] = [
     altText: "Dominator Festival logo",
     tags: ["Festival", "Events"],
     featured: true,
-    logoTone: "dark",
   },
   {
     id: "tegendraads",
@@ -199,7 +192,6 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/projecten/kpn-festival.png",
     altText: "KPN Festival logo",
     tags: ["Festival", "Events"],
-    logoTone: "dark",
   },
   {
     id: "stadsfestival-amersfoort",
@@ -216,7 +208,6 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/projecten/lepeltje-lepeltje.png",
     altText: "Lepeltje Lepeltje logo",
     tags: ["Festival", "Horeca"],
-    logoTone: "dark",
   },
   {
     id: "festifoort",

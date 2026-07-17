@@ -19,13 +19,6 @@ type ProjectLogoCardProps = {
   variant?: ProjectLogoCardVariant;
 };
 
-function logoAreaBackground(logo: ProjectLogo): string {
-  if (logo.logoTone === "dark") return "bg-[#0B1F4D]";
-  if (logo.logoTone === "brand") return "bg-transparent";
-  if (logo.category === "Opdrachtgevers") return "bg-white";
-  return "bg-[#F5F7FA]/50";
-}
-
 export default function ProjectLogoCard({
   logo,
   interactive = true,
@@ -40,10 +33,7 @@ export default function ProjectLogoCard({
 
   const [imageError, setImageError] = useState(false);
   const alt = logo.altText ?? `${logo.name} logo`;
-  const isOpdrachtgever = logo.category === "Opdrachtgevers";
-  const tone = logo.logoTone ?? "light";
 
-  // Geen lege/kapotte kaarten op productie
   if (imageError) {
     return null;
   }
@@ -71,12 +61,10 @@ export default function ProjectLogoCard({
 
       <div
         className={cn(
-          "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100",
-          logoAreaBackground(logo),
-          tone === "dark" && "border-transparent",
-          isCarousel && "h-32 min-h-32 p-3 sm:h-36 sm:p-4 lg:h-40",
+          "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-3",
+          isCarousel && "h-32 min-h-32 sm:h-36 sm:p-4 lg:h-40",
           isCompact && "h-20 min-h-20 p-2",
-          resolvedVariant === "default" && "h-28 min-h-28 p-3 sm:h-32 sm:p-4",
+          resolvedVariant === "default" && "h-28 min-h-28 sm:h-32 sm:p-4",
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -89,11 +77,7 @@ export default function ProjectLogoCard({
             isCompact && "max-h-14",
             resolvedVariant === "default" && "max-h-20 sm:max-h-24",
             interactive &&
-              !isOpdrachtgever &&
-              "grayscale group-hover:grayscale-0 group-hover:scale-105",
-            interactive &&
-              isOpdrachtgever &&
-              "opacity-95 group-hover:opacity-100 group-hover:scale-105",
+              "grayscale-[0.35] group-hover:grayscale-0 group-hover:scale-105",
           )}
           onError={() => setImageError(true)}
         />
