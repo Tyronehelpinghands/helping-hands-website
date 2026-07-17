@@ -1,17 +1,14 @@
 # Opdrachtgever-logo's
 
-Plaats logo-bestanden in deze map (PNG/SVG/WebP/JPG). Als een bestand ontbreekt, toont de website een tekst-placeholder.
+Plaats logo-bestanden in deze map. Ontbrekende bestanden worden niet getoond op /projecten.
 
+Actieve bestanden:
 - crewstars.png
 - tap-crew.png
 - backstage-masters.png
 - factor-f.webp
-- mojo.svg
-- loc7000.png
 - jaarbeurs.jpg
-- id-t.png
-- backbone.png
-- your-productions.png
-- the-good-guyz.png
-- q-dance.png
-- tap-crew.png
+- backbone-international.png
+
+Verwacht (nog niet actief):
+- mojo.png
