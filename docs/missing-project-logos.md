@@ -25,6 +25,10 @@ Geen ontbrekende items.
 4. Your Productions
 5. LOC7000
 6. ID&T
+7. TAP Crew
+8. Backstage Masters
+9. Backbone International
+10. Stadsfestival Amersfoort
 
 ## Laatste logo-correcties (projecten-map)
 
@@ -40,3 +44,7 @@ Bestanden hernoemd naar consistente namen (geen spaties):
 | `donimator.png` | `dominator.png` |
 
 `dominator.webp` is vervangen door `dominator.png`.
+
+## Crewstars logo
+
+- `crewstars logo.png` hernoemd/gekopieerd naar `crewstars.png` (officieel paars icoon).

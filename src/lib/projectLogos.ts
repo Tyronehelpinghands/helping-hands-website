@@ -40,7 +40,8 @@ export const projectLogoFilters: { id: ProjectLogoFilter; label: string }[] = [
 
 /**
  * Catalogus van zichtbare logo's (lokaal bestand aanwezig).
- * Verwijderd: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T.
+ * Verwijderd: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T,
+ * TAP Crew, Backstage Masters, Backbone International, Stadsfestival Amersfoort.
  */
 export const projectLogos: ProjectLogo[] = [
   // Opdrachtgevers
@@ -51,24 +52,6 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/opdrachtgevers/crewstars.png",
     altText: "Crewstars logo",
     tags: ["Eventcrew", "Planning", "Productie"],
-    featured: true,
-  },
-  {
-    id: "tap-crew",
-    name: "TAP Crew",
-    category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/tap-crew.png",
-    altText: "TAP Crew logo",
-    tags: ["Horeca", "Events", "Crew"],
-    featured: true,
-  },
-  {
-    id: "backstage-masters",
-    name: "Backstage Masters",
-    category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/backstage-masters.png",
-    altText: "Backstage Masters logo",
-    tags: ["Backstage", "Productie", "Event support"],
     featured: true,
   },
   {
@@ -89,15 +72,6 @@ export const projectLogos: ProjectLogo[] = [
     tags: ["Beurs", "Locatie"],
     featured: true,
   },
-  {
-    id: "backbone",
-    name: "Backbone International",
-    category: "Opdrachtgevers",
-    logoPath: "/images/logos/opdrachtgevers/backbone-international.png",
-    altText: "Backbone International logo",
-    tags: ["Productie", "Internationaal"],
-  },
-
   // Projecten & festivals
   {
     id: "defqon",
@@ -191,14 +165,6 @@ export const projectLogos: ProjectLogo[] = [
     category: "Projecten & festivals",
     logoPath: "/images/logos/projecten/kpn-festival.png",
     altText: "KPN Festival logo",
-    tags: ["Festival", "Events"],
-  },
-  {
-    id: "stadsfestival-amersfoort",
-    name: "Stadsfestival Amersfoort",
-    category: "Projecten & festivals",
-    logoPath: "/images/logos/projecten/stadsfestival-amersfoort.png",
-    altText: "Stadsfestival Amersfoort logo",
     tags: ["Festival", "Events"],
   },
   {
@@ -351,9 +317,8 @@ export const missingProjectLogos: MissingProjectLogo[] = [
 
 const HOMEPAGE_CAROUSEL_PRIORITY_IDS = [
   "crewstars",
-  "tap-crew",
-  "backstage-masters",
   "factor-f",
+  "jaarbeurs",
 ] as const;
 
 export function getFeaturedProjectLogos(): ProjectLogo[] {
