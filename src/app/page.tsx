@@ -7,7 +7,7 @@ import QuickRequestForm from "@/components/QuickRequestForm";
 import PageHero from "@/components/sections/PageHero";
 import SectorCards from "@/components/SectorCards";
 import ServiceFilter from "@/components/ServiceFilter";
-import { deployments, services } from "@/lib/content";
+import { deployments } from "@/lib/content";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export default function Home() {
@@ -19,29 +19,38 @@ export default function Home() {
 
       <LogoCarousel />
 
-      <section className="bg-[#F5F7FA] py-24 sm:py-32">
+      <section className="bg-[#F5F7FA] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
               Diensten
             </p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-[#0B1F4D] sm:text-5xl">
-              Crew en ondersteuning voor elke fase van de productie.
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-[#0B1F4D] sm:text-4xl lg:text-5xl">
+              Crew en ondersteuning voor elke fase van je productie.
             </h2>
-            <p className="mt-5 text-lg leading-8 text-[#101828]/75">
-              Van hospitality en floor support tot stagehands en logistiek —
-              praktische mensen die begrijpen wat er op locatie nodig is.
+            <p className="mt-5 text-base leading-8 text-[#101828]/75 sm:text-lg">
+              Van horeca en hospitality tot stagebouw, productie, logistiek en keuken:
+              Helping Hands levert praktische mensen die direct begrijpen wat er op
+              locatie nodig is.
             </p>
-            <Link
-              href="/diensten"
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#173A8A] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
-            >
-              Bekijk alle diensten &rarr;
-            </Link>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                href="/diensten"
+                className="inline-flex items-center justify-center rounded-full bg-[#173A8A] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
+              >
+                Bekijk alle diensten
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Personeel aanvragen
+              </Link>
+            </div>
           </div>
 
-          <div className="mt-16">
-            <ServiceFilter services={services} />
+          <div className="mt-12 sm:mt-16">
+            <ServiceFilter />
           </div>
         </div>
       </section>

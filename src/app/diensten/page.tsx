@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/sections/PageHero";
+import ServiceFilter from "@/components/ServiceFilter";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
-import ServiceCard from "@/components/ServiceCard";
-import { services } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Diensten | Helping Hands Agency",
   description:
-    "Event crew, horeca support, restaurantpersoneel, stagehands, productie assistentie, logistiek en teamcaptains.",
+    "Event crew, horeca, restaurant, keuken, bar, stagebouw, productie, logistiek en hospitality voor events en locaties.",
 };
 
 export default function DienstenPage() {
@@ -18,10 +17,21 @@ export default function DienstenPage() {
       <PageHero content={getPageHeroContent("/diensten")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <ServiceCard key={service.title} service={service} showUsage showCta />
-          ))}
+        <div className="max-w-3xl">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+            Diensten
+          </p>
+          <h2 className="mt-3 text-3xl font-black text-[#0B1F4D] sm:text-4xl">
+            Crew voor elke fase van je productie
+          </h2>
+          <p className="mt-4 leading-8 text-[#101828]/75">
+            Van stagebouw en productie tot horeca, keuken, bar en hospitality:
+            filter op categorie en bekijk concrete inzetmogelijkheden.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <ServiceFilter showAllWhenAlle />
         </div>
       </section>
 

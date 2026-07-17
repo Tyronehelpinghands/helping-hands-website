@@ -1,11 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ChefHat,
   ClipboardList,
+  ConciergeBell,
   PackageOpen,
   ShieldCheck,
   Truck,
   Users,
   UtensilsCrossed,
+  Wine,
 } from "lucide-react";
 
 export type ServiceIconKey =
@@ -14,7 +17,11 @@ export type ServiceIconKey =
   | "stagehands"
   | "productie-assistentie"
   | "logistiek"
-  | "teamcaptains";
+  | "teamcaptains"
+  | "restaurant"
+  | "keuken"
+  | "bar"
+  | "hospitality";
 
 export const serviceIconMap: Record<ServiceIconKey, LucideIcon> = {
   "event-crew": Users,
@@ -23,6 +30,10 @@ export const serviceIconMap: Record<ServiceIconKey, LucideIcon> = {
   "productie-assistentie": ClipboardList,
   logistiek: Truck,
   teamcaptains: ShieldCheck,
+  restaurant: UtensilsCrossed,
+  keuken: ChefHat,
+  bar: Wine,
+  hospitality: ConciergeBell,
 };
 
 const titleToIconKey: Record<string, ServiceIconKey> = {
