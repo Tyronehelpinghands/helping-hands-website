@@ -145,14 +145,6 @@ export const logos: LogoItem[] = [
     folder: "projecten",
   },
   {
-    name: "BTS",
-    slug: "bts",
-    file: "bts.png",
-    type: "project",
-    category: "Concertproductie",
-    folder: "projecten",
-  },
-  {
     name: "SAIL Amsterdam",
     slug: "sail-amsterdam",
     file: "sail-amsterdam.png",
@@ -171,7 +163,7 @@ export const logos: LogoItem[] = [
   {
     name: "Dominator Festival",
     slug: "dominator-festival",
-    file: "dominator-festival.png",
+    file: "dominator.png",
     type: "project",
     category: "Festival / site ondersteuning",
     folder: "projecten",

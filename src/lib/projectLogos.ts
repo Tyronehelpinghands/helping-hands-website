@@ -150,14 +150,6 @@ export const projectLogos: ProjectLogo[] = [
     tags: ["Concert", "Productie"],
   },
   {
-    id: "bts",
-    name: "BTS",
-    category: "Projecten & festivals",
-    logoPath: "/images/logos/projecten/bts.png",
-    altText: "BTS logo",
-    tags: ["Concert", "Productie"],
-  },
-  {
     id: "sail-amsterdam",
     name: "SAIL Amsterdam",
     category: "Projecten & festivals",
@@ -178,10 +170,11 @@ export const projectLogos: ProjectLogo[] = [
     id: "dominator",
     name: "Dominator Festival",
     category: "Projecten & festivals",
-    logoPath: "/images/logos/projecten/dominator.webp",
+    logoPath: "/images/logos/projecten/dominator.png",
     altText: "Dominator Festival logo",
     tags: ["Festival", "Events"],
     featured: true,
+    logoTone: "dark",
   },
   {
     id: "tegendraads",
@@ -206,6 +199,7 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/projecten/kpn-festival.png",
     altText: "KPN Festival logo",
     tags: ["Festival", "Events"],
+    logoTone: "dark",
   },
   {
     id: "stadsfestival-amersfoort",
@@ -222,6 +216,7 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/projecten/lepeltje-lepeltje.png",
     altText: "Lepeltje Lepeltje logo",
     tags: ["Festival", "Horeca"],
+    logoTone: "dark",
   },
   {
     id: "festifoort",
@@ -352,7 +347,14 @@ export const missingProjectLogos: MissingProjectLogo[] = [
     name: "MOJO",
     category: "Opdrachtgevers",
     expectedPath: "public/images/logos/opdrachtgevers/mojo.png",
-    reason: "Alleen tijdelijke SVG-wordmark aanwezig; officieel logo ontbreekt.",
+    reason: "Officieel logo ontbreekt.",
+  },
+  {
+    id: "bts",
+    name: "BTS",
+    category: "Projecten & festivals",
+    expectedPath: "public/images/logos/projecten/bts.png",
+    reason: "Bestand verwijderd tijdens logo-correctie; nog geen vervangend logo.",
   },
 ];
 
