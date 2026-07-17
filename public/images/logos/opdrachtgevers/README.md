@@ -5,7 +5,7 @@ Plaats logo-bestanden in deze map (PNG/SVG/WebP/JPG). Als een bestand ontbreekt,
 - crewstars.png
 - tap-crew.png
 - backstage-masters.png
-- factor-f.svg
+- factor-f.webp
 - mojo.svg
 - loc7000.png
 - jaarbeurs.jpg
@@ -14,3 +14,4 @@ Plaats logo-bestanden in deze map (PNG/SVG/WebP/JPG). Als een bestand ontbreekt,
 - your-productions.png
 - the-good-guyz.png
 - q-dance.png
+- tap-crew.png

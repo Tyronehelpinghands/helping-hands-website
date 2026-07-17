@@ -43,7 +43,7 @@ export const logos: LogoItem[] = [
   {
     name: "TAP Crew",
     slug: "tap-crew",
-    file: "tap-crew.svg",
+    file: "tap-crew.png",
     type: "opdrachtgever",
     category: "Opdrachtgever",
     folder: "opdrachtgevers",
@@ -59,7 +59,7 @@ export const logos: LogoItem[] = [
   {
     name: "Factor F",
     slug: "factor-f",
-    file: "factor-f.svg",
+    file: "factor-f.webp",
     type: "opdrachtgever",
     category: "Opdrachtgever",
     folder: "opdrachtgevers",
