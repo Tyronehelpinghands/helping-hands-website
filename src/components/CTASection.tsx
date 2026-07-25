@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type CTASectionProps = {
@@ -8,6 +9,8 @@ type CTASectionProps = {
   buttonHref?: string;
   secondaryLabel?: string;
   secondaryHref?: string;
+  backgroundImage?: string;
+  backgroundAlt?: string;
 };
 
 function CtaButton({
@@ -48,12 +51,35 @@ export default function CTASection({
   buttonHref = "/contact",
   secondaryLabel,
   secondaryHref,
+  backgroundImage,
+  backgroundAlt = "",
 }: CTASectionProps) {
   return (
     <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-      <div className="hero-gradient relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] shadow-2xl shadow-[#0B1F4D]/30">
-        <div className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-[#F28C28]/25 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+      <div
+        className={
+          backgroundImage
+            ? "relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] shadow-2xl shadow-[#0B1F4D]/30"
+            : "hero-gradient relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] shadow-2xl shadow-[#0B1F4D]/30"
+        }
+      >
+        {backgroundImage ? (
+          <>
+            <Image
+              src={backgroundImage}
+              alt={backgroundAlt}
+              fill
+              sizes="(max-width: 1200px) 100vw, 1152px"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-[#0B1F4D]/75" />
+          </>
+        ) : (
+          <>
+            <div className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-[#F28C28]/25 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+          </>
+        )}
         <div className="relative px-6 py-14 text-white sm:px-10 sm:py-16 lg:px-14">
           {eyebrow && (
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">

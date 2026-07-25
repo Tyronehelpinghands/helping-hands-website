@@ -2,14 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import AudienceToggle from "@/components/AudienceToggle";
 import CTASection from "@/components/CTASection";
+import DeploymentCards from "@/components/DeploymentCards";
 import LogoCarousel from "@/components/LogoCarousel";
 import ProcessAccordion from "@/components/ProcessAccordion";
 import QuickRequestForm from "@/components/QuickRequestForm";
 import PageHero from "@/components/sections/PageHero";
 import SectorCards from "@/components/SectorCards";
 import ServiceFilter from "@/components/ServiceFilter";
-import { deployments } from "@/lib/content";
-import { homeCrewStrip, homeDeploymentPhotos } from "@/lib/crewPhotos";
+import { ctaBackgroundPhoto, homeCrewStrip } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export default function Home() {
@@ -102,38 +102,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {deployments.map((item) => {
-              const photo = homeDeploymentPhotos[item.label];
-              return (
-                <article
-                  key={item.label}
-                  className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B1F4D]/60 shadow-xl transition hover:border-[#F28C28]/40"
-                >
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0B1F4D]">
-                    {photo ? (
-                      <Image
-                        src={photo.src}
-                        alt={photo.alt}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover transition duration-500 hover:scale-105"
-                      />
-                    ) : (
-                      <div className="stock-image-placeholder absolute inset-0" />
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <span className="inline-block rounded-full bg-[#F28C28] px-3 py-1 text-xs font-bold">
-                      Crew
-                    </span>
-                    <h3 className="mt-3 text-xl font-black">{item.label}</h3>
-                    <p className="mt-2 text-sm text-white/70">{item.detail}</p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <DeploymentCards />
         </div>
       </section>
 
@@ -184,6 +153,8 @@ export default function Home() {
         buttonHref="/contact"
         secondaryLabel="Bekijk vacatures"
         secondaryHref="/vacatures"
+        backgroundImage={ctaBackgroundPhoto.src}
+        backgroundAlt={ctaBackgroundPhoto.alt}
       />
     </>
   );

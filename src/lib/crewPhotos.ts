@@ -5,15 +5,18 @@ export type CrewPhoto = {
   alt: string;
 };
 
-/** Homepage — sectie "Waar wij worden ingezet". */
+/**
+ * Homepage — sectorboxes met foto-achtergrond (Crewstars-stijl).
+ * Wide/landscape shots werken het best als card-background.
+ */
 export const homeDeploymentPhotos: Record<string, CrewPhoto> = {
   Festivals: {
-    src: "/images/crew/festival-flex-hammer.webp",
-    alt: "Helping Hands crew tijdens festivalopbouw",
+    src: "/images/crew/festival-build-site.webp",
+    alt: "Festivalterrein tijdens opbouw met containers en crew",
   },
   Concerten: {
-    src: "/images/crew/scaffolding-climb.webp",
-    alt: "Crew aan het werk in scaffolding bij een productie",
+    src: "/images/crew/concert-globe-stage.webp",
+    alt: "Grootschalige concertproductie op het podium",
   },
   Stadions: {
     src: "/images/crew/stadium-flightcase-push.webp",
@@ -28,8 +31,8 @@ export const homeDeploymentPhotos: Record<string, CrewPhoto> = {
     alt: "Keuken- en horecacrew aan het werk op locatie",
   },
   Producties: {
-    src: "/images/crew/forklift-operator.webp",
-    alt: "Crew bedient heftruck tijdens productielogistiek",
+    src: "/images/crew/scaffolding-team-wide.webp",
+    alt: "Crew bouwt scaffolding en overkapping op locatie",
   },
 };
 
@@ -72,8 +75,8 @@ export const medewerkersGallery: CrewPhoto[] = [
     alt: "Crewlid met Helping Hands branding op locatie",
   },
   {
-    src: "/images/crew/harness-shaka.webp",
-    alt: "Crewlid op terrein met veiligheidsuitrusting",
+    src: "/images/crew/scaffolding-team-wide.webp",
+    alt: "Team bouwt scaffolding op een evenemententerrein",
   },
   {
     src: "/images/crew/chef-fryer.webp",
@@ -88,12 +91,12 @@ export const medewerkersGallery: CrewPhoto[] = [
     alt: "Crew tijdens standbouw en beursopbouw",
   },
   {
-    src: "/images/crew/forklift-operator.webp",
-    alt: "Crew op heftruck tijdens logistiek werk",
+    src: "/images/crew/festival-build-site.webp",
+    alt: "Festivalopbouw met crew en materiaal op het terrein",
   },
   {
-    src: "/images/crew/festival-flex-hammer.webp",
-    alt: "Crew tijdens festivalopbouw met Helping Hands branding",
+    src: "/images/crew/forklift-operator.webp",
+    alt: "Crew op heftruck tijdens logistiek werk",
   },
   {
     src: "/images/crew/harness-branded-back.webp",
@@ -117,4 +120,10 @@ export const medewerkersGallery: CrewPhoto[] = [
 export const medewerkersFeatured: CrewPhoto = {
   src: "/images/crew/thumbs-up-branded.webp",
   alt: "Werken bij Helping Hands — crew met branding",
+};
+
+/** Wide shots voor CTA / donkere secties. */
+export const ctaBackgroundPhoto: CrewPhoto = {
+  src: "/images/crew/concert-globe-stage.webp",
+  alt: "Live productie met publiek en podium",
 };
