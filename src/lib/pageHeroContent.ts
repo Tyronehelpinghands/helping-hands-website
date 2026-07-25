@@ -74,34 +74,38 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
   },
   "/over-ons": {
     eyebrow: "Over ons",
-    title: "Gebouwd vanuit praktijkervaring op de vloer.",
+    title: "Meer dan alleen een uitzendbureau.",
     description:
-      "Helping Hands Agency is ontstaan vanuit ervaring in evenementen, horeca en productie. Wij leveren geen anonieme handjes, maar mensen die weten hoe ze zich op locatie moeten gedragen.",
+      "Opgericht in 2022 door Tyrone van der Schagt: professionele crew voor events, horeca en productie — met een missie om jongeren een eerlijke kans op de arbeidsmarkt te geven.",
     theme: "over",
-    primaryCta: { label: "Bekijk projecten", href: "/projecten" },
-    secondaryCta: { label: "Neem contact op", href: "/contact" },
+    primaryCta: { label: "Personeel aanvragen", href: "/contact" },
+    secondaryCta: { label: "Werken bij Helping Hands", href: "/vacatures" },
     highlights: [
-      { label: "Praktijkervaring" },
-      { label: "Eén aanspreekpunt" },
-      { label: "Duidelijke afspraken" },
-      { label: "Betrouwbare uitvoering" },
+      { label: "Sinds 2022" },
+      { label: "Persoonlijke begeleiding" },
+      { label: "Professionele uitvoering" },
+      { label: "Doorgroeimogelijkheden" },
     ],
     interactiveCards: [
       {
-        title: "Praktijkervaring",
-        description: "Wij kennen de werkvloer van events, horeca en productie van binnenuit.",
+        title: "Maatschappelijke missie",
+        description:
+          "Jongeren en jongvolwassenen weer in beweging brengen met werk, structuur en begeleiding.",
       },
       {
-        title: "Eén aanspreekpunt",
-        description: "Opdrachtgevers hebben één vast contact voor bezetting en terugkoppeling.",
+        title: "Professionele inzet",
+        description:
+          "Opdrachtgevers krijgen crew die op tijd is, veilig werkt en verantwoordelijkheid neemt.",
       },
       {
-        title: "Duidelijke afspraken",
-        description: "Functie, tijden, kleding en taken worden vooraf helder afgestemd.",
+        title: "Persoonlijke match",
+        description:
+          "Niet elke opdracht past bij iedereen — wij kijken naar motivatie, houding en ontwikkeling.",
       },
       {
-        title: "Betrouwbare uitvoering",
-        description: "Van aanvraag tot afhandeling: structuur in het proces en opvolging.",
+        title: "Groei op de vloer",
+        description:
+          "Van eerste opdracht tot doorgroei als specialist, teamleider of voorman.",
       },
     ],
   },
