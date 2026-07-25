@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
 import VacancyFilter from "@/components/VacancyFilter";
 import PageHero from "@/components/sections/PageHero";
+import { opdrachtgeversHorecaPhoto } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail } from "@/lib/navigation";
 import { restaurantVacancyGroups } from "@/lib/vacancies";
@@ -20,17 +22,25 @@ export default function VacaturesPage() {
         id="vacatures"
         className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
       >
+        <PhotoBackgroundCard
+          photo={opdrachtgeversHorecaPhoto}
+          className="mb-8 min-h-[12rem]"
+          overlayClassName="bg-[#0B1F4D]/72"
+        >
+          <div className="p-7 text-white sm:p-8">
+            <h2 className="text-2xl font-black sm:text-3xl">
+              Ook voor restaurants en horeca
+            </h2>
+            <p className="mt-4 max-w-3xl leading-7 text-white/85">
+              Naast eventcrew levert Helping Hands Agency ook personeel voor
+              restaurants, keukens, bediening, bar, afwas en leidinggevende
+              horecafuncties.
+            </p>
+          </div>
+        </PhotoBackgroundCard>
+
         <div className="rounded-2xl border border-slate-200/80 bg-white p-7 shadow-lg shadow-[#0B1F4D]/5 sm:p-8">
-          <h2 className="text-2xl font-black text-[#0B1F4D] sm:text-3xl">
-            Ook voor restaurants en horeca
-          </h2>
-          <p className="mt-4 max-w-3xl leading-7 text-[#101828]/75">
-            Naast eventcrew levert Helping Hands Agency ook personeel voor
-            restaurants, keukens, bediening, bar, afwas en leidinggevende
-            horecafuncties. Van extra handen tijdens piekmomenten tot ervaren
-            koks en floor managers op aanvraag.
-          </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             {restaurantVacancyGroups.map((group) => (
               <article
                 key={group.title}

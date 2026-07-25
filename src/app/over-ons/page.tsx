@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import CTASection from "@/components/CTASection";
+import CrewPhotoGrid from "@/components/CrewPhotoGrid";
 import PageHero from "@/components/sections/PageHero";
+import { overOnsCtaPhoto, overOnsGallery } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export const metadata: Metadata = {
@@ -42,18 +45,43 @@ export default function OverOnsPage() {
       <PageHero content={getPageHeroContent("/over-ons")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl font-black text-[#0B1F4D]">Wie wij zijn</h2>
-          <p className="mt-5 text-lg leading-8 text-[#101828]/75">
-            Helping Hands Agency is gebouwd vanuit praktijkervaring in de live
-            branche. Wij begrijpen dat evenementen draaien op timing,
-            communicatie en inzet — niet op ingewikkelde processen.
-          </p>
-          <p className="mt-4 text-lg leading-8 text-[#101828]/75">
-            Wij leveren geen anonieme handjes, maar mensen die weten hoe ze zich
-            op locatie moeten gedragen. Met één aanspreekpunt, duidelijke
-            afspraken en betrouwbare uitvoering.
-          </p>
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl font-black text-[#0B1F4D]">Wie wij zijn</h2>
+            <p className="mt-5 text-lg leading-8 text-[#101828]/75">
+              Helping Hands Agency is gebouwd vanuit praktijkervaring in de live
+              branche. Wij begrijpen dat evenementen draaien op timing,
+              communicatie en inzet — niet op ingewikkelde processen.
+            </p>
+            <p className="mt-4 text-lg leading-8 text-[#101828]/75">
+              Wij leveren geen anonieme handjes, maar mensen die weten hoe ze zich
+              op locatie moeten gedragen. Met één aanspreekpunt, duidelijke
+              afspraken en betrouwbare uitvoering.
+            </p>
+          </div>
+
+          <CrewPhotoGrid photos={overOnsGallery} columns={2} />
+        </div>
+
+        <div className="relative mt-16 min-h-[16rem] overflow-hidden rounded-2xl sm:min-h-[20rem]">
+          <Image
+            src={overOnsCtaPhoto.src}
+            alt={overOnsCtaPhoto.alt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[#0B1F4D]/55" />
+          <div className="relative flex h-full min-h-[16rem] items-end p-8 sm:min-h-[20rem] sm:p-10">
+            <div className="max-w-xl text-white">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
+                Op de vloer
+              </p>
+              <h3 className="mt-3 text-2xl font-black sm:text-3xl">
+                Praktijkervaring die je ziet in elke inzet.
+              </h3>
+            </div>
+          </div>
         </div>
 
         <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -77,6 +105,8 @@ export default function OverOnsPage() {
         buttonHref="/contact"
         secondaryLabel="Bekijk vacatures"
         secondaryHref="/vacatures"
+        backgroundImage={overOnsCtaPhoto.src}
+        backgroundAlt={overOnsCtaPhoto.alt}
       />
     </>
   );

@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
+import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
 import PageHero from "@/components/sections/PageHero";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { services } from "@/lib/content";
+import {
+  opdrachtgeversCtaPhoto,
+  opdrachtgeversFeatured,
+  opdrachtgeversHorecaPhoto,
+  opdrachtgeversProcessPhotos,
+} from "@/lib/crewPhotos";
 
 export const metadata: Metadata = {
   title: "Opdrachtgevers | Helping Hands Agency",
@@ -61,7 +69,7 @@ export default function OpdrachtgeversPage() {
       <PageHero content={getPageHeroContent("/opdrachtgevers")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="grid gap-12 lg:grid-cols-2">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Voor wie wij werken</h2>
             <ul className="mt-6 space-y-3">
@@ -73,6 +81,18 @@ export default function OpdrachtgeversPage() {
               ))}
             </ul>
           </div>
+          <div className="relative min-h-[18rem] overflow-hidden rounded-2xl shadow-lg lg:min-h-[22rem]">
+            <Image
+              src={opdrachtgeversFeatured.src}
+              alt={opdrachtgeversFeatured.alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="mt-12 grid gap-12 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Welke functies wij leveren</h2>
             <ul className="mt-6 space-y-3">
@@ -86,38 +106,59 @@ export default function OpdrachtgeversPage() {
               ))}
             </ul>
           </div>
+          <div className="relative min-h-[16rem] overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src={opdrachtgeversProcessPhotos[1].src}
+              alt={opdrachtgeversProcessPhotos[1].alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
         </div>
 
-        <div className="mt-16 rounded-2xl border border-slate-200/80 bg-[#F5F7FA] p-8">
-          <h2 className="text-2xl font-black text-[#0B1F4D]">
-            Personeel voor restaurants en horeca
-          </h2>
-          <p className="mt-4 max-w-3xl leading-7 text-[#101828]/75">
-            Heb je tijdelijk extra personeel nodig voor bediening, keuken, bar of
-            afwas? Helping Hands levert praktische mensen voor piekmomenten,
-            ziekte, events, terrasdrukte en tijdelijke bezetting.
-          </p>
-          <Link
-            href="/contact"
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-[#173A8A] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
-          >
-            Restaurantpersoneel aanvragen
-          </Link>
-        </div>
+        <PhotoBackgroundCard
+          photo={opdrachtgeversHorecaPhoto}
+          className="mt-16 min-h-[16rem]"
+          overlayClassName="bg-[#0B1F4D]/78"
+        >
+          <div className="p-8 text-white sm:p-10">
+            <h2 className="text-2xl font-black">
+              Personeel voor restaurants en horeca
+            </h2>
+            <p className="mt-4 max-w-3xl leading-7 text-white/85">
+              Heb je tijdelijk extra personeel nodig voor bediening, keuken, bar of
+              afwas? Helping Hands levert praktische mensen voor piekmomenten,
+              ziekte, events, terrasdrukte en tijdelijke bezetting.
+            </p>
+            <Link
+              href="/contact"
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+            >
+              Restaurantpersoneel aanvragen
+            </Link>
+          </div>
+        </PhotoBackgroundCard>
 
         <div className="mt-16">
           <h2 className="text-2xl font-black text-[#0B1F4D]">Hoe het aanvraagproces werkt</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {process.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-2xl bg-[#0B1F4D] p-6 text-white shadow-lg"
-              >
-                <span className="text-sm font-black text-[#F28C28]">{item.step}</span>
-                <h3 className="mt-2 text-lg font-black">{item.title}</h3>
-                <p className="mt-2 text-sm text-white/75">{item.text}</p>
-              </article>
-            ))}
+            {process.map((item, index) => {
+              const photo = opdrachtgeversProcessPhotos[index];
+              return (
+                <PhotoBackgroundCard
+                  key={item.title}
+                  photo={photo}
+                  className="min-h-[14rem]"
+                >
+                  <div className="flex h-full min-h-[14rem] flex-col justify-end p-6 text-white">
+                    <span className="text-sm font-black text-[#F28C28]">{item.step}</span>
+                    <h3 className="mt-2 text-lg font-black">{item.title}</h3>
+                    <p className="mt-2 text-sm text-white/85">{item.text}</p>
+                  </div>
+                </PhotoBackgroundCard>
+              );
+            })}
           </div>
         </div>
 
@@ -150,6 +191,8 @@ export default function OpdrachtgeversPage() {
         description="Stuur je planning door en wij denken mee over de juiste bezetting."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
+        backgroundImage={opdrachtgeversCtaPhoto.src}
+        backgroundAlt={opdrachtgeversCtaPhoto.alt}
       />
     </>
   );

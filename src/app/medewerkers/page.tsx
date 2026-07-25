@@ -144,7 +144,7 @@ export default function MedewerkersPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {medewerkersGallery.slice(10).map((photo) => (
             <div
               key={photo.src}
@@ -154,7 +154,7 @@ export default function MedewerkersPage() {
                 src={photo.src}
                 alt={photo.alt}
                 fill
-                sizes="(max-width: 768px) 50vw, 25vw"
+                sizes="(max-width: 768px) 50vw, 20vw"
                 className="object-cover"
               />
             </div>

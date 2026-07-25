@@ -114,6 +114,26 @@ export const medewerkersGallery: CrewPhoto[] = [
     src: "/images/crew/scaffolding-portrait.webp",
     alt: "Crewlid op scaffolding bij eventopbouw",
   },
+  {
+    src: "/images/crew/arena-flightcase.webp",
+    alt: "Crew verplaatst flightcase in een stadion",
+  },
+  {
+    src: "/images/crew/harness-shaka.webp",
+    alt: "Crewlid op terrein met veiligheidsuitrusting",
+  },
+  {
+    src: "/images/crew/crew-field-01.webp",
+    alt: "Crew op trailer tijdens laden en lossen",
+  },
+  {
+    src: "/images/crew/crew-field-05.webp",
+    alt: "Helping Hands branding op de werkvloer",
+  },
+  {
+    src: "/images/crew/festival-flex-hammer.webp",
+    alt: "Crew tijdens festivalopbouw met branding",
+  },
 ];
 
 /** Uitgelichte foto naast "waarom werken bij". */
@@ -126,4 +146,94 @@ export const medewerkersFeatured: CrewPhoto = {
 export const ctaBackgroundPhoto: CrewPhoto = {
   src: "/images/crew/concert-globe-stage.webp",
   alt: "Live productie met publiek en podium",
+};
+
+/** Over ons — collage naast "Wie wij zijn". */
+export const overOnsGallery: CrewPhoto[] = [
+  {
+    src: "/images/crew/crew-field-03.webp",
+    alt: "Helping Hands team overlegt op locatie",
+  },
+  {
+    src: "/images/crew/harness-branded-back.webp",
+    alt: "Crewlid met Helping Hands branding en valbeveiliging",
+  },
+  {
+    src: "/images/crew/scaffolding-portrait.webp",
+    alt: "Crewlid op scaffolding tijdens opbouw",
+  },
+  {
+    src: "/images/crew/crew-field-05.webp",
+    alt: "Helping Hands shirt zichtbaar op de werkvloer",
+  },
+];
+
+export const overOnsCtaPhoto: CrewPhoto = {
+  src: "/images/crew/scaffolding-team-wide.webp",
+  alt: "Team aan het werk op scaffolding",
+};
+
+/** Contact / personeel aanvragen. */
+export const contactRequestPhoto: CrewPhoto = {
+  src: "/images/crew/arena-flightcase.webp",
+  alt: "Crew verplaatst materiaal in een stadion",
+};
+
+export const contactCrewPhoto: CrewPhoto = {
+  src: "/images/crew/harness-shaka.webp",
+  alt: "Crewlid klaar voor inzet op locatie",
+};
+
+export const contactStrip: CrewPhoto[] = [
+  {
+    src: "/images/crew/crew-field-01.webp",
+    alt: "Crew op trailer tijdens laden en lossen",
+  },
+  {
+    src: "/images/crew/forklift-operator.webp",
+    alt: "Crew op heftruck tijdens logistiek",
+  },
+  {
+    src: "/images/crew/festival-flex-hammer.webp",
+    alt: "Crew tijdens festivalopbouw",
+  },
+  {
+    src: "/images/crew/scaffolding-climb.webp",
+    alt: "Crew klimt in scaffolding",
+  },
+];
+
+/** Opdrachtgevers / personeel aanvragen. */
+export const opdrachtgeversFeatured: CrewPhoto = {
+  src: "/images/crew/crew-field-01.webp",
+  alt: "Crew op locatie bij laden en lossen",
+};
+
+export const opdrachtgeversHorecaPhoto: CrewPhoto = {
+  src: "/images/crew/chef-fryer.webp",
+  alt: "Horecacrew aan het werk op een event",
+};
+
+export const opdrachtgeversProcessPhotos: CrewPhoto[] = [
+  {
+    src: "/images/crew/arena-flightcase.webp",
+    alt: "Stadioncrew met flightcase",
+  },
+  {
+    src: "/images/crew/standbouw-ladder.webp",
+    alt: "Beursopbouw met ladder",
+  },
+  {
+    src: "/images/crew/scaffolding-climb.webp",
+    alt: "Stagebouw op scaffolding",
+  },
+  {
+    src: "/images/crew/forklift-operator.webp",
+    alt: "Logistiek met heftruck",
+  },
+];
+
+export const opdrachtgeversCtaPhoto: CrewPhoto = {
+  src: "/images/crew/festival-build-site.webp",
+  alt: "Festivalterrein tijdens opbouw",
 };
