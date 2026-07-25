@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/sections/PageHero";
+import { medewerkersFeatured, medewerkersGallery } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail } from "@/lib/navigation";
 
@@ -58,8 +60,32 @@ export default function MedewerkersPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+          {medewerkersGallery.slice(0, 6).map((photo, index) => (
+            <div
+              key={photo.src}
+              className={
+                index === 0
+                  ? "relative col-span-2 aspect-[16/10] overflow-hidden rounded-2xl lg:col-span-2 lg:row-span-2 lg:aspect-auto lg:h-full lg:min-h-[28rem]"
+                  : "relative aspect-[4/5] overflow-hidden rounded-2xl"
+              }
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority={index === 0}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
             <h2 className="text-2xl font-black text-[#0B1F4D]">
               Waarom werken bij Helping Hands?
@@ -74,6 +100,18 @@ export default function MedewerkersPage() {
             </ul>
           </div>
 
+          <div className="relative min-h-72 overflow-hidden rounded-2xl border border-slate-200 shadow-lg lg:min-h-full">
+            <Image
+              src={medewerkersFeatured.src}
+              alt={medewerkersFeatured.alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
             <h2 className="text-2xl font-black text-[#0B1F4D]">
               Wat verwachten wij?
@@ -87,6 +125,40 @@ export default function MedewerkersPage() {
               ))}
             </ul>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {medewerkersGallery.slice(6, 10).map((photo) => (
+              <div
+                key={photo.src}
+                className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {medewerkersGallery.slice(10).map((photo) => (
+            <div
+              key={photo.src}
+              className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100"
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover"
+              />
+            </div>
+          ))}
         </div>
 
         <div className="mt-12 rounded-2xl bg-[#0B1F4D] p-8 text-white shadow-xl">

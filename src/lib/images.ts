@@ -1,12 +1,12 @@
-/** Vaste paden — vervang bestanden in public/images/stock/ zonder code aan te passen. */
+/** Vaste paden — eigen crewfoto's in public/images/crew/. */
 export const stockImages = {
-  heroEvent: "/images/stock/hero-event.jpg",
-  servicesStagehands: "/images/stock/services-stagehands.jpg",
-  clientsBriefing: "/images/stock/clients-briefing.jpg",
-  crewWorking: "/images/stock/crew-working.jpg",
-  ctaProduction: "/images/stock/cta-production.jpg",
-  festivals: "/images/stock/festivals.jpg",
-  horecaSupport: "/images/stock/horeca-support.jpg",
-  stagehands: "/images/stock/stagehands.jpg",
-  productionBackstage: "/images/stock/production-backstage.jpg",
+  heroEvent: "/images/crew/stadium-flightcase-push.webp",
+  servicesStagehands: "/images/crew/standbouw-ladder.webp",
+  clientsBriefing: "/images/crew/crew-field-03.webp",
+  crewWorking: "/images/crew/thumbs-up-branded.webp",
+  ctaProduction: "/images/crew/forklift-operator.webp",
+  festivals: "/images/crew/festival-flex-hammer.webp",
+  horecaSupport: "/images/crew/chef-fryer.webp",
+  stagehands: "/images/crew/scaffolding-climb.webp",
+  productionBackstage: "/images/crew/crew-woman-branded.webp",
 } as const;

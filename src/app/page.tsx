@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import AudienceToggle from "@/components/AudienceToggle";
 import CTASection from "@/components/CTASection";
@@ -8,6 +9,7 @@ import PageHero from "@/components/sections/PageHero";
 import SectorCards from "@/components/SectorCards";
 import ServiceFilter from "@/components/ServiceFilter";
 import { deployments } from "@/lib/content";
+import { homeCrewStrip, homeDeploymentPhotos } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 
 export default function Home() {
@@ -18,6 +20,35 @@ export default function Home() {
       <SectorCards />
 
       <LogoCarousel />
+
+      <section className="bg-white py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
+              Op locatie
+            </p>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-[#0B1F4D] sm:text-3xl">
+              Onze crew in actie
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
+            {homeCrewStrip.map((photo) => (
+              <div
+                key={photo.src}
+                className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-slate-100"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  className="object-cover transition duration-500 hover:scale-105"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="bg-[#F5F7FA] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -72,21 +103,36 @@ export default function Home() {
           </div>
 
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {deployments.map((item) => (
-              <article
-                key={item.label}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B1F4D]/60 shadow-xl transition hover:border-[#F28C28]/40"
-              >
-                <div className="stock-image-placeholder relative aspect-[16/7] w-full" />
-                <div className="p-6">
-                  <span className="inline-block rounded-full bg-[#F28C28] px-3 py-1 text-xs font-bold">
-                    Crew
-                  </span>
-                  <h3 className="mt-3 text-xl font-black">{item.label}</h3>
-                  <p className="mt-2 text-sm text-white/70">{item.detail}</p>
-                </div>
-              </article>
-            ))}
+            {deployments.map((item) => {
+              const photo = homeDeploymentPhotos[item.label];
+              return (
+                <article
+                  key={item.label}
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B1F4D]/60 shadow-xl transition hover:border-[#F28C28]/40"
+                >
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0B1F4D]">
+                    {photo ? (
+                      <Image
+                        src={photo.src}
+                        alt={photo.alt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover transition duration-500 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="stock-image-placeholder absolute inset-0" />
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <span className="inline-block rounded-full bg-[#F28C28] px-3 py-1 text-xs font-bold">
+                      Crew
+                    </span>
+                    <h3 className="mt-3 text-xl font-black">{item.label}</h3>
+                    <p className="mt-2 text-sm text-white/70">{item.detail}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
