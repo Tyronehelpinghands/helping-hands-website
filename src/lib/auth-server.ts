@@ -21,6 +21,10 @@ const DEMO_INTERNAL_PROFILE: Profile = {
   full_name: "Demo Admin",
 };
 
+export function getDemoInternalProfile(): Profile {
+  return DEMO_INTERNAL_PROFILE;
+}
+
 export async function getDemoRoleFromCookies(): Promise<DemoUserRole | null> {
   const cookieStore = await cookies();
   const value = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
@@ -62,8 +66,8 @@ export async function requireDashboardAccess(allowedRoles: UserRole[]) {
     demoRole === "internal" &&
     allowedRoles.some((role) => role === "admin" || role === "planner")
   ) {
-  // TODO: Vervang demo-profiel door echte Supabase Auth + rolcontrole
-    return DEMO_INTERNAL_PROFILE;
+    // TODO: Vervang demo-profiel door echte Supabase Auth + rolcontrole
+    return getDemoInternalProfile();
   }
 
   const { user, profile } = await getSessionProfile();

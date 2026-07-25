@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import { isInternRole } from "@/lib/auth";
-import { getSessionProfile } from "@/lib/auth-server";
+import {
+  getDemoInternalProfile,
+  getDemoRoleFromCookies,
+  getSessionProfile,
+} from "@/lib/auth-server";
 
 export async function requireInternApiAccess() {
+  // Demo-login (intern) moet API-koppelingen kunnen testen, net als het dashboard.
+  const demoRole = await getDemoRoleFromCookies();
+  if (demoRole === "internal") {
+    return { profile: getDemoInternalProfile() };
+  }
+
   const { user, profile } = await getSessionProfile();
 
   if (!user) {

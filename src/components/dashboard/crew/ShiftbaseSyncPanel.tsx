@@ -32,7 +32,11 @@ export default function ShiftbaseSyncPanel() {
 
       if (!res.ok) {
         setState("not_linked");
-        setMessage("Niet ingelogd of geen toegang.");
+        setMessage(
+          typeof data.error === "string"
+            ? data.error
+            : "Niet ingelogd of geen toegang.",
+        );
         return;
       }
 
