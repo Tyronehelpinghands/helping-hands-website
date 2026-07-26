@@ -1,11 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  canAccessDashboardPath,
+  isValidRole,
+  type UserRole,
+} from "@/lib/auth";
+import {
   DEMO_ROLE_COOKIE,
   getProtectedPortal,
   isDemoUserRole,
 } from "@/lib/authRedirects";
+import { isDemoUiAccessAllowed } from "@/lib/demoAccess";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
+
+function hasAllowedDemoAccess(
+  request: NextRequest,
+  expectedDemoRole: string,
+): boolean {
+  if (!isDemoUiAccessAllowed()) return false;
+  const demoRole = request.cookies.get(DEMO_ROLE_COOKIE)?.value;
+  return (
+    isDemoUserRole(demoRole) &&
+    (demoRole === expectedDemoRole || demoRole === "internal")
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   const url = getSupabaseUrl();
@@ -13,13 +31,10 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPortal = getProtectedPortal(pathname);
 
-  // TODO: Supabase Auth koppelen — vervang demo cookie door echte rolcontrole
-  // TODO: Role-based redirects server-side afdwingen per rol
-  const demoRole = request.cookies.get(DEMO_ROLE_COOKIE)?.value;
-  const hasMatchingDemoRole =
+  const hasMatchingDemoRole = Boolean(
     protectedPortal &&
-    isDemoUserRole(demoRole) &&
-    demoRole === protectedPortal.demoRole;
+      hasAllowedDemoAccess(request, protectedPortal.demoRole),
+  );
 
   if (!url || !key) {
     if (protectedPortal && !hasMatchingDemoRole) {
@@ -58,8 +73,22 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (protectedPortal) {
-    const isInternDashboard = protectedPortal.demoRole === "internal";
-    const hasSupabaseAccess = Boolean(user) && isInternDashboard;
+    let hasSupabaseAccess = false;
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profile?.role && isValidRole(profile.role)) {
+        hasSupabaseAccess = canAccessDashboardPath(
+          profile.role as UserRole,
+          pathname,
+        );
+      }
+    }
 
     if (!hasMatchingDemoRole && !hasSupabaseAccess) {
       const loginUrl = request.nextUrl.clone();

@@ -57,7 +57,7 @@ export default function ProjectLogoGrid() {
         {filtered.length} {filtered.length === 1 ? "resultaat" : "resultaten"}
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
         {filtered.map((logo) => (
           <ProjectLogoCard key={logo.id} logo={logo} />
         ))}

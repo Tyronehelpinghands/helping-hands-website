@@ -8,14 +8,18 @@ import {
   isValidRole,
 } from "@/lib/auth";
 import { getSessionProfile } from "@/lib/auth-server";
+import {
+  isDemoApiAccessAllowed,
+  isDemoUiAccessAllowed,
+} from "@/lib/demoAccess";
 import { getPortalByType } from "@/lib/portals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { noIndexMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Inloggen | Helping Hands Agency",
-  description:
-    "Log veilig in op het intern portaal, medewerkersportaal of opdrachtgeversportaal van Helping Hands Agency.",
-};
+export const metadata: Metadata = noIndexMetadata(
+  "Inloggen",
+  "Log veilig in op het intern portaal, medewerkersportaal of opdrachtgeversportaal van Helping Hands Agency.",
+);
 
 const errorMessages: Record<string, string> = {
   profile:
@@ -60,7 +64,7 @@ export default async function LoginPage({
       <section className="hero-gradient relative overflow-hidden text-white">
         <div className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[#38bdf8]/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-[#F28C28]/10 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 sm:pt-32 lg:px-8 lg:pb-16 lg:pt-36">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
             <BrandLogoImage
               variant="markWhite"
@@ -76,17 +80,21 @@ export default async function LoginPage({
             </div>
           </div>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-white/85">
-            Kies je portaal en log veilig in met je account.
+            Kies het portaal dat bij jouw rol past. Intern, medewerker en
+            opdrachtgever zijn gescheiden — je landt nooit standaard in het
+            interndashboard.
           </p>
         </div>
       </section>
 
       <section className="bg-[#F5F7FA] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         <LoginSelector
-          key={initialType}
+          key={initialType ?? "choose"}
           initialType={initialType}
           configError={configError}
           redirectTo={redirectTo}
+          demoUiAllowed={isDemoUiAccessAllowed()}
+          demoApiAllowed={isDemoApiAccessAllowed()}
         />
       </section>
     </>

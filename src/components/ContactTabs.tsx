@@ -3,51 +3,116 @@
 import { FormEvent, useState } from "react";
 import { applicationsEmail, contactEmail } from "@/lib/navigation";
 
-const clientFields = [
-  { label: "Bedrijfsnaam", type: "text" },
-  { label: "Naam contactpersoon", type: "text" },
-  { label: "E-mail", type: "email" },
-  { label: "Telefoon", type: "tel" },
-  { label: "Datum", type: "date" },
-  { label: "Locatie", type: "text" },
-  { label: "Starttijd", type: "time" },
-  { label: "Eindtijd", type: "time" },
-  { label: "Functies", type: "text" },
-  { label: "Aantal mensen", type: "number" },
-  { label: "Kledingvoorschriften", type: "text" },
-  { label: "Extra briefing", type: "textarea" },
+type FieldDef = {
+  label: string;
+  type: string;
+  name: string;
+  required?: boolean;
+  fullWidth?: boolean;
+  placeholder?: string;
+};
+
+const clientFields: FieldDef[] = [
+  { label: "Bedrijfsnaam", type: "text", name: "bedrijfsnaam", required: true },
+  {
+    label: "Naam contactpersoon",
+    type: "text",
+    name: "contactpersoon",
+    required: true,
+  },
+  { label: "E-mail", type: "email", name: "email", required: true },
+  { label: "Telefoon", type: "tel", name: "telefoon", required: true },
+  { label: "Datum", type: "date", name: "datum", required: true },
+  { label: "Locatie", type: "text", name: "locatie", required: true },
+  { label: "Starttijd", type: "time", name: "starttijd", required: true },
+  { label: "Eindtijd", type: "time", name: "eindtijd", required: true },
+  {
+    label: "Functies",
+    type: "text",
+    name: "functies",
+    required: true,
+    placeholder: "Bijv. stagehands, barbacks, runners",
+  },
+  {
+    label: "Aantal mensen",
+    type: "number",
+    name: "aantal",
+    required: true,
+  },
+  {
+    label: "Kleding / PBM",
+    type: "text",
+    name: "kleding-pbm",
+    placeholder: "Zwarte kleding, veiligheidsschoenen, etc.",
+  },
+  {
+    label: "Contactpersoon op locatie",
+    type: "text",
+    name: "contact-locatie",
+  },
+  {
+    label: "Extra briefing",
+    type: "textarea",
+    name: "briefing",
+    fullWidth: true,
+    placeholder: "Taken, aankomst, zones, bijzonderheden…",
+  },
 ];
 
-const workerFields = [
-  { label: "Naam", type: "text" },
-  { label: "E-mail", type: "email" },
-  { label: "Telefoon", type: "tel" },
-  { label: "Woonplaats", type: "text" },
-  { label: "Leeftijd", type: "number" },
-  { label: "Ervaring", type: "textarea" },
-  { label: "Beschikbaarheid", type: "text" },
-  { label: "ZZP of loondienst", type: "text" },
-  { label: "Rijbewijs ja/nee", type: "text" },
+const workerFields: FieldDef[] = [
+  { label: "Naam", type: "text", name: "naam", required: true },
+  { label: "E-mail", type: "email", name: "email", required: true },
+  { label: "Telefoon", type: "tel", name: "telefoon", required: true },
+  { label: "Woonplaats", type: "text", name: "woonplaats", required: true },
+  { label: "Leeftijd", type: "number", name: "leeftijd" },
+  {
+    label: "Ervaring",
+    type: "textarea",
+    name: "ervaring",
+    fullWidth: true,
+    required: true,
+  },
+  { label: "Beschikbaarheid", type: "text", name: "beschikbaarheid" },
+  { label: "ZZP of loondienst", type: "text", name: "contractvorm" },
+  { label: "Rijbewijs ja/nee", type: "text", name: "rijbewijs" },
 ];
 
 type Tab = "client" | "worker";
 
-function Field({ field }: { field: { label: string; type: string } }) {
-  const id = field.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
+function Field({ field }: { field: FieldDef }) {
   return (
-    <label className={field.type === "textarea" ? "block sm:col-span-2" : "block"}>
-      <span className="text-sm font-black text-[#0B1F4D]">{field.label}</span>
+    <label
+      className={
+        field.fullWidth || field.type === "textarea"
+          ? "block sm:col-span-2"
+          : "block"
+      }
+    >
+      <span className="text-sm font-black text-[#0B1F4D]">
+        {field.label}
+        {field.required ? (
+          <span className="text-[#F28C28]" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        ) : null}
+      </span>
       {field.type === "textarea" ? (
         <textarea
-          id={id}
+          id={field.name}
+          name={field.name}
           rows={4}
+          required={field.required}
+          placeholder={field.placeholder}
           className="mt-2 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
         />
       ) : (
         <input
-          id={id}
+          id={field.name}
+          name={field.name}
           type={field.type}
+          required={field.required}
+          placeholder={field.placeholder}
           className="mt-2 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
         />
       )}
@@ -58,6 +123,7 @@ function Field({ field }: { field: { label: string; type: string } }) {
 export default function ContactTabs() {
   const [activeTab, setActiveTab] = useState<Tab>("client");
   const [submittedTab, setSubmittedTab] = useState<Tab | null>(null);
+  const [isUrgent, setIsUrgent] = useState(false);
   const isClient = activeTab === "client";
   const fields = isClient ? clientFields : workerFields;
 
@@ -104,7 +170,9 @@ export default function ContactTabs() {
           <div className="rounded-2xl bg-[#0B1F4D] p-8 text-white">
             <p className="text-2xl font-black">
               {submittedTab === "client"
-                ? "Aanvraag voorbereid."
+                ? isUrgent
+                  ? "Spoedaanvraag voorbereid."
+                  : "Aanvraag voorbereid."
                 : "Aanmelding voorbereid."}
             </p>
             <p className="mt-3 leading-7 text-white/75">
@@ -116,8 +184,9 @@ export default function ContactTabs() {
                     className="font-bold text-[#F28C28] underline-offset-4 hover:underline"
                   >
                     {contactEmail}
-                  </a>{" "}
-                  of koppel dit later aan HubSpot.
+                  </a>
+                  {isUrgent ? " en vermeld spoed in het onderwerp." : "."} Voor
+                  de snelste opvolging mag je ook direct mailen.
                 </>
               ) : (
                 <>
@@ -142,17 +211,37 @@ export default function ContactTabs() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
+            {isClient ? (
+              <label className="mb-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#F28C28]/35 bg-[#FFF7ED] px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={isUrgent}
+                  onChange={(event) => setIsUrgent(event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-[#F28C28] focus:ring-[#F28C28]"
+                />
+                <span>
+                  <span className="block text-sm font-black text-[#0B1F4D]">
+                    Spoedaanvraag
+                  </span>
+                  <span className="mt-1 block text-sm leading-6 text-[#101828]/70">
+                    Vink aan bij korte doorlooptijd. We kijken wat er nog haalbaar
+                    is met beschikbare crew.
+                  </span>
+                </span>
+              </label>
+            ) : null}
+
             <div className="grid gap-4 sm:grid-cols-2">
               {fields.map((field) => (
-                <Field key={field.label} field={field} />
+                <Field key={field.name} field={field} />
               ))}
             </div>
 
             <div className="mt-6 rounded-2xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/75">
               {isClient ? (
                 <>
-                  Formulier nog niet gekoppeld. Voor personeelsaanvragen mail je
-                  naar{" "}
+                  Formulier bereidt je aanvraag voor (nog geen automatische
+                  versturing). Voor personeelsaanvragen mail je naar{" "}
                   <a
                     href={`mailto:${contactEmail}`}
                     className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
@@ -170,6 +259,13 @@ export default function ContactTabs() {
                   >
                     {applicationsEmail}
                   </a>
+                  . Of bekijk eerst de{" "}
+                  <a
+                    href="/vacatures"
+                    className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                  >
+                    openstaande vacatures
+                  </a>
                   .
                 </>
               )}
@@ -179,7 +275,11 @@ export default function ContactTabs() {
               type="submit"
               className="mt-6 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.01] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:w-auto"
             >
-              {isClient ? "Aanvraag voorbereiden" : "Aanmelding voorbereiden"}
+              {isClient
+                ? isUrgent
+                  ? "Spoedaanvraag voorbereiden"
+                  : "Aanvraag voorbereiden"
+                : "Aanmelding voorbereiden"}
             </button>
           </form>
         )}

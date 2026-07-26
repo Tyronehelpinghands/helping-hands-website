@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import {
   canAccessDashboardPath,
+  canAccessPortal,
   getDashboardPathForRole,
   isValidRole,
   type Profile,
@@ -8,9 +9,13 @@ import {
 } from "@/lib/auth";
 import {
   DEMO_ROLE_COOKIE,
+  demoRoleToPortalType,
   isDemoUserRole,
   type DemoUserRole,
 } from "@/lib/authRedirects";
+import { isDemoUiAccessAllowed } from "@/lib/demoAccess";
+import type { PortalType } from "@/lib/portals";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
@@ -21,8 +26,33 @@ const DEMO_INTERNAL_PROFILE: Profile = {
   full_name: "Demo Admin",
 };
 
+const DEMO_EMPLOYEE_PROFILE: Profile = {
+  id: "demo-employee",
+  email: "demo-crew@helpinghands.nl",
+  role: "medewerker",
+  full_name: "Demo Medewerker",
+};
+
+const DEMO_CLIENT_PROFILE: Profile = {
+  id: "demo-client",
+  email: "demo-client@helpinghands.nl",
+  role: "opdrachtgever",
+  full_name: "Demo Opdrachtgever",
+};
+
 export function getDemoInternalProfile(): Profile {
   return DEMO_INTERNAL_PROFILE;
+}
+
+export function getDemoProfileForRole(demoRole: DemoUserRole): Profile {
+  switch (demoRole) {
+    case "internal":
+      return DEMO_INTERNAL_PROFILE;
+    case "employee":
+      return DEMO_EMPLOYEE_PROFILE;
+    case "client":
+      return DEMO_CLIENT_PROFILE;
+  }
 }
 
 export async function getDemoRoleFromCookies(): Promise<DemoUserRole | null> {
@@ -31,10 +61,19 @@ export async function getDemoRoleFromCookies(): Promise<DemoUserRole | null> {
   return isDemoUserRole(value) ? value : null;
 }
 
+async function getAllowedDemoRole(): Promise<DemoUserRole | null> {
+  if (!isDemoUiAccessAllowed()) return null;
+  return getDemoRoleFromCookies();
+}
+
 export async function getSessionProfile(): Promise<{
   user: { id: string; email?: string } | null;
   profile: Profile | null;
 }> {
+  if (!isSupabaseConfigured()) {
+    return { user: null, profile: null };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -61,13 +100,20 @@ export async function getSessionProfile(): Promise<{
 }
 
 export async function requireDashboardAccess(allowedRoles: UserRole[]) {
-  const demoRole = await getDemoRoleFromCookies();
+  const demoRole = await getAllowedDemoRole();
   if (
     demoRole === "internal" &&
     allowedRoles.some((role) => role === "admin" || role === "planner")
   ) {
-    // TODO: Vervang demo-profiel door echte Supabase Auth + rolcontrole
     return getDemoInternalProfile();
+  }
+
+  if (demoRole === "employee" && allowedRoles.includes("medewerker")) {
+    return getDemoProfileForRole("employee");
+  }
+
+  if (demoRole === "client" && allowedRoles.includes("opdrachtgever")) {
+    return getDemoProfileForRole("client");
   }
 
   const { user, profile } = await getSessionProfile();
@@ -87,7 +133,44 @@ export async function requireDashboardAccess(allowedRoles: UserRole[]) {
   return profile;
 }
 
+/** Server gate voor /portaal/medewerkers en /portaal/opdrachtgevers. */
+export async function requirePortalAccess(portal: PortalType) {
+  const demoRole = await getAllowedDemoRole();
+  if (demoRole && demoRoleToPortalType(demoRole) === portal) {
+    return getDemoProfileForRole(demoRole);
+  }
+
+  // Intern demo mag portalen bekijken (impersonatie-light).
+  if (demoRole === "internal") {
+    return getDemoInternalProfile();
+  }
+
+  const { user, profile } = await getSessionProfile();
+
+  if (!user) {
+    redirect(`/login?type=${portal}`);
+  }
+
+  if (!profile) {
+    redirect("/login?error=profile");
+  }
+
+  if (!canAccessPortal(profile.role, portal)) {
+    redirect(getDashboardPathForRole(profile.role));
+  }
+
+  return profile;
+}
+
 export async function requireDashboardPath(pathname: string) {
+  const demoRole = await getAllowedDemoRole();
+  if (demoRole) {
+    const demoProfile = getDemoProfileForRole(demoRole);
+    if (canAccessDashboardPath(demoProfile.role, pathname)) {
+      return demoProfile;
+    }
+  }
+
   const { user, profile } = await getSessionProfile();
 
   if (!user) {

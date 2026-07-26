@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
+import PublicHeader from "@/components/layout/PublicHeader";
 import SiteChromeExtras from "@/components/SiteChromeExtras";
 
 export default function ConditionalSiteChrome({
@@ -22,7 +22,7 @@ export default function ConditionalSiteChrome({
 
   return (
     <>
-      <Header />
+      <PublicHeader />
       {children}
       <Footer />
       <SiteChromeExtras />

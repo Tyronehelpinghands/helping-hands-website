@@ -1,6 +1,7 @@
 # Mobile Responsive Audit — Helping Hands Website
 
-Datum: 14 juli 2026
+Datum: 14 juli 2026  
+Update: 25 juli 2026 — P1–P3. Header is fixed overlay met mobiele CTA “Aanvragen” altijd zichtbaar; slide-over menu met scroll lock. Check especially: geen horizontal overflow, header contrast op heroes, sticky bottom CTA vs. safe-area.
 
 ## 1. Gecontroleerde routes
 

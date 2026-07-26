@@ -5,11 +5,11 @@ import {
   getDemoRoleFromCookies,
   getSessionProfile,
 } from "@/lib/auth-server";
+import { isDemoApiAccessAllowed } from "@/lib/demoAccess";
 
 export async function requireInternApiAccess() {
-  // Demo-login (intern) moet API-koppelingen kunnen testen, net als het dashboard.
   const demoRole = await getDemoRoleFromCookies();
-  if (demoRole === "internal") {
+  if (demoRole === "internal" && isDemoApiAccessAllowed()) {
     return { profile: getDemoInternalProfile() };
   }
 
@@ -18,7 +18,13 @@ export async function requireInternApiAccess() {
   if (!user) {
     return {
       error: NextResponse.json(
-        { ok: false, error: "Niet ingelogd" },
+        {
+          ok: false,
+          error:
+            demoRole === "internal" && !isDemoApiAccessAllowed()
+              ? "Demo-API-toegang is uitgeschakeld. Zet ALLOW_DEMO_API_ACCESS=true of log in met een intern account."
+              : "Niet ingelogd",
+        },
         { status: 401 },
       ),
     };

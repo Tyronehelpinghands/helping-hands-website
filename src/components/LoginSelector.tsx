@@ -34,27 +34,32 @@ const portalIcons: Record<PortalType, LucideIcon> = {
 };
 
 type LoginSelectorProps = {
-  initialType: PortalType;
+  /** Geen default — null betekent: kies bewust een portaal (intern is niet default). */
+  initialType: PortalType | null;
   configError?: string | null;
   redirectTo?: string | null;
+  /** Server-side flags (env is niet beschikbaar in de browser zonder NEXT_PUBLIC_). */
+  demoUiAllowed?: boolean;
+  demoApiAllowed?: boolean;
 };
 
 export default function LoginSelector({
   initialType,
   configError = null,
   redirectTo = null,
+  demoUiAllowed = true,
+  demoApiAllowed = false,
 }: LoginSelectorProps) {
   const router = useRouter();
   const supabaseEnabled = isSupabaseConfigured();
-  const [activePortal, setActivePortal] = useState<PortalType>(initialType);
+  const [activePortal, setActivePortal] = useState<PortalType | null>(initialType);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(configError);
 
   const activeCard =
-    LOGIN_PORTAL_CARDS.find((card) => card.portalType === activePortal) ??
-    LOGIN_PORTAL_CARDS[0];
+    LOGIN_PORTAL_CARDS.find((card) => card.portalType === activePortal) ?? null;
 
   // Op loginpagina altijd opnieuw inloggen — verwijder oude demo-sessie.
   useEffect(() => {
@@ -62,6 +67,11 @@ export default function LoginSelector({
   }, []);
 
   function handleDemoLogin(demoRole: DemoUserRole) {
+    if (!demoUiAllowed) {
+      setError("Demo-login is uitgeschakeld op deze omgeving (ALLOW_DEMO_ACCESS=false).");
+      return;
+    }
+
     void (async () => {
       if (supabaseEnabled) {
         try {
@@ -79,6 +89,11 @@ export default function LoginSelector({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!activePortal) {
+      setError("Kies eerst welk portaal bij jouw rol hoort.");
+      return;
+    }
 
     if (!supabaseEnabled) {
       setError("Gebruik de demo-knoppen om in te loggen. Echte auth volgt later.");
@@ -116,6 +131,7 @@ export default function LoginSelector({
         return;
       }
 
+      // Altijd rol-correct redirecten; gekozen portaal alleen als de rol dat mag.
       const destination = resolveLoginDestination(
         profile.role,
         activePortal,
@@ -131,12 +147,18 @@ export default function LoginSelector({
     }
   }
 
-  const PortalIcon = portalIcons[activePortal];
+  const PortalIcon = activePortal ? portalIcons[activePortal] : ShieldCheck;
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6 rounded-xl border border-[#38bdf8]/20 bg-[#38bdf8]/5 px-4 py-3 text-sm text-[#0284c7]">
-        Demo-login. Echte toegang wordt later gekoppeld aan veilige auth.
+      <div className="mb-6 rounded-xl border border-[#F28C28]/30 bg-[#FFF7ED] px-4 py-3 text-sm text-[#0B1F4D]">
+        <p className="font-bold">Kies jouw portaal — intern is niet de standaard voor iedereen.</p>
+        <p className="mt-1 text-[#101828]/75">
+          Demo-login toont UI met testdata.
+          {demoApiAllowed
+            ? " Integratie-API’s staan aan voor deze omgeving (ALLOW_DEMO_API_ACCESS)."
+            : " Integratie-API’s blijven uit zonder echte intern-login (veilig default)."}
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -223,11 +245,12 @@ export default function LoginSelector({
                 Supabase login
               </p>
               <h2 className="mt-1 text-2xl font-black text-white sm:text-3xl">
-                {activeCard.title}
+                {activeCard ? activeCard.title : "Kies een portaal hierboven"}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-                Log in met je account. Je wordt doorgestuurd naar het portaal dat je hierboven
-                hebt gekozen.
+                {activeCard
+                  ? "Log in met je account. Je wordt doorgestuurd op basis van je rol (en het gekozen portaal als dat mag)."
+                  : "Selecteer eerst intern, medewerker of opdrachtgever. Je landt altijd in het portaal dat bij jouw rol past."}
               </p>
             </div>
           </div>

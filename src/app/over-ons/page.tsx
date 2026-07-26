@@ -8,6 +8,7 @@ import OverOnsSplitSection from "@/components/over-ons/OverOnsSplitSection";
 import OverOnsStats from "@/components/over-ons/OverOnsStats";
 import OverOnsTimeline from "@/components/over-ons/OverOnsTimeline";
 import Reveal from "@/components/over-ons/Reveal";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import PageHero from "@/components/sections/PageHero";
 import { overOnsCtaPhoto } from "@/lib/crewPhotos";
 import {
@@ -23,15 +24,24 @@ import {
 } from "@/lib/overOnsContent";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 
-export const metadata: Metadata = {
-  title: "Over ons | Helping Hands Agency",
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Over ons",
   description:
-    "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt om jongeren een eerlijke kans te geven op de arbeidsmarkt — met professionele crew voor events, horeca en productie.",
-};
+    "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt: professionele crew voor events en horeca, met een missie om jongeren een eerlijke kans te geven.",
+  path: "/over-ons",
+});
 
 export default function OverOnsPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Over ons", path: "/over-ons" },
+        ]}
+      />
       <PageHero content={getPageHeroContent("/over-ons")} />
 
       {/* Intro: tekst links, fotocollage rechts */}
@@ -217,12 +227,18 @@ export default function OverOnsPage() {
               <p className="max-w-3xl text-lg leading-8 text-[#101828]/80">
                 {overOnsClosing.paragraphs[0]}
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:bg-[#de7c1f]"
                 >
                   Personeel aanvragen
+                </Link>
+                <Link
+                  href="/diensten"
+                  className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] px-8 py-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+                >
+                  Bekijk diensten
                 </Link>
                 <Link
                   href="/vacatures"

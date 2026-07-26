@@ -3,15 +3,18 @@ import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PageHero from "@/components/sections/PageHero";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { medewerkersFeatured, medewerkersGallery } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail } from "@/lib/navigation";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Medewerkers | Helping Hands Agency",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Medewerkers — werken als crew",
   description:
-    "Werken bij Helping Hands Agency — event crew, horeca, stagehands en productie op locatie.",
-};
+    "Crew aanmelden bij Helping Hands Agency: werken als event crew, stagehands, hospitality of horecapersoneel. Flexibele klussen, duidelijke briefing, doorgroeien.",
+  path: "/medewerkers",
+});
 
 const whyWork = [
   "Duidelijke planning",
@@ -41,9 +44,40 @@ const roles = [
 export default function MedewerkersPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Medewerkers", path: "/medewerkers" },
+        ]}
+      />
       <PageHero content={getPageHeroContent("/medewerkers")} />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 max-w-3xl">
+          <h2 className="text-2xl font-black text-[#0B1F4D] sm:text-3xl">
+            Werken in de crew: events, horeca en productie
+          </h2>
+          <p className="mt-4 text-base leading-8 text-[#101828]/75">
+            Zoek je afwisselende klussen als event crew, stagehand, runner of in
+            de horeca? Bij Helping Hands krijg je heldere planning en briefing —
+            van festivalterrein tot restaurantvloer. Bekijk openstaande functies
+            of meld je direct aan. Meer over hoe wij werken staat op{" "}
+            <Link
+              href="/over-ons"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              over ons
+            </Link>{" "}
+            en bij{" "}
+            <Link
+              href="/diensten"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              diensten
+            </Link>
+            .
+          </p>
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/vacatures"
@@ -51,11 +85,17 @@ export default function MedewerkersPage() {
           >
             Bekijk vacatures
           </Link>
-          <a
-            href={`mailto:${applicationsEmail}`}
+          <Link
+            href="/contact"
             className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] px-8 py-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
           >
-            Aanmelden als crewlid
+            Aanmelden via contact
+          </Link>
+          <a
+            href={`mailto:${applicationsEmail}`}
+            className="inline-flex items-center justify-center rounded-full border-2 border-[#F28C28] px-8 py-4 text-sm font-bold text-[#F28C28] transition hover:bg-[#FFF7ED]"
+          >
+            Mail {applicationsEmail}
           </a>
         </div>
       </section>

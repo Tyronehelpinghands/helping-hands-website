@@ -505,10 +505,11 @@ export type ClientIntegrationItem = {
   checkUrl?: string;
 };
 
+/** Geen intern API-checkUrls — opdrachtgevers mogen geen productie-integratie-endpoints raken. */
 export const CLIENT_INTEGRATIONS: ClientIntegrationItem[] = [
   { id: "hubspot", name: "HubSpot" },
-  { id: "moneybird", name: "Moneybird", checkUrl: "/api/moneybird/status" },
-  { id: "shiftbase", name: "Shiftbase", checkUrl: "/api/shiftbase" },
+  { id: "moneybird", name: "Moneybird" },
+  { id: "shiftbase", name: "Shiftbase" },
   { id: "supabase", name: "Supabase" },
   { id: "gmail", name: "Gmail" },
   { id: "whatsapp", name: "WhatsApp" },

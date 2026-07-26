@@ -1,0 +1,91 @@
+export type FaqItem = {
+  question: string;
+  answer: string;
+};
+
+export const homeFaqs: FaqItem[] = [
+  {
+    question: "Welke crew kan ik bij Helping Hands Agency inhuren?",
+    answer:
+      "Wij leveren event crew, stagehands, horeca- en restaurantpersoneel, keuken- en barpersoneel, productie-assistentie, logistiek en hospitality. Van festivals en concerten tot beurzen, stadions en horecalocaties.",
+  },
+  {
+    question: "Hoe snel kan ik personeel aanvragen?",
+    answer:
+      "Stuur datum, locatie, tijden, functies en aantal mensen via het contactformulier of e-mail. Bij spoedaanvragen denken we mee over wat nog haalbaar is op basis van beschikbaarheid.",
+  },
+  {
+    question: "Werken jullie alleen met events of ook met restaurants?",
+    answer:
+      "Beide. Naast event- en productiecrew leveren we flexibele ondersteuning voor restaurants en horeca: bediening, runners, bar, keuken en afwas tijdens piekmomenten of tijdelijke bezetting.",
+  },
+  {
+    question: "Wat bedoelen jullie met projectervaring op de website?",
+    answer:
+      "Logo’s en namen tonen sectoren en producties waar onze crew via jobs, partners of producties ervaring heeft opgedaan. Dat is geen claim van officiële partnership, tenzij dat expliciet staat vermeld.",
+  },
+  {
+    question: "Hoe meld ik mij aan als crewlid?",
+    answer:
+      "Bekijk de vacatures of stuur je gegevens naar aanmeldingen@helpinghandsagency.nl. Vermeld ervaring, woonplaats, beschikbaarheid en of je ZZP of loondienst zoekt.",
+  },
+];
+
+export const contactFaqs: FaqItem[] = [
+  {
+    question: "Welke informatie heb ik nodig voor een personeelsaanvraag?",
+    answer:
+      "Datum, locatie, start- en eindtijd, aantal mensen, functies, kleding of PBM, contactpersoon op locatie en een korte briefing. Hoe completer, hoe sneller wij kunnen bezetten.",
+  },
+  {
+    question: "Kan ik een spoedaanvraag doen?",
+    answer:
+      "Ja. Geef bij je aanvraag aan dat het spoed is en deel de harde deadline. We kijken wat er nog mogelijk is met beschikbare crew.",
+  },
+  {
+    question: "Waar mail ik als opdrachtgever of als crew?",
+    answer:
+      "Personeelsaanvragen: info@helpinghandsagency.nl. Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl.",
+  },
+  {
+    question: "Is het contactformulier al gekoppeld aan jullie systemen?",
+    answer:
+      "Het formulier bereidt je aanvraag voor. Voor de snelste opvolging kun je de gegevens ook direct mailen. Koppeling met HubSpot of andere tools volgt later.",
+  },
+];
+
+export const opdrachtgeversFaqs: FaqItem[] = [
+  {
+    question: "Voor welke sectoren leveren jullie personeel?",
+    answer:
+      "Events, festivals, concerten, beurzen, stadions, horeca, restaurants, keuken, bar, stagebouw, productie, logistiek en hospitality.",
+  },
+  {
+    question: "Hoe werkt de briefing van crew?",
+    answer:
+      "Na bevestiging ontvangt de crew duidelijke info over aankomst, kleding, taken, locatie en aanspreekpunt. Jij houdt één vast contact bij Helping Hands.",
+  },
+  {
+    question: "Kunnen jullie ook restaurantpersoneel of keukenpersoneel leveren?",
+    answer:
+      "Ja. Denk aan bediening, hosts, runners, bartenders, barbacks, keukenhulpen, afwassers en zelfstandig werkend koks voor piekdrukte of tijdelijke bezetting.",
+  },
+  {
+    question: "Claimen jullie officiële partnerships via de projectlogo’s?",
+    answer:
+      "Nee. Logo’s en namen geven projectervaring en inzetgebieden weer. Officiële partnership claimen we alleen als dat expliciet vermeld staat.",
+  },
+];
+
+export function getFaqsForPage(
+  page: "home" | "contact" | "opdrachtgevers",
+): FaqItem[] {
+  switch (page) {
+    case "contact":
+      return contactFaqs;
+    case "opdrachtgevers":
+      return opdrachtgeversFaqs;
+    default:
+      return homeFaqs;
+  }
+}

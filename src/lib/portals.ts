@@ -170,9 +170,13 @@ export function getPortalDashboardPath(type: PortalType): string {
   return portals.find((portal) => portal.id === type)?.dashboardHref ?? "/login";
 }
 
-export function getPortalByType(type: string | null): PortalType {
+/**
+ * Parse ?type= from login URL.
+ * Geen default naar "intern" — gebruiker moet bewust een portaal kiezen.
+ */
+export function getPortalByType(type: string | null): PortalType | null {
   if (type === "intern" || type === "medewerker" || type === "opdrachtgever") {
     return type;
   }
-  return "intern";
+  return null;
 }

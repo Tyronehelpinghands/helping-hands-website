@@ -62,9 +62,9 @@ export default function ProjectLogoCard({
       <div
         className={cn(
           "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-3",
-          isCarousel && "h-32 min-h-32 sm:h-36 sm:p-4 lg:h-40",
+          isCarousel && "h-36 min-h-36 sm:h-40 sm:p-5 lg:h-44",
           isCompact && "h-20 min-h-20 p-2",
-          resolvedVariant === "default" && "h-28 min-h-28 sm:h-32 sm:p-4",
+          resolvedVariant === "default" && "h-32 min-h-32 sm:h-40 sm:p-5",
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,10 +72,10 @@ export default function ProjectLogoCard({
           src={logo.logoPath}
           alt={alt}
           className={cn(
-            "w-auto max-w-full object-contain transition duration-300",
-            isCarousel && "max-h-20 sm:max-h-24 lg:max-h-28",
+            "h-auto w-auto max-h-full max-w-full object-contain transition duration-300",
+            isCarousel && "max-h-24 sm:max-h-28 lg:max-h-32",
             isCompact && "max-h-14",
-            resolvedVariant === "default" && "max-h-20 sm:max-h-24",
+            resolvedVariant === "default" && "max-h-24 sm:max-h-28",
             interactive &&
               "grayscale-[0.35] group-hover:grayscale-0 group-hover:scale-105",
           )}

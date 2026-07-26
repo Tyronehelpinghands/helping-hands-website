@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
 import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
 import VacancyFilter from "@/components/VacancyFilter";
+import VacancyJobPostingsJsonLd from "@/components/seo/VacancyJobPostingsJsonLd";
 import PageHero from "@/components/sections/PageHero";
 import { opdrachtgeversHorecaPhoto } from "@/lib/crewPhotos";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail } from "@/lib/navigation";
+import { buildPageMetadata } from "@/lib/seo";
 import { restaurantVacancyGroups } from "@/lib/vacancies";
 
-export const metadata: Metadata = {
-  title: "Vacatures | Werken bij Helping Hands Agency",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Vacatures",
   description:
-    "Vacatures bij Helping Hands Agency voor events, restaurants, keukens, bediening, bar en leidinggevende horecafuncties.",
-};
+    "Vacatures voor event crew, stagehands, horeca-, restaurant-, keuken- en barpersoneel bij Helping Hands Agency.",
+  path: "/vacatures",
+});
 
 export default function VacaturesPage() {
   return (
     <>
+      <VacancyJobPostingsJsonLd />
       <PageHero content={getPageHeroContent("/vacatures")} />
 
       <section

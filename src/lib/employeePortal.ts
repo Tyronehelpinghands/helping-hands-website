@@ -100,9 +100,19 @@ export type EmployeeHoursEntry = {
   correctionRequest?: EmployeeHoursCorrectionRequest;
 };
 
-/** Medewerker mag geen uren goedkeuren — alleen correctie indienen indien nog geen open verzoek. */
+/**
+ * Medewerker mag geen uren goedkeuren (dat is intern).
+ * Alleen correctie indienen bij openstaande/beoordeelde uren — niet bij gefactureerd of al lopende correctie.
+ */
 export function canEmployeeSubmitHoursCorrection(entry: EmployeeHoursEntry): boolean {
-  return entry.status !== "Correctie aangevraagd";
+  if (entry.status === "Correctie aangevraagd") return false;
+  if (entry.status === "Gefactureerd") return false;
+  return (
+    entry.status === "Concept" ||
+    entry.status === "Ingediend" ||
+    entry.status === "Goedgekeurd" ||
+    entry.status === "Afgekeurd"
+  );
 }
 
 export type EmployeeMessage = {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import AudienceToggle from "@/components/AudienceToggle";
@@ -6,20 +7,44 @@ import DeploymentCards from "@/components/DeploymentCards";
 import LogoCarousel from "@/components/LogoCarousel";
 import ProcessAccordion from "@/components/ProcessAccordion";
 import QuickRequestForm from "@/components/QuickRequestForm";
+import RevealOnScroll from "@/components/RevealOnScroll";
+import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
+import ProjectExperienceTeaser from "@/components/sections/ProjectExperienceTeaser";
+import ServicesSection from "@/components/sections/ServicesSection";
+import TrustBar from "@/components/sections/TrustBar";
+import WhyHelpingHands from "@/components/sections/WhyHelpingHands";
+import JsonLd from "@/components/seo/JsonLd";
 import SectorCards from "@/components/SectorCards";
-import ServiceFilter from "@/components/ServiceFilter";
 import { ctaBackgroundPhoto, homeCrewStrip } from "@/lib/crewPhotos";
+import { homeFaqs } from "@/lib/faq";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
+import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
+import { siteConfig } from "@/lib/siteConfig";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: `${siteConfig.name} | Crew voor evenementen, horeca en productie`,
+  description: siteConfig.description,
+  path: "/",
+  absoluteTitle: true,
+});
 
 export default function Home() {
   return (
     <>
+      <JsonLd data={faqJsonLd(homeFaqs)} />
       <PageHero content={getPageHeroContent("/")} />
+      <RevealOnScroll>
+        <TrustBar />
+      </RevealOnScroll>
 
-      <SectorCards />
+      <RevealOnScroll>
+        <SectorCards />
+      </RevealOnScroll>
 
-      <LogoCarousel />
+      <RevealOnScroll>
+        <LogoCarousel />
+      </RevealOnScroll>
 
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -60,9 +85,10 @@ export default function Home() {
               Crew en ondersteuning voor elke fase van je productie.
             </h2>
             <p className="mt-5 text-base leading-8 text-[#101828]/75 sm:text-lg">
-              Van horeca en hospitality tot stagebouw, productie, logistiek en keuken:
-              Helping Hands levert praktische mensen die direct begrijpen wat er op
-              locatie nodig is.
+              Event crew inhuren, stagehands, horeca personeel, restaurant- en
+              keukenpersoneel, bar, productie, logistiek en hospitality — Helping
+              Hands levert praktische mensen die direct begrijpen wat er op locatie
+              nodig is.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
@@ -72,8 +98,14 @@ export default function Home() {
                 Bekijk alle diensten
               </Link>
               <Link
-                href="/contact"
+                href="/diensten/event-crew"
                 className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Event crew
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#F28C28] bg-white px-7 py-3.5 text-sm font-bold text-[#F28C28] transition hover:bg-[#FFF7ED]"
               >
                 Personeel aanvragen
               </Link>
@@ -81,28 +113,8 @@ export default function Home() {
           </div>
 
           <div className="mt-12 sm:mt-16">
-            <ServiceFilter />
+            <ServicesSection />
           </div>
-        </div>
-      </section>
-
-      <section className="section-dark py-24 text-white sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
-              Sectoren
-            </p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
-              Waar wij worden ingezet
-            </h2>
-            <p className="mt-5 text-lg leading-8 text-white/75">
-              Van festivalterrein tot stadionproductie: wij leveren praktische
-              ondersteuning op locaties waar timing en communicatie belangrijk
-              zijn.
-            </p>
-          </div>
-
-          <DeploymentCards />
         </div>
       </section>
 
@@ -122,6 +134,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ProjectExperienceTeaser />
 
       <section className="py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -144,7 +158,35 @@ export default function Home() {
         </div>
       </section>
 
+      <RevealOnScroll>
+        <WhyHelpingHands />
+      </RevealOnScroll>
+
+      <section className="section-dark py-24 text-white sm:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
+              Sectoren
+            </p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
+              Waar wij worden ingezet
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-white/75">
+              Van festivalterrein tot stadionproductie: wij leveren praktische
+              ondersteuning op locaties waar timing en communicatie belangrijk
+              zijn.
+            </p>
+          </div>
+
+          <DeploymentCards />
+        </div>
+      </section>
+
       <QuickRequestForm />
+
+      <RevealOnScroll>
+        <FaqSection items={homeFaqs} />
+      </RevealOnScroll>
 
       <CTASection
         title="Personeel nodig voor je volgende productie?"

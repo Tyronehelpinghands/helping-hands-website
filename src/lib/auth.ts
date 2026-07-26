@@ -71,7 +71,7 @@ export function canAccessPortal(role: UserRole, portalType: PortalType): boolean
     case "medewerker":
       return role === "medewerker" || isInternRole(role);
     case "opdrachtgever":
-      return role === "opdrachtgever";
+      return role === "opdrachtgever" || isInternRole(role);
     default:
       return false;
   }

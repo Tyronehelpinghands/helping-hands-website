@@ -116,7 +116,7 @@ export default function PageHero({ content }: PageHeroProps) {
         )}
       />
 
-      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-20 xl:py-24">
+      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:grid-cols-2 lg:items-center lg:px-8 lg:pb-20 lg:pt-36 xl:pb-24">
         <div className="min-w-0">
           <p className={cn("text-sm font-bold uppercase tracking-[0.2em]", theme.eyebrow)}>
             {content.eyebrow}

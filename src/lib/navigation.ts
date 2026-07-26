@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/siteConfig";
+
 export const navLinks = [
   { href: "/", label: "Home" },
   { href: "/diensten", label: "Diensten" },
@@ -10,8 +12,8 @@ export const navLinks = [
   { href: "/login", label: "Login" },
 ] as const;
 
-export const contactEmail = "info@helpinghandsagency.nl";
-export const applicationsEmail = "aanmeldingen@helpinghandsagency.nl";
+export const contactEmail = siteConfig.email;
+export const applicationsEmail = siteConfig.applicationsEmail;
 
 export type DropdownItem = {
   title: string;
@@ -41,12 +43,12 @@ export const navDropdowns: NavDropdownConfig[] = [
         title: "Event crew",
         description:
           "Floor support, publieksstromen, runners en algemene eventondersteuning.",
-        href: "/diensten",
+        href: "/diensten/event-crew",
       },
       {
         title: "Horeca support",
         description: "Barbacks, runners, bediening, uitgifte en hospitality.",
-        href: "/diensten",
+        href: "/diensten/horeca-personeel",
       },
       {
         title: "Stagehands",
@@ -65,11 +67,12 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/diensten",
       },
       {
-        title: "Teamcaptains",
-        description: "Aansturing, briefing en aanspreekpunt op locatie.",
+        title: "Alle diensten",
+        description: "Filter op event, horeca, keuken, bar, stagebouw en meer.",
         href: "/diensten",
       },
     ],
+    cta: { label: "Bekijk alle diensten", href: "/diensten" },
   },
   {
     id: "opdrachtgevers",

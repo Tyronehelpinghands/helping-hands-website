@@ -4,19 +4,22 @@ import PortalDashboard from "@/components/PortalDashboard";
 import PortalHeroMark from "@/components/PortalHeroMark";
 import { internDashboard } from "@/lib/portals";
 
-export const metadata = {
-  title: "Intern portaal | Helping Hands Agency",
-  description: "Demo-dashboard voor intern planning en crewbeheer.",
-};
+import type { Metadata } from "next";
+import { noIndexMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = noIndexMetadata(
+  "Intern portaal",
+  "Demo-dashboard voor intern planning en crewbeheer.",
+);
 
 export default function InternPortaalPage() {
   return (
     <>
-      <PortalBanner />
+      <PortalBanner variant="intern" />
       <PortalHeroMark
         label="Intern"
         title="Intern portaal"
-        description="Overzicht voor planning, aanvragen, crew en projectadministratie."
+        description="Overzicht voor planning, aanvragen, crew en projectadministratie. Ga via login?type=intern — niet de standaard voor crew of opdrachtgevers."
         action={
           <Link
             href="/login?type=intern"

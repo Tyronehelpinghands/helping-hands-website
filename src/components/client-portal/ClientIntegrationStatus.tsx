@@ -56,7 +56,10 @@ export default function ClientIntegrationStatus() {
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle className="text-lg font-black text-[#0B1F4D]">Integratiestatus</CardTitle>
-          <CardDescription>Veilige server-side checks — geen tokens in frontend.</CardDescription>
+          <CardDescription>
+            Koppelingen worden later per opdrachtgever zichtbaar. Geen interne
+            API-status of tokens in dit portaal.
+          </CardDescription>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={checkAll} disabled={loading}>
           {loading ? (

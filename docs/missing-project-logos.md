@@ -1,6 +1,12 @@
 # Ontbrekende projectlogo’s
 
+Laatste update: 25 juli 2026 (P2)
+
 Items die **niet** op `/projecten` worden getoond omdat het verwachte lokale logo-bestand ontbreekt.
+
+**Bron van waarheid voor zichtbare logo’s:** `src/lib/projectLogos.ts` (niet meer `logos.ts` — verwijderd in P1).
+
+**Let op:** er liggen nog bestanden in `public/images/logos/` voor Backstage Masters, Backbone, Stadsfestival, Q-dance, TAP Crew — die blijven **bewust niet** in `projectLogos.ts` tot ze opnieuw bewust worden toegevoegd.
 
 ## Opdrachtgevers
 

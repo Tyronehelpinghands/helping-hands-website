@@ -83,14 +83,16 @@ export default function BrandLogo({
 
 export function HeaderBrandLogo({
   scrolled,
+  inverted = false,
   onNavigate,
 }: {
   scrolled: boolean;
+  inverted?: boolean;
   onNavigate?: () => void;
 }) {
   const logoWidth = scrolled
-    ? "w-[135px] sm:w-[145px] lg:w-[170px] max-h-[52px]"
-    : "w-[150px] sm:w-[160px] lg:w-[200px] max-h-[72px]";
+    ? "w-[120px] sm:w-[135px] lg:w-[155px] max-h-[44px]"
+    : "w-[145px] sm:w-[160px] lg:w-[195px] max-h-[68px]";
 
   return (
     <>
@@ -98,9 +100,9 @@ export function HeaderBrandLogo({
         href="/"
         onClick={onNavigate}
         priority
-        variant="full"
+        variant={inverted ? "fullWhite" : "full"}
         className="hidden min-[400px]:inline-flex"
-        imageClassName={logoWidth}
+        imageClassName={`${logoWidth} transition-[width,max-height] duration-300`}
       />
       <Link
         href="/"
@@ -109,15 +111,23 @@ export function HeaderBrandLogo({
         aria-label={`${brandAlt} home`}
       >
         <BrandLogoImage
-          variant="mark"
+          variant={inverted ? "markWhite" : "mark"}
           priority
-          imageClassName="h-10 w-10"
+          imageClassName="h-9 w-9 sm:h-10 sm:w-10"
         />
         <span className="flex flex-col leading-tight">
-          <span className="text-sm font-extrabold tracking-tight text-[#173A8A]">
+          <span
+            className={`text-sm font-extrabold tracking-tight ${
+              inverted ? "text-white" : "text-[#173A8A]"
+            }`}
+          >
             Helping Hands
           </span>
-          <span className="text-[0.6rem] font-semibold uppercase tracking-[0.1em] text-slate-500">
+          <span
+            className={`text-[0.6rem] font-semibold uppercase tracking-[0.1em] ${
+              inverted ? "text-white/70" : "text-slate-500"
+            }`}
+          >
             Event staffing
           </span>
         </span>

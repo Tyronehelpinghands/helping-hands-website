@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2, ShieldCheck, Users } from "lucide-react";
 import PortalBanner from "@/components/PortalBanner";
 import PortalHeroMark from "@/components/PortalHeroMark";
 import { LOGIN_PORTAL_CARDS } from "@/lib/authRedirects";
+import { noIndexMetadata } from "@/lib/seo";
 
 const cardIcons = {
   intern: ShieldCheck,
@@ -10,20 +12,19 @@ const cardIcons = {
   opdrachtgever: Building2,
 } as const;
 
-export const metadata = {
-  title: "Portalen | Helping Hands Agency",
-  description:
-    "Kies intern dashboard, medewerkersportaal of opdrachtgeversportaal.",
-};
+export const metadata: Metadata = noIndexMetadata(
+  "Portalen",
+  "Kies intern dashboard, medewerkersportaal of opdrachtgeversportaal.",
+);
 
 export default function PortaalPage() {
   return (
     <>
-      <PortalBanner />
+      <PortalBanner variant="generic" />
       <PortalHeroMark
         label="Portalen"
         title="Helping Hands Portalen"
-        description="Kies het portaal dat bij jouw rol hoort. Demo-login is beschikbaar; echte auth volgt later."
+        description="Kies het portaal dat bij jouw rol hoort. Intern, crew en opdrachtgever zijn gescheiden — demo-login is alleen UI tenzij integratie-API’s expliciet zijn aangezet."
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

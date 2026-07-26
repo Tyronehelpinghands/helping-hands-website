@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm";
 
-export const metadata: Metadata = {
-  title: "Wachtwoord vergeten | Helping Hands Agency",
-  description: "Vraag een wachtwoord-resetlink aan voor je Helping Hands account.",
-};
+import { noIndexMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = noIndexMetadata(
+  "Wachtwoord vergeten",
+  "Vraag een wachtwoord-resetlink aan voor je Helping Hands account.",
+);
 
 export default function ForgotPasswordPage() {
   return (
     <>
       <section className="hero-gradient relative overflow-hidden text-white">
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 sm:pt-32 lg:px-8 lg:pb-16 lg:pt-36">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#7dd3fc]">
             Account
           </p>

@@ -3,7 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
+import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import JsonLd from "@/components/seo/JsonLd";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { services } from "@/lib/content";
@@ -13,12 +16,15 @@ import {
   opdrachtgeversHorecaPhoto,
   opdrachtgeversProcessPhotos,
 } from "@/lib/crewPhotos";
+import { opdrachtgeversFaqs } from "@/lib/faq";
+import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Opdrachtgevers | Helping Hands Agency",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Opdrachtgevers — personeel voor events & horeca",
   description:
-    "Personeel aanvragen voor evenementen, festivals, stadions, beurzen, restaurants en horecalocaties.",
-};
+    "Event personeel Nederland inhuren: crew evenementen, stagehands, horeca- en restaurantpersoneel. Helder aanvraagproces, briefing en één aanspreekpunt.",
+  path: "/opdrachtgevers",
+});
 
 const clientTypes = [
   "Event- en productiebedrijven",
@@ -66,9 +72,58 @@ const process = [
 export default function OpdrachtgeversPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Opdrachtgevers", path: "/opdrachtgevers" },
+        ]}
+      />
+      <JsonLd data={faqJsonLd(opdrachtgeversFaqs)} />
       <PageHero content={getPageHeroContent("/opdrachtgevers")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mb-14 max-w-3xl">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+            Voor opdrachtgevers
+          </p>
+          <h2 className="mt-3 text-3xl font-black text-[#0B1F4D] sm:text-4xl">
+            Personeel evenementenbureau én horeca — zonder gedoe op de vloer
+          </h2>
+          <p className="mt-4 text-base leading-8 text-[#101828]/75">
+            Of je nu event crew nodig hebt voor een festivalproductie, stagehands
+            voor load-in, of restaurantpersoneel voor piekdrukte: Helping Hands
+            Agency bezet praktische functies met duidelijke briefing. Start via{" "}
+            <Link
+              href="/contact"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              contact
+            </Link>
+            , bekijk{" "}
+            <Link
+              href="/diensten"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              alle diensten
+            </Link>{" "}
+            of ga gericht naar{" "}
+            <Link
+              href="/diensten/event-crew"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              event crew
+            </Link>{" "}
+            en{" "}
+            <Link
+              href="/diensten/horeca-personeel"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              horeca personeel
+            </Link>
+            .
+          </p>
+        </div>
+
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Voor wie wij werken</h2>
@@ -185,6 +240,12 @@ export default function OpdrachtgeversPage() {
           </Link>
         </div>
       </section>
+
+      <FaqSection
+        items={opdrachtgeversFaqs}
+        title="Vragen van opdrachtgevers"
+        description="Over sectoren, briefing en hoe projectervaring op de site bedoeld is."
+      />
 
       <CTASection
         title="Crew nodig op korte termijn?"

@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import PageHero from "@/components/sections/PageHero";
-import ServiceFilter from "@/components/ServiceFilter";
+import ServicesSection from "@/components/sections/ServicesSection";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
+import { buildPageMetadata } from "@/lib/seo";
+import { getPublishedServiceLandings } from "@/lib/services";
 
-export const metadata: Metadata = {
-  title: "Diensten | Helping Hands Agency",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Diensten",
   description:
-    "Event crew, horeca, restaurant, keuken, bar, stagebouw, productie, logistiek en hospitality voor events en locaties.",
-};
+    "Event crew inhuren, stagehands, horeca- en restaurantpersoneel, keuken, bar, productie, logistiek en hospitality in Nederland.",
+  path: "/diensten",
+});
 
 export default function DienstenPage() {
+  const landings = getPublishedServiceLandings();
+
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Diensten", path: "/diensten" },
+        ]}
+      />
       <PageHero content={getPageHeroContent("/diensten")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -26,12 +38,27 @@ export default function DienstenPage() {
           </h2>
           <p className="mt-4 leading-8 text-[#101828]/75">
             Van stagebouw en productie tot horeca, keuken, bar en hospitality:
-            filter op categorie en bekijk concrete inzetmogelijkheden.
+            filter op categorie en bekijk concrete inzetmogelijkheden. Zoek je
+            gericht event crew of horeca personeel? Start via de landings hieronder.
           </p>
         </div>
 
+        {landings.length > 0 ? (
+          <div className="mt-8 flex flex-wrap gap-3">
+            {landings.map((landing) => (
+              <Link
+                key={landing.slug}
+                href={landing.path}
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-[#173A8A] shadow-sm transition hover:border-[#F28C28]/50 hover:shadow-md"
+              >
+                {landing.title}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+
         <div className="mt-10">
-          <ServiceFilter showAllWhenAlle />
+          <ServicesSection showAllWhenAlle />
         </div>
       </section>
 
