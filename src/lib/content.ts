@@ -98,19 +98,19 @@ export const processSteps = [
     step: "01",
     title: "Aanvraag",
     description:
-      "Je deelt datum, locatie, tijden, functies en aantal mensen.",
+      "Je deelt datum, locatie, tijden, functies, aantal mensen en contactpersoon.",
   },
   {
     step: "02",
     title: "Planning",
     description:
-      "Wij stemmen de bezetting af op beschikbaarheid, ervaring en type productie.",
+      "Wij koppelen de juiste crew aan je aanvraag op basis van beschikbaarheid, ervaring en type productie.",
   },
   {
     step: "03",
     title: "Briefing",
     description:
-      "Crew ontvangt duidelijke informatie over aankomst, kleding, taken en aanspreekpunten.",
+      "Crew ontvangt duidelijke informatie over aankomst, kleding, taken, locatie en aanspreekpunt.",
   },
   {
     step: "04",
@@ -122,7 +122,7 @@ export const processSteps = [
     step: "05",
     title: "Afhandeling",
     description:
-      "Na afloop zorgen we voor terugkoppeling, urencontrole en opvolging.",
+      "We controleren uren, verzamelen terugkoppeling en zorgen voor nette opvolging.",
   },
 ];
 

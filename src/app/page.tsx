@@ -147,7 +147,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 sm:py-32">
+      <section className="relative overflow-hidden py-24 sm:py-32">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(23,58,138,0.08), transparent), radial-gradient(ellipse 40% 30% at 90% 80%, rgba(242,140,40,0.08), transparent)",
+          }}
+        />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
@@ -157,8 +165,9 @@ export default function Home() {
               Zo werken wij
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#101828]/70">
-              Van aanvraag tot afhandeling: een helder proces voor crew,
-              briefing en uitvoering op locatie.
+              Van aanvraag tot afhandeling: vijf concrete stappen voor planning,
+              briefing en uitvoering — zodat jij weet wat er gebeurt en wie wat
+              doet.
             </p>
           </div>
 
