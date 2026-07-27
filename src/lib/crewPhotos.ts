@@ -88,47 +88,47 @@ export const homeHeroCollage: CrewPhoto[] = [
   },
 ];
 
-/** Bento-layout spans voor homepage crewsectie. */
+/** Bento-layout items voor homepage crewsectie (shapes in HomeCrewBento). */
 export type CrewBentoItem = CrewPhoto & {
-  className: string;
+  caption: string;
   sizes: string;
 };
 
 export const homeCrewBento: CrewBentoItem[] = [
   {
     src: "/images/crew/scaffolding-team-wide.webp",
-    alt: "Team bouwt scaffolding en overkapping op locatie",
-    className: "col-span-2 row-span-2 aspect-[4/3] sm:aspect-auto sm:min-h-[20rem]",
-    sizes: "(max-width: 640px) 100vw, 50vw",
+    alt: "Helping Hands crew bouwt scaffolding en overkapping op locatie",
+    caption: "Scaffolding & opbouw",
+    sizes: "(max-width: 640px) 100vw, 58vw",
   },
   {
     src: "/images/crew/thumbs-up-branded.webp",
-    alt: "Helping Hands crewlid met thumbs up",
-    className: "aspect-[3/4] sm:aspect-[4/5]",
-    sizes: "(max-width: 640px) 50vw, 25vw",
+    alt: "Helping Hands crewlid in branded shirt met thumbs up",
+    caption: "Eigen crew",
+    sizes: "(max-width: 640px) 50vw, 42vw",
   },
   {
     src: "/images/crew/crew-woman-branded.webp",
-    alt: "Helping Hands crewlid in branded shirt",
-    className: "aspect-[3/4] sm:aspect-[4/5]",
-    sizes: "(max-width: 640px) 50vw, 25vw",
+    alt: "Helping Hands crewlid in branded shirt op locatie",
+    caption: "Branded op de vloer",
+    sizes: "(max-width: 640px) 50vw, 42vw",
   },
   {
     src: "/images/crew/chef-fryer.webp",
-    alt: "Horecacrew achter de frituur op een event",
-    className: "aspect-[4/3] sm:col-span-1",
+    alt: "Horecacrew achter de frituur tijdens een event",
+    caption: "Horeca & frituur",
     sizes: "(max-width: 640px) 50vw, 25vw",
   },
   {
     src: "/images/crew/stadium-flightcase-push.webp",
-    alt: "Crew verplaatst materiaal in een stadion",
-    className: "aspect-[4/3] sm:col-span-1",
+    alt: "Eventcrew duwt flightcase door een stadion",
+    caption: "Stadion & logistiek",
     sizes: "(max-width: 640px) 50vw, 25vw",
   },
   {
     src: "/images/crew/festival-build-site.webp",
-    alt: "Festivalterrein tijdens opbouw met crew",
-    className: "col-span-2 aspect-[16/9] sm:col-span-2",
+    alt: "Festivalterrein tijdens opbouw met containers en Helping Hands crew",
+    caption: "Festivalterrein",
     sizes: "(max-width: 640px) 100vw, 50vw",
   },
 ];

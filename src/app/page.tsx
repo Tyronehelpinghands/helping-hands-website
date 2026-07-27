@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import AudienceToggle from "@/components/AudienceToggle";
 import CTASection from "@/components/CTASection";
@@ -9,6 +8,7 @@ import ProcessAccordion from "@/components/ProcessAccordion";
 import QuickRequestForm from "@/components/QuickRequestForm";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import FaqSection from "@/components/sections/FaqSection";
+import HomeCrewBento from "@/components/sections/HomeCrewBento";
 import PageHero from "@/components/sections/PageHero";
 import ServicesSection from "@/components/sections/ServicesSection";
 import TrustBar from "@/components/sections/TrustBar";
@@ -39,9 +39,17 @@ export default function Home() {
 
       <LogoCarousel />
 
-      <section className="bg-white py-10 sm:py-14">
+      <section className="relative overflow-hidden bg-white py-10 sm:py-14">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 50% 40% at 0% 60%, rgba(23,58,138,0.06), transparent), radial-gradient(ellipse 40% 35% at 100% 20%, rgba(242,140,40,0.07), transparent)",
+          }}
+        />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 max-w-2xl">
+          <div className="mb-8 max-w-2xl sm:mb-10">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
               Op locatie
             </p>
@@ -53,22 +61,7 @@ export default function Home() {
               geen stock.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            {homeCrewBento.map((photo, index) => (
-              <div
-                key={`${photo.src}-${index}`}
-                className={`relative overflow-hidden rounded-2xl bg-slate-100 ${photo.className}`}
-              >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  sizes={photo.sizes}
-                  className="object-cover transition duration-500 hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100"
-                />
-              </div>
-            ))}
-          </div>
+          <HomeCrewBento photos={homeCrewBento} />
         </div>
       </section>
 
