@@ -12,6 +12,8 @@ import {
 } from "@/lib/vacancyFilters";
 import { openApplyMailto, vacancies, type Vacancy } from "@/lib/vacancies";
 
+const RESULTS_ID = "vacancy-results";
+
 export default function VacancyExplorer() {
   const [filters, setFilters] = useState<VacancyFilterState>(
     defaultVacancyFilterState,
@@ -27,7 +29,7 @@ export default function VacancyExplorer() {
   return (
     <section
       id="vacatures"
-      className="scroll-mt-24 bg-white py-16 sm:py-24"
+      className="scroll-mt-24 max-w-[100vw] overflow-x-clip bg-white py-16 sm:py-24"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll>
@@ -46,40 +48,55 @@ export default function VacancyExplorer() {
           </div>
         </RevealOnScroll>
 
-        <div className="mt-10">
+        <div className="mt-10 max-w-full">
           <VacancyFilters
             state={filters}
             onChange={setFilters}
             resultCount={visible.length}
             mobileOpen={mobileFiltersOpen}
             onMobileOpenChange={setMobileFiltersOpen}
+            resultsId={RESULTS_ID}
           />
         </div>
 
-        {visible.length > 0 ? (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((vacancy) => (
-              <VacancyCard
-                key={vacancy.id}
-                vacancy={vacancy}
-                onView={() => setSelected(vacancy)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-[#F5F7FA] p-8 text-center">
-            <p className="text-base font-bold text-[#0B1F4D]">
-              Geen functies gevonden. Probeer een andere categorie of meld je
-              open aan.
-            </p>
-            <a
-              href={openApplyMailto}
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-6 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
-            >
-              Open aanmelden
-            </a>
-          </div>
-        )}
+        <div id={RESULTS_ID} role="tabpanel" className="mt-8">
+          {visible.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.map((vacancy) => (
+                <VacancyCard
+                  key={vacancy.id}
+                  vacancy={vacancy}
+                  onView={() => setSelected(vacancy)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-[#F5F7FA] p-8 text-center">
+              <p className="text-base font-bold text-[#0B1F4D]">
+                Geen vacatures gevonden binnen deze categorie.
+              </p>
+              <p className="mt-2 text-sm text-[#101828]/65">
+                Probeer een andere categorie, wis je zoekterm, of meld je open
+                aan.
+              </p>
+              <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setFilters(defaultVacancyFilterState)}
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-full border-2 border-[#173A8A] px-6 text-sm font-bold text-[#173A8A] transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
+                >
+                  Reset filters
+                </button>
+                <a
+                  href={openApplyMailto}
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-[#F28C28] px-6 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
+                >
+                  Open aanmelden
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <VacancyDetailDrawer

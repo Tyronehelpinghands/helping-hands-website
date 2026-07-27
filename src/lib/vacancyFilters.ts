@@ -144,6 +144,7 @@ const energyIds: Record<MatchEnergy, string[]> = {
     "eventmedewerker-floor-support",
     "host-gastheer-gastvrouw",
     "hospitality-medewerker",
+    "vip-support",
   ],
   fysiek: [
     "stagehand-load-in-out",

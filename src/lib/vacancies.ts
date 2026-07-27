@@ -319,7 +319,7 @@ export const vacancies: Vacancy[] = [
     level: "Instap",
     employmentType: "Oproepbasis / flexibel",
     shortDescription:
-      "Gastvrijheid, ontvangst en hospitality support op events en locaties.",
+      "Ontvang gasten, ondersteun publieksstromen en zorg voor een nette en gastvrije ervaring.",
     description:
       "Als hospitality medewerker zorg je dat gasten zich welkom voelen: ontvangst, begeleiding en service in hospitality-zones.",
     tasks: [
@@ -337,6 +337,35 @@ export const vacancies: Vacancy[] = [
     suitableFor: ["Wie gasten helpen leuk vindt", "Instappers hospitality"],
     tags: ["hospitality", "gasten", "events", "ontvangst"],
     featured: true,
+  }),
+  v({
+    id: "vip-support",
+    slug: "vip-support",
+    title: "VIP support",
+    category: "Hospitality",
+    level: "Ervaring handig",
+    employmentType: "Oproepbasis / flexibel / projectbasis",
+    shortDescription:
+      "Ondersteun VIP-ruimtes, ontvangst, routing en gastbeleving tijdens events en producties.",
+    description:
+      "VIP support zorgt voor een soepele ervaring rond VIP-zones: ontvangst, routing, netheid en discrete service zodat gasten en organisatoren rust houden.",
+    tasks: [
+      "VIP-gasten ontvangen en begeleiden",
+      "VIP-ruimtes netjes en klaar houden",
+      "Routing en toegang ondersteunen",
+      "Samenwerken met hospitality en floor",
+    ],
+    profile: [
+      "Representatief en discreet",
+      "Gastgericht",
+      "Stressbestendig",
+      "Ervaring met gasten of hospitality is een plus",
+    ],
+    suitableFor: [
+      "Wie VIP- of hospitalitywerk leuk vindt",
+      "Crew met service-ervaring",
+    ],
+    tags: ["vip", "hospitality", "events", "ontvangst"],
   }),
 
   // ——— Restaurant ———
@@ -715,7 +744,7 @@ export const vacancies: Vacancy[] = [
     level: "Instap",
     employmentType: "Oproepbasis / flexibel",
     shortDescription:
-      "Logistieke ondersteuning op events: stromen, materiaal en planning op de vloer.",
+      "Help met materiaal, voorraad, laad- en losmomenten en praktische ondersteuning op eventlocaties.",
     description:
       "Logistiek medewerker events houdt overzicht op materiaalstromen en praktische logistiek tijdens producties.",
     tasks: [
@@ -736,7 +765,7 @@ export const vacancies: Vacancy[] = [
     level: "Instap",
     employmentType: "Oproepbasis / flexibel",
     shortDescription:
-      "Breng materiaal snel en veilig van A naar B op locatie.",
+      "Zorg dat materialen op de juiste plek komen en ondersteun crew en productie op locatie.",
     description:
       "Materiaal runner is een actieve rol: je verplaatst wat nodig is zodat teams door kunnen.",
     tasks: [
@@ -900,7 +929,7 @@ export const restaurantVacancyGroups = [
   },
   {
     title: "Bar & hospitality",
-    roles: ["Barback", "Bartender", "Horeca support", "Hospitality medewerker"],
+    roles: ["Barback", "Bartender", "Horeca support", "Hospitality medewerker", "VIP support"],
   },
   {
     title: "Keuken & leidinggevend",
@@ -971,6 +1000,22 @@ export function vacancyQuestionMailto(vacancy: Vacancy): string {
 /** Open aanmelding zonder specifieke functie. */
 export const openApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
   "Aanmelding medewerker Helping Hands",
+)}&body=${encodeURIComponent(
+  [
+    "Hallo Helping Hands,",
+    "",
+    "Ik wil me aanmelden als crewlid.",
+    "",
+    "Naam:",
+    "Telefoon:",
+    "Woonplaats:",
+    "Ervaring:",
+    "Beschikbaarheid:",
+    "Vervoer:",
+    "Opmerking:",
+    "",
+    "Groet,",
+  ].join("\n"),
 )}`;
 
 /** @deprecated Use vacancyApplyMailto */

@@ -70,7 +70,7 @@ export default function VacancyCta() {
                 />
                 <CtaLink
                   href="#vacatures"
-                  label="Bekijk vacatures"
+                  label="Bekijk functies"
                   variant="secondary"
                 />
               </div>

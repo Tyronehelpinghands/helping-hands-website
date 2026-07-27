@@ -14,6 +14,7 @@ import {
   simpleNavLinks,
   type NavDropdownConfig,
 } from "@/lib/navigation";
+import { openApplyMailto } from "@/lib/vacancies";
 
 type MobileMenuProps = {
   open: boolean;
@@ -229,13 +230,13 @@ export default function MobileMenu({
           >
             Personeel aanvragen
           </Link>
-          <Link
-            href="/vacatures"
+          <a
+            href={openApplyMailto}
             onClick={onClose}
             className="flex w-full min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
           >
             Crew aanmelden
-          </Link>
+          </a>
           <Link
             href="/login"
             onClick={onClose}

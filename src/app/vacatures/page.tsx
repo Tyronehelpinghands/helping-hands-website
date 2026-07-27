@@ -19,7 +19,7 @@ import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Vacatures event crew, horeca en stagebouw | Helping Hands Agency",
   description:
-    "Bekijk vacatures bij Helping Hands Agency voor event crew, horeca, keuken, bar, stagebouw, productie en logistiek. Meld je aan en pak flexibele klussen mee.",
+    "Bekijk vacatures bij Helping Hands Agency voor event crew, horeca, keuken, bar, stagebouw, productie, logistiek en hospitality. Meld je aan en pak flexibele klussen mee.",
   path: "/vacatures",
   absoluteTitle: true,
 });

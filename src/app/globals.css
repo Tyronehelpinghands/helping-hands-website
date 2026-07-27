@@ -87,6 +87,7 @@
 }
 
 html {
+  scroll-behavior: smooth;
   scroll-padding-top: 5.5rem;
   max-width: 100%;
   overflow-x: hidden;
@@ -107,6 +108,10 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .logo-carousel-track,
   .project-logo-carousel-track {
     animation: none;
