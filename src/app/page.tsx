@@ -23,7 +23,7 @@ import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: `${siteConfig.name} | Crew voor evenementen, horeca en productie`,
+  title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,

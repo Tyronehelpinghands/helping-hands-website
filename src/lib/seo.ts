@@ -69,14 +69,38 @@ export function noIndexMetadata(title: string, description: string): Metadata {
 }
 
 export function organizationJsonLd() {
+  const { address } = siteConfig;
+
   return {
     "@context": "https://schema.org",
     "@type": ["Organization", "EmploymentAgency"],
     name: siteConfig.name,
+    legalName: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
+    telephone: siteConfig.phoneTel,
     logo: absoluteUrl(siteConfig.defaultOgImage),
     description: siteConfig.description,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: address.street,
+      postalCode: address.postalCode,
+      addressLocality: address.city,
+      addressCountry: address.countryCode,
+    },
+    vatID: siteConfig.vat,
+    identifier: [
+      {
+        "@type": "PropertyValue",
+        name: "KvK",
+        value: siteConfig.kvk,
+      },
+      {
+        "@type": "PropertyValue",
+        name: "BTW",
+        value: siteConfig.vat,
+      },
+    ],
     areaServed: {
       "@type": "Country",
       name: "Netherlands",

@@ -14,6 +14,9 @@ export const navLinks = [
 
 export const contactEmail = siteConfig.email;
 export const applicationsEmail = siteConfig.applicationsEmail;
+export const ownerEmail = siteConfig.ownerEmail;
+export const contactPhoneDisplay = siteConfig.phoneDisplay;
+export const contactPhoneTel = siteConfig.phoneTel;
 
 export type DropdownItem = {
   title: string;

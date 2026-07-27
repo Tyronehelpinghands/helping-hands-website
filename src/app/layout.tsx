@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | Crew voor evenementen, horeca en productie`,
+    default: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: siteConfig.locale,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} | Crew voor evenementen, horeca en productie`,
+    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
     description: siteConfig.description,
     url: siteConfig.url,
     images: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} | Crew voor evenementen, horeca en productie`,
+    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
     description: siteConfig.description,
     images: [absoluteUrl(siteConfig.defaultOgImage)],
   },

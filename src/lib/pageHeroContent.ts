@@ -37,9 +37,9 @@ export type PageHeroContent = {
 const pageHeroByPath: Record<string, PageHeroContent> = {
   "/": {
     eyebrow: "Helping Hands Agency",
-    title: "Flexibele crew voor events, horeca en productie.",
+    title: "Event crew en horecapersoneel inhuren voor events en producties.",
     description:
-      "Van last-minute extra handen tot complete projectinzet: Helping Hands levert praktische mensen die begrijpen wat er op locatie nodig is.",
+      "Van last-minute extra handen tot complete projectinzet: Helping Hands Agency levert event crew, stagehands en horecapersoneel die begrijpen wat er op locatie nodig is.",
     theme: "staffing",
     primaryCta: { label: "Personeel aanvragen", href: "/contact" },
     secondaryCta: { label: "Crew aanmelden", href: "/vacatures" },

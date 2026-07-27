@@ -17,6 +17,10 @@ import { contactFaqs } from "@/lib/faq";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { applicationsEmail, contactEmail } from "@/lib/navigation";
 import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
+import {
+  formatAddressSingleLine,
+  siteConfig,
+} from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Contact",
@@ -71,6 +75,12 @@ export default function ContactPage() {
               >
                 {contactEmail}
               </a>
+              <a
+                href={`tel:${siteConfig.phoneTel}`}
+                className="mt-2 block font-semibold text-white underline-offset-4 hover:underline"
+              >
+                {siteConfig.phoneDisplay}
+              </a>
               <Link
                 href="/diensten"
                 className="mt-4 inline-flex text-sm font-bold text-white underline-offset-4 hover:underline"
@@ -101,6 +111,63 @@ export default function ContactPage() {
               </p>
             </div>
           </PhotoBackgroundCard>
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-slate-200/80 bg-[#F5F7FA] p-6 sm:p-8">
+          <h2 className="text-xl font-black text-[#0B1F4D]">
+            Bedrijfsgegevens
+          </h2>
+          <dl className="mt-5 grid gap-4 text-sm leading-6 text-[#101828]/80 sm:grid-cols-2">
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">Bedrijf</dt>
+              <dd>{siteConfig.name}</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">Adres</dt>
+              <dd>{formatAddressSingleLine()}</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">Telefoon</dt>
+              <dd>
+                <a
+                  href={`tel:${siteConfig.phoneTel}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {siteConfig.phoneDisplay}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">E-mail</dt>
+              <dd>
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {contactEmail}
+                </a>
+                <br />
+                <a
+                  href={`mailto:${siteConfig.ownerEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {siteConfig.ownerEmail}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">KvK</dt>
+              <dd>{siteConfig.kvk}</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">BTW</dt>
+              <dd>{siteConfig.vat}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="font-bold text-[#0B1F4D]">IBAN</dt>
+              <dd>{siteConfig.iban}</dd>
+            </div>
+          </dl>
         </div>
 
         <div className="mt-14">

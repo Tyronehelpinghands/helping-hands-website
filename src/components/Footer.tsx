@@ -4,8 +4,11 @@ import { brandAlt, brandImages } from "@/lib/brand";
 import {
   applicationsEmail,
   contactEmail,
+  contactPhoneDisplay,
+  contactPhoneTel,
   navLinks,
 } from "@/lib/navigation";
+import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 
 const serviceLinks = [
   { href: "/diensten/event-crew", label: "Event crew" },
@@ -35,6 +38,16 @@ export default function Footer() {
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
               Crew voor evenementen, horeca, stagebouw, productie en logistiek.
               Snel inzetbaar op locatie.
+            </p>
+            <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">
+              {formatAddressSingleLine()}
+              <br />
+              <a
+                href={`tel:${contactPhoneTel}`}
+                className="transition hover:text-white"
+              >
+                {contactPhoneDisplay}
+              </a>
             </p>
           </div>
 
@@ -146,9 +159,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; 2026 Helping Hands Agency</p>
-          <p>Event staffing &amp; crew voor de live branche</p>
+        <div className="mt-12 space-y-3 border-t border-white/10 pt-6 text-xs leading-5 text-white/45">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>&copy; 2026 {siteConfig.name}</p>
+            <p>Event staffing &amp; crew voor de live branche</p>
+          </div>
+          <p>
+            {siteConfig.name} · {formatAddressSingleLine()} · KvK{" "}
+            {siteConfig.kvk} · BTW {siteConfig.vat} · IBAN {siteConfig.iban}
+          </p>
         </div>
       </div>
     </footer>
