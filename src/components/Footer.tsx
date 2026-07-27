@@ -16,9 +16,13 @@ const serviceLinks = [
   { href: "/diensten/event-crew", label: "Event crew" },
   { href: "/diensten/stagehands", label: "Stagehands" },
   { href: "/diensten/horeca-personeel", label: "Horeca support" },
+  { href: "/diensten/restaurant-personeel", label: "Restaurant personeel" },
+  { href: "/diensten/keukenpersoneel", label: "Keukenpersoneel" },
+  { href: "/diensten/barpersoneel", label: "Barpersoneel" },
   { href: "/diensten/productie-assistentie", label: "Productie assistentie" },
   { href: "/diensten/logistiek", label: "Logistiek" },
   { href: "/diensten/hospitality", label: "Hospitality" },
+  { href: "/diensten", label: "Alle diensten" },
 ];
 
 export default function Footer() {

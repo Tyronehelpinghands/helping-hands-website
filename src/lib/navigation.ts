@@ -52,14 +52,29 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/diensten/event-crew",
       },
       {
+        title: "Stagehands",
+        description: "Laden, lossen, opbouw, afbouw en materiaalhandling.",
+        href: "/diensten/stagehands",
+      },
+      {
         title: "Horeca support",
         description: "Barbacks, runners, bediening, uitgifte en hospitality.",
         href: "/diensten/horeca-personeel",
       },
       {
-        title: "Stagehands",
-        description: "Laden, lossen, opbouw, afbouw en materiaalhandling.",
-        href: "/diensten/stagehands",
+        title: "Restaurant personeel",
+        description: "Bediening, hosts, runners en floor support in restaurants.",
+        href: "/diensten/restaurant-personeel",
+      },
+      {
+        title: "Keukenpersoneel",
+        description: "Keukenhulpen, afwassers en zelfstandig werkend koks.",
+        href: "/diensten/keukenpersoneel",
+      },
+      {
+        title: "Barpersoneel",
+        description: "Bartenders, barbacks en dranken runners voor bars en events.",
+        href: "/diensten/barpersoneel",
       },
       {
         title: "Productie assistentie",
@@ -71,6 +86,11 @@ export const navDropdowns: NavDropdownConfig[] = [
         title: "Logistiek",
         description: "Materiaalstromen, back-of-house en transportbewegingen.",
         href: "/diensten/logistiek",
+      },
+      {
+        title: "Hospitality",
+        description: "Hosts, guest support, VIP-begeleiding en ontvangst.",
+        href: "/diensten/hospitality",
       },
       {
         title: "Alle diensten",

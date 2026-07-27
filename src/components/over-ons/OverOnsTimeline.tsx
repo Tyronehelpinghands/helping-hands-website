@@ -10,7 +10,7 @@ export default function OverOnsTimeline() {
             Ons pad
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">
-            Van oprichting tot professionele partner op de vloer
+            Van oprichting tot professionele inzet op de vloer
           </h2>
         </Reveal>
 

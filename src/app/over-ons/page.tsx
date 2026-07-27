@@ -8,9 +8,12 @@ import OverOnsSplitSection from "@/components/over-ons/OverOnsSplitSection";
 import OverOnsStats from "@/components/over-ons/OverOnsStats";
 import OverOnsTimeline from "@/components/over-ons/OverOnsTimeline";
 import Reveal from "@/components/over-ons/Reveal";
+import FaqSection from "@/components/sections/FaqSection";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import JsonLd from "@/components/seo/JsonLd";
 import PageHero from "@/components/sections/PageHero";
 import { overOnsCtaPhoto } from "@/lib/crewPhotos";
+import { overOnsFaqs } from "@/lib/faq";
 import {
   overOnsAmbition,
   overOnsApproach,
@@ -23,8 +26,7 @@ import {
   overOnsWhy,
 } from "@/lib/overOnsContent";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
-
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Over ons",
@@ -32,6 +34,13 @@ export const metadata: Metadata = buildPageMetadata({
     "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt: professionele crew voor events en horeca, met een missie om jongeren een eerlijke kans te geven.",
   path: "/over-ons",
 });
+
+const pageAnchors = [
+  { href: "#missie", label: "Missie" },
+  { href: "#aanpak", label: "Aanpak" },
+  { href: "#opdrachtgevers", label: "Opdrachtgevers" },
+  { href: "#groei", label: "Groei" },
+] as const;
 
 export default function OverOnsPage() {
   return (
@@ -42,10 +51,28 @@ export default function OverOnsPage() {
           { name: "Over ons", path: "/over-ons" },
         ]}
       />
+      <JsonLd data={faqJsonLd(overOnsFaqs)} />
       <PageHero content={getPageHeroContent("/over-ons")} />
 
+      <nav
+        aria-label="Op deze pagina"
+        className="border-b border-slate-200/80 bg-white"
+      >
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
+          {pageAnchors.map((anchor) => (
+            <a
+              key={anchor.href}
+              href={anchor.href}
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-[#F5F7FA] px-4 text-sm font-bold text-[#173A8A] transition hover:border-[#F28C28]/50"
+            >
+              {anchor.label}
+            </a>
+          ))}
+        </div>
+      </nav>
+
       {/* Intro: tekst links, fotocollage rechts */}
-      <section className="bg-white py-12 sm:py-16 lg:py-20">
+      <section id="missie" className="scroll-mt-28 bg-white py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <Reveal>
@@ -81,7 +108,7 @@ export default function OverOnsPage() {
       />
 
       {/* Groei: tekst links, brede projectfoto */}
-      <section className="bg-[#F5F7FA] py-12 sm:py-16 lg:py-20">
+      <section id="groei" className="scroll-mt-28 bg-[#F5F7FA] py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <Reveal>
@@ -101,12 +128,14 @@ export default function OverOnsPage() {
               </p>
               <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                 {overOnsGrowth.roles.map((role) => (
-                  <li
-                    key={role}
-                    className="flex items-start gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-sm font-semibold text-[#101828]/85 shadow-sm"
-                  >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#F28C28]" />
-                    {role}
+                  <li key={role.label}>
+                    <Link
+                      href={role.href}
+                      className="flex min-h-11 items-start gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-sm font-semibold text-[#101828]/85 shadow-sm transition hover:border-[#F28C28]/50 hover:text-[#173A8A]"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#F28C28]" />
+                      {role.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -128,13 +157,15 @@ export default function OverOnsPage() {
 
       <OverOnsTimeline />
 
-      <OverOnsSplitSection
-        eyebrow={overOnsApproach.eyebrow}
-        title={overOnsApproach.title}
-        paragraphs={overOnsApproach.paragraphs}
-        photo={overOnsPhotos.approach}
-        className="bg-white"
-      />
+      <div id="aanpak" className="scroll-mt-28">
+        <OverOnsSplitSection
+          eyebrow={overOnsApproach.eyebrow}
+          title={overOnsApproach.title}
+          paragraphs={overOnsApproach.paragraphs}
+          photo={overOnsPhotos.approach}
+          className="bg-white"
+        />
+      </div>
 
       <section className="bg-[#F5F7FA] py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -182,14 +213,54 @@ export default function OverOnsPage() {
         </div>
       </section>
 
-      <OverOnsSplitSection
-        eyebrow={overOnsClients.eyebrow}
-        title={overOnsClients.title}
-        paragraphs={overOnsClients.paragraphs}
-        photo={overOnsPhotos.clients}
-        reverse
-        className="bg-white"
-      />
+      <div id="opdrachtgevers" className="scroll-mt-28">
+        <OverOnsSplitSection
+          eyebrow={overOnsClients.eyebrow}
+          title={overOnsClients.title}
+          paragraphs={overOnsClients.paragraphs}
+          photo={overOnsPhotos.clients}
+          reverse
+          className="bg-white"
+        />
+      </div>
+
+      {/* Mid-page CTA after clients */}
+      <section className="border-y border-slate-200/80 bg-[#F5F7FA] py-12 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <div className="max-w-xl">
+              <h2 className="text-2xl font-black text-[#0B1F4D]">
+                Klaar om crew aan te vragen?
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-[#101828]/70 sm:text-base">
+                Deel datum, locatie, tijden en functies — of bekijk eerst welke
+                diensten bij jouw productie passen. Hilversum · landelijk · één
+                aanspreekpunt.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:shrink-0">
+              <Link
+                href="/contact"
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-7 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#de7c1f]"
+              >
+                Personeel aanvragen
+              </Link>
+              <Link
+                href="/diensten"
+                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] px-7 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Bekijk diensten
+              </Link>
+              <Link
+                href="/vacatures"
+                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] px-7 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Vacatures
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Ambition + banner */}
       <section className="relative overflow-hidden py-14 sm:py-20">
@@ -220,41 +291,16 @@ export default function OverOnsPage() {
 
       <OverOnsQuote quote={overOnsClosing.quote} />
 
-      <section className="pb-6 sm:pb-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal>
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-lg sm:p-10">
-              <p className="max-w-3xl text-lg leading-8 text-[#101828]/80">
-                {overOnsClosing.paragraphs[0]}
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:bg-[#de7c1f]"
-                >
-                  Personeel aanvragen
-                </Link>
-                <Link
-                  href="/diensten"
-                  className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] px-8 py-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
-                >
-                  Bekijk diensten
-                </Link>
-                <Link
-                  href="/vacatures"
-                  className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] px-8 py-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
-                >
-                  Werken bij Helping Hands
-                </Link>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <FaqSection
+        items={overOnsFaqs}
+        title="Veelgestelde vragen over Helping Hands"
+        description="Missie, kwaliteit voor opdrachtgevers, projectervaring en hoe je start."
+        className="bg-white py-16 sm:py-20"
+      />
 
       <CTASection
         title="Samenwerken met Helping Hands?"
-        description="Vraag crew aan of bekijk vacatures om mee te draaien op locatie."
+        description={overOnsClosing.paragraphs[0]}
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
         secondaryLabel="Werken bij Helping Hands"

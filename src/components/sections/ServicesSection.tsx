@@ -32,7 +32,9 @@ export default function ServicesSection({
 
       <p className="mt-5 text-sm font-semibold text-[#173A8A]">
         {activeFilter === "Alle"
-          ? `${visibleServices.length} uitgelichte diensten`
+          ? showAllWhenAlle
+            ? `${visibleServices.length} diensten`
+            : `${visibleServices.length} uitgelichte diensten`
           : `${visibleServices.length} diensten in ${activeFilter}`}
       </p>
 

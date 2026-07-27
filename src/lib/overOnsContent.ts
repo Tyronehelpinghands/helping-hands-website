@@ -1,7 +1,7 @@
 import type { CrewPhoto } from "@/lib/crewPhotos";
 
 export const overOnsIntro = {
-  title: "Meer dan alleen een uitzendbureau",
+  title: "Opgericht in 2022",
   paragraphs: [
     "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt. Het bedrijf ontstond vanuit een duidelijke overtuiging: niet iedereen past binnen het standaardplaatje van de arbeidsmarkt, maar dat betekent niet dat iemand niet wil of kan werken.",
     "Veel jongeren beschikken over motivatie en talent, maar hebben moeite om een passende baan te vinden of langdurig vast te houden. Sommigen zitten in een uitkering, zijn voortijdig gestopt met school, hebben weinig werkervaring of zijn meerdere keren op een werkplek terechtgekomen die niet bij hen paste. Helping Hands kijkt niet alleen naar wat er op een cv staat, maar vooral naar wat iemand kan worden met de juiste begeleiding en kansen.",
@@ -27,14 +27,46 @@ export const overOnsGrowth = {
     "Door onze praktijkervaring begrijpen wij dat opdrachtgevers behoefte hebben aan medewerkers die op tijd zijn, instructies opvolgen, veilig werken, professioneel communiceren en verantwoordelijkheid nemen.",
   ],
   roles: [
-    "Sitecrew en stagehands",
-    "Productie- en eventmedewerkers",
-    "Podium- en tentenbouwers",
-    "Logistieke medewerkers",
-    "Heftruckchauffeurs en gecertificeerde krachten",
-    "Horecamedewerkers en runners",
-    "Keukenmedewerkers en zelfstandig werkende koks",
-    "Teamleiders en voormannen",
+    {
+      label: "Sitecrew en stagehands",
+      href: "/diensten/stagehands",
+    },
+    {
+      label: "Productie- en eventmedewerkers",
+      href: "/diensten/event-crew",
+    },
+    {
+      label: "Podium- en tentenbouwers",
+      href: "/diensten/stagehands",
+    },
+    {
+      label: "Logistieke medewerkers",
+      href: "/diensten/logistiek",
+    },
+    {
+      label: "Heftruckchauffeurs en gecertificeerde krachten",
+      href: "/diensten/logistiek",
+    },
+    {
+      label: "Horecamedewerkers en runners",
+      href: "/diensten/horeca-personeel",
+    },
+    {
+      label: "Keukenmedewerkers en zelfstandig werkende koks",
+      href: "/diensten/keukenpersoneel",
+    },
+    {
+      label: "Productie-assistentie",
+      href: "/diensten/productie-assistentie",
+    },
+    {
+      label: "Hospitality en ontvangst",
+      href: "/diensten/hospitality",
+    },
+    {
+      label: "Teamleiders en voormannen",
+      href: "/medewerkers",
+    },
   ],
 };
 
@@ -80,7 +112,7 @@ export const overOnsAmbition = {
   eyebrow: "Onze ambitie",
   title: "Iedereen verdient een eerlijke kans om zichzelf te bewijzen",
   paragraphs: [
-    "Helping Hands wil verder groeien als professionele personeelspartner én als organisatie die maatschappelijke impact maakt.",
+    "Helping Hands wil verder groeien als professioneel personeelsbureau én als organisatie die maatschappelijke impact maakt.",
     "Onze ambitie is om steeds meer jongeren en jongvolwassenen duurzaam aan het werk te helpen, medewerkers opleidingen en certificaten aan te bieden en doorgroeimogelijkheden te creëren binnen de evenementen-, horeca-, productie- en logistieke sector.",
     "Wij willen laten zien dat mensen die op papier soms worden afgeschreven, in de praktijk juist enorm waardevol kunnen zijn. Met duidelijke begeleiding, eerlijkheid en wederzijds vertrouwen kunnen zij uitgroeien tot betrouwbare vakmensen waar opdrachtgevers graag opnieuw mee samenwerken.",
   ],
@@ -120,7 +152,7 @@ export const overOnsTimeline = [
   {
     year: "2024–heden",
     title: "Samenwerking met grote organisaties",
-    text: "Inzet bij grotere producties en ervaren partners, met vaste processen, teamleiders en korte lijnen.",
+    text: "Inzet bij grotere producties en ervaren organisaties, met vaste processen, teamleiders en korte lijnen.",
   },
   {
     year: "Verder",

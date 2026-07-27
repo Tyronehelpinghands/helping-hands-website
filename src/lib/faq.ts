@@ -87,14 +87,64 @@ export const opdrachtgeversFaqs: FaqItem[] = [
   },
 ];
 
+export const overOnsFaqs: FaqItem[] = [
+  {
+    question: "Wat is de missie van Helping Hands Agency?",
+    answer:
+      "Helping Hands is in 2022 opgericht door Tyrone van der Schagt om jongeren en jongvolwassenen een eerlijke kans te geven: kijken naar potentieel, motivatie en begeleiding — niet alleen naar het cv — terwijl opdrachtgevers professionele, voorbereide crew krijgen.",
+  },
+  {
+    question: "Betekent jullie missie minder kwaliteit voor opdrachtgevers?",
+    answer:
+      "Nee. Onze maatschappelijke missie betekent niet dat we concessies doen aan kwaliteit. Opdrachtgevers mogen crew verwachten die op tijd is, veilig werkt en duidelijk is gebrieft — met korte lijnen en één aanspreekpunt.",
+  },
+  {
+    question: "Wat bedoelen jullie met projectervaring?",
+    answer:
+      "We tonen sectoren en producties waar onze crew via jobs, partners of producties ervaring heeft opgedaan. Dat is geen claim van officiële partnership, tenzij dat expliciet staat vermeld.",
+  },
+  {
+    question: "Hoe vraag ik personeel aan of meld ik mij aan als crew?",
+    answer:
+      "Opdrachtgevers: stuur datum, locatie, tijden, functies en aantallen via contact of info@helpinghandsagency.nl. Crew: bekijk vacatures of mail aanmeldingen@helpinghandsagency.nl.",
+  },
+];
+
+export const dienstenFaqs: FaqItem[] = [
+  {
+    question: "Welke diensten kan ik bij Helping Hands inhuren?",
+    answer:
+      "Event crew, stagehands, horeca- en restaurantpersoneel, keuken, bar, productie-assistentie, logistiek en hospitality — voor festivals, concerten, beurzen, stadions en horecalocaties.",
+  },
+  {
+    question: "Wat moet ik aanleveren voor een snelle bezetting?",
+    answer:
+      "Datum, locatie, start- en eindtijd, aantal mensen, functies, kleding of PBM, contactpersoon op locatie en een korte briefing. Hoe completer, hoe sneller wij kunnen bezetten.",
+  },
+  {
+    question: "Werken jullie in events én restaurants?",
+    answer:
+      "Beide. Naast event- en productiecrew leveren we flexibele ondersteuning voor restaurants en horeca: bediening, runners, bar, keuken en afwas.",
+  },
+  {
+    question: "Hoe start ik een aanvraag?",
+    answer:
+      "Gebruik Personeel aanvragen op de contactpagina, of bel/app 06 5741 6338 / vast 035 205 7307. Vermeld datum, locatie, tijden, functies en aantal mensen.",
+  },
+];
+
 export function getFaqsForPage(
-  page: "home" | "contact" | "opdrachtgevers",
+  page: "home" | "contact" | "opdrachtgevers" | "over-ons" | "diensten",
 ): FaqItem[] {
   switch (page) {
     case "contact":
       return contactFaqs;
     case "opdrachtgevers":
       return opdrachtgeversFaqs;
+    case "over-ons":
+      return overOnsFaqs;
+    case "diensten":
+      return dienstenFaqs;
     default:
       return homeFaqs;
   }
