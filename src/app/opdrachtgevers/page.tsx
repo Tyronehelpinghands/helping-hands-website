@@ -112,8 +112,15 @@ export default function OpdrachtgeversPage() {
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               event crew
+            </Link>
+            ,{" "}
+            <Link
+              href="/diensten/stagehands"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              stagehands
             </Link>{" "}
-            en{" "}
+            of{" "}
             <Link
               href="/diensten/horeca-personeel"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"

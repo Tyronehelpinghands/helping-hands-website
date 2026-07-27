@@ -39,7 +39,8 @@ export default function DienstenPage() {
           <p className="mt-4 leading-8 text-[#101828]/75">
             Van stagebouw en productie tot horeca, keuken, bar en hospitality:
             filter op categorie en bekijk concrete inzetmogelijkheden. Zoek je
-            gericht event crew of horeca personeel? Start via de landings hieronder.
+            gericht event crew, stagehands of horeca personeel? Start via de
+            landings hieronder.
           </p>
         </div>
 
@@ -76,28 +77,25 @@ export default function DienstenPage() {
           </p>
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              "Bediening",
-              "Runner",
-              "Barback",
-              "Bartender",
-              "Afwasser",
-              "Keukenhulp",
-              "Hulp kok",
-              "Zelfstandig werkend kok",
-              "Chef de partie",
-              "Sous-chef",
-              "Chef-kok",
-              "Host",
-              "Shiftleader / Floor manager",
-            ].map((role) => (
-              <div
-                key={role}
-                className="rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-semibold text-[#173A8A] shadow-sm"
+              { label: "Restaurant personeel", href: "/diensten/restaurant-personeel" },
+              { label: "Keukenpersoneel", href: "/diensten/keukenpersoneel" },
+              { label: "Barpersoneel", href: "/diensten/barpersoneel" },
+              { label: "Horeca support", href: "/diensten/horeca-personeel" },
+              { label: "Hospitality", href: "/diensten/hospitality" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-semibold text-[#173A8A] shadow-sm transition hover:border-[#F28C28]/40"
               >
-                {role}
-              </div>
+                {item.label}
+              </Link>
             ))}
           </div>
+          <p className="mt-6 text-sm leading-7 text-[#101828]/65">
+            Functies o.a.: bediening, runner, barback, bartender, afwasser,
+            keukenhulp, koks, host en floor manager.
+          </p>
           <Link
             href="/contact"
             className="mt-8 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:bg-[#de7c1f]"

@@ -104,6 +104,18 @@ export default function Home() {
                 Event crew
               </Link>
               <Link
+                href="/diensten/stagehands"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Stagehands
+              </Link>
+              <Link
+                href="/diensten/horeca-personeel"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Horeca
+              </Link>
+              <Link
                 href="/contact"
                 className="inline-flex items-center justify-center rounded-full border-2 border-[#F28C28] bg-white px-7 py-3.5 text-sm font-bold text-[#F28C28] transition hover:bg-[#FFF7ED]"
               >

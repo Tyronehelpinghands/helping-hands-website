@@ -8,12 +8,12 @@ import {
 } from "@/lib/navigation";
 
 const serviceLinks = [
-  { href: "/diensten", label: "Event crew" },
-  { href: "/diensten", label: "Stagehands" },
-  { href: "/diensten", label: "Horeca support" },
-  { href: "/diensten", label: "Productie assistentie" },
-  { href: "/diensten", label: "Logistiek" },
-  { href: "/diensten", label: "Teamcaptains" },
+  { href: "/diensten/event-crew", label: "Event crew" },
+  { href: "/diensten/stagehands", label: "Stagehands" },
+  { href: "/diensten/horeca-personeel", label: "Horeca support" },
+  { href: "/diensten/productie-assistentie", label: "Productie assistentie" },
+  { href: "/diensten/logistiek", label: "Logistiek" },
+  { href: "/diensten/hospitality", label: "Hospitality" },
 ];
 
 export default function Footer() {

@@ -53,18 +53,18 @@ export const navDropdowns: NavDropdownConfig[] = [
       {
         title: "Stagehands",
         description: "Laden, lossen, opbouw, afbouw en materiaalhandling.",
-        href: "/diensten",
+        href: "/diensten/stagehands",
       },
       {
         title: "Productie assistentie",
         description:
           "Backstage support, runners en praktische productieondersteuning.",
-        href: "/diensten",
+        href: "/diensten/productie-assistentie",
       },
       {
         title: "Logistiek",
         description: "Materiaalstromen, back-of-house en transportbewegingen.",
-        href: "/diensten",
+        href: "/diensten/logistiek",
       },
       {
         title: "Alle diensten",
