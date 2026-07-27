@@ -180,14 +180,27 @@ export function serviceJsonLd(input: {
   };
 }
 
+/**
+ * JobPosting JSON-LD. Never include baseSalary unless real salary data exists.
+ */
 export function jobPostingJsonLd(input: {
   title: string;
   description: string;
   employmentType?: string;
   location: string;
   datePosted?: string;
+  validThrough?: string;
+  url?: string;
+  identifier?: string;
+  /** Only pass when a real salary is known — never invent. */
+  baseSalary?: {
+    currency: string;
+    minValue?: number;
+    maxValue?: number;
+    unitText?: string;
+  };
 }) {
-  return {
+  const posting: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: input.title,
@@ -201,9 +214,12 @@ export function jobPostingJsonLd(input: {
     },
     jobLocation: {
       "@type": "Place",
+      name: input.location,
       address: {
         "@type": "PostalAddress",
-        addressLocality: input.location,
+        addressLocality: input.location.includes("Landelijk")
+          ? "Nederland"
+          : input.location,
         addressCountry: "NL",
       },
     },
@@ -213,4 +229,42 @@ export function jobPostingJsonLd(input: {
       name: "Netherlands",
     },
   };
+
+  if (input.url) posting.url = absoluteUrl(input.url);
+  if (input.identifier) {
+    posting.identifier = {
+      "@type": "PropertyValue",
+      name: siteConfig.name,
+      value: input.identifier,
+    };
+  }
+  if (input.validThrough) posting.validThrough = input.validThrough;
+
+  if (input.baseSalary) {
+    posting.baseSalary = {
+      "@type": "MonetaryAmount",
+      currency: input.baseSalary.currency,
+      value: {
+        "@type": "QuantitativeValue",
+        ...(input.baseSalary.minValue != null
+          ? { minValue: input.baseSalary.minValue }
+          : {}),
+        ...(input.baseSalary.maxValue != null
+          ? { maxValue: input.baseSalary.maxValue }
+          : {}),
+        unitText: input.baseSalary.unitText ?? "HOUR",
+      },
+    };
+  }
+
+  return posting;
+}
+
+/** Map free-text employment labels to schema.org employmentType where possible. */
+export function mapVacancyEmploymentType(label: string): string {
+  const lower = label.toLowerCase();
+  if (lower.includes("full")) return "FULL_TIME";
+  if (lower.includes("part")) return "PART_TIME";
+  if (lower.includes("stage") || lower.includes("intern")) return "INTERN";
+  return "TEMPORARY";
 }

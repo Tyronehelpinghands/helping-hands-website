@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils";
 export default function FloatingCTA() {
   const pathname = usePathname();
   const { scrolled } = useScrollHeader(320);
-  const hideOnContact = pathname === "/contact" || pathname === "/medewerkers";
+  const hideOnContact =
+    pathname === "/contact" ||
+    pathname === "/medewerkers" ||
+    pathname === "/vacatures";
 
   if (hideOnContact) return null;
 
