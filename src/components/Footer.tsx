@@ -5,6 +5,8 @@ import {
   applicationsEmail,
   contactEmail,
   contactPhoneDisplay,
+  contactPhoneLandlineDisplay,
+  contactPhoneLandlineTel,
   contactPhoneTel,
   navLinks,
 } from "@/lib/navigation";
@@ -47,6 +49,13 @@ export default function Footer() {
                 className="transition hover:text-white"
               >
                 {contactPhoneDisplay}
+              </a>
+              <br />
+              <a
+                href={`tel:${contactPhoneLandlineTel}`}
+                className="transition hover:text-white"
+              >
+                Vast {contactPhoneLandlineDisplay}
               </a>
             </p>
           </div>

@@ -2,7 +2,14 @@
 
 import { FormEvent, useState } from "react";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
-import { contactEmail, contactPhoneDisplay, contactPhoneTel } from "@/lib/navigation";
+import {
+  contactEmail,
+  contactPhoneDisplay,
+  contactPhoneLandlineDisplay,
+  contactPhoneLandlineTel,
+  contactPhoneTel,
+  contactWhatsappUrl,
+} from "@/lib/navigation";
 import { getServiceIconKey } from "@/lib/service-icons";
 
 const deploymentTypes = [
@@ -71,6 +78,42 @@ export default function QuickRequestForm() {
             Kies het type inzet, aantal mensen en deel de eerste details. Je
             aanvraag opent in je e-mail naar {contactEmail}.
           </p>
+          <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-5">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#F28C28]">
+              Spoed?
+            </p>
+            <p className="mt-2 text-sm leading-7 text-white/80">
+              Bel of app direct — we denken mee over wat nog haalbaar is.
+            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <a
+                href={`tel:${contactPhoneTel}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+              >
+                Bel {contactPhoneDisplay}
+              </a>
+              <a
+                href={`tel:${contactPhoneLandlineTel}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Vast {contactPhoneLandlineDisplay}
+              </a>
+              <a
+                href={contactWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={`mailto:${contactEmail}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Mail
+              </a>
+            </div>
+          </div>
         </div>
 
         <form
@@ -83,27 +126,43 @@ export default function QuickRequestForm() {
                 Je e-mailprogramma opent.
               </p>
               <p className="mt-3 leading-7 text-[#101828]/75">
-                Controleer de aanvraag en verstuur hem. Komt er niets op?
-                Mail dan direct naar{" "}
+                Controleer de aanvraag en verstuur hem. Komt er niets op? Mail
+                dan direct naar{" "}
                 <a
                   href={`mailto:${contactEmail}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactEmail}
-                </a>{" "}
-                of bel{" "}
+                </a>
+                , bel{" "}
                 <a
                   href={`tel:${contactPhoneTel}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactPhoneDisplay}
                 </a>
+                , vast{" "}
+                <a
+                  href={`tel:${contactPhoneLandlineTel}`}
+                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {contactPhoneLandlineDisplay}
+                </a>{" "}
+                of{" "}
+                <a
+                  href={contactWhatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  stuur een WhatsApp
+                </a>
                 .
               </p>
               <button
                 type="button"
                 onClick={resetForm}
-                className="mt-6 rounded-full bg-[#173A8A] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                className="mt-6 min-h-11 rounded-full bg-[#173A8A] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
               >
                 Nieuwe aanvraag
               </button>
@@ -122,7 +181,7 @@ export default function QuickRequestForm() {
                         key={item}
                         type="button"
                         onClick={() => setType(item)}
-                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+                        className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
                           type === item
                             ? "border-[#F28C28] bg-[#F28C28] text-white"
                             : "border-slate-200 bg-[#F5F7FA] text-[#173A8A] hover:border-[#173A8A]/40"
@@ -150,7 +209,7 @@ export default function QuickRequestForm() {
                       key={size}
                       type="button"
                       onClick={() => setCrewSize(size)}
-                      className={`cursor-pointer rounded-xl border px-4 py-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
+                      className={`min-h-11 cursor-pointer rounded-xl border px-4 py-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 ${
                         crewSize === size
                           ? "border-[#173A8A] bg-[#173A8A] text-white"
                           : "border-slate-200 bg-[#F5F7FA] text-[#173A8A] hover:border-[#173A8A]/40"
@@ -171,7 +230,7 @@ export default function QuickRequestForm() {
                     type="date"
                     value={when}
                     onChange={(e) => setWhen(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
                   />
                 </label>
                 <label className="block">
@@ -183,7 +242,7 @@ export default function QuickRequestForm() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Bijv. Amsterdam"
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
                   />
                 </label>
               </div>
@@ -196,7 +255,7 @@ export default function QuickRequestForm() {
                   onChange={(e) => setContact(e.target.value)}
                   placeholder="E-mail of telefoon"
                   required
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
+                  className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
                 />
               </label>
 
@@ -207,20 +266,36 @@ export default function QuickRequestForm() {
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactEmail}
-                </a>{" "}
-                of{" "}
+                </a>
+                , mobiel{" "}
                 <a
                   href={`tel:${contactPhoneTel}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactPhoneDisplay}
                 </a>
+                , vast{" "}
+                <a
+                  href={`tel:${contactPhoneLandlineTel}`}
+                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {contactPhoneLandlineDisplay}
+                </a>{" "}
+                of{" "}
+                <a
+                  href={contactWhatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  WhatsApp
+                </a>
                 .
               </p>
 
               <button
                 type="submit"
-                className="w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.01] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                className="min-h-11 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.01] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
               >
                 Aanvraag versturen
               </button>

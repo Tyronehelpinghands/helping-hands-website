@@ -12,7 +12,17 @@ export const homeFaqs: FaqItem[] = [
   {
     question: "Hoe snel kan ik personeel aanvragen?",
     answer:
-      "Stuur datum, locatie, tijden, functies en aantal mensen via het contactformulier of e-mail. Bij spoedaanvragen denken we mee over wat nog haalbaar is op basis van beschikbaarheid.",
+      "Stuur datum, locatie, tijden, functies en aantal mensen via het contactformulier of e-mail. Bij spoedaanvragen denken we mee over wat nog haalbaar is op basis van beschikbaarheid. Bel of app 06 5741 6338, vast 035 785 7307, of mail info@helpinghandsagency.nl.",
+  },
+  {
+    question: "Wat moet ik aanleveren voor een snelle bezetting?",
+    answer:
+      "Datum, locatie, start- en eindtijd, aantal mensen, functies, kleding of PBM, contactpersoon op locatie en een korte briefing. Hoe completer, hoe sneller wij kunnen bezetten.",
+  },
+  {
+    question: "Werken jullie vanuit Hilversum of landelijk?",
+    answer:
+      "Helping Hands Agency is gevestigd in Hilversum (Wandelpad 30) en levert crew door heel Nederland — van Midden-Nederland tot festivals, stadions en locaties landelijk.",
   },
   {
     question: "Werken jullie alleen met events of ook met restaurants?",

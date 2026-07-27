@@ -78,7 +78,7 @@ export function organizationJsonLd() {
     legalName: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
-    telephone: siteConfig.phoneTel,
+    telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
     logo: absoluteUrl(siteConfig.defaultOgImage),
     description: siteConfig.description,
     address: {

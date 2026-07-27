@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import PageHeroHighlights from "@/components/sections/PageHeroHighlights";
 import PageHeroInteractiveCard from "@/components/sections/PageHeroInteractiveCard";
+import { homeHeroCollage } from "@/lib/crewPhotos";
 import type { PageHeroContent, PageHeroTheme } from "@/lib/pageHeroContent";
 import { cn } from "@/lib/utils";
 
@@ -96,10 +98,93 @@ function HeroCta({ href, label, variant }: { href: string; label: string; varian
   );
 }
 
+function StaffingHeroMedia({
+  cards,
+  theme,
+  activeIndex,
+  onSelect,
+}: {
+  cards: PageHeroContent["interactiveCards"];
+  theme: PageHeroTheme;
+  activeIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  const activeCard = cards[activeIndex] ?? cards[0];
+  const collage = homeHeroCollage.slice(0, 5);
+
+  return (
+    <div className="min-w-0 space-y-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3 lg:grid-rows-2 lg:gap-3">
+        {collage.map((photo, index) => {
+          const isHero = index === 0;
+          return (
+            <div
+              key={photo.src}
+              className={cn(
+                "relative overflow-hidden rounded-2xl bg-white/10",
+                isHero
+                  ? "col-span-2 aspect-[16/10] lg:col-span-2 lg:row-span-2 lg:aspect-auto lg:min-h-[22rem]"
+                  : "aspect-[4/5] lg:aspect-auto lg:min-h-[10.5rem]",
+                index === 4 && "hidden sm:block",
+              )}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                priority={isHero}
+                loading={isHero ? "eager" : "lazy"}
+                sizes={
+                  isHero
+                    ? "(max-width: 1024px) 100vw, 40vw"
+                    : "(max-width: 1024px) 50vw, 15vw"
+                }
+                className="object-cover transition duration-500 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100"
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-2xl border p-3 shadow-xl backdrop-blur-sm sm:p-4",
+          themeShell[theme].panel,
+        )}
+      >
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {cards.map((card, index) => (
+            <PageHeroInteractiveCard
+              key={card.title}
+              card={card}
+              theme={theme}
+              isActive={activeIndex === index}
+              onSelect={() => onSelect(index)}
+            />
+          ))}
+        </div>
+        {activeCard ? (
+          <div
+            className="mt-3 rounded-xl border border-white/10 bg-black/15 px-3 py-2.5"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-sm font-bold text-white">{activeCard.title}</p>
+            <p className="mt-0.5 text-sm leading-6 text-white/75">
+              {activeCard.description}
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export default function PageHero({ content }: PageHeroProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const theme = themeShell[content.theme];
   const activeCard = content.interactiveCards[activeIndex] ?? content.interactiveCards[0];
+  const showStaffingMedia = content.theme === "staffing";
 
   return (
     <section className={cn("relative overflow-hidden text-white", theme.section)}>
@@ -116,7 +201,7 @@ export default function PageHero({ content }: PageHeroProps) {
         )}
       />
 
-      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:grid-cols-2 lg:items-center lg:px-8 lg:pb-20 lg:pt-36 xl:pb-24">
+      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8 lg:pb-20 lg:pt-36 xl:pb-24">
         <div className="min-w-0">
           <p className={cn("text-sm font-bold uppercase tracking-[0.2em]", theme.eyebrow)}>
             {content.eyebrow}
@@ -146,52 +231,61 @@ export default function PageHero({ content }: PageHeroProps) {
           <PageHeroHighlights highlights={content.highlights} />
         </div>
 
-        <div className="min-w-0">
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-2xl border p-5 shadow-2xl backdrop-blur-sm sm:p-6 lg:p-8",
-              theme.panel,
-            )}
-          >
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-white/55">
-              {content.theme === "opdrachtgevers"
-                ? "Zo werkt samenwerken"
-                : content.theme === "vacatures"
-                  ? "Kies je richting"
-                  : content.theme === "projecten"
-                    ? "Sectoren & locaties"
-                    : content.theme === "contact"
-                      ? "Waar kunnen we mee helpen?"
-                      : "Meer informatie"}
-            </p>
+        {showStaffingMedia ? (
+          <StaffingHeroMedia
+            cards={content.interactiveCards}
+            theme={content.theme}
+            activeIndex={activeIndex}
+            onSelect={setActiveIndex}
+          />
+        ) : (
+          <div className="min-w-0">
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-2xl border p-5 shadow-2xl backdrop-blur-sm sm:p-6 lg:p-8",
+                theme.panel,
+              )}
+            >
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-white/55">
+                {content.theme === "opdrachtgevers"
+                  ? "Zo werkt samenwerken"
+                  : content.theme === "vacatures"
+                    ? "Kies je richting"
+                    : content.theme === "projecten"
+                      ? "Sectoren & locaties"
+                      : content.theme === "contact"
+                        ? "Waar kunnen we mee helpen?"
+                        : "Meer informatie"}
+              </p>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
-              {content.interactiveCards.map((card, index) => (
-                <PageHeroInteractiveCard
-                  key={card.title}
-                  card={card}
-                  theme={content.theme}
-                  isActive={activeIndex === index}
-                  onSelect={() => setActiveIndex(index)}
-                />
-              ))}
-            </div>
-
-            {activeCard ? (
-              <div
-                className="mt-4 rounded-xl border border-white/10 bg-black/15 px-4 py-3 transition-all duration-300"
-                role="status"
-                aria-live="polite"
-              >
-                <p className="text-sm font-bold text-white">{activeCard.title}</p>
-                <p className="mt-1 text-sm leading-6 text-white/75">{activeCard.description}</p>
-                {activeCard.hoverHint ? (
-                  <p className="mt-2 text-xs font-semibold text-[#F28C28]">{activeCard.hoverHint}</p>
-                ) : null}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+                {content.interactiveCards.map((card, index) => (
+                  <PageHeroInteractiveCard
+                    key={card.title}
+                    card={card}
+                    theme={content.theme}
+                    isActive={activeIndex === index}
+                    onSelect={() => setActiveIndex(index)}
+                  />
+                ))}
               </div>
-            ) : null}
+
+              {activeCard ? (
+                <div
+                  className="mt-4 rounded-xl border border-white/10 bg-black/15 px-4 py-3 transition-all duration-300"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <p className="text-sm font-bold text-white">{activeCard.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-white/75">{activeCard.description}</p>
+                  {activeCard.hoverHint ? (
+                    <p className="mt-2 text-xs font-semibold text-[#F28C28]">{activeCard.hoverHint}</p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

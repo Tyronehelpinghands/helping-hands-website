@@ -81,6 +81,20 @@ export default function ContactPage() {
               >
                 {siteConfig.phoneDisplay}
               </a>
+              <a
+                href={`tel:${siteConfig.phoneLandlineTel}`}
+                className="mt-1 block text-sm font-semibold text-white/90 underline-offset-4 hover:underline"
+              >
+                Vast {siteConfig.phoneLandlineDisplay}
+              </a>
+              <a
+                href={siteConfig.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 block text-sm font-semibold text-[#F28C28] underline-offset-4 hover:underline"
+              >
+                WhatsApp
+              </a>
               <Link
                 href="/diensten"
                 className="mt-4 inline-flex text-sm font-bold text-white underline-offset-4 hover:underline"
@@ -135,6 +149,15 @@ export default function ContactPage() {
                 >
                   {siteConfig.phoneDisplay}
                 </a>
+                <span className="text-[#101828]/55"> (mobiel)</span>
+                <br />
+                <a
+                  href={`tel:${siteConfig.phoneLandlineTel}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {siteConfig.phoneLandlineDisplay}
+                </a>
+                <span className="text-[#101828]/55"> (vast)</span>
               </dd>
             </div>
             <div>

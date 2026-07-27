@@ -109,12 +109,21 @@ export default function CompanySettingsPanel({ settings, onChange }: Props) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="phone">Telefoon</Label>
+            <Label htmlFor="phone">Mobiel</Label>
             <Input
               id="phone"
               value={settings.phone}
               onChange={(e) => update("phone", e.target.value)}
-              placeholder="+31 ..."
+              placeholder="06 5741 6338"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="phoneLandline">Vast nummer</Label>
+            <Input
+              id="phoneLandline"
+              value={settings.phoneLandline ?? ""}
+              onChange={(e) => update("phoneLandline", e.target.value)}
+              placeholder="035 785 7307"
             />
           </div>
           <div className="space-y-1.5 sm:col-span-2">

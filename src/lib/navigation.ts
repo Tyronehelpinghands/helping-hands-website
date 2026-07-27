@@ -17,6 +17,9 @@ export const applicationsEmail = siteConfig.applicationsEmail;
 export const ownerEmail = siteConfig.ownerEmail;
 export const contactPhoneDisplay = siteConfig.phoneDisplay;
 export const contactPhoneTel = siteConfig.phoneTel;
+export const contactWhatsappUrl = siteConfig.whatsappUrl;
+export const contactPhoneLandlineDisplay = siteConfig.phoneLandlineDisplay;
+export const contactPhoneLandlineTel = siteConfig.phoneLandlineTel;
 
 export type DropdownItem = {
   title: string;

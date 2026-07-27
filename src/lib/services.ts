@@ -296,3 +296,54 @@ export function getServiceLanding(
 ): ServiceLanding | undefined {
   return serviceLandings.find((landing) => landing.slug === slug);
 }
+
+/** Map a homepage service card to its best matching published landing path. */
+export function getLandingPathForService(service: {
+  id: string;
+  category: import("@/lib/homeServices").HomeServiceCategory;
+}): string | undefined {
+  const byId: Record<string, ServiceLandingSlug> = {
+    stagehands: "stagehands",
+    "load-in-load-out": "stagehands",
+    sitecrew: "stagehands",
+    "horeca-support": "horeca-personeel",
+    "horeca-bartenders": "barpersoneel",
+    bartenders: "barpersoneel",
+    barbacks: "barpersoneel",
+    "horeca-barbacks": "barpersoneel",
+    keukenhulpen: "keukenpersoneel",
+    "zelfstandig-werkend-koks": "keukenpersoneel",
+    "spoelkeuken-afwassers": "keukenpersoneel",
+    bedieningsmedewerkers: "restaurant-personeel",
+    "hosts-gastheer": "restaurant-personeel",
+    "productie-assistenten": "productie-assistentie",
+    "productie-runners": "productie-assistentie",
+    "logistiek-medewerkers": "logistiek",
+    "materiaal-runners": "logistiek",
+    hosts: "hospitality",
+    "guest-support": "hospitality",
+    "vip-support": "hospitality",
+    eventmedewerkers: "event-crew",
+    "event-floor-support": "event-crew",
+    "event-runners": "event-crew",
+  };
+
+  const byCategory: Record<
+    import("@/lib/homeServices").HomeServiceCategory,
+    ServiceLandingSlug
+  > = {
+    Event: "event-crew",
+    Horeca: "horeca-personeel",
+    Restaurant: "restaurant-personeel",
+    Keuken: "keukenpersoneel",
+    Bar: "barpersoneel",
+    Stagebouw: "stagehands",
+    Productie: "productie-assistentie",
+    Logistiek: "logistiek",
+    Hospitality: "hospitality",
+  };
+
+  const slug = byId[service.id] ?? byCategory[service.category];
+  const landing = getServiceLanding(slug);
+  return landing?.published ? landing.path : undefined;
+}

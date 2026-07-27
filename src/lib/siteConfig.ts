@@ -7,10 +7,17 @@ export const siteConfig = {
   applicationsEmail: "aanmeldingen@helpinghandsagency.nl" as string,
   /** Direct contact (eigenaar / operationeel) */
   ownerEmail: "tyrone@helpinghandsagency.nl" as string,
-  /** Raw NL mobile digits for formatting helpers */
-  phone: "0686349036" as string,
-  phoneDisplay: "06 8634 9036" as string,
-  phoneTel: "+31686349036" as string,
+  /** Primary Helping Hands mobile (WhatsApp-capable) */
+  phone: "0657416338" as string,
+  phoneDisplay: "06 5741 6338" as string,
+  phoneTel: "+31657416338" as string,
+  /** WhatsApp deep link for primary mobile */
+  whatsappUrl: "https://wa.me/31657416338" as string,
+  /** Vaste lijn (Hilversum) */
+  phoneLandline: "0357857307" as string,
+  phoneLandlineDisplay: "035 785 7307" as string,
+  phoneLandlineTel: "+31357857307" as string,
+  phoneLandlineDisplayIntl: "+31 35 785 7307" as string,
   address: {
     street: "Wandelpad 30",
     postalCode: "1211 GN",

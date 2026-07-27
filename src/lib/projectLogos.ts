@@ -40,8 +40,8 @@ export const projectLogoFilters: { id: ProjectLogoFilter; label: string }[] = [
 
 /**
  * Catalogus van zichtbare logo's (lokaal bestand aanwezig).
- * Verwijderd: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T,
- * TAP Crew, Backstage Masters, Backbone International, Stadsfestival Amersfoort.
+ * Banned / niet tonen: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T.
+ * Niet in catalogus (geen goedgekeurde assets): Backbone International, Stadsfestival Amersfoort, MOJO.
  */
 export const projectLogos: ProjectLogo[] = [
   // Opdrachtgevers
@@ -61,6 +61,24 @@ export const projectLogos: ProjectLogo[] = [
     logoPath: "/images/logos/opdrachtgevers/factor-f.webp",
     altText: "Factor F logo",
     tags: ["Festivals", "Productie", "Crewervaring"],
+    featured: true,
+  },
+  {
+    id: "tap-crew",
+    name: "TAP Crew",
+    category: "Opdrachtgevers",
+    logoPath: "/images/logos/opdrachtgevers/tap-crew.png",
+    altText: "TAP Crew logo",
+    tags: ["Eventcrew", "Productie"],
+    featured: true,
+  },
+  {
+    id: "backstage-masters",
+    name: "Backstage Masters",
+    category: "Opdrachtgevers",
+    logoPath: "/images/logos/opdrachtgevers/backstage-masters.png",
+    altText: "Backstage Masters logo",
+    tags: ["Backstage", "Productie"],
     featured: true,
   },
   {
@@ -318,6 +336,8 @@ export const missingProjectLogos: MissingProjectLogo[] = [
 const HOMEPAGE_CAROUSEL_PRIORITY_IDS = [
   "crewstars",
   "factor-f",
+  "tap-crew",
+  "backstage-masters",
   "jaarbeurs",
 ] as const;
 

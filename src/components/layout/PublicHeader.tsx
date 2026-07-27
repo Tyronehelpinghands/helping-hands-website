@@ -11,6 +11,8 @@ import {
   useScrollHeader,
 } from "@/hooks/useScrollHeader";
 import {
+  contactPhoneDisplay,
+  contactPhoneTel,
   navDropdowns,
   simpleNavLinks,
   type NavDropdownConfig,
@@ -25,7 +27,9 @@ export default function PublicHeader() {
   const { scrolled, progress } = useScrollHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<DropdownId>(null);
-  const [mobileAccordion, setMobileAccordion] = useState<DropdownId>(null);
+  const [mobileAccordion, setMobileAccordion] = useState<DropdownId>(
+    pathname === "/" ? "diensten" : null,
+  );
 
   const darkHero = pathHasDarkHero(pathname);
   const inverted = darkHero && !scrolled && !menuOpen;
@@ -105,19 +109,19 @@ export default function PublicHeader() {
         data-scrolled={scrolled ? "true" : "false"}
         data-inverted={inverted ? "true" : "false"}
         className={cn(
-          "fixed inset-x-0 top-0 w-full max-w-[100vw] transition-[background-color,box-shadow,border-color,backdrop-filter,height] duration-300",
+          "fixed inset-x-0 top-0 w-full max-w-[100vw] overflow-x-clip transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300",
           menuOpen ? "z-[80]" : "z-50",
           inverted
             ? "border-b border-white/10 bg-transparent"
             : scrolled
-              ? "border-b border-slate-200/80 bg-white/90 shadow-[0_4px_24px_rgba(11,31,77,0.08)] backdrop-blur-md"
+              ? "border-b border-slate-200/70 bg-white/85 shadow-[0_4px_28px_rgba(11,31,77,0.1)] backdrop-blur-xl"
               : "border-b border-slate-200/50 bg-white/95 shadow-[0_1px_20px_rgba(11,31,77,0.05)] backdrop-blur-sm",
         )}
       >
         <div
           className={cn(
-            "mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 transition-[height] duration-300 sm:gap-3 sm:px-6 lg:px-8",
-            scrolled ? "h-14 sm:h-16" : "h-[4.5rem] sm:h-20",
+            "mx-auto flex max-w-7xl items-center justify-between gap-1.5 px-3 transition-[height] duration-300 min-[360px]:gap-2 min-[360px]:px-4 sm:gap-3 sm:px-6 lg:px-8",
+            scrolled ? "h-14 sm:h-[3.75rem]" : "h-[3.75rem] sm:h-16",
           )}
         >
           <HeaderBrandLogo
@@ -173,11 +177,34 @@ export default function PublicHeader() {
               ))}
           </nav>
 
-          <div className="relative z-[70] flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+          <div className="relative z-[70] flex min-w-0 shrink-0 items-center gap-1 min-[360px]:gap-1.5 sm:gap-2.5">
+            <a
+              href={`tel:${contactPhoneTel}`}
+              aria-label={`Bel ${contactPhoneDisplay}`}
+              className={cn(
+                "hidden h-11 min-h-11 w-11 min-w-11 items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex",
+                inverted
+                  ? "border-white/25 text-white hover:bg-white/10"
+                  : "border-slate-200/80 text-[#173A8A] hover:border-slate-300 hover:bg-[#F5F7FA]",
+              )}
+            >
+              <svg
+                className="h-[1.125rem] w-[1.125rem]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </a>
             <Link
               href="/login"
               className={cn(
-                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex",
+                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 md:inline-flex",
                 inverted
                   ? "text-white/90 hover:bg-white/10 hover:text-white"
                   : "text-[#173A8A] hover:bg-[#F5F7FA] hover:text-[#0B1F4D]",
@@ -202,7 +229,7 @@ export default function PublicHeader() {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#F28C28] px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:scale-[1.03] hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:px-5 sm:py-2.5 sm:text-sm"
+              className="inline-flex h-11 min-h-11 shrink-0 items-center justify-center rounded-full bg-[#F28C28] px-3 py-2 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:scale-[1.03] hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 min-[360px]:px-3.5 sm:px-5 sm:text-sm"
             >
               <span className="sm:hidden">Aanvragen</span>
               <span className="hidden sm:inline">Personeel aanvragen</span>
@@ -219,7 +246,15 @@ export default function PublicHeader() {
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
               aria-label={menuOpen ? "Menu sluiten" : "Menu openen"}
-              onClick={() => setMenuOpen((open) => !open)}
+              onClick={() => {
+                setMenuOpen((open) => {
+                  const next = !open;
+                  if (next && pathname === "/" && !mobileAccordion) {
+                    setMobileAccordion("diensten");
+                  }
+                  return next;
+                });
+              }}
             >
               <svg
                 className="h-5 w-5"

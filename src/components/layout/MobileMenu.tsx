@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { BrandLogoImage } from "@/components/BrandLogo";
 import { ChevronDown } from "@/components/layout/HeaderDropdown";
 import {
   contactEmail,
+  contactPhoneDisplay,
+  contactPhoneLandlineDisplay,
+  contactPhoneLandlineTel,
+  contactPhoneTel,
+  contactWhatsappUrl,
   navDropdowns,
   simpleNavLinks,
   type NavDropdownConfig,
@@ -53,9 +59,17 @@ export default function MobileMenu({
         className="fixed inset-y-0 right-0 z-[70] flex h-dvh w-[min(88vw,24rem)] max-w-full animate-[slide-in-right_0.22s_ease-out] flex-col overflow-x-hidden bg-white shadow-2xl lg:hidden"
       >
         <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-5">
-          <p className="text-base font-extrabold tracking-tight text-[#173A8A]">
-            Helping Hands
-          </p>
+          <Link
+            href="/"
+            onClick={onClose}
+            className="inline-flex items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+            aria-label="Helping Hands Agency home"
+          >
+            <BrandLogoImage
+              variant="full"
+              imageClassName="h-9 w-auto max-w-[150px]"
+            />
+          </Link>
           <button
             type="button"
             aria-label="Menu sluiten"
@@ -148,7 +162,7 @@ export default function MobileMenu({
                       <Link
                         href={config.cta.href}
                         onClick={onClose}
-                        className="mx-2 mt-2 inline-flex rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
+                        className="mx-2 mt-2 inline-flex min-h-11 items-center rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
                       >
                         {config.cta.label}
                       </Link>
@@ -178,33 +192,57 @@ export default function MobileMenu({
         </nav>
 
         <div className="shrink-0 space-y-3 border-t border-slate-200 bg-white px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <a
+                href={`tel:${contactPhoneTel}`}
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-[#173A8A]/25 px-3 py-2.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                {contactPhoneDisplay}
+              </a>
+              <a
+                href={contactWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-[#173A8A]/25 px-3 py-2.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                WhatsApp
+              </a>
+            </div>
+            <a
+              href={`tel:${contactPhoneLandlineTel}`}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-full border-2 border-[#173A8A]/25 px-3 py-2.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+            >
+              Vast {contactPhoneLandlineDisplay}
+            </a>
+            <a
+              href={`mailto:${contactEmail}`}
+              className="block text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:text-[#173A8A] hover:underline"
+            >
+              {contactEmail}
+            </a>
+          </div>
           <Link
             href="/contact"
             onClick={onClose}
-            className="flex w-full items-center justify-center rounded-full bg-[#F28C28] px-5 py-3.5 text-base font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+            className="flex w-full min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-5 py-3.5 text-base font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
           >
             Personeel aanvragen
           </Link>
           <Link
             href="/vacatures"
             onClick={onClose}
-            className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+            className="flex w-full min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
           >
             Crew aanmelden
           </Link>
           <Link
             href="/login"
             onClick={onClose}
-            className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A]/30 bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+            className="flex w-full min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A]/30 bg-white px-5 py-3.5 text-base font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
           >
             Login
           </Link>
-          <a
-            href={`mailto:${contactEmail}`}
-            className="block text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:text-[#173A8A] hover:underline"
-          >
-            {contactEmail}
-          </a>
         </div>
       </div>
     </>

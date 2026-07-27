@@ -39,7 +39,10 @@ export type CompanySettings = {
   city: string;
   country: string;
   website: string;
+  /** Primary mobile (WhatsApp-capable) */
   phone: string;
+  /** Vaste lijn */
+  phoneLandline: string;
   defaultEmail: string;
 };
 
@@ -251,7 +254,8 @@ export const defaultSettings: AppSettings = {
     city: "Hilversum",
     country: "Nederland",
     website: "https://helpinghandsagency.nl",
-    phone: "06 8634 9036",
+    phone: "06 5741 6338",
+    phoneLandline: "035 785 7307",
     defaultEmail: "info@helpinghandsagency.nl",
   },
   email: {

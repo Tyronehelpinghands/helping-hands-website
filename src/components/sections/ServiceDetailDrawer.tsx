@@ -3,7 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import ServiceIconBadge from "@/components/ServiceIconBadge";
-import type { Service } from "@/lib/services";
+import {
+  getLandingPathForService,
+  type Service,
+} from "@/lib/services";
 
 type ServiceDetailDrawerProps = {
   service: Service | null;
@@ -31,6 +34,8 @@ export default function ServiceDetailDrawer({
   }, [service, onClose]);
 
   if (!service) return null;
+
+  const landingPath = getLandingPathForService(service);
 
   return (
     <>
@@ -114,17 +119,27 @@ export default function ServiceDetailDrawer({
             <Link
               href="/contact"
               onClick={onClose}
-              className="flex w-full items-center justify-center rounded-full bg-[#F28C28] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+              className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#F28C28] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
             >
               Personeel aanvragen
             </Link>
-            <Link
-              href="/diensten"
-              onClick={onClose}
-              className="flex w-full items-center justify-center rounded-full border-2 border-[#173A8A] px-5 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
-            >
-              Bekijk alle diensten
-            </Link>
+            {landingPath ? (
+              <Link
+                href={landingPath}
+                onClick={onClose}
+                className="flex min-h-11 w-full items-center justify-center rounded-full border-2 border-[#173A8A] px-5 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Meer over deze dienst
+              </Link>
+            ) : (
+              <Link
+                href="/diensten"
+                onClick={onClose}
+                className="flex min-h-11 w-full items-center justify-center rounded-full border-2 border-[#173A8A] px-5 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+              >
+                Bekijk alle diensten
+              </Link>
+            )}
           </div>
         </div>
       </div>

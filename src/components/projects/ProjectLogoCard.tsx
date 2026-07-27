@@ -62,7 +62,7 @@ export default function ProjectLogoCard({
       <div
         className={cn(
           "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-3",
-          isCarousel && "h-36 min-h-36 sm:h-40 sm:p-5 lg:h-44",
+          isCarousel && "h-40 min-h-40 sm:h-44 sm:p-5 lg:h-48",
           isCompact && "h-20 min-h-20 p-2",
           resolvedVariant === "default" && "h-32 min-h-32 sm:h-40 sm:p-5",
         )}
@@ -71,13 +71,15 @@ export default function ProjectLogoCard({
         <img
           src={logo.logoPath}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           className={cn(
             "h-auto w-auto max-h-full max-w-full object-contain transition duration-300",
-            isCarousel && "max-h-24 sm:max-h-28 lg:max-h-32",
+            isCarousel && "max-h-28 sm:max-h-32 lg:max-h-36",
             isCompact && "max-h-14",
             resolvedVariant === "default" && "max-h-24 sm:max-h-28",
             interactive &&
-              "grayscale-[0.35] group-hover:grayscale-0 group-hover:scale-105",
+              "opacity-90 grayscale-[0.2] group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0",
           )}
           onError={() => setImageError(true)}
         />
