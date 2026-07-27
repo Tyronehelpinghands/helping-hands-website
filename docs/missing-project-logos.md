@@ -1,56 +1,50 @@
 # Ontbrekende projectlogo’s
 
-Laatste update: 25 juli 2026 (P2)
+Laatste update: 27 juli 2026
 
 Items die **niet** op `/projecten` worden getoond omdat het verwachte lokale logo-bestand ontbreekt.
 
-**Bron van waarheid voor zichtbare logo’s:** `src/lib/projectLogos.ts` (niet meer `logos.ts` — verwijderd in P1).
-
-**Let op:** er liggen nog bestanden in `public/images/logos/` voor Backstage Masters, Backbone, Stadsfestival, Q-dance, TAP Crew — die blijven **bewust niet** in `projectLogos.ts` tot ze opnieuw bewust worden toegevoegd.
+**Bron van waarheid voor zichtbare logo’s:** `src/lib/projectLogos.ts`
 
 ## Opdrachtgevers
 
-- **MOJO**
-  - verwacht bestand: `public/images/logos/opdrachtgevers/mojo.png`
+| Naam | Categorie | Verwacht bestand | Map |
+|------|-----------|------------------|-----|
+| MOJO | Opdrachtgevers | `mojo.png` | `public/images/logos/opdrachtgevers/` |
+| Backbone International | Opdrachtgevers | `backbone-international.png` (kebab-case) | `public/images/logos/opdrachtgevers/` |
+
+> Er ligt nog `backbone international.jpg` (spaties) — bewust niet in catalogus tot een goedgekeurde kebab-case asset is toegevoegd.
 
 ## Projecten & festivals
 
-- **BTS**
-  - verwacht bestand: `public/images/logos/projecten/bts.png`
-  - reden: bestand was weg na logo-correctie
+| Naam | Categorie | Verwacht bestand | Map |
+|------|-----------|------------------|-----|
+| BTS | Projecten & festivals | `bts.png` | `public/images/logos/projecten/` |
+| Stadsfestival Amersfoort | Projecten & festivals | `stadsfestival-amersfoort.png` | `public/images/logos/projecten/` |
+
+> Er ligt nog `stadsfestival amersfoort logo.jpg` (spaties) — bewust niet in catalogus.
 
 ## Locaties
 
 Geen ontbrekende items.
 
-## Bewust verwijderd van de projectenpagina
+## Bewust verwijderd / banned (nooit tonen)
 
-1. Ironman 70.3 Westfriesland
-2. Q-dance
-3. The Good Guyz
-4. Your Productions
-5. LOC7000
-6. ID&T
-7. TAP Crew
-8. Backstage Masters
-9. Backbone International
-10. Stadsfestival Amersfoort
+1. Ironman / Ironman 70.3 Westfriesland / ironman-westfriesland
+2. Q-dance / Q Dance / Qdance / Q-Dance
+3. The Good Guyz / The Good Guys / the-good-guyz
+4. Your Productions / Yout Productions
+5. LOC7000 / LOC 7000 / Loc7000
+6. ID&T / IDT / ID-T / id-t
 
-## Laatste logo-correcties (projecten-map)
+## Wel in catalogus (lokale assets aanwezig)
 
-Bestanden hernoemd naar consistente namen (geen spaties):
+Preferred opdrachtgevers met lokale bestanden:
 
-| Was | Nu |
-|-----|-----|
-| `bruno mars.png` | `bruno-mars.png` |
-| `q music the party.png` | `qmusic-the-party.png` |
-| `kpn.png` | `kpn-festival.png` |
-| `leppeltje leppeltje.png` | `lepeltje-lepeltje.png` |
-| `proef amersfoort.png` | `proef-amersfoort.png` |
-| `donimator.png` | `dominator.png` |
+- Crewstars → `crewstars.png`
+- Factor F → `factor-f.webp`
+- TAP Crew → `tap-crew.png`
+- Backstage Masters → `backstage-masters.png`
+- Jaarbeurs → `jaarbeurs.jpg`
 
-`dominator.webp` is vervangen door `dominator.png`.
-
-## Crewstars logo
-
-- `crewstars logo.png` hernoemd/gekopieerd naar `crewstars.png` (officieel paars icoon).
+Bestandsnaamconventie: lowercase, streepjes, geen spaties, `.png` waar mogelijk.

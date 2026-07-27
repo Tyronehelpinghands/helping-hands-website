@@ -11,7 +11,8 @@ export default function FloatingCTA() {
   const hideOnContact =
     pathname === "/contact" ||
     pathname === "/medewerkers" ||
-    pathname === "/vacatures";
+    pathname === "/vacatures" ||
+    pathname === "/projecten";
 
   if (hideOnContact) return null;
 

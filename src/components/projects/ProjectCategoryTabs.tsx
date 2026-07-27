@@ -3,7 +3,7 @@
 import {
   projectLogoFilters,
   type ProjectLogoFilter,
-} from "@/lib/projectLogos";
+} from "@/lib/projectCategories";
 import { cn } from "@/lib/utils";
 
 type ProjectCategoryTabsProps = {
@@ -18,7 +18,11 @@ export default function ProjectCategoryTabs({
   counts,
 }: ProjectCategoryTabsProps) {
   return (
-    <div className="w-full max-w-full overflow-x-auto pb-1">
+    <div
+      role="tablist"
+      aria-label="Filter projectervaring"
+      className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       <div className="flex w-max gap-2 sm:flex-wrap sm:w-auto">
         {projectLogoFilters.map((filter) => {
           const isActive = active === filter.id;
@@ -28,8 +32,9 @@ export default function ProjectCategoryTabs({
             <button
               key={filter.id}
               type="button"
+              role="tab"
+              aria-selected={isActive}
               onClick={() => onChange(filter.id)}
-              aria-pressed={isActive}
               className={cn(
                 "shrink-0 cursor-pointer rounded-full border px-4 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:px-5",
                 isActive

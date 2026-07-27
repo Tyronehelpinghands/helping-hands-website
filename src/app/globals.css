@@ -125,7 +125,10 @@ body.mobile-menu-open {
   overflow: hidden;
 }
 
-body.mobile-menu-open [data-mobile-sticky-cta] {
+body.mobile-menu-open [data-mobile-sticky-cta],
+body.mobile-menu-open [data-mobile-employee-cta],
+body.mobile-menu-open [data-mobile-vacancy-cta],
+body.mobile-menu-open [data-mobile-project-cta] {
   display: none;
 }
 

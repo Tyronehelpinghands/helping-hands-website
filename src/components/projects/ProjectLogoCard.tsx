@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ProjectLogo } from "@/lib/projectLogos";
+import { getCategoryContext } from "@/lib/projectCategories";
 import { cn } from "@/lib/utils";
 
 const categoryStyles: Record<ProjectLogo["category"], string> = {
@@ -17,6 +18,7 @@ type ProjectLogoCardProps = {
   interactive?: boolean;
   compact?: boolean;
   variant?: ProjectLogoCardVariant;
+  onSelect?: (logo: ProjectLogo) => void;
 };
 
 export default function ProjectLogoCard({
@@ -24,12 +26,14 @@ export default function ProjectLogoCard({
   interactive = true,
   compact = false,
   variant,
+  onSelect,
 }: ProjectLogoCardProps) {
   const resolvedVariant: ProjectLogoCardVariant =
     variant ?? (compact ? "compact" : "default");
   const isCarousel = resolvedVariant === "carousel";
   const isCompact = resolvedVariant === "compact";
   const showFooter = resolvedVariant === "default";
+  const clickable = Boolean(onSelect) && interactive;
 
   const [imageError, setImageError] = useState(false);
   const alt = logo.altText ?? `${logo.name} logo`;
@@ -38,17 +42,8 @@ export default function ProjectLogoCard({
     return null;
   }
 
-  return (
-    <article
-      className={cn(
-        "group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300",
-        interactive &&
-          "hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:shadow-lg hover:shadow-[#173A8A]/5",
-        isCarousel && "p-5 sm:p-6",
-        isCompact && "p-3",
-        resolvedVariant === "default" && "p-4 sm:p-5",
-      )}
-    >
+  const content = (
+    <>
       <span
         className={cn(
           "inline-flex w-fit rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide",
@@ -62,9 +57,9 @@ export default function ProjectLogoCard({
       <div
         className={cn(
           "mt-3 flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-3",
-          isCarousel && "h-40 min-h-40 sm:h-44 sm:p-5 lg:h-48",
+          isCarousel && "h-28 min-h-28 sm:h-32 sm:p-6 lg:h-36",
           isCompact && "h-20 min-h-20 p-2",
-          resolvedVariant === "default" && "h-32 min-h-32 sm:h-40 sm:p-5",
+          resolvedVariant === "default" && "h-36 min-h-36 sm:h-40 sm:p-6",
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -75,11 +70,11 @@ export default function ProjectLogoCard({
           decoding="async"
           className={cn(
             "h-auto w-auto max-h-full max-w-full object-contain transition duration-300",
-            isCarousel && "max-h-28 sm:max-h-32 lg:max-h-36",
+            isCarousel && "max-h-12 sm:max-h-16 lg:max-h-20",
             isCompact && "max-h-14",
             resolvedVariant === "default" && "max-h-24 sm:max-h-28",
             interactive &&
-              "opacity-90 grayscale-[0.2] group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0",
+              "opacity-90 grayscale-[0.15] group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0",
           )}
           onError={() => setImageError(true)}
         />
@@ -87,21 +82,57 @@ export default function ProjectLogoCard({
 
       {showFooter ? (
         <>
-          <p className="mt-3 text-center text-sm font-bold text-[#0B1F4D]">{logo.name}</p>
+          <p className="mt-4 text-center text-sm font-bold text-[#0B1F4D] sm:text-base">
+            {logo.name}
+          </p>
+          <p className="mt-1.5 text-center text-xs leading-5 text-[#101828]/60">
+            {getCategoryContext(logo.category)}
+          </p>
           {logo.tags && logo.tags.length > 0 ? (
-            <div className="mt-2 flex flex-wrap justify-center gap-1">
+            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
               {logo.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-md bg-slate-100 px-2 py-0.5 text-[0.65rem] font-medium text-slate-600"
+                  className="rounded-full bg-slate-100 px-2.5 py-1 text-[0.65rem] font-medium text-slate-600"
                 >
                   {tag}
                 </span>
               ))}
             </div>
           ) : null}
+          {clickable ? (
+            <span className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-[#173A8A]/20 bg-[#173A8A]/5 px-4 text-xs font-bold text-[#173A8A] transition group-hover:border-[#F28C28]/40 group-hover:bg-[#F28C28]/10 group-hover:text-[#c46a12]">
+              Bekijk inzetgebied
+            </span>
+          ) : null}
         </>
       ) : null}
-    </article>
+    </>
   );
+
+  const shellClass = cn(
+    "group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-[#F5F7FA]/80 shadow-sm transition duration-300",
+    interactive &&
+      "hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:shadow-lg hover:shadow-[#173A8A]/5",
+    isCarousel && "p-5 sm:p-6 lg:p-8",
+    isCompact && "p-3",
+    resolvedVariant === "default" && "p-4 sm:p-5",
+    clickable &&
+      "w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2",
+  );
+
+  if (clickable) {
+    return (
+      <button
+        type="button"
+        className={shellClass}
+        onClick={() => onSelect?.(logo)}
+        aria-label={`${logo.name} — bekijk inzetgebied`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <article className={shellClass}>{content}</article>;
 }

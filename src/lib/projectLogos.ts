@@ -3,6 +3,9 @@
  *
  * Alleen entries met een lokaal bestaand logo-bestand worden getoond.
  * Ontbrekende logo's staan in missingProjectLogos + docs/missing-project-logos.md.
+ *
+ * Banned / nooit tonen: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T
+ * (alle spellingvarianten).
  */
 
 export type ProjectLogoCategory =
@@ -29,18 +32,12 @@ export type MissingProjectLogo = {
   reason: string;
 };
 
-export type ProjectLogoFilter = "Alle" | ProjectLogoCategory;
-
-export const projectLogoFilters: { id: ProjectLogoFilter; label: string }[] = [
-  { id: "Alle", label: "Alle" },
-  { id: "Opdrachtgevers", label: "Opdrachtgevers" },
-  { id: "Projecten & festivals", label: "Projecten & festivals" },
-  { id: "Locaties", label: "Locaties" },
-];
+export type { ProjectLogoFilter } from "@/lib/projectCategories";
+export { projectLogoFilters } from "@/lib/projectCategories";
 
 /**
  * Catalogus van zichtbare logo's (lokaal bestand aanwezig).
- * Banned / niet tonen: Ironman, Q-dance, The Good Guyz, Your Productions, LOC7000, ID&T.
+ * Preferred opdrachtgevers met lokale assets: Crewstars, Factor F, TAP Crew, Backstage Masters.
  * Niet in catalogus (geen goedgekeurde assets): Backbone International, Stadsfestival Amersfoort, MOJO.
  */
 export const projectLogos: ProjectLogo[] = [
@@ -354,7 +351,9 @@ export function getHomepageFeaturedLogos(): ProjectLogo[] {
   return getFeaturedProjectLogos();
 }
 
-export function filterProjectLogos(filter: ProjectLogoFilter): ProjectLogo[] {
+export function filterProjectLogos(
+  filter: import("@/lib/projectCategories").ProjectLogoFilter,
+): ProjectLogo[] {
   if (filter === "Alle") return projectLogos;
   return projectLogos.filter((logo) => logo.category === filter);
 }
