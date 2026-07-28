@@ -70,9 +70,12 @@ export type TravelCalculationResult = {
 };
 
 export function getShiftbaseApiToken(): string | undefined {
-  const raw = process.env.SHIFTBASE_API_TOKEN;
+  // Prefer SHIFTBASE_API_TOKEN; also accept SHIFTBASE_API_KEY (common Vercel naming).
+  const raw =
+    process.env.SHIFTBASE_API_TOKEN?.trim() ||
+    process.env.SHIFTBASE_API_KEY?.trim();
   if (!raw) return undefined;
-  const token = raw.trim().replace(/^['"]|['"]$/g, "");
+  const token = raw.replace(/^['"]|['"]$/g, "").trim();
   return token || undefined;
 }
 
@@ -100,13 +103,13 @@ export function formatShiftbaseError(error: unknown): string {
   if (error instanceof Error) {
     const msg = error.message;
     if (msg.includes("401") || msg.includes("403")) {
-      return "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_TOKEN (Settings → App center → Public API).";
+      return "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY (Settings → App center → Public API).";
     }
     if (msg.includes("429")) {
       return "Shiftbase rate limit bereikt. Probeer later opnieuw.";
     }
     if (msg.includes("niet geconfigureerd")) {
-      return "SHIFTBASE_API_TOKEN is niet geconfigureerd op de server.";
+      return "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd op de server.";
     }
     if (msg.includes("404")) {
       return `${msg} Tip: gebruik SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api/v1 en controleer of App Center Plus actief is.`;

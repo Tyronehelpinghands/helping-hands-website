@@ -91,8 +91,8 @@ export default async function InternIntegratiesPage({
       name: "Shiftbase",
       status: shiftbasePrepared ? "Voorbereid" : "Ontbreekt",
       note: shiftbasePrepared
-        ? "Token aanwezig — klik Test om live API te checken"
-        : "SHIFTBASE_API_TOKEN ontbreekt",
+        ? "Token/key aanwezig — klik Test om live API te checken"
+        : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt",
     },
     {
       provider: "moneybird",

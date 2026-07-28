@@ -442,8 +442,8 @@ export default function IntegrationsHubClient({
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
               {shiftbaseConfigured
-                ? "SHIFTBASE_API_TOKEN aanwezig. Klik Test API om te controleren."
-                : "SHIFTBASE_API_TOKEN ontbreekt in Vercel."}
+                ? "Shiftbase API key/token aanwezig. Klik Test API om te controleren."
+                : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in Vercel."}
             </p>
             <LiveTestButton provider="shiftbase" />
           </CardContent>

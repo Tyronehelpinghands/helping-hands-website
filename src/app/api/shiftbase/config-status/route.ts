@@ -35,7 +35,8 @@ export async function GET() {
       tokenLength: token?.length ?? 0,
       baseUrl: getShiftbaseApiBaseUrl(),
       baseUrlFromEnv: Boolean(process.env.SHIFTBASE_API_BASE_URL?.trim()),
-      rawKeyPresent: Boolean(process.env.SHIFTBASE_API_TOKEN),
+      rawTokenPresent: Boolean(process.env.SHIFTBASE_API_TOKEN?.trim()),
+      rawKeyPresent: Boolean(process.env.SHIFTBASE_API_KEY?.trim()),
       endpoints: {
         test: SHIFTBASE_ENDPOINTS.test,
         employees: SHIFTBASE_ENDPOINTS.employees,
@@ -45,7 +46,7 @@ export async function GET() {
       resolvedTestUrl: resolveShiftbaseUrl(SHIFTBASE_ENDPOINTS.test),
     },
     hint: configured
-      ? "Token is zichtbaar in deze server-runtime. Gebruik /api/shiftbase/test voor de API-check."
-      : "SHIFTBASE_API_TOKEN ontbreekt in deze runtime. Zet de variabele in Vercel → Production, redeploy, en test opnieuw.",
+      ? "Token/key is zichtbaar in deze server-runtime. Gebruik /api/shiftbase/test voor de API-check."
+      : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in deze runtime. Zet één van beide in Vercel → Production, redeploy, en test opnieuw.",
   });
 }
