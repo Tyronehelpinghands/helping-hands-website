@@ -57,9 +57,7 @@ export type EmployeeGrowthStage = {
   description: string;
 };
 
-export const employeeApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
-  "Aanmelding medewerker Helping Hands",
-)}`;
+export { employeeApplyMailto } from "@/lib/navigation";
 
 export const employeeHeroTrust = [
   "Duidelijke planning",

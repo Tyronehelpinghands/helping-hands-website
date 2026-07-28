@@ -50,6 +50,7 @@ export type EmailSettings = {
   generalEmail: string;
   crewApplicationsEmail: string;
   planningEmail: string;
+  plannerEmail: string;
   financeEmail: string;
   salesEmail: string;
 };
@@ -262,6 +263,7 @@ export const defaultSettings: AppSettings = {
     generalEmail: "info@helpinghandsagency.nl",
     crewApplicationsEmail: "aanmeldingen@helpinghandsagency.nl",
     planningEmail: "planning@helpinghandsagency.nl",
+    plannerEmail: "mesbah@helpinghandsagency.nl",
     financeEmail: "administratie@helpinghandsagency.nl",
     salesEmail: "sales@helpinghandsagency.nl",
   },

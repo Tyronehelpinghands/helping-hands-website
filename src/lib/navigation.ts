@@ -13,7 +13,12 @@ export const navLinks = [
 ] as const;
 
 export const contactEmail = siteConfig.email;
+export const planningEmail = siteConfig.planningEmail;
+export const plannerEmail = siteConfig.plannerEmail;
 export const applicationsEmail = siteConfig.applicationsEmail;
+export const employeeApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
+  "Aanmelding medewerker Helping Hands",
+)}`;
 export const ownerEmail = siteConfig.ownerEmail;
 export const contactPhoneDisplay = siteConfig.phoneDisplay;
 export const contactPhoneTel = siteConfig.phoneTel;
@@ -139,7 +144,7 @@ export const navDropdowns: NavDropdownConfig[] = [
       {
         title: "Aanmelden als crewlid",
         description: "Meld je aan voor events, horeca en producties.",
-        href: "/vacatures",
+        href: employeeApplyMailto,
       },
       {
         title: "Doorgroeien",
@@ -147,7 +152,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/medewerkers",
       },
     ],
-    cta: { label: "Aanmelden", href: "/vacatures" },
+    cta: { label: "Aanmelden", href: employeeApplyMailto },
   },
 ];
 

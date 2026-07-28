@@ -2,8 +2,13 @@ export const siteConfig = {
   name: "Helping Hands Agency",
   shortName: "Helping Hands",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://helpinghandsagency.nl",
-  /** Publiek contact voor aanvragen en algemene vragen */
+  /** Algemene vragen */
   email: "info@helpinghandsagency.nl" as string,
+  /** Personeels- / crewaanvragen (opdrachtgevers) */
+  planningEmail: "planning@helpinghandsagency.nl" as string,
+  /** Planner (Mesbah) — planning & inzet */
+  plannerEmail: "mesbah@helpinghandsagency.nl" as string,
+  /** Crewaanmeldingen & sollicitaties */
   applicationsEmail: "aanmeldingen@helpinghandsagency.nl" as string,
   /** Direct contact (eigenaar / operationeel) */
   ownerEmail: "tyrone@helpinghandsagency.nl" as string,

@@ -29,8 +29,13 @@ const CONTACT_CHANNELS = [
   },
   {
     title: "Planning",
-    email: "info@helpinghandsagency.nl",
+    email: "planning@helpinghandsagency.nl",
     description: "Voor aanvragen, planning en briefings.",
+  },
+  {
+    title: "Planner (Mesbah)",
+    email: "mesbah@helpinghandsagency.nl",
+    description: "Direct contact met de planner.",
   },
   {
     title: "Administratie",

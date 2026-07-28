@@ -4,13 +4,13 @@ import Link from "next/link";
 import { BrandLogoImage } from "@/components/BrandLogo";
 import { ChevronDown } from "@/components/layout/HeaderDropdown";
 import {
-  contactEmail,
   contactPhoneDisplay,
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
   contactWhatsappUrl,
   navDropdowns,
+  planningEmail,
   simpleNavLinks,
   type NavDropdownConfig,
 } from "@/lib/navigation";
@@ -146,27 +146,66 @@ export default function MobileMenu({
                         {config.panelDescription}
                       </p>
                     ) : null}
-                    {config.items.map((item) => (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        onClick={onClose}
-                        className="block rounded-xl border border-slate-100 px-4 py-3 transition hover:border-[#F28C28]/40 hover:bg-[#F28C28]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
-                      >
-                        <p className="font-bold text-[#101828]">{item.title}</p>
-                        <p className="mt-0.5 text-sm text-slate-600">
-                          {item.description}
-                        </p>
-                      </Link>
-                    ))}
+                    {config.items.map((item) => {
+                      const itemClassName =
+                        "block rounded-xl border border-slate-100 px-4 py-3 transition hover:border-[#F28C28]/40 hover:bg-[#F28C28]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2";
+                      const itemContent = (
+                        <>
+                          <p className="font-bold text-[#101828]">
+                            {item.title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-slate-600">
+                            {item.description}
+                          </p>
+                        </>
+                      );
+
+                      if (
+                        item.href.startsWith("mailto:") ||
+                        item.href.startsWith("tel:")
+                      ) {
+                        return (
+                          <a
+                            key={item.title}
+                            href={item.href}
+                            onClick={onClose}
+                            className={itemClassName}
+                          >
+                            {itemContent}
+                          </a>
+                        );
+                      }
+
+                      return (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          onClick={onClose}
+                          className={itemClassName}
+                        >
+                          {itemContent}
+                        </Link>
+                      );
+                    })}
                     {config.cta ? (
-                      <Link
-                        href={config.cta.href}
-                        onClick={onClose}
-                        className="mx-2 mt-2 inline-flex min-h-11 items-center rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
-                      >
-                        {config.cta.label}
-                      </Link>
+                      config.cta.href.startsWith("mailto:") ||
+                      config.cta.href.startsWith("tel:") ? (
+                        <a
+                          href={config.cta.href}
+                          onClick={onClose}
+                          className="mx-2 mt-2 inline-flex min-h-11 items-center rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
+                        >
+                          {config.cta.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={config.cta.href}
+                          onClick={onClose}
+                          className="mx-2 mt-2 inline-flex min-h-11 items-center rounded-full bg-[#F28C28] px-4 py-2.5 text-sm font-bold text-white"
+                        >
+                          {config.cta.label}
+                        </Link>
+                      )
                     ) : null}
                   </div>
                 ) : null}
@@ -217,10 +256,10 @@ export default function MobileMenu({
               Vast {contactPhoneLandlineDisplay}
             </a>
             <a
-              href={`mailto:${contactEmail}`}
+              href={`mailto:${planningEmail}`}
               className="block text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:text-[#173A8A] hover:underline"
             >
-              {contactEmail}
+              {planningEmail}
             </a>
           </div>
           <Link

@@ -5,7 +5,6 @@ import CrewPhotoGrid from "@/components/CrewPhotoGrid";
 import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
 import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
-import TrustBar from "@/components/sections/TrustBar";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/lib/crewPhotos";
 import { contactFaqs } from "@/lib/faq";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
-import { applicationsEmail, contactEmail } from "@/lib/navigation";
+import { applicationsEmail, contactEmail, plannerEmail, planningEmail } from "@/lib/navigation";
 import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 import {
   formatAddressSingleLine,
@@ -40,7 +39,6 @@ export default function ContactPage() {
       />
       <JsonLd data={faqJsonLd(contactFaqs)} />
       <PageHero content={getPageHeroContent("/contact")} />
-      <TrustBar />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mb-10 max-w-3xl">
@@ -67,13 +65,22 @@ export default function ContactPage() {
             <div className="p-8 text-white">
               <h2 className="text-xl font-black">Personeelsaanvragen</h2>
               <p className="mt-4 text-sm text-white/80">
-                Algemene vragen &amp; personeelsaanvragen — ook spoed
+                Crew aanvragen voor events, horeca en productie — ook spoed
               </p>
               <a
-                href={`mailto:${contactEmail}`}
+                href={`mailto:${planningEmail}`}
                 className="mt-2 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
               >
-                {contactEmail}
+                {planningEmail}
+              </a>
+              <p className="mt-3 text-xs font-bold uppercase tracking-wide text-white/55">
+                Planning (Mesbah)
+              </p>
+              <a
+                href={`mailto:${plannerEmail}`}
+                className="mt-1 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
+              >
+                {plannerEmail}
               </a>
               <a
                 href={`tel:${siteConfig.phoneTel}`}
@@ -169,6 +176,31 @@ export default function ContactPage() {
                 >
                   {contactEmail}
                 </a>
+                <span className="text-[#101828]/55"> (algemeen)</span>
+                <br />
+                <a
+                  href={`mailto:${planningEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {planningEmail}
+                </a>
+                <span className="text-[#101828]/55"> (personeelsaanvragen)</span>
+                <br />
+                <a
+                  href={`mailto:${plannerEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {plannerEmail}
+                </a>
+                <span className="text-[#101828]/55"> (planner)</span>
+                <br />
+                <a
+                  href={`mailto:${applicationsEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {applicationsEmail}
+                </a>
+                <span className="text-[#101828]/55"> (aanmeldingen)</span>
                 <br />
                 <a
                   href={`mailto:${siteConfig.ownerEmail}`}

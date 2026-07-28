@@ -9,6 +9,8 @@ import {
   contactPhoneLandlineTel,
   contactPhoneTel,
   navLinks,
+  plannerEmail,
+  planningEmail,
 } from "@/lib/navigation";
 import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 
@@ -101,13 +103,35 @@ export default function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li>
                 <p className="text-xs font-bold uppercase tracking-wide text-white/45">
-                  Algemene vragen &amp; personeelsaanvragen
+                  Algemene vragen
                 </p>
                 <a
                   href={`mailto:${contactEmail}`}
                   className="mt-1 block transition hover:text-white"
                 >
                   {contactEmail}
+                </a>
+              </li>
+              <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  Personeelsaanvragen
+                </p>
+                <a
+                  href={`mailto:${planningEmail}`}
+                  className="mt-1 block transition hover:text-white"
+                >
+                  {planningEmail}
+                </a>
+              </li>
+              <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  Planning (Mesbah)
+                </p>
+                <a
+                  href={`mailto:${plannerEmail}`}
+                  className="mt-1 block transition hover:text-white"
+                >
+                  {plannerEmail}
                 </a>
               </li>
               <li>

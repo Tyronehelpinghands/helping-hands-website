@@ -26,18 +26,23 @@ export default function EmailSettingsPanel({ settings, onChange }: Props) {
   const fields: { key: keyof EmailSettings; label: string; hint: string }[] = [
     {
       key: "generalEmail",
-      label: "Algemene vragen / personeelsaanvragen",
+      label: "Algemene vragen",
       hint: "info@helpinghandsagency.nl",
+    },
+    {
+      key: "planningEmail",
+      label: "Personeelsaanvragen / planning",
+      hint: "planning@helpinghandsagency.nl",
+    },
+    {
+      key: "plannerEmail",
+      label: "Planner (Mesbah)",
+      hint: "mesbah@helpinghandsagency.nl",
     },
     {
       key: "crewApplicationsEmail",
       label: "Crew-aanmeldingen / sollicitaties",
       hint: "aanmeldingen@helpinghandsagency.nl",
-    },
-    {
-      key: "planningEmail",
-      label: "Planning",
-      hint: "planning@helpinghandsagency.nl",
     },
     {
       key: "financeEmail",

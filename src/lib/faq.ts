@@ -12,7 +12,7 @@ export const homeFaqs: FaqItem[] = [
   {
     question: "Hoe snel kan ik personeel aanvragen?",
     answer:
-      "Stuur datum, locatie, tijden, functies en aantal mensen via het contactformulier of e-mail. Bij spoedaanvragen denken we mee over wat nog haalbaar is op basis van beschikbaarheid. Bel of app 06 5741 6338, vast 035 785 7307, of mail info@helpinghandsagency.nl.",
+      "Stuur datum, locatie, tijden, functies en aantal mensen via het contactformulier of e-mail. Bij spoedaanvragen denken we mee over wat nog haalbaar is op basis van beschikbaarheid. Bel of app 06 5741 6338, vast 035 785 7307, of mail planning@helpinghandsagency.nl.",
   },
   {
     question: "Wat moet ik aanleveren voor een snelle bezetting?",
@@ -55,7 +55,7 @@ export const contactFaqs: FaqItem[] = [
   {
     question: "Waar mail ik als opdrachtgever of als crew?",
     answer:
-      "Personeelsaanvragen: info@helpinghandsagency.nl. Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl.",
+      "Personeelsaanvragen: planning@helpinghandsagency.nl (planner: mesbah@helpinghandsagency.nl). Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl. Algemene vragen: info@helpinghandsagency.nl.",
   },
   {
     question: "Is het contactformulier al gekoppeld aan jullie systemen?",
@@ -106,7 +106,7 @@ export const overOnsFaqs: FaqItem[] = [
   {
     question: "Hoe vraag ik personeel aan of meld ik mij aan als crew?",
     answer:
-      "Opdrachtgevers: stuur datum, locatie, tijden, functies en aantallen via contact of info@helpinghandsagency.nl. Crew: bekijk vacatures of mail aanmeldingen@helpinghandsagency.nl.",
+      "Opdrachtgevers: stuur datum, locatie, tijden, functies en aantallen via contact of planning@helpinghandsagency.nl. Crew: bekijk vacatures of mail aanmeldingen@helpinghandsagency.nl.",
   },
 ];
 

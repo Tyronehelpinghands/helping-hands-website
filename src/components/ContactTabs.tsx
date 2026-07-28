@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { applicationsEmail, contactEmail } from "@/lib/navigation";
+import { applicationsEmail, planningEmail } from "@/lib/navigation";
 
 type FieldDef = {
   label: string;
@@ -180,10 +180,10 @@ export default function ContactTabs() {
                 <>
                   Stuur deze gegevens naar{" "}
                   <a
-                    href={`mailto:${contactEmail}`}
+                    href={`mailto:${planningEmail}`}
                     className="font-bold text-[#F28C28] underline-offset-4 hover:underline"
                   >
-                    {contactEmail}
+                    {planningEmail}
                   </a>
                   {isUrgent ? " en vermeld spoed in het onderwerp." : "."} Voor
                   de snelste opvolging mag je ook direct mailen.
@@ -243,10 +243,10 @@ export default function ContactTabs() {
                   Formulier bereidt je aanvraag voor (nog geen automatische
                   versturing). Voor personeelsaanvragen mail je naar{" "}
                   <a
-                    href={`mailto:${contactEmail}`}
+                    href={`mailto:${planningEmail}`}
                     className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                   >
-                    {contactEmail}
+                    {planningEmail}
                   </a>
                   .
                 </>

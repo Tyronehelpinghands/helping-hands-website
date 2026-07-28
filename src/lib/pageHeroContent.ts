@@ -1,3 +1,5 @@
+import { employeeApplyMailto } from "@/lib/navigation";
+
 export type PageHeroTheme =
   | "staffing"
   | "vacatures"
@@ -259,7 +261,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     description:
       "Bij Helping Hands werk je op events, horeca, stagebouw, productie en logistiek. Je krijgt duidelijke afspraken, begeleiding en de kans om jezelf te ontwikkelen op echte producties.",
     theme: "medewerkers",
-    primaryCta: { label: "Aanmelden als crewlid", href: "/contact" },
+    primaryCta: { label: "Aanmelden als crewlid", href: employeeApplyMailto },
     secondaryCta: { label: "Bekijk vacatures", href: "/vacatures" },
     highlights: [
       { label: "Planning" },
@@ -292,7 +294,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     description:
       "Stuur je personeelsvraag, projectinformatie of samenwerking door. We denken mee over functies, aantallen, tijden en briefing.",
     theme: "contact",
-    primaryCta: { label: "Mail ons", href: "mailto:info@helpinghandsagency.nl" },
+    primaryCta: { label: "Mail ons", href: "mailto:planning@helpinghandsagency.nl" },
     secondaryCta: { label: "Crew aanmelden", href: "/vacatures" },
     highlights: [
       { label: "Personeelsaanvraag" },

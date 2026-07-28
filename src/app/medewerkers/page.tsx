@@ -14,7 +14,8 @@ import MobileEmployeeCta from "@/components/medewerkers/MobileEmployeeCta";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
-import { employeeFaqs } from "@/lib/employeePage";
+import { employeeApplyMailto, employeeFaqs } from "@/lib/employeePage";
+import { applicationsEmail } from "@/lib/navigation";
 import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -72,13 +73,13 @@ export default function MedewerkersPage() {
                 >
                   vacatures
                 </Link>
-                , of stuur je aanmelding via{" "}
-                <Link
-                  href="/contact"
+                , of stuur je aanmelding naar{" "}
+                <a
+                  href={employeeApplyMailto}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
-                  contact
-                </Link>
+                  {applicationsEmail}
+                </a>
                 .
               </p>
             </div>

@@ -3,12 +3,12 @@
 import { FormEvent, useState } from "react";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
 import {
-  contactEmail,
   contactPhoneDisplay,
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
   contactWhatsappUrl,
+  planningEmail,
 } from "@/lib/navigation";
 import { getServiceIconKey } from "@/lib/service-icons";
 
@@ -53,7 +53,7 @@ export default function QuickRequestForm() {
       ].join("\n"),
     );
 
-    window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${planningEmail}?subject=${subject}&body=${body}`;
     setSubmitted(true);
   }
 
@@ -76,7 +76,7 @@ export default function QuickRequestForm() {
           </h2>
           <p className="mt-5 text-lg leading-8 text-white/75">
             Kies het type inzet, aantal mensen en deel de eerste details. Je
-            aanvraag opent in je e-mail naar {contactEmail}.
+            aanvraag opent in je e-mail naar {planningEmail}.
           </p>
           <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-5">
             <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#F28C28]">
@@ -107,7 +107,7 @@ export default function QuickRequestForm() {
                 WhatsApp
               </a>
               <a
-                href={`mailto:${contactEmail}`}
+                href={`mailto:${planningEmail}`}
                 className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
               >
                 Mail
@@ -129,10 +129,10 @@ export default function QuickRequestForm() {
                 Controleer de aanvraag en verstuur hem. Komt er niets op? Mail
                 dan direct naar{" "}
                 <a
-                  href={`mailto:${contactEmail}`}
+                  href={`mailto:${planningEmail}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
-                  {contactEmail}
+                  {planningEmail}
                 </a>
                 , bel{" "}
                 <a
@@ -262,10 +262,10 @@ export default function QuickRequestForm() {
               <p className="rounded-xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/70">
                 Voor spoedaanvragen:{" "}
                 <a
-                  href={`mailto:${contactEmail}`}
+                  href={`mailto:${planningEmail}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
-                  {contactEmail}
+                  {planningEmail}
                 </a>
                 , mobiel{" "}
                 <a

@@ -30,16 +30,28 @@ function DropdownCard({
   href: string;
   onNavigate?: () => void;
 }) {
-  return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      className="group block rounded-xl border border-slate-100 bg-[#F5F7FA]/80 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[#F28C28]/45 hover:bg-white hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
-    >
+  const className =
+    "group block rounded-xl border border-slate-100 bg-[#F5F7FA]/80 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[#F28C28]/45 hover:bg-white hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2";
+  const content = (
+    <>
       <p className="font-bold text-[#0B1F4D] transition group-hover:text-[#F28C28]">
         {title}
       </p>
       <p className="mt-1 text-sm leading-5 text-slate-600">{description}</p>
+    </>
+  );
+
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) {
+    return (
+      <a href={href} onClick={onNavigate} className={className}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} onClick={onNavigate} className={className}>
+      {content}
     </Link>
   );
 }
@@ -132,13 +144,24 @@ export default function HeaderDropdown({
 
               {config.cta ? (
                 <div className="mt-4 border-t border-slate-100 pt-4">
-                  <Link
-                    href={config.cta.href}
-                    onClick={onClose}
-                    className="inline-flex rounded-full bg-[#F28C28] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
-                  >
-                    {config.cta.label}
-                  </Link>
+                  {config.cta.href.startsWith("mailto:") ||
+                  config.cta.href.startsWith("tel:") ? (
+                    <a
+                      href={config.cta.href}
+                      onClick={onClose}
+                      className="inline-flex rounded-full bg-[#F28C28] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+                    >
+                      {config.cta.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={config.cta.href}
+                      onClick={onClose}
+                      className="inline-flex rounded-full bg-[#F28C28] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
+                    >
+                      {config.cta.label}
+                    </Link>
+                  )}
                 </div>
               ) : null}
             </div>
