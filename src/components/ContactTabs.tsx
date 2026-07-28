@@ -185,8 +185,9 @@ export default function ContactTabs() {
                   >
                     {planningEmail}
                   </a>
-                  {isUrgent ? " en vermeld spoed in het onderwerp." : "."} Voor
-                  de snelste opvolging mag je ook direct mailen.
+                  {isUrgent
+                    ? " en vermeld spoed in het onderwerp — dan schakelen we meteen."
+                    : " — dan pakt planning je aanvraag op."}
                 </>
               ) : (
                 <>
@@ -240,19 +241,19 @@ export default function ContactTabs() {
             <div className="mt-6 rounded-2xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/75">
               {isClient ? (
                 <>
-                  Formulier bereidt je aanvraag voor (nog geen automatische
-                  versturing). Voor personeelsaanvragen mail je naar{" "}
+                  Vul het formulier in om je aanvraag scherp te krijgen. Mail
+                  daarna naar{" "}
                   <a
                     href={`mailto:${planningEmail}`}
                     className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                   >
                     {planningEmail}
-                  </a>
-                  .
+                  </a>{" "}
+                  — zo pakken we je vraag meteen op.
                 </>
               ) : (
                 <>
-                  Voor werken bij Helping Hands mail je naar{" "}
+                  Klaar om te starten? Mail je gegevens naar{" "}
                   <a
                     href={`mailto:${applicationsEmail}`}
                     className="font-bold text-[#173A8A] underline-offset-4 hover:underline"

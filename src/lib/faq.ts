@@ -58,9 +58,9 @@ export const contactFaqs: FaqItem[] = [
       "Personeelsaanvragen: planning@helpinghandsagency.nl (planner: mesbah@helpinghandsagency.nl). Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl. Algemene vragen: info@helpinghandsagency.nl.",
   },
   {
-    question: "Is het contactformulier al gekoppeld aan jullie systemen?",
+    question: "Wordt mijn aanvraag automatisch verstuurd?",
     answer:
-      "Het formulier bereidt je aanvraag voor. Voor de snelste opvolging kun je de gegevens ook direct mailen. Koppeling met HubSpot of andere tools volgt later.",
+      "Nee — het formulier helpt je je aanvraag compleet en scherp te maken. Daarna mail je de gegevens naar planning. Zo pakt ons team je vraag direct op.",
   },
 ];
 
