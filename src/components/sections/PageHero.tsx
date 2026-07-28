@@ -266,8 +266,28 @@ export default function PageHero({ content }: PageHeroProps) {
   const activeCard = content.interactiveCards[activeIndex] ?? content.interactiveCards[0];
   const showStaffingMedia = content.theme === "staffing";
 
+  const mobileServiceChips = [
+    { label: "Event crew", href: "/diensten/event-crew" },
+    { label: "Stagehands", href: "/diensten/stagehands" },
+    { label: "Horeca", href: "/diensten/horeca-personeel" },
+    { label: "Productie", href: "/diensten/productie-assistentie" },
+  ] as const;
+
   return (
     <section className={cn("relative overflow-hidden text-white", theme.section)}>
+      {showStaffingMedia ? (
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <Image
+            src="/images/crew/festival-build-site.webp"
+            alt=""
+            fill
+            loading="lazy"
+            sizes="100vw"
+            className="object-cover opacity-[0.22]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B1F4D]/75 via-[#0B1F4D]/55 to-[#0B1F4D]/85" />
+        </div>
+      ) : null}
       <div
         className={cn(
           "pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full blur-3xl",
@@ -311,15 +331,28 @@ export default function PageHero({ content }: PageHeroProps) {
           <PageHeroHighlights highlights={content.highlights} />
 
           {showStaffingMedia ? (
-            <p className="mt-5 text-sm leading-6 text-white/70">
-              Hilversum · landelijk inzetbaar ·{" "}
-              <a
-                href={`tel:${contactPhoneTel}`}
-                className="font-semibold text-white underline-offset-4 transition hover:text-[#F28C28] hover:underline"
-              >
-                Bel {contactPhoneDisplay}
-              </a>
-            </p>
+            <>
+              <p className="mt-5 text-sm leading-6 text-white/70">
+                Hilversum · landelijk inzetbaar ·{" "}
+                <a
+                  href={`tel:${contactPhoneTel}`}
+                  className="font-semibold text-white underline-offset-4 transition hover:text-[#F28C28] hover:underline"
+                >
+                  Bel {contactPhoneDisplay}
+                </a>
+              </p>
+              <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
+                {mobileServiceChips.map((chip) => (
+                  <Link
+                    key={chip.href}
+                    href={chip.href}
+                    className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-bold text-white backdrop-blur-sm transition hover:border-[#F28C28]/60 hover:bg-[#F28C28]"
+                  >
+                    {chip.label}
+                  </Link>
+                ))}
+              </div>
+            </>
           ) : null}
         </div>
 

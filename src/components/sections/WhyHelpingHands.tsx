@@ -33,16 +33,33 @@ export default function WhyHelpingHands() {
           <p className="mt-5 text-base leading-8 text-[#101828]/75 sm:text-lg">
             Praktisch, betrouwbaar en met korte lijnen — voor opdrachtgevers die
             snel willen schakelen én crew die op locatie weet wat er speelt.
-            Bijvoorbeeld: load-in en floor support op festivals, of horeca- en
-            keukenondersteuning tijdens drukke diensten.
+          </p>
+          <p className="mt-4 text-base leading-8 text-[#101828]/70 sm:text-lg">
+            Helping Hands is in 2022 gestart om jongeren en jongvolwassenen die
+            moeilijk aan werk komen, kansen, structuur en begeleiding te geven —
+            professioneel op de vloer, menselijk in de aanpak.
           </p>
         </div>
+
+        <aside className="mt-10 max-w-3xl rounded-2xl border border-[#173A8A]/15 bg-[#F5F7FA] px-5 py-5 sm:px-6">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#F28C28]">
+            Uit de praktijk
+          </p>
+          <p className="mt-2 text-base font-bold leading-7 text-[#0B1F4D] sm:text-lg">
+            Festival load-in &amp; floor support — snelle briefing, duidelijke
+            rollen, crew die op tijd stond en doorpakte tijdens drukte.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[#101828]/65">
+            Concrete projectervaring via jobs en producties — geen
+            partnership-claim.
+          </p>
+        </aside>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason, index) => (
             <article
               key={reason.title}
-              className="group rounded-2xl border border-slate-200/80 bg-[#F5F7FA] p-6 transition hover:-translate-y-0.5 hover:border-[#F28C28]/50 hover:bg-white hover:shadow-lg hover:shadow-[#0B1F4D]/5"
+              className="group rounded-2xl border border-slate-200/70 bg-[#F5F7FA]/80 p-6 transition hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:bg-white hover:shadow-md hover:shadow-[#0B1F4D]/5"
             >
               <span className="text-sm font-black text-[#F28C28]">
                 0{index + 1}
@@ -57,18 +74,18 @@ export default function WhyHelpingHands() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="/contact"
-            className="inline-flex items-center justify-center rounded-full bg-[#F28C28] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
-          >
-            Personeel aanvragen
-          </Link>
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link
             href="/over-ons"
-            className="inline-flex items-center justify-center rounded-full border-2 border-[#173A8A] px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#173A8A] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
           >
             Meer over ons
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex min-h-11 items-center justify-center px-2 text-sm font-bold text-[#173A8A] underline-offset-4 transition hover:text-[#F28C28] hover:underline"
+          >
+            Personeel aanvragen →
           </Link>
         </div>
       </div>

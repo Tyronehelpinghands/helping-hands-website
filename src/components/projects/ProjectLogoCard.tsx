@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import type { ProjectLogo } from "@/lib/projectLogos";
 import { getCategoryContext } from "@/lib/projectCategories";
@@ -62,12 +63,12 @@ export default function ProjectLogoCard({
           resolvedVariant === "default" && "h-36 min-h-36 sm:h-40 sm:p-6",
         )}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={logo.logoPath}
           alt={alt}
+          width={isCarousel ? 220 : isCompact ? 140 : 200}
+          height={isCarousel ? 80 : isCompact ? 56 : 112}
           loading="lazy"
-          decoding="async"
           className={cn(
             "h-auto w-auto max-h-full max-w-full object-contain transition duration-300",
             isCarousel && "max-h-12 sm:max-h-16 lg:max-h-20",
