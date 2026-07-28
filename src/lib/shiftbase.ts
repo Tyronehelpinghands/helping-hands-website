@@ -129,8 +129,8 @@ export function formatShiftbaseError(error: unknown): string {
     if (msg.includes("niet geconfigureerd")) {
       return "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd op de server.";
     }
-    if (msg.includes("404")) {
-      return `${msg} Tip: zet SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api (zonder /v1) en gebruik een Public API-token via Instellingen → App center → Public API (niet alleen Applicatie-tokens). Public API is een premium feature.`;
+    if (msg.includes("404") || msg.includes("geen geldig endpoint")) {
+      return msg;
     }
     if (msg.includes("Shiftbase API fout") || msg.includes("Shiftbase endpoint")) {
       return msg;
@@ -274,6 +274,7 @@ export async function testShiftbaseConnection(): Promise<{
   message: string;
   endpoint?: string;
   baseUrl?: string;
+  attempts?: Array<{ baseUrl: string; path: string; status: number }>;
 }> {
   const customTest = process.env.SHIFTBASE_ENDPOINT_TEST?.trim();
   const paths = [
@@ -282,14 +283,20 @@ export async function testShiftbaseConnection(): Promise<{
   ].filter((value, index, all) => all.indexOf(value) === index);
 
   const bases = getShiftbaseBaseUrlCandidates();
+  const attempts: Array<{ baseUrl: string; path: string; status: number }> =
+    [];
   let lastStatus = 0;
   let lastPath = paths[0] ?? "/employees";
   let lastBase = bases[0] ?? getShiftbaseApiBaseUrl();
-  let sawUnauthorized = false;
 
   for (const baseUrl of bases) {
     for (const endpoint of paths) {
       const result = await probeShiftbaseEndpoint(endpoint, baseUrl);
+      attempts.push({
+        baseUrl: result.baseUrl,
+        path: result.path,
+        status: result.status,
+      });
       lastStatus = result.status;
       lastPath = result.path;
       lastBase = result.baseUrl;
@@ -300,14 +307,14 @@ export async function testShiftbaseConnection(): Promise<{
           message: `Shiftbase API bereikbaar (${result.baseUrl}${result.path}).`,
           endpoint: result.path,
           baseUrl: result.baseUrl,
+          attempts,
         };
       }
 
       if (result.status === 401 || result.status === 403) {
-        sawUnauthorized = true;
-        // Auth failed on a reachable route — no need to keep probing paths.
         throw new Error(
-          `Shiftbase authenticatie mislukt (${result.status}) op ${result.baseUrl}${result.path}. Controleer of je een Public API-token gebruikt (Instellingen → App center → Public API), niet alleen een Applicatie-token.`,
+          `Shiftbase authenticatie mislukt (${result.status}) op ${result.baseUrl}${result.path}. ` +
+            `Token wordt wel ontvangen, maar geweigerd. Maak/controleer een token via App center → Public API en plak die exact in SHIFTBASE_API_KEY.`,
         );
       }
 
@@ -316,21 +323,19 @@ export async function testShiftbaseConnection(): Promise<{
           `Shiftbase rate limit bereikt (429) op ${result.baseUrl}${result.path}`,
         );
       }
-
-      // Keep trying other paths/bases on 404; other statuses also continue lightly
     }
   }
 
-  if (sawUnauthorized) {
-    throw new Error(
-      "Shiftbase authenticatie mislukt. Gebruik een Public API-token.",
-    );
-  }
+  const sample = attempts
+    .slice(0, 6)
+    .map((a) => `${a.status}:${a.baseUrl}${a.path}`)
+    .join(" · ");
 
   throw new Error(
-    `Shiftbase endpoint niet gevonden (laatste ${lastStatus}) op ${lastBase}${lastPath}. ` +
-      `Geprobeerde bases: ${bases.join(", ")}. ` +
-      `Controleer: 1) SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api 2) token komt uit Public API (premium), niet alleen App center → Applicatie-tokens.`,
+    `Shiftbase gaf geen geldig endpoint (laatste ${lastStatus} op ${lastBase}${lastPath}). ` +
+      `Samples: ${sample}. ` +
+      `Zet in Vercel SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api (zonder /v1), redeploy, en test opnieuw. ` +
+      `Premium/App Center Plus is OK — het gaat om de juiste base URL + Public API-tokenwaarde.`,
   );
 }
 
