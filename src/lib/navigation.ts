@@ -128,11 +128,6 @@ export const navDropdowns: NavDropdownConfig[] = [
           "Bekijk hoe wij planning, briefing en uitvoering aanpakken.",
         href: "/opdrachtgevers",
       },
-      {
-        title: "Werkwijze",
-        description: "Van aanvraag tot afhandeling.",
-        href: "/opdrachtgevers",
-      },
     ],
     cta: { label: "Vraag crew aan", href: "/contact" },
   },
