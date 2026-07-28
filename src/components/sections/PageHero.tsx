@@ -156,7 +156,13 @@ function StaffingHeroMedia({
                     ? "(max-width: 1024px) 100vw, 40vw"
                     : "(max-width: 1024px) 50vw, 15vw"
                 }
-                className="object-cover transition duration-500 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100"
+                className={cn(
+                  "object-cover transition duration-500 motion-reduce:transition-none motion-reduce:hover:scale-100",
+                  photo.objectPosition === "50% 0%"
+                    ? "origin-top hover:scale-[1.02]"
+                    : "hover:scale-[1.03]",
+                )}
+                style={{ objectPosition: photo.objectPosition ?? "50% 20%" }}
               />
             </div>
           );

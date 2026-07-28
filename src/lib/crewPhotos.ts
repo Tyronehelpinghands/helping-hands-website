@@ -3,6 +3,8 @@
 export type CrewPhoto = {
   src: string;
   alt: string;
+  /** CSS object-position — houdt gezichten in beeld bij object-cover. */
+  objectPosition?: string;
 };
 
 /**
@@ -41,6 +43,7 @@ export const homeCrewStrip: CrewPhoto[] = [
   {
     src: "/images/crew/thumbs-up-branded.webp",
     alt: "Helping Hands crewlid met thumbs up",
+    objectPosition: "50% 0%",
   },
   {
     src: "/images/crew/crew-woman-branded.webp",
@@ -69,22 +72,28 @@ export const homeHeroCollage: CrewPhoto[] = [
   {
     src: "/images/crew/scaffolding-team-wide.webp",
     alt: "Helping Hands crew bouwt scaffolding op locatie",
+    objectPosition: "50% 40%",
   },
   {
     src: "/images/crew/thumbs-up-branded.webp",
     alt: "Crewlid in Helping Hands shirt met thumbs up",
+    // Weinig headroom in bron — top-lock voorkomt afgesneden hoofd in hero-tiles
+    objectPosition: "50% 0%",
   },
   {
     src: "/images/crew/stadium-flightcase-push.webp",
     alt: "Eventcrew verplaatst flightcase in een stadion",
+    objectPosition: "50% 30%",
   },
   {
     src: "/images/crew/chef-fryer.webp",
     alt: "Horecacrew aan het werk tijdens een event",
+    objectPosition: "55% 20%",
   },
   {
     src: "/images/crew/standbouw-ladder.webp",
     alt: "Crew tijdens standbouw en beursopbouw",
+    objectPosition: "50% 25%",
   },
 ];
 
@@ -92,8 +101,6 @@ export const homeHeroCollage: CrewPhoto[] = [
 export type CrewBentoItem = CrewPhoto & {
   caption: string;
   sizes: string;
-  /** CSS object-position — houdt gezichten in beeld bij object-cover. */
-  objectPosition?: string;
 };
 
 /**
