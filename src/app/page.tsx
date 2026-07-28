@@ -80,6 +80,38 @@ export default function Home() {
               Hands levert praktische mensen die direct begrijpen wat er op locatie
               nodig is.
             </p>
+            <p className="mt-4 text-base leading-8 text-[#101828]/75 sm:text-lg">
+              Of je nu floor support nodig hebt voor een festival, load-in crew
+              voor een concert, barbacks en bediening voor een drukke horecadienst,
+              of runners en productie-assistentie backstage: wij denken mee over
+              functie, aantal, tijden en briefing. Zo land je crew die op tijd is,
+              veilig werkt en weet wat er van ze verwacht wordt.
+            </p>
+            <p className="mt-4 text-base leading-8 text-[#101828]/70 sm:text-lg">
+              Filter hieronder op categorie, open een functie voor meer detail, of
+              ga direct naar onze SEO-landings voor{" "}
+              <Link
+                href="/diensten/event-crew"
+                className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+              >
+                event crew
+              </Link>
+              ,{" "}
+              <Link
+                href="/diensten/stagehands"
+                className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+              >
+                stagehands
+              </Link>{" "}
+              of{" "}
+              <Link
+                href="/diensten/horeca-personeel"
+                className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+              >
+                horeca personeel
+              </Link>
+              .
+            </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/diensten"

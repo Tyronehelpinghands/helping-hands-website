@@ -125,19 +125,13 @@ function StepDetail({ step, dark }: { step: ProcessStep; dark?: boolean }) {
       <p className={`text-base leading-7 ${muted}`}>{step.intro}</p>
 
       <div
-        className={`relative overflow-hidden rounded-xl border px-4 py-3.5 ${
+        className={`rounded-xl border px-4 py-3.5 ${
           dark
             ? "border-white/15 bg-gradient-to-r from-white/10 to-transparent"
             : "border-[#173A8A]/15 bg-gradient-to-r from-[#0B1F4D]/[0.04] to-transparent"
         }`}
       >
-        <span
-          className="pointer-events-none absolute -right-1 -top-3 select-none text-5xl font-black leading-none text-[#F28C28]/20"
-          aria-hidden="true"
-        >
-          {step.step}
-        </span>
-        <p className={`relative text-sm font-medium leading-6 ${dark ? "text-white/90" : "text-[#0B1F4D]"}`}>
+        <p className={`text-sm font-medium leading-6 ${dark ? "text-white/90" : "text-[#0B1F4D]"}`}>
           <span className={`font-bold ${label}`}>Resultaat · </span>
           {step.outcome}
         </p>

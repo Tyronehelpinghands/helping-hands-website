@@ -47,7 +47,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       { label: "Snel schakelen" },
       { label: "Duidelijke briefing" },
       { label: "Betrouwbare crew" },
-      { label: "EÃ©n aanspreekpunt" },
+      { label: "Eén aanspreekpunt" },
     ],
     interactiveCards: [
       {
@@ -76,7 +76,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     eyebrow: "Over ons",
     title: "Meer dan alleen een uitzendbureau.",
     description:
-      "Opgericht in 2022 door Tyrone van der Schagt: professionele crew voor events, horeca en productie â€” met een missie om jongeren een eerlijke kans op de arbeidsmarkt te geven.",
+      "Opgericht in 2022 door Tyrone van der Schagt: professionele crew voor events, horeca en productie — met een missie om jongeren een eerlijke kans op de arbeidsmarkt te geven.",
     theme: "over",
     primaryCta: { label: "Personeel aanvragen", href: "/contact" },
     secondaryCta: { label: "Werken bij Helping Hands", href: "/vacatures" },
@@ -100,7 +100,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       {
         title: "Persoonlijke match",
         description:
-          "Niet elke opdracht past bij iedereen â€” wij kijken naar motivatie, houding en ontwikkeling.",
+          "Niet elke opdracht past bij iedereen — wij kijken naar motivatie, houding en ontwikkeling.",
       },
       {
         title: "Groei op de vloer",
@@ -126,7 +126,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     interactiveCards: [
       {
         title: "Flexibele diensten",
-        description: "Werk wanneer het jou uitkomt â€” events, horeca en productie.",
+        description: "Werk wanneer het jou uitkomt — events, horeca en productie.",
         hoverHint: "Voor mensen die aanpakken",
       },
       {
@@ -136,7 +136,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       },
       {
         title: "Keuken & bar",
-        description: "Bediening, bar, keuken en spoel â€” met briefing vooraf.",
+        description: "Bediening, bar, keuken en spoel — met briefing vooraf.",
         hoverHint: "Duidelijke briefings",
       },
       {
@@ -233,7 +233,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     interactiveCards: [
       {
         title: "Snelle aanvraag",
-        description: "Deel datum, locatie, functies en aantal â€” wij denken mee.",
+        description: "Deel datum, locatie, functies en aantal — wij denken mee.",
         tag: "Stap 1",
       },
       {
@@ -248,7 +248,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       },
       {
         title: "Terugkoppeling achteraf",
-        description: "EÃ©n vast contact bij Helping Hands â€” ook na afloop.",
+        description: "Eén vast contact bij Helping Hands — ook na afloop.",
         tag: "Stap 4",
       },
     ],
@@ -274,7 +274,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       },
       {
         title: "Beschikbaarheid doorgeven",
-        description: "Geef aan wanneer je kunt â€” planning koppelt passende opdrachten.",
+        description: "Geef aan wanneer je kunt — planning koppelt passende opdrachten.",
       },
       {
         title: "Uren controleren",
@@ -303,7 +303,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     interactiveCards: [
       {
         title: "Personeelsaanvraag",
-        description: "Datum, locatie, functies en aantal mensen â€” wij reageren snel.",
+        description: "Datum, locatie, functies en aantal mensen — wij reageren snel.",
       },
       {
         title: "Samenwerking",
