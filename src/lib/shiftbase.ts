@@ -10,25 +10,39 @@
 import type { PlanningShift } from "@/data/planningMockData";
 import { buildShiftbaseDescription } from "@/lib/planning-utils";
 
-const DEFAULT_BASE_URL = "https://api.shiftbase.com/api/v1";
+const DEFAULT_BASE_URL = "https://api.shiftbase.com/api";
 
-/** Configureerbare endpoints — pas aan indien Shiftbase andere paths gebruikt */
+/** Alternate bases — Shiftbase docs use /api; some accounts expect /api/v1. */
+const SHIFTBASE_BASE_URL_CANDIDATES = [
+  "https://api.shiftbase.com/api",
+  "https://api.shiftbase.com/api/v1",
+] as const;
+
+/** Configureerbare endpoints — pas aan indien jouw account afwijkende routes gebruikt */
 export const SHIFTBASE_ENDPOINTS = {
-  employees: process.env.SHIFTBASE_ENDPOINT_EMPLOYEES ?? "/employee",
+  employees: process.env.SHIFTBASE_ENDPOINT_EMPLOYEES ?? "/employees",
   employee: (id: string) =>
-    (process.env.SHIFTBASE_ENDPOINT_EMPLOYEE ?? "/employee/{id}").replace("{id}", id),
-  shifts: process.env.SHIFTBASE_ENDPOINT_SHIFTS ?? "/shift",
+    (process.env.SHIFTBASE_ENDPOINT_EMPLOYEE ?? "/employees/{id}").replace(
+      "{id}",
+      id,
+    ),
+  shifts: process.env.SHIFTBASE_ENDPOINT_SHIFTS ?? "/shifts",
   shift: (id: string) =>
-    (process.env.SHIFTBASE_ENDPOINT_SHIFT ?? "/shift/{id}").replace("{id}", id),
-  timesheets: process.env.SHIFTBASE_ENDPOINT_TIMESHEETS ?? "/timesheet",
-  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/employee?limit=1",
+    (process.env.SHIFTBASE_ENDPOINT_SHIFT ?? "/shifts/{id}").replace("{id}", id),
+  timesheets: process.env.SHIFTBASE_ENDPOINT_TIMESHEETS ?? "/timesheets",
+  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/employees?limit=1",
 } as const;
 
-const SHIFTBASE_TEST_FALLBACKS = [
+/** Probe paths used only for connection healthchecks */
+const SHIFTBASE_TEST_PATHS = [
   SHIFTBASE_ENDPOINTS.test,
-  `${SHIFTBASE_ENDPOINTS.employees}?limit=1`,
+  "/employees?limit=1",
+  "/Employees?limit=1",
   "/employee?limit=1",
-  "/department?limit=1",
+  "/departments?limit=1",
+  "/Departments?limit=1",
+  "/locations?limit=1",
+  "/accounts",
 ] as const;
 
 export type ShiftbaseEmployeeAddress = {
@@ -81,18 +95,22 @@ export function getShiftbaseApiToken(): string | undefined {
 
 export function getShiftbaseApiBaseUrl(): string {
   const raw = process.env.SHIFTBASE_API_BASE_URL?.trim();
-  let base = (raw || DEFAULT_BASE_URL).replace(/\/$/, "");
-  // Legacy env: https://api.shiftbase.com/api → voeg /v1 toe
-  if (base.endsWith("/api") && !/\/api\/v\d+$/i.test(base)) {
-    base = `${base}/v1`;
-  }
-  return base;
+  if (raw) return raw.replace(/\/$/, "");
+  return DEFAULT_BASE_URL;
 }
 
-export function resolveShiftbaseUrl(endpoint: string): string {
-  const baseUrl = getShiftbaseApiBaseUrl();
+export function getShiftbaseBaseUrlCandidates(): string[] {
+  const preferred = getShiftbaseApiBaseUrl();
+  const list = [preferred, ...SHIFTBASE_BASE_URL_CANDIDATES];
+  return list
+    .map((url) => url.replace(/\/$/, ""))
+    .filter((url, index, all) => all.indexOf(url) === index);
+}
+
+export function resolveShiftbaseUrl(endpoint: string, baseUrl?: string): string {
+  const base = (baseUrl ?? getShiftbaseApiBaseUrl()).replace(/\/$/, "");
   const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  return `${baseUrl}${path}`;
+  return `${base}${path}`;
 }
 
 export function isShiftbaseConfigured(): boolean {
@@ -112,7 +130,7 @@ export function formatShiftbaseError(error: unknown): string {
       return "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd op de server.";
     }
     if (msg.includes("404")) {
-      return `${msg} Tip: gebruik SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api/v1 en controleer of App Center Plus actief is.`;
+      return `${msg} Tip: zet SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api (zonder /v1) en gebruik een Public API-token via Instellingen → App center → Public API (niet alleen Applicatie-tokens). Public API is een premium feature.`;
     }
     if (msg.includes("Shiftbase API fout") || msg.includes("Shiftbase endpoint")) {
       return msg;
@@ -223,10 +241,14 @@ function extractList<T>(data: unknown, mapper: (item: Record<string, unknown>) =
   return [];
 }
 
-async function probeShiftbaseEndpoint(endpoint: string): Promise<{
+async function probeShiftbaseEndpoint(
+  endpoint: string,
+  baseUrl: string,
+): Promise<{
   ok: boolean;
   status: number;
   path: string;
+  baseUrl: string;
 }> {
   const token = getShiftbaseApiToken();
   if (!token) {
@@ -234,62 +256,81 @@ async function probeShiftbaseEndpoint(endpoint: string): Promise<{
   }
 
   const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = resolveShiftbaseUrl(endpoint);
+  const url = resolveShiftbaseUrl(endpoint, baseUrl);
 
   const response = await fetch(url, {
     headers: {
       Accept: "application/json",
       Authorization: `API ${token}`,
     },
+    cache: "no-store",
   });
 
-  return { ok: response.ok, status: response.status, path };
+  return { ok: response.ok, status: response.status, path, baseUrl };
 }
 
 export async function testShiftbaseConnection(): Promise<{
   ok: boolean;
   message: string;
   endpoint?: string;
+  baseUrl?: string;
 }> {
   const customTest = process.env.SHIFTBASE_ENDPOINT_TEST?.trim();
-  const candidates = [
+  const paths = [
     ...(customTest ? [customTest] : []),
-    ...SHIFTBASE_TEST_FALLBACKS,
+    ...SHIFTBASE_TEST_PATHS,
   ].filter((value, index, all) => all.indexOf(value) === index);
 
+  const bases = getShiftbaseBaseUrlCandidates();
   let lastStatus = 0;
-  let lastPath = SHIFTBASE_ENDPOINTS.test;
+  let lastPath = paths[0] ?? "/employees";
+  let lastBase = bases[0] ?? getShiftbaseApiBaseUrl();
+  let sawUnauthorized = false;
 
-  for (const endpoint of candidates) {
-    const result = await probeShiftbaseEndpoint(endpoint);
-    lastStatus = result.status;
-    lastPath = result.path;
+  for (const baseUrl of bases) {
+    for (const endpoint of paths) {
+      const result = await probeShiftbaseEndpoint(endpoint, baseUrl);
+      lastStatus = result.status;
+      lastPath = result.path;
+      lastBase = result.baseUrl;
 
-    if (result.ok) {
-      return {
-        ok: true,
-        message: "Shiftbase koppeling actief.",
-        endpoint: result.path,
-      };
-    }
+      if (result.ok) {
+        return {
+          ok: true,
+          message: `Shiftbase API bereikbaar (${result.baseUrl}${result.path}).`,
+          endpoint: result.path,
+          baseUrl: result.baseUrl,
+        };
+      }
 
-    if (result.status === 401 || result.status === 403) {
-      throw new Error(
-        `Shiftbase authenticatie mislukt (${result.status}) op ${result.path}`,
-      );
-    }
+      if (result.status === 401 || result.status === 403) {
+        sawUnauthorized = true;
+        // Auth failed on a reachable route — no need to keep probing paths.
+        throw new Error(
+          `Shiftbase authenticatie mislukt (${result.status}) op ${result.baseUrl}${result.path}. Controleer of je een Public API-token gebruikt (Instellingen → App center → Public API), niet alleen een Applicatie-token.`,
+        );
+      }
 
-    if (result.status === 429) {
-      throw new Error(`Shiftbase rate limit bereikt (429) op ${result.path}`);
-    }
+      if (result.status === 429) {
+        throw new Error(
+          `Shiftbase rate limit bereikt (429) op ${result.baseUrl}${result.path}`,
+        );
+      }
 
-    if (result.status !== 404) {
-      throw new Error(`Shiftbase API fout (${result.status}) op ${result.path}`);
+      // Keep trying other paths/bases on 404; other statuses also continue lightly
     }
   }
 
+  if (sawUnauthorized) {
+    throw new Error(
+      "Shiftbase authenticatie mislukt. Gebruik een Public API-token.",
+    );
+  }
+
   throw new Error(
-    `Shiftbase endpoint niet gevonden (404) op ${lastPath}. Geprobeerde base URL: ${getShiftbaseApiBaseUrl()}`,
+    `Shiftbase endpoint niet gevonden (laatste ${lastStatus}) op ${lastBase}${lastPath}. ` +
+      `Geprobeerde bases: ${bases.join(", ")}. ` +
+      `Controleer: 1) SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api 2) token komt uit Public API (premium), niet alleen App center → Applicatie-tokens.`,
   );
 }
 

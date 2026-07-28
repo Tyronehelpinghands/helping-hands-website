@@ -3,6 +3,7 @@ import { requireInternApiAccess } from "@/lib/api-auth";
 import {
   getShiftbaseApiBaseUrl,
   getShiftbaseApiToken,
+  getShiftbaseBaseUrlCandidates,
   isShiftbaseConfigured,
   resolveShiftbaseUrl,
   SHIFTBASE_ENDPOINTS,
@@ -34,6 +35,7 @@ export async function GET() {
       hasToken: Boolean(token),
       tokenLength: token?.length ?? 0,
       baseUrl: getShiftbaseApiBaseUrl(),
+      baseUrlCandidates: getShiftbaseBaseUrlCandidates(),
       baseUrlFromEnv: Boolean(process.env.SHIFTBASE_API_BASE_URL?.trim()),
       rawTokenPresent: Boolean(process.env.SHIFTBASE_API_TOKEN?.trim()),
       rawKeyPresent: Boolean(process.env.SHIFTBASE_API_KEY?.trim()),
@@ -46,7 +48,7 @@ export async function GET() {
       resolvedTestUrl: resolveShiftbaseUrl(SHIFTBASE_ENDPOINTS.test),
     },
     hint: configured
-      ? "Token/key is zichtbaar in deze server-runtime. Gebruik /api/shiftbase/test voor de API-check."
-      : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in deze runtime. Zet één van beide in Vercel → Production, redeploy, en test opnieuw.",
+      ? "Key/token is zichtbaar in deze runtime. Gebruik Test API. Tip: Public API-token + base https://api.shiftbase.com/api"
+      : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt. Applicatie-tokens ≠ automatisch Public API.",
   });
 }
