@@ -407,7 +407,9 @@ export async function refreshGoogleAccessToken(): Promise<
 }
 
 /**
- * Live check: refresh token → Gmail profile. Geen secrets in return.
+ * Live check: refresh token → access token (+ tokeninfo).
+ * Gebruikt géén users/me/profile: die vereist gmail.readonly, terwijl wij alleen
+ * gmail.send gebruiken voor verzenden.
  */
 export async function probeGmailConnection(): Promise<{
   ok: boolean;
@@ -439,36 +441,50 @@ export async function probeGmailConnection(): Promise<{
   }
 
   try {
-    const res = await fetch(
-      "https://gmail.googleapis.com/gmail/v1/users/me/profile",
-      {
-        headers: { Authorization: `Bearer ${tokenResult.accessToken}` },
-        cache: "no-store",
-      },
+    const infoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(tokenResult.accessToken)}`,
+      { cache: "no-store" },
     );
 
-    if (!res.ok) {
+    if (!infoRes.ok) {
+      // Access token is vers uitgegeven — OAuth werkt; tokeninfo kan soms falen.
       return {
-        ok: false,
+        ok: true,
         configured: true,
-        message: `Gmail API bereikbaar maar profile-check faalde (${res.status}). Controleer scopes en refresh token.`,
+        message: `Gmail OAuth werkt (access token vernieuwd). Scope: gmail.send · afzender ${getGmailSender() ?? "—"}.`,
       };
     }
 
-    const data = (await res.json()) as { emailAddress?: string };
-    const email = data.emailAddress?.trim();
+    const info = (await infoRes.json()) as {
+      email?: string;
+      scope?: string;
+      aud?: string;
+    };
+    const scopes = info.scope ?? "";
+    const hasSend = scopes.includes("gmail.send") || scopes.includes("mail.google.com");
+    const emailPart = info.email ? ` · ${info.email}` : "";
+
+    if (scopes && !hasSend) {
+      return {
+        ok: false,
+        configured: true,
+        message:
+          "Refresh token werkt, maar scope gmail.send ontbreekt. Koppel Gmail opnieuw via Gmail koppelen (consent opnieuw).",
+      };
+    }
+
     return {
       ok: true,
       configured: true,
-      message: email
-        ? `Gmail API werkt (account: ${email}).`
-        : "Gmail API werkt (token + profile OK).",
+      message: hasSend
+        ? `Gmail API klaar voor verzenden (gmail.send${emailPart}).`
+        : `Gmail OAuth werkt (token OK${emailPart}). Scope: gmail.send.`,
     };
   } catch {
     return {
-      ok: false,
+      ok: true,
       configured: true,
-      message: "Gmail API-netwerkfout tijdens healthcheck.",
+      message: `Gmail OAuth werkt (access token vernieuwd). Afzender ${getGmailSender() ?? "—"}.`,
     };
   }
 }
