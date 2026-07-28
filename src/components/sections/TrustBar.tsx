@@ -1,27 +1,20 @@
 import Link from "next/link";
-import {
-  countProjectLogosByCategory,
-  projectLogos,
-} from "@/lib/projectLogos";
-import { homeServiceFilters } from "@/lib/services";
-
-const serviceCategoryCount = homeServiceFilters.filter((f) => f !== "Alle").length;
 
 const items = [
   {
-    label: "Dienstcategorieën",
-    value: `${serviceCategoryCount} sectoren`,
-    detail: "Van event tot hospitality",
+    label: "Sectoren",
+    value: "Events & horeca",
+    detail: "Van festival tot hospitality",
   },
   {
     label: "Projectervaring",
-    value: `${projectLogos.length} logo's`,
-    detail: "Via jobs, partners en producties",
+    value: "Via jobs, partners & producties",
+    detail: "Concrete crewervaring op locatie",
   },
   {
     label: "Locaties",
-    value: `${countProjectLogosByCategory("Locaties")} venues`,
-    detail: "Stadions, beurzen en eventlocaties",
+    value: "Stadions, beurzen & eventlocaties",
+    detail: "Landelijk inzetbaar",
   },
   {
     label: "Aanvraag",
@@ -60,7 +53,7 @@ export default function TrustBar() {
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
                 {item.label}
               </p>
-              <p className="mt-2 text-xl font-black tracking-tight text-[#0B1F4D] sm:text-2xl">
+              <p className="mt-2 text-lg font-black leading-snug tracking-tight text-[#0B1F4D] sm:text-xl">
                 {item.value}
               </p>
               <p className="mt-auto pt-2 text-sm leading-6 text-[#101828]/65">

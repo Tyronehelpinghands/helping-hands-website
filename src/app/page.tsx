@@ -57,8 +57,8 @@ export default function Home() {
               Onze crew in actie
             </h2>
             <p className="mt-3 text-base leading-7 text-[#101828]/70">
-              Eigen crewfoto&apos;s van festivals, stadions, standbouw en horeca —
-              geen stock.
+              Eigen crew op locatie — festivals, stadions, scaffolding en horeca.
+              Geen stockfoto&apos;s.
             </p>
           </div>
           <HomeCrewBento photos={homeCrewBento} />

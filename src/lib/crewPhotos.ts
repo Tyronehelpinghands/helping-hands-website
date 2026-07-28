@@ -92,44 +92,56 @@ export const homeHeroCollage: CrewPhoto[] = [
 export type CrewBentoItem = CrewPhoto & {
   caption: string;
   sizes: string;
+  /** CSS object-position — houdt gezichten in beeld bij object-cover. */
+  objectPosition?: string;
 };
 
+/**
+ * Homepage “Onze crew in actie” — alleen lokale foto’s met zichtbare crew/gezichten.
+ * Geen wide silhouetten of rugshots; objectPosition per tile tegen crop.
+ */
 export const homeCrewBento: CrewBentoItem[] = [
   {
-    src: "/images/crew/scaffolding-team-wide.webp",
-    alt: "Helping Hands crew bouwt scaffolding en overkapping op locatie",
-    caption: "Scaffolding & opbouw",
+    src: "/images/crew/arena-flightcase.webp",
+    alt: "Helping Hands crew met flightcase in een stadion",
+    caption: "Stadion & load-in",
     sizes: "(max-width: 640px) 100vw, 58vw",
+    objectPosition: "50% 22%",
   },
   {
     src: "/images/crew/thumbs-up-branded.webp",
     alt: "Helping Hands crewlid in branded shirt met thumbs up",
     caption: "Eigen crew",
     sizes: "(max-width: 640px) 50vw, 42vw",
+    objectPosition: "50% 18%",
   },
   {
     src: "/images/crew/crew-woman-branded.webp",
     alt: "Helping Hands crewlid in branded shirt op locatie",
     caption: "Branded op de vloer",
     sizes: "(max-width: 640px) 50vw, 42vw",
+    objectPosition: "50% 16%",
   },
   {
     src: "/images/crew/chef-fryer.webp",
     alt: "Horecacrew achter de frituur tijdens een event",
     caption: "Horeca & frituur",
     sizes: "(max-width: 640px) 50vw, 25vw",
+    objectPosition: "55% 20%",
   },
   {
-    src: "/images/crew/stadium-flightcase-push.webp",
-    alt: "Eventcrew duwt flightcase door een stadion",
-    caption: "Stadion & logistiek",
+    src: "/images/crew/scaffolding-portrait.webp",
+    alt: "Helping Hands crewlid op scaffolding tijdens opbouw",
+    caption: "Scaffolding & opbouw",
     sizes: "(max-width: 640px) 50vw, 25vw",
+    objectPosition: "50% 18%",
   },
   {
-    src: "/images/crew/festival-build-site.webp",
-    alt: "Festivalterrein tijdens opbouw met containers en Helping Hands crew",
-    caption: "Festivalterrein",
+    src: "/images/crew/harness-shaka.webp",
+    alt: "Helping Hands crewlid met valbeveiliging op locatie",
+    caption: "Crew op locatie",
     sizes: "(max-width: 640px) 100vw, 50vw",
+    objectPosition: "50% 15%",
   },
 ];
 
