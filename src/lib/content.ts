@@ -63,32 +63,32 @@ export const sectors = [
 export const deployments = [
   {
     label: "Festivals",
-    detail: "Opbouw, hospitality & floor support",
+    detail: "Opbouw, floor support en hospitality op het terrein",
     imageKey: "festivals" as const,
   },
   {
     label: "Concerten",
-    detail: "Backstage, opbouw & afbouw",
+    detail: "Load-in, backstage crew en snelle afbouw",
     imageKey: "stagehands" as const,
   },
   {
     label: "Stadions",
-    detail: "Event crew & logistiek op schaal",
+    detail: "Event crew en logistiek bij grootschalige inzet",
     imageKey: null,
   },
   {
     label: "Beurzen",
-    detail: "Registratie, routing & crew",
+    detail: "Standbouw-ondersteuning, routing en registratiecrew",
     imageKey: null,
   },
   {
     label: "Horecalocaties",
-    detail: "Bars, bediening & runners",
+    detail: "Bar, bediening, keukenondersteuning en runners",
     imageKey: "horecaSupport" as const,
   },
   {
     label: "Producties",
-    detail: "Crewcoördinatie & assistentie",
+    detail: "Runners, assistentie en coördinatie achter de schermen",
     imageKey: "productionBackstage" as const,
   },
 ];

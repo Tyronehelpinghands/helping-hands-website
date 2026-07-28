@@ -75,21 +75,8 @@ export default function Home() {
               Crew en ondersteuning voor elke fase van je productie.
             </h2>
             <p className="mt-5 text-base leading-8 text-[#101828]/75 sm:text-lg">
-              Event crew inhuren, stagehands, horeca personeel, restaurant- en
-              keukenpersoneel, bar, productie, logistiek en hospitality — Helping
-              Hands levert praktische mensen die direct begrijpen wat er op locatie
-              nodig is.
-            </p>
-            <p className="mt-4 text-base leading-8 text-[#101828]/75 sm:text-lg">
-              Of je nu floor support nodig hebt voor een festival, load-in crew
-              voor een concert, barbacks en bediening voor een drukke horecadienst,
-              of runners en productie-assistentie backstage: wij denken mee over
-              functie, aantal, tijden en briefing. Zo land je crew die op tijd is,
-              veilig werkt en weet wat er van ze verwacht wordt.
-            </p>
-            <p className="mt-4 text-base leading-8 text-[#101828]/70 sm:text-lg">
-              Filter hieronder op categorie, open een functie voor meer detail, of
-              ga direct naar onze SEO-landings voor{" "}
+              Event crew, stagehands, horeca-, keuken- en barpersoneel, productie,
+              logistiek en hospitality — filter hieronder of ga direct naar{" "}
               <Link
                 href="/diensten/event-crew"
                 className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
@@ -136,12 +123,6 @@ export default function Home() {
                 className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
               >
                 Horeca
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#F28C28] bg-white px-7 py-3.5 text-sm font-bold text-[#F28C28] transition hover:bg-[#FFF7ED]"
-              >
-                Personeel aanvragen
               </Link>
             </div>
           </div>

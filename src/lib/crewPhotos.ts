@@ -98,7 +98,7 @@ export type CrewBentoItem = CrewPhoto & {
 
 /**
  * Homepage “Onze crew in actie” — alleen lokale foto’s met zichtbare crew/gezichten.
- * Geen wide silhouetten of rugshots; objectPosition per tile tegen crop.
+ * Bewust andere set dan hero-collage (minder overlap bij scroll).
  */
 export const homeCrewBento: CrewBentoItem[] = [
   {
@@ -109,13 +109,6 @@ export const homeCrewBento: CrewBentoItem[] = [
     objectPosition: "50% 22%",
   },
   {
-    src: "/images/crew/thumbs-up-branded.webp",
-    alt: "Helping Hands crewlid in branded shirt met thumbs up",
-    caption: "Eigen crew",
-    sizes: "(max-width: 640px) 50vw, 42vw",
-    objectPosition: "50% 18%",
-  },
-  {
     src: "/images/crew/crew-woman-branded.webp",
     alt: "Helping Hands crewlid in branded shirt op locatie",
     caption: "Branded op de vloer",
@@ -123,11 +116,11 @@ export const homeCrewBento: CrewBentoItem[] = [
     objectPosition: "50% 16%",
   },
   {
-    src: "/images/crew/chef-fryer.webp",
-    alt: "Horecacrew achter de frituur tijdens een event",
-    caption: "Horeca & frituur",
-    sizes: "(max-width: 640px) 50vw, 25vw",
-    objectPosition: "55% 20%",
+    src: "/images/crew/harness-shaka.webp",
+    alt: "Helping Hands crewlid met valbeveiliging op locatie",
+    caption: "Crew op locatie",
+    sizes: "(max-width: 640px) 50vw, 42vw",
+    objectPosition: "50% 15%",
   },
   {
     src: "/images/crew/scaffolding-portrait.webp",
@@ -137,11 +130,18 @@ export const homeCrewBento: CrewBentoItem[] = [
     objectPosition: "50% 18%",
   },
   {
-    src: "/images/crew/harness-shaka.webp",
-    alt: "Helping Hands crewlid met valbeveiliging op locatie",
-    caption: "Crew op locatie",
+    src: "/images/crew/forklift-operator.webp",
+    alt: "Helping Hands crew op heftruck tijdens logistiek",
+    caption: "Logistiek",
+    sizes: "(max-width: 640px) 50vw, 25vw",
+    objectPosition: "50% 25%",
+  },
+  {
+    src: "/images/crew/crew-field-03.webp",
+    alt: "Helping Hands team overlegt op locatie",
+    caption: "Overleg op de vloer",
     sizes: "(max-width: 640px) 100vw, 50vw",
-    objectPosition: "50% 15%",
+    objectPosition: "50% 20%",
   },
 ];
 

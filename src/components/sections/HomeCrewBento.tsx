@@ -58,12 +58,10 @@ function CrewBentoTile({
   photo,
   shape,
   layoutClass,
-  priority,
 }: {
   photo: CrewBentoItem;
   shape: TileShape;
   layoutClass: string;
-  priority?: boolean;
 }) {
   return (
     <figure
@@ -81,7 +79,7 @@ function CrewBentoTile({
         alt={photo.alt}
         fill
         sizes={photo.sizes}
-        priority={priority}
+        loading="lazy"
         className="object-cover transition duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         style={{ objectPosition: photo.objectPosition ?? "50% 20%" }}
       />
@@ -127,7 +125,6 @@ export default function HomeCrewBento({ photos }: HomeCrewBentoProps) {
             photo={photo}
             shape={TILE_SHAPES[index] ?? "asymmetric"}
             layoutClass={LAYOUT_CLASS[index] ?? "aspect-[4/3] sm:col-span-3"}
-            priority={index === 0}
           />
         ))}
       </div>

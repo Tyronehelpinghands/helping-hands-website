@@ -1,68 +1,108 @@
 # Homepage-analyse — Helping Hands Agency
 
-**Datum:** 27 juli 2026  
+**Datum:** 28 juli 2026  
 **Live:** https://helping-hands-website.vercel.app/  
-**Bron:** `src/app/page.tsx` + gekoppelde componenten/data  
-**Scope:** Analyse only — geen redesign in deze taak
+**Bron:** `src/app/page.tsx` + gekoppelde componenten/data (gecontroleerd tegen live HTML)  
+**Scope:** Documentatie only — geen redesign in deze taak
 
 ---
 
-## Context (recente basis)
+## Context (huidige basis — juli 2026)
 
-Al aanwezig in de codebase (niet opnieuw “ontdekken” als gap):
+Al aanwezig en **niet** opnieuw als “gap” markeren:
 
 - SEO-landings gepubliceerd (`serviceLandings` in `src/lib/services.ts`, alle `published: true`)
-- Bedrijfsgegevens in `src/lib/siteConfig.ts`: Helping Hands Agency, Wandelpad 30 Hilversum, telefoon, KvK, BTW, IBAN
-- Organization + WebSite JSON-LD in `src/app/layout.tsx` via `organizationJsonLd()` / `websiteJsonLd()`
+- Bedrijfsgegevens in `src/lib/siteConfig.ts`: Helping Hands Agency, Wandelpad 30 Hilversum, telefoon (mobiel + vast), KvK, BTW, IBAN, WhatsApp-URL
+- Organization + WebSite JSON-LD in `src/app/layout.tsx`
 - Homepage-title/H1 aangescherpt op **inhuren** (`pageHeroContent.ts` + `page.tsx` metadata)
-- `QuickRequestForm` opent mailto naar `info@helpinghandsagency.nl`
-- Projectdisclaimer: `projectExperienceDisclaimer` in `projectLogos.ts`
-- Header scroll-states: `PublicHeader` + `useScrollHeader` (transparent → glass/compact)
-- Sticky mobiele CTA: `FloatingCTA` via `SiteChromeExtras`
+- Hero staffing-media: lokale crew-collage (`homeHeroCollage`) + interactive cards
+- Crew-bento “Onze crew in actie” (`HomeCrewBento` + `homeCrewBento`)
+- Sectorfoto’s via `DeploymentCards` (geen tekst-`SectorCards` meer op homepage)
+- `LogoCarousel` met veilige claimtaal + `projectExperienceDisclaimer`
+- Preferred logos actief o.a. Crewstars, Factor F, TAP Crew, Backstage Masters, Jaarbeurs
+- `ServiceCard` linkt naar matching `/diensten/[slug]` via `getLandingPathForService`
+- `QuickRequestForm`: mailto naar `planning@…` + spoedblok met tel / vast / WhatsApp / mail
+- Header: transparent → glass/compact, progress bar, `tel:`-icoon vanaf `sm`, sticky mobiele CTA
+- `ProcessAccordion`: desktop stepper-timeline + mobiele accordion
+- FAQ + `faqJsonLd` inclusief Hilversum/landelijk + projectervaring-disclaimer
+- Banned brands niet in `projectLogos`; Q-dance orphan niet aangetroffen in repo-scan
+
+**Niet meer op homepage** (componenten bestaan nog elders/archief): `SectorCards`, `ProjectExperienceTeaser`.
 
 ---
 
-## 1. Eerste indruk
+## 1. Eerste indruk & scores
 
-### Wat ziet de bezoeker in de eerste 3 seconden?
+### Wat ziet de bezoeker in de eerste ~3 seconden?
 
 1. Donkere navy hero (`.hero-gradient`) met oranje accent
 2. Eyebrow **“Helping Hands Agency”**
 3. H1: *“Event crew en horecapersoneel inhuren voor events en producties.”*
 4. Twee CTA’s: **Personeel aanvragen** → `/contact`, **Crew aanmelden** → `/vacatures`
-5. Trust bullets: Snel schakelen / Duidelijke briefing / Betrouwbare crew / Eén aanspreekpunt
-6. Rechts: interactieve tekstkaarten (Eventcrew, Horeca support, Stagebouw, Productie) — **geen fotocollage**
+5. Trust-pills: Snel schakelen / Duidelijke briefing / Betrouwbare crew / Eén aanspreekpunt
+6. Rechts (desktop): **echte crewfoto-collage** + interactive service-tabs eronder
 
 ### Vragen & antwoorden
 
 | Vraag | Antwoord |
 |-------|----------|
-| Begrijp je binnen 5 seconden wat Helping Hands doet? | **Ja.** H1 + subtekst maken “inhuren van event/horecacrew” expliciet. |
-| Voelt het als een serieus crewbedrijf of een template? | **Serieus merk** (navy/oranje, vaste CTA-taal), maar de hero mist nog echte locatiefoto’s — daardoor iets “product-UI” i.p.v. “crew op de vloer”. |
-| Is de primaire actie duidelijk? | **Ja.** Oranje “Personeel aanvragen” is dominant in hero, header en sticky bar. |
-| Is er vertrouwen zonder scrollen? | **Gedeeltelijk.** Bullets helpen; logo’s en echte foto’s komen pas ná TrustBar/SectorCards. |
-| Is mobiel de eerste viewport te vol? | **Matig.** H1 + CTAs + 4 interactive cards stapelen op smalle schermen; cards voelen als tweede “scherm” onder de fold. |
+| Begrijp je binnen 5 seconden wat Helping Hands doet? | **Ja.** H1 + subtekst + foto’s maken “inhuren van event/horecacrew” expliciet. |
+| Voelt het als een serieus crewbedrijf of een template? | **Serieus merk.** Eigen branded crewfoto’s in hero + bento tillen geloofwaardigheid sterk. |
+| Is de primaire actie duidelijk? | **Ja.** Oranje “Personeel aanvragen” in hero, header, sticky bar en door de pagina. |
+| Is er vertrouwen zonder scrollen? | **Grotendeels.** Foto’s + bullets; harde metrics (reactietijd, teamgrootte) ontbreken nog. Logo’s volgen direct onder TrustBar. |
+| Is mobiel de eerste viewport te vol? | **Ja, risico.** Collage + interactive cards stapelen onder H1/CTA’s → lange first screen. |
 
 ### Scores (1–10)
 
 | Dimensie | Score | Toelichting |
 |----------|------:|-------------|
-| Professionaliteit | **8** | Consistente brandkleuren, typografie (`font-black`), nette secties |
-| Vertrouwen | **7** | Disclaimer, FAQ, company JSON-LD; hero mist nog “bewijs”-beeld |
-| Creativiteit | **5.5** | Interactieve cards oké, maar weinig visuele verrassing; gradient-hero zonder foto |
-| Duidelijkheid | **8.5** | Sterke “inhuren”-H1, heldere doelgroep-split later |
-| Conversiekracht | **7.5** | Veel CTA’s + sticky bar; mailto-frictie bij QuickRequest |
-| Mobiele ervaring | **7** | Sticky CTA + MobileMenu sterk; hero + cards stapelen |
-| SEO-potentie | **8** | Title/H1/landings/schemas klaar; domein-DNS/canonical nog risico |
+| Professionaliteit | **8.5** | Consistente brandkleuren, typografie, nette secties, echte foto’s |
+| Vertrouwen | **8** | Disclaimer, FAQ, company JSON-LD, lokale foto’s, logo-carousel vroeg |
+| Creativiteit | **7.5** | Collage + bento-shapes sterk; hero-achtergrond nog abstract gradient |
+| Duidelijkheid | **8.5** | Sterke “inhuren”-H1, dual funnel, heldere diensten/sectoren |
+| Conversiekracht | **8** | Veel CTA’s + tel/WhatsApp bij QuickRequest; mailto blijft frictie |
+| Mobiele ervaring | **7** | Sticky CTA + menu sterk; hero-hoogte en 9 service-tabs zwaar |
+| SEO-potentie | **8.5** | Title/H1/landings/schemas klaar; canonical/env blijft aandachtspunt |
 
-**Gemiddelde indruk:** sterke conversie- en SEO-basis; grootste gap is **visuele beleving in de hero** en **sectiedruk/duplicatie** lager op de pagina.
+**Gemiddelde indruk (~8.0):** homepage is conversie- en merk-klaar. Grootste resterende gaps: **mobiele hero-dichtheid**, **soft claims zonder bewijs**, **mailto-frictie**, **LCP/priority-overlap** en **paginalengte/CTA-herhaling**.
 
 ---
 
-## 2. Hero-sectie analyse
+## 2. Sterke & zwakke punten
 
-**Component:** `src/components/sections/PageHero.tsx`  
-**Content:** `getPageHeroContent("/")` in `src/lib/pageHeroContent.ts`
+### Sterke punten
+
+1. Duidelijke **inhuren**-propositie in title + H1
+2. Eigen crewfotografie in hero, bento én sectorcards (geen stock-only)
+3. Volwassen design system: navy `#0B1F4D` / `#173A8A`, oranje `#F28C28`
+4. Sticky header (inverted → glass) + sticky mobile CTA + desktop floating CTA
+5. Veilige projectlogo-claimtaal + FAQ-item over projectervaring
+6. SEO-foundation: metadata, FAQ/Organization/WebSite schema, published landings
+7. Dual audience (opdrachtgever/crew) expliciet in hero + `AudienceToggle`
+8. QuickRequest met spoedkanalen (mobiel, vast, WhatsApp, mail)
+9. Banned brands afwezig in actieve logo-catalogus
+10. Sectievolgorde al dicht bij ideale conversieflow (bewijs vroeg, aanvraag laat)
+
+### Zwakke punten
+
+1. Mobiele hero: collage + 4 interactive cards = lange first viewport
+2. Soft claim “beste crewbedrijf van Nederland” zonder meetbaar bewijs
+3. TrustBar/highlights zijn generieke labels, geen harde trust-metrics
+4. Mailto-only QuickRequest (e-mailclient vereist)
+5. Meerdere `priority`-images (hero collage + bento) → LCP-concurrentie
+6. 9 service-filters op homepage kan overwhelmen, vooral mobiel
+7. Pagina is lang; CTA “Personeel aanvragen” herhaalt zonder nieuwe info
+8. Foto-overlap tussen hero, bento en deployment (zelfde assets hergebruikt)
+9. Canonical/OG volgen `NEXT_PUBLIC_SITE_URL` / default `helpinghandsagency.nl` — live Vercel-host kan afwijken
+10. Weinig case-snippet / “wat krijg je concreet” naast processtappen
+
+---
+
+## 3. Hero-sectie
+
+**Component:** `src/components/sections/PageHero.tsx` (`StaffingHeroMedia` bij theme `staffing`)  
+**Content:** `getPageHeroContent("/")` in `src/lib/pageHeroContent.ts`  
+**Media:** `homeHeroCollage` in `src/lib/crewPhotos.ts` (5 lokale webp’s; 1e `priority`)
 
 ### Huidige staat
 
@@ -73,528 +113,451 @@ Al aanwezig in de codebase (niet opnieuw “ontdekken” als gap):
 | Subtekst | Van last-minute extra handen tot complete projectinzet… |
 | Primary CTA | Personeel aanvragen → `/contact` |
 | Secondary CTA | Crew aanmelden → `/vacatures` |
-| Trust bullets | 4 labels via `PageHeroHighlights` |
-| Visual side | `PageHeroInteractiveCard` grid (tekst, geen Image) |
-| Achtergrond | CSS `.hero-gradient` (geen foto) |
+| Trust bullets | 4 labels via `PageHeroHighlights` (pills) |
+| Visual side | Foto-collage (2×2 / lg 3-col) + interactive cards + live detailpanel |
+| Achtergrond | CSS `.hero-gradient` (geen full-bleed foto) |
 
 ### Sterke punten
 
 - Keyword **inhuren** in H1 (SEO + conversie)
-- Duidelijke dual audience (opdrachtgever vs crew)
-- Interactieve cards geven “wat leveren jullie?” zonder naar diensten te scrollen
-- Header inverted (wit logo) werkt met dark hero (`pathHasDarkHero("/")`)
+- Echte locatiefoto’s in eerste viewport — merk voelt als crewbedrijf
+- Dual audience CTA’s
+- Interactive cards geven snelle dienst-scan zonder scroll
+- Header inverted werkt met dark hero (`pathHasDarkHero("/")`)
+- Hover-scale + `motion-reduce` op collage
 
 ### Zwakke punten
 
-- Geen dominante **crew-/locatiefoto** in eerste viewport → merk voelt abstract
-- Interactive cards concurreren met H1/CTA’s (vooral mobiel)
-- Geen trust-badges (KvK/reactietijd/regio) naast CTA
-- Geen scroll-cue of subtiele motion naar TrustBar
+- Op mobiel: tekst → CTA → pills → collage → cards = te veel voor “één compositie”
+- Interactive cards concurreren met collage (dubbele “wat doen jullie?”)
+- Geen harde trust naast CTA (Hilversum / landelijk / telefoon als tekstbadge)
+- Achtergrond blijft abstract gradient i.p.v. subtiele full-bleed atmosfeer
+- 5e collage-foto `hidden sm:block` — oké, maar LCP blijft zwaar op mobile
 
-### Concrete verbeteringen (later implementeren)
+### Concrete verbeteringen (later)
 
-1. **Hero media collage** rechts (of full-bleed achter tekst): 3–5 lokale crewfoto’s uit `/images/crew/`
-2. Trust badges onder CTA’s: “Hilversum · landelijk inzetbaar”, telefoon, “één aanspreekpunt”
-3. Primary CTA behouden; secondary lichter; optioneel derde: `tel:` of WhatsApp
-4. Interactive cards inkorten op mobiel (2 zichtbaar + “meer”) of verplaatsen onder TrustBar
-5. Subtiele CSS hover/scale op collage; `prefers-reduced-motion` respecteren (zoals `RevealOnScroll`)
-6. Eyebrow mag merk blijven; H1 niet langer maken
+1. Mobiel: collage inkorten (2–3 tiles) of cards onder TrustBar/Diensten
+2. Trust-regel onder CTA: “Hilversum · landelijk inzetbaar” + `tel:` tekstlink
+3. Primary CTA dominant houden; secondary lichter (al grotendeels zo)
+4. Optioneel: één soft full-bleed crewfoto achter gradient (opacity laag) — geen floating badges
+5. Geen langere H1; merk in eyebrow behouden
 
 ---
 
-## 3. Header / navigatie
+## 4. Header / navigatie
 
 ### Huidige implementatie
 
 | Bestand | Rol |
 |---------|-----|
-| `PublicHeader.tsx` | Fixed header, inverted/glass, progress bar, CTA |
-| `MobileMenu.tsx` | Slide-over, accordions, CTA’s onderaan |
-| `HeaderDropdown.tsx` | Desktop mega-achtige dropdowns |
-| `useScrollHeader.ts` | `scrolled` + `progress` (threshold 24px) |
+| `PublicHeader.tsx` | Fixed header, inverted/glass, progress bar, CTA, `tel:` |
+| `MobileMenu.tsx` | Slide-over, accordions, WhatsApp/contact |
+| `HeaderDropdown.tsx` | Desktop dropdowns |
+| `useScrollHeader.ts` | `scrolled` + `progress` |
 | `navigation.ts` | `navDropdowns` + `simpleNavLinks` |
+| `FloatingCTA.tsx` | Desktop float + sticky mobile bar |
+| `layout.tsx` | `pb-20` op `<lg` tegen sticky bar |
 
 ### Wat werkt al goed
 
-- Sticky/fixed overlay
-- Transparent op dark hero → `bg-white/90 backdrop-blur-md` na scroll
-- Compacte hoogte: `h-[4.5rem]` → `h-14` (scrolled)
+- Transparent op dark hero → `bg-white/85 backdrop-blur-xl` na scroll
+- Compacte hoogte bij scroll
 - Oranje CTA altijd zichtbaar (mobiel: “Aanvragen”)
-- Active states + Escape/click-outside
-- Body scroll lock bij open menu
+- `tel:`-icoon vanaf `sm`
+- Escape / click-outside / body scroll lock
+- Op `/` opent mobiel accordion “Diensten” standaard
 - Scroll progress oranje streep
 
-### Verbeterplan (finetune, geen rebuild)
+### Verbeterplan (finetune)
 
-1. **PublicHeader.tsx**
-   - Glass-state iets sterker op homepage (meer blur / subtielere border)
-   - Op zeer smalle schermen CTA + hamburger spacing bewaken (nu oké met `shrink-0`)
-   - Overweeg telefoon-icoon naast CTA op `sm+` (directe conversie)
-2. **MobileMenu.tsx**
-   - Logo/`HeaderBrandLogo` i.p.v. alleen tekst “Helping Hands”
-   - Snelle contactrij: tel + mail (mail staat al)
-   - Accordion “Diensten” default open op `/` optioneel (discoverability)
-3. **useScrollHeader.ts**
-   - Threshold 24 is fine; eventueel homepage-specifieke threshold voor “glass earlier”
-   - Geen Framer Motion nodig
+1. Op zeer smalle schermen (<360px) spacing CTA + hamburger blijven bewaken
+2. Optioneel WhatsApp-icoon discreet naast tel (alleen `siteConfig.whatsappUrl`)
+3. Glass-contrast op drukke hero-foto’s testen (collage kan header-contrast beïnvloeden bij scroll-start)
+4. Geen Framer Motion nodig
 
 ---
 
-## 4. Layout / volgorde
+## 5. Layout / sectievolgorde
 
-### Huidige volgorde (`page.tsx`)
+### Huidige volgorde (`src/app/page.tsx`) — live bevestigd
 
-1. `PageHero`
+1. `PageHero` (collage + interactive cards)
 2. `TrustBar`
-3. `SectorCards` (tekst, 6 sectoren)
-4. `LogoCarousel`
-5. Crew strip “Onze crew in actie” (`homeCrewStrip`)
-6. Diensten-intro + `ServicesSection`
-7. `AudienceToggle`
-8. `ProjectExperienceTeaser` (logo-grid + disclaimer)
-9. Werkwijze (`ProcessAccordion`)
-10. `WhyHelpingHands`
-11. Sectoren foto (`DeploymentCards`)
-12. `QuickRequestForm`
-13. `FaqSection`
-14. `CTASection`
+3. `LogoCarousel`
+4. “Onze crew in actie” → `HomeCrewBento`
+5. Diensten-intro + `ServicesSection`
+6. Sectoren → `DeploymentCards`
+7. Werkwijze → `ProcessAccordion`
+8. `WhyHelpingHands`
+9. Audience-sectie → `AudienceToggle`
+10. `QuickRequestForm`
+11. `FaqSection`
+12. `CTASection`
 
-### Aanbevolen flow (conversie)
+### Oordeel
 
-1. Hero (met media)
-2. TrustBar (kort)
-3. LogoCarousel (sociaal bewijs vroeg)
-4. Crew/beeld bento of strip
-5. Diensten (tabs/cards)
-6. Sectorfoto’s (`DeploymentCards`) — **niet** dubbele tekst-`SectorCards`
-7. Werkwijze (timeline)
-8. Why / differentiatie
-9. AudienceToggle (of eerder na hero als compact)
-10. Snelle aanvraag
-11. FAQ
-12. Slot-CTA
+Volgorde is **sterk** en sluit aan bij conversiebest practice: belofte → soft trust → sociaal bewijs (logo’s) → beeld → diensten → sectoren → proces → differentiatie → split audience → aanvraag → FAQ → slot-CTA.
 
 ### Keep / expand / move / combine / remove
 
 | Sectie | Advies |
 |--------|--------|
-| PageHero | **Keep + expand** (media) |
-| TrustBar | **Keep** (compact houden) |
-| SectorCards | **Combine/remove of verplaats** — overlapt met DeploymentCards |
-| LogoCarousel | **Keep**; claim language checken |
-| Crew strip | **Expand** naar bento óf laten + verbeteren aspect-ratio mix |
-| ServicesSection | **Keep + polish** cards/CTAs |
-| AudienceToggle | **Keep**; eventueel omhoog |
-| ProjectExperienceTeaser | **Combine** met carousel of inkorten (nu dubbele logo-ervaring) |
-| ProcessAccordion | **Keep**; optioneel visuele timeline |
-| WhyHelpingHands | **Keep** |
-| DeploymentCards | **Keep** (sterkste sectorvisual) |
-| QuickRequestForm | **Keep**; UX mailto verbeteren |
+| PageHero | **Keep + polish** (mobiele dichtheid) |
+| TrustBar | **Keep**; optioneel 1 local/metric zin |
+| LogoCarousel | **Keep** |
+| HomeCrewBento | **Keep**; foto-select diversifiëren t.o.v. hero |
+| ServicesSection | **Keep + polish** (mobiele filters) |
+| DeploymentCards | **Keep** (primaire sectorvisual) |
+| ProcessAccordion | **Keep** (desktop timeline al aanwezig) |
+| WhyHelpingHands | **Keep**; soft claim temperen of onderbouwen |
+| AudienceToggle | **Keep**; eventueel omhoog ná TrustBar als compact strip |
+| QuickRequestForm | **Keep**; mailto-frictie mitigeren |
 | FAQ + CTA | **Keep** |
+| SectorCards / ProjectExperienceTeaser | **Niet terugzetten** op home |
 
 ---
 
-## 5. Creativiteit van afbeeldingen
+## 6. Imagery / creativiteit
 
 ### Huidige kwaliteit
 
-- **Sterk:** eigen crewfoto’s in `public/images/crew/*.webp` via `crewPhotos.ts` — branded shirts, scaffolding, stadion, keuken
-- **Zwak:** hero gebruikt **geen** van deze foto’s
-- Alt-teksten: over het algemeen beschrijvend en bruikbaar
-- Optimalisatie: webp aanwezig; logo’s soms png/jpg/webp mix; carousel gebruikt `<img>` niet altijd `next/image`
-- Geen externe hotlinks in homepage-beeldflow (goed)
+- **Sterk:** lokale crewfoto’s in `/images/crew/*.webp` via `crewPhotos.ts`
+- Hero collage, bento (organische radii + brand rings), deployment photo-cards, CTA-achtergrond
+- Alt-teksten beschrijvend en bruikbaar
+- Geen externe hotlinks in homepage-beeldflow
+- `next/image` op hero/bento/deployment/CTA
 
 ### Consistency
 
-- Crewfotos: consistente “op locatie”-sfeer
-- Logo’s: wisselende crop/padding in bronbestanden → `object-contain` helpt
-- SectorCards zonder beeld vs DeploymentCards mét beeld = inconsistentie
+- Sfeer “op locatie / branded shirts” is consistent
+- Overlap: scaffolding, thumbs-up, chef-fryer, stadium komen in meerdere secties terug → herhaling voelbaar bij scroll
+- Logo’s: wisselende bronformats; carousel gebruikt `<img>` in `ProjectLogoCard` (niet `next/image`)
 
-### Ideeën A–E
+### Ideeën A–E (volgende iteratie)
 
 | | Idee | Doel |
 |---|------|------|
-| **A** | Hero collage (3–5 crew shots) | Eerste indruk = echt crewbedrijf |
-| **B** | Image bento onder logo’s | Visuele ademhaling + storytelling |
-| **C** | Sector cards met foto-achtergrond (DeploymentCards-stijl vroeger) | SectorCards vervangen/upgraden |
-| **D** | Before / during / after strip (load-in → show → load-out) | Proces begrijpelijk maken |
-| **E** | Interactive image cards i.p.v. pure tekstcards in hero | Behoud interactie + beeld |
+| **A** | Mobiele hero-media inkorten | Snellere first action |
+| **B** | Unieke foto-sets per sectie (minder overlap) | Frissere scroll |
+| **C** | Subtiele full-bleed hero atmosfeer (lage opacity) | Merkdiepte zonder badges |
+| **D** | Mini “load-in → show → load-out” strip | Proces visueel |
+| **E** | Case-beeld + 1 zin resultaat (zonder partnership-claim) | Conversiebewijs |
 
-### Aanbevolen mapstructuur (later)
-
-```text
-public/images/home/
-  hero/
-  crew/
-  sectors/
-  backgrounds/
-```
-
-Huidige assets mogen blijven in `/images/crew/` en `/images/logos/`; home-specifieke selects kunnen aliases/copies krijgen zonder hotlinks.
-
-**Regel:** geen Unsplash/externe CDN-hotlinks op marketinghomepage.
+**Regel:** geen Unsplash/externe CDN-hotlinks; geen floating badges over hero-media.
 
 ---
 
-## 6. Logo carrousel
+## 7. Logo-carrousel
 
 **Component:** `LogoCarousel.tsx` → `getHomepageFeaturedLogos()` → `projectLogos.ts`  
-**Card:** `ProjectLogoCard` variant `carousel` (180–260px breed)
+**Card:** `ProjectLogoCard` variant `carousel`
 
 ### Sterke punten
 
-- CSS-marquee (`.logo-carousel-track`), pause on hover
-- Gradient fades links/rechts
-- Eyebrow “Crewervaring” + veilige copy over inzet via opdrachten/partners
-- Featured + priority: Crewstars, Factor F, Jaarbeurs eerst
+- CSS-marquee (`.logo-carousel-track`), pause on hover, gradient fades
+- Eyebrow “Crewervaring” + expliciete non-partnership copy
+- Priority IDs: Crewstars, Factor F, TAP Crew, Backstage Masters, Jaarbeurs
+- Disclaimer zichtbaar onder track
+- CTA naar `/projecten`
 
 ### Banned brands check
 
-Mag **niet** verschijnen: ID&T, Ironman, The Good Guyz, Your Productions, LOC7000, Q-dance.
+Mag **niet**: ID&T, Ironman, The Good Guyz, Your Productions, LOC7000, Q-dance.
 
 | Status | Resultaat |
 |--------|-----------|
-| In `projectLogos` array | **Afwezig** (correct) |
-| Alleen genoemd in comment / docs | OK |
-| Orphan file `Q-dance_logo_2018.png` in `public/` | **Risico:** niet in UI, wel in repo — opruimen of buiten webroot houden |
+| In `projectLogos` | **Afwezig** (correct) |
+| Orphan Q-dance in public | **Niet gevonden** (juli 2026 scan) |
 
-### Preferred logos (lokaal)
+### Preferred logos
 
-| Logo | Bestand | In `projectLogos`? |
-|------|---------|-------------------|
-| Crewstars | `opdrachtgevers/crewstars.png` | **Ja** |
-| Factor F | `opdrachtgevers/factor-f.webp` | **Ja** |
-| TAP Crew | `opdrachtgevers/tap-crew.png` | **Nee** (bewust verwijderd; file bestaat) |
-| Backstage Masters | `opdrachtgevers/backstage masters.png` | **Nee** (bewust; file bestaat) |
-| MOJO | verwacht `mojo.png` | **Nee** — in `missingProjectLogos` |
+| Logo | In catalogus? |
+|------|---------------|
+| Crewstars | Ja, featured |
+| Factor F | Ja, featured |
+| TAP Crew | Ja, featured |
+| Backstage Masters | Ja, featured |
+| MOJO | Alleen als goedgekeurd lokaal bestand bestaat |
 
-**Aanbeveling:** TAP Crew + Backstage Masters opnieuw toevoegen *alleen* met disclaimer-taal; MOJO toevoegen zodra officieel lokaal bestand er is. Banned brands blijven hard blok.
+### Restpunten
 
-### Leesbaarheid / broken
-
-- Cards groot genoeg op desktop; op mobiel 180px is acceptabel
-- `imageError → null` verbergt broken images (goed), maar kan “gaten” in track geven
-- Grayscale hover: fancy, soms slechter leesbaar op lichte logo’s
-
-### Claim language
-
-Veilig aanwezig:
-
-- Carousel: “ingezet via verschillende opdrachten, partners en producties”
-- Teaser + FAQ + `projectExperienceDisclaimer`
-- Vermijd: “wij werken voor / partners van / official supplier van …” zonder contract
+- Carousel `<img>` i.p.v. `next/image` (lazy ok, sizing minder strak)
+- `imageError → null` kan gaten in track geven
+- Category-chips + logo naam: leesbaarheid wisselt per asset-padding
+- Claimtaal is veilig — behouden; geen “wij werken voor …” zonder contract
 
 ---
 
-## 7. Diensten-sectie
+## 8. Diensten-sectie
 
 **UI:** `ServicesSection` + `ServiceTabs` + `ServiceCard` + `ServiceDetailDrawer`  
-**Data:** `homeServices.ts` / re-export `services.ts`
+**Data:** `src/lib/services.ts` (+ landings mapping)
 
 ### Huidig gedrag
 
-- Tabs per categorie (Event, Horeca, Restaurant, …)
-- “Alle” toont **featured** services (niet alle) op homepage — correct voor scanbaarheid
-- Drawer voor detail; card-CTA “Personeel aanvragen” → `/contact`
-- Introblok met deep links naar `/diensten`, landings en contact
+- Tabs: Alle / Event / Horeca / Restaurant / Keuken / Bar / Stagebouw / Productie / Logistiek / Hospitality
+- “Alle” op homepage = **featured** (live: “9 uitgelichte diensten”)
+- Drawer voor detail; CTA “Personeel aanvragen” → `/contact`
+- Titel link + “Meer over deze dienst →” naar matching landing
+- Introblok met deep links naar event crew / stagehands / horeca + knoppenrij
 
 ### Sterke punten
 
-- Rijke taxonomie (veel functies)
-- Icon badges
-- Interne links naar SEO-landings
+- Rijke taxonomie + taken/idealFor
+- SEO-interne links naar landings
+- Conversiepad per card
 
 ### Zwakke punten
 
-- Veel filters op homepage kan overwhelmen
-- Cards zijn border/shadow-heavy (veel “card-UI”)
-- Geen directe link per card naar matching landing (alleen drawer + contact)
-- Diensten-sectie staat relatief ver onder logo’s/crewstrip
+- Lange intro (3 alinea’s) vóór grid — scanbaarheid daalt
+- 9 filters op smalle schermen: horizontale overflow / cognitive load
+- Cards nog border/shadow-heavy (veel “card-UI”)
+- Dubbele CTA-rij (“Bekijk inzet” + “Personeel aanvragen” + landing link) voelt druk
 
-### Layout-verbeteringen
+### Verbeteringen
 
-1. Featured-first grid (max 6–9) + “Bekijk alle diensten”
-2. Card → primaire landing-link waar slug matcht (event-crew, stagehands, …)
-3. Drawer behouden voor detail; CTA “Personeel aanvragen” prominent houden
-4. Tabs sticky op mobiel of dropdown-select op smalle viewports
+1. Intro inkorten tot 1 alinea + linkrij
+2. Mobiel: select/dropdown i.p.v. volle tabstrip, of sticky compact chips
+3. Featured max 6–9 behouden; “Bekijk alle diensten” prominenter
+4. Drawer behouden; primaire oranje CTA behouden
 
 ---
 
-## 8. Conversie
+## 9. Sectoren
 
-### Frequentie “Personeel aanvragen” / contact-CTA’s
+**Component:** `DeploymentCards` + data `deployments` in `src/lib/content.ts` + foto’s `homeDeploymentPhotos`
 
-Voorkomt op homepage o.a. in:
+### Huidige staat
 
-- Header (`PublicHeader`)
-- Hero primary
-- Diensten-intro + elke `ServiceCard`
-- `AudienceToggle` (clients)
-- `WhyHelpingHands`
-- `QuickRequestForm` submit
-- `CTASection`
-- `FloatingCTA` (desktop + mobiel sticky)
+Zes foto-cards: Festivals, Concerten, Stadions, Beurzen, Horecalocaties, Producties — overlay gradient, label “Crew”, korte detailregel.
 
-→ **Frequent genoeg**; risico is herhaling zonder nieuwe info, niet tekort.
+### Oordeel
+
+- Visueel sterkste sectorpresentatie; goed geplaatst ná diensten
+- Touch-vriendelijk (geen hover-only essentiële copy)
+- `SectorCards` hoort **niet** terug op homepage (duplicatie)
+
+### Verbeteringen
+
+1. Optioneel: card klikbaar naar relevante landing of `/projecten` filter
+2. Detailcopy iets concreter per sector (1 zin met “wat leveren we”)
+3. Foto-select afstemmen op unieke shots t.o.v. hero/bento
+
+---
+
+## 10. Conversie
+
+### CTA-frequentie “Personeel aanvragen” / contact
+
+Voorkomt o.a. in: header, hero, diensten-intro, elke `ServiceCard`, Why, Audience (clients), QuickRequest, `CTASection`, `FloatingCTA`.
+
+→ **Frequent genoeg**; risico is vermoeidheid, niet tekort.
 
 ### QuickRequest
 
-- Mailto-flow: werkt zonder backend/API keys
-- Frictie: gebruiker moet e-mailclient hebben; op mobiel wisselvallig
-- Successtate legt tel + mail uit — goed
-- Ontbreekt: WhatsApp deep link
+- Mailto naar `planning@helpinghandsagency.nl` met subject/body — werkt zonder backend
+- Spoedblok: Bel / Vast / WhatsApp / Mail — **sterk**
+- Frictie: e-mailclient vereist; op sommige mobiele browsers wisselvallig
+- Successtate aanwezig
 
-### Sticky mobile CTA
+### Sticky / floating
 
-- `FloatingCTA`: vaste bottom bar `Personeel | Werken`
-- `body` heeft `pb-20` op `<lg` zodat content niet achter bar valt — goed
-- Desktop floating panel na scroll (threshold 320)
+- Mobiel: vaste bottom bar Personeel | Werken
+- Desktop: floating panel na scroll (threshold 320)
+- `body.pb-20` op `<lg` — correct
 
 ### Trust nabij CTA’s
 
-- Hero: bullets ja, soft proof nee
-- QuickRequest: tel/mail spoedregel ja
-- Eind-CTA: sfeerfoto ja, geen KvK/adres (adres hoort in footer — oké)
+- Hero: soft pills, geen tel-tekst
+- Header: tel-icoon (`sm+`)
+- QuickRequest: beste trust-cluster
+- Eind-CTA: sfeerfoto + dual CTA; geen KvK in hero (hoort footer — oké)
 
 ### Contactkanalen
 
 | Kanaal | Status |
 |--------|--------|
-| Mail | Sterk (`info@…`, mailto forms) |
-| Telefoon | In QuickRequest + siteConfig; beperkt in hero/header |
-| WhatsApp | **Niet** aanwezig |
+| Mail / planning@ | Sterk |
+| Mobiel + vast | In QuickRequest + siteConfig; header-icoon |
+| WhatsApp | In QuickRequest + MobileMenu + contactpagina |
 | Contactpagina | Primair conversiedoel |
 
 ---
 
-## 9. SEO
+## 11. SEO
 
 ### Title / meta / H1
 
 | Item | Waarde |
 |------|--------|
-| Homepage title | `Helping Hands Agency \| Event crew & horecapersoneel inhuren` (`absoluteTitle: true`) |
+| Title | `Helping Hands Agency \| Event crew & horecapersoneel inhuren` (`absoluteTitle: true`) |
 | Meta description | `siteConfig.description` (inhuren + festivals/stadions/… + briefing) |
 | H1 | Event crew en horecapersoneel inhuren voor events en producties. |
 
-### Headings
+Live title matcht.
 
-- Meerdere duidelijke H2’s (Trust, Diensten, Audience, Projecten, Werkwijze, Why, Sectoren, QuickRequest, FAQ)
-- Let op: twee “sector”-achtige blokken (SectorCards + DeploymentCards) → keyword-spreiding oké, UX-dubbel
+### Headings & interne links
 
-### Interne links
+- Duidelijke H2-structuur per sectie
+- Sterke deep links naar `/diensten/*`, `/projecten`, `/contact`, `/vacatures`, `/over-ons`
+- Service cards → landings via mapping
 
-Sterk naar `/diensten/*`, `/projecten`, `/contact`, `/vacatures`, `/over-ons`. Landings zijn live — homepage deep links kunnen nog uitgebreider per service card.
+### Local SEO
 
-### Alts / keywords / local SEO
-
-- Alts op crewfoto’s aanwezig
-- Local: Hilversum in `siteConfig` + Organization PostalAddress; homepage-copy is landelijk (bewust)
-- Overweeg 1× “Hilversum / Midden-Nederland / landelijk” in TrustBar of footer-adjacent blok
+- FAQ: Hilversum + landelijk
+- Organization PostalAddress + telefoons in JSON-LD
+- Homepage-body blijft landelijk gericht (bewust); TrustBar kan 1× local phrase gebruiken
 
 ### Schemas / OG / canonical
 
-- FAQPage JSON-LD op homepage (`faqJsonLd(homeFaqs)`)
+- FAQPage JSON-LD op homepage
 - Organization + WebSite in root layout
 - OG/Twitter via `buildPageMetadata`
-- **Canonical:** `absoluteUrl("/")` → default `https://helpinghandsagency.nl`  
-  **Let op:** domein-DNS kan nog pending zijn; live staat op Vercel. Zolang `NEXT_PUBLIC_SITE_URL` niet op het live Vercel-domein staat, kunnen canonical/OG naar het toekomstige domein wijzen. Documenteer env per environment.
+- Canonical: `absoluteUrl("/")` → `siteConfig.url` (`NEXT_PUBLIC_SITE_URL` of default `https://helpinghandsagency.nl`)
+- **Risico:** live Vercel-URL vs production domain — env per environment documenteren
 
-### Performance & SEO
+### Keywordprioriteit
 
-- Veel client components op homepage (hero, services, forms, reveal) → hydrate cost
-- Images deels `next/image` (crew, deployment, CTA); logo carousel `<img>`
+**Primair:** event crew inhuren · horecapersoneel inhuren · stagehands inhuren · personeel evenementen · crew uitzendbureau events  
 
-### Keywordlijst (prioriteit voor homepage + landings)
+**Secundair:** restaurant-/keuken-/barpersoneel · productie-assistentie · logistiek · hospitality · festival/stadion/beurs crew  
 
-Primair:
-
-- event crew inhuren
-- horecapersoneel inhuren
-- stagehands inhuren
-- personeel evenementen
-- crew uitzendbureau events
-
-Secundair:
-
-- restaurant personeel inhuren
-- keukenpersoneel / barpersoneel
-- productie assistentie / logistiek hospitality
-- festival crew / stadion crew / beurs personeel
-
-Lokaal:
-
-- Helping Hands Agency Hilversum
-- event crew Hilversum / Midden-Nederland
+**Lokaal:** Helping Hands Agency Hilversum · event crew Hilversum / Midden-Nederland
 
 ---
 
-## 10. Interactie / animatie
-
-**Voorkeur:** CSS transitions + lichte client hooks — **geen Framer Motion** tenzij strikt nodig.
-
-### Nu aanwezig
-
-- `RevealOnScroll` (IntersectionObserver, reduced-motion aware)
-- Header height/background transitions
-- Logo carousel CSS keyframes
-- Hover scale op foto’s/cards
-- Accordion grid-rows animatie (`ProcessAccordion`)
-- Service drawer, audience toggle, hero card select
-
-### Aanbevelingen
-
-1. Hero collage: soft fade/slide met CSS only
-2. Sector hover al goed — niet overdrijven
-3. Vermijd scroll-jacking en zware parallax
-4. Behoud `prefers-reduced-motion` patroon van `RevealOnScroll`
-
----
-
-## 11. Mobile
-
-### 320–414
-
-- Sticky CTA + header CTA: conversie sterk
-- Hero + 4 interactive cards: lange first screen
-- SectorCards: op mobiel descriptions deels `max-h-0` tot hover — **touch heeft geen hover** → copy kan verborgen blijven (`group-hover`) — fix nodig
-- Services tabs: horizontale overflow risico bij 9 filters
-- QuickRequest type-grid: 6 buttons — bruikbaar maar lang
-
-### Tablet
-
-- 2-koloms grids werken; logo carousel prettig
-- AudienceToggle en QuickRequest splitten netjes vanaf `lg`
-
-### Desktop
-
-- Header dropdowns vanaf `lg`
-- Floating CTA rechtsonder na scroll
-- Hero 2-koloms layout sterkste desktop-compositie — baat bij echte media rechts
-
----
-
-## 12. Performance
-
-| Onderwerp | Observatie |
-|-----------|------------|
-| Images | Crew webp + `next/image` op strip/deployment/CTA |
-| Logo’s | `<img>` in carousel/cards; geen priority/sizing via Image |
-| Client JS | Veel `"use client"` islands op homepage |
-| CLS | Aspect-ratio op crew strip (`aspect-[3/4]`) goed; logo cards vaste heights helpen |
-| CWV | Grootste risico: LCP = tekst/gradient hero (snel) óf later zware images zonder priority |
-| Aanbeveling | Hero collage: 1 LCP image `priority`; rest lazy; carousel `loading="lazy"` |
-
----
-
-## 13. Content
+## 12. Content & tone
 
 ### Tone
 
 - Direct, operationeel, Nederlands B2B: “datum, locatie, functies, briefing”
-- Weinig bullshit; soms generiek (“beste crewbedrijf van Nederland” in Why — claim soft, onderbouw met bewijs)
+- Dual voice: professioneel voor opdrachtgevers, menselijk voor crew
+- Meestal veilige claims; uitzondering: “beste crewbedrijf van Nederland” in `WhyHelpingHands`
 
 ### Differentiatie
 
-Uniek t.o.v. generiek uitzendbureau:
-
 - Event + horeca + stagebouw in één taal
-- Projectervaring-disclaimer (eerlijk)
-- Dual funnel opdrachtgever/crew
-- Eigen branded crewfoto’s
+- Eerlijke projectervaring-disclaimer
+- Dual funnel + eigen branded foto’s
+- Missie (jongeren / 2022) leeft sterker op `/over-ons` dan op home — oké, maar 1 zin op home kan merkdiepte geven zonder hero te vervuilen
 
-Mist nog:
+### Suggested content blocks (later)
 
-- Reactietijd / regio-dekking / teamgrootte (alleen als waar)
-- Korte case-snippet (1 productie, 1 resultaat) zonder partnership-claim
-
-### Suggested blocks (content)
-
-1. “Wat we nodig hebben voor een snelle bezetting” (checklist)
-2. “Last-minute vs gepland” (2 scenario’s)
-3. Hilversum + landelijke inzet (local SEO)
-4. Veilige projectzin bij logo’s (al grotendeels aanwezig)
+1. Checklist “Wat we nodig hebben voor snelle bezetting” (deels in FAQ)
+2. Last-minute vs gepland (2 scenario’s)
+3. Soft claim vervangen door “praktisch / betrouwbaar / korte lijnen” + bewijs
+4. 1 case-snippet zonder partnership-claim
 
 ---
 
-## 14. Prioriteitenlijst P1–P5
+## 13. Interactie / animatie
 
-### P1 — Conversie & first impression (hoogste impact)
+**Voorkeur:** CSS + lichte client hooks — **geen Framer Motion**.
 
-- Hero media collage met lokale crewfoto’s
-- Trust nabij primary CTA (tel / regio / snelle opvolging)
-- SectorCards touch-fix (geen hover-only copy)
-- Header/mobiel: optioneel `tel:` snelle actie
+### Aanwezig
 
-### P2 — Bewijs & logo’s
+- `RevealOnScroll` (IntersectionObserver, reduced-motion)
+- Header transitions + progress
+- Logo carousel keyframes (+ pause on hover / reduced-motion)
+- Hero/bento/deployment hover-scale
+- ProcessAccordion stepper + accordion
+- Service drawer, audience toggle, hero card select
 
-- Carousel claim language audit
-- Preferred logos (TAP Crew, Backstage Masters) veilig heractiveren indien gewenst
-- Orphan banned files opruimen (`Q-dance_logo_2018.png`)
-- ProjectExperienceTeaser vs LogoCarousel dedupliceren
+### Aanbevelingen
 
-### P3 — Diensten & sectorvisuals
+1. Geen scroll-jacking / zware parallax
+2. Reveal niet om élke sectie wrappen (hydrate cost)
+3. Behoud `prefers-reduced-motion` patronen
+4. Hero interactive: keyboard/focus al aanwezig — blijven testen
 
-- Services cards → landings linken
-- DeploymentCards als primaire sectorsectie; SectorCards inkorten/verwijderen
-- Image bento i.p.v. platte 6-up strip (optioneel)
+---
+
+## 14. Mobile
+
+### 320–414
+
+- Sticky CTA + header CTA: conversie sterk
+- Hero + collage + cards: te lang vóór TrustBar
+- Service tabs: 9 chips → overflow / scanmoeilijkheid
+- QuickRequest type-grid: bruikbaar maar lang
+- Deployment cards: goed (volle info zonder hover)
+- `pb-20` voorkomt content achter sticky bar
+
+### Tablet
+
+- 2-koloms grids + carousel prettig
+- Process stepper vanaf `lg`
+
+### Desktop
+
+- Hero 2-koloms = sterkste compositie
+- Floating CTA rechtsonder na scroll
+- Header dropdowns vanaf `lg`
+
+---
+
+## 15. Performance
+
+| Onderwerp | Observatie |
+|-----------|------------|
+| Images | Veel webp + `next/image` op kernsecties |
+| Priority | Hero collage[0] **én** bento[0] → dubbele eager LCP-kandidaten |
+| Logo’s | `<img>` in carousel; error → null |
+| Client JS | Veel `"use client"` islands (hero, services, process, forms, floating CTA) |
+| CLS | Aspect boxes op collage/bento helpen |
+| CWV-risico | Largest Contentful Paint = hero image; te veel priority schaadt |
+| Aanbeveling | Alleen 1 homepage LCP `priority`; rest lazy; carousel lazy; Reveal spaarzaam |
+
+---
+
+## 16. Prioriteiten P1–P5
+
+### P1 — First impression & mobile conversie
+
+- Hero mobiel inkorten (collage en/of cards)
+- Soft trust onder CTA (Hilversum / landelijk / bel)
+- Soft claim in Why temperen of onderbouwen
+- Behoud H1/title “inhuren”
+
+### P2 — Conversie-frictie
+
+- QuickRequest: “kopieer aanvraag” of duidelijker fallback naast mailto
+- WhatsApp/tel al aanwezig — in hero/header iets zichtbaarder maken (tekst, niet alleen icoon)
+- CTA-herhaling reduceren waar geen nieuwe info
+
+### P3 — Diensten & bewijs
+
+- Mobiele service-filters vereenvoudigen
+- Diensten-intro inkorten
+- Unieke foto-sets; optioneel 1 case-snippet
 
 ### P4 — SEO & techniek
 
-- `NEXT_PUBLIC_SITE_URL` per environment documenteren (Vercel vs helpinghandsagency.nl)
-- Homepage local phrase + interne links naar alle landings
-- FAQ uitbreiden met 1–2 local/conversievragen
-- Logo’s waar zinvol naar `next/image`
+- `NEXT_PUBLIC_SITE_URL` per environment
+- Interne links blijven; OG-image eventueel crew-shot i.p.v. alleen logo
+- Geen fake Review/AggregateRating schema
 
-### P5 — Polish & performance
+### P5 — Performance & polish
 
+- Eén `priority` LCP image
+- Logo carousel naar `next/image` waar zinvol
 - Reveal/motion finetune CSS-only
-- QuickRequest WhatsApp-optie of “kopieer aanvraag”
-- LCP priority op hero image
-- Filter-UI services op mobiel vereenvoudigen
+- Process/timeline accessibility regressietest
 
 ---
 
-## 15. Sterke / zwakke punten + concrete verbeteringen
+## Top 10 verbeteringen (samenvatting)
 
-### Sterke punten
-
-1. Duidelijke **inhuren**-propositie in title + H1
-2. Volwassen design system (navy `#0B1F4D`, oranje `#F28C28`)
-3. Sticky header + sticky mobile CTA
-4. Eigen crewfotografie i.p.v. stock-only
-5. Veilige projectlogo-claimtaal + FAQ
-6. SEO foundation: metadata, FAQ/Organization schema, service landings
-7. Dual audience (opdrachtgever/crew) expliciet
-8. QuickRequest zonder backend-afhankelijkheid
-9. Banned brands niet in actieve `projectLogos`
-10. Bedrijfsgegevens compleet in `siteConfig`
-
-### Zwakke punten
-
-1. Hero zonder echte foto’s
-2. SectorCards hover-only copy op touch
-3. Dubbele logo-secties (carousel + teaser)
-4. Dubbele sector-secties (tekst + foto)
-5. Mailto-frictie QuickRequest
-6. Orphan logo-bestanden (o.a. Q-dance) in `public/`
-7. Preferred partnerlogo’s (TAP/Backstage/MOJO) niet/incompleet in catalogus
-8. Weinig directe `tel:`/WhatsApp in hero/header
-9. Veel client JS op homepage
-10. Canonical/domein mogelijk niet gelijk aan live Vercel-URL
-
-### Concrete verbeteringen (samenvatting)
-
-1. Hero collage uit `/images/crew/`
-2. Touch-vriendelijke sector copy
-3. Carousel + teaser samenvoegen of teaser inkorten
-4. Services → SEO-landings
-5. Preferred logos veilig toevoegen; banned orphans verwijderen
-6. Tel/WhatsApp naast mail
-7. Env-canonical strategie
-8. Bento i.p.v. uniforme strip
-9. Werkwijze als horizontale timeline op desktop
-10. LCP/`priority` + lazy logos
+1. **Mobiele hero inkorten** — collage/cards minder stapelen  
+2. **Trust-regel onder hero-CTA** — Hilversum / landelijk / bel  
+3. **Soft claim “beste crewbedrijf” temperen** of onderbouwen  
+4. **Eén LCP `priority`-image** — bento niet ook eager  
+5. **Service-tabs mobiel vereenvoudigen**  
+6. **Diensten-intro inkorten**  
+7. **QuickRequest-frictie mitigeren** (kopieer / duidelijkere fallback)  
+8. **Foto-overlap tussen secties verminderen**  
+9. **Canonical/env documenteren** (`NEXT_PUBLIC_SITE_URL`)  
+10. **Optioneel case-snippet** zonder partnership-claim  
 
 ---
 
@@ -603,15 +566,16 @@ Mist nog:
 | UI | Pad |
 |----|-----|
 | Page | `src/app/page.tsx` |
-| Layout chrome | `ConditionalSiteChrome`, `PublicHeader`, `MobileMenu`, `Footer`, `FloatingCTA` |
+| Layout chrome | `ConditionalSiteChrome`, `PublicHeader`, `MobileMenu`, `Footer`, `FloatingCTA`, `SiteChromeExtras` |
 | Hero | `sections/PageHero`, `PageHeroHighlights`, `PageHeroInteractiveCard` |
 | Trust / why / FAQ | `TrustBar`, `WhyHelpingHands`, `FaqSection` |
-| Sectoren | `SectorCards`, `DeploymentCards` |
-| Logo’s | `LogoCarousel`, `ProjectExperienceTeaser`, `ProjectLogoCard` |
+| Sectoren | `DeploymentCards` (niet `SectorCards` op home) |
+| Logo’s | `LogoCarousel`, `ProjectLogoCard` |
+| Crewbeeld | `HomeCrewBento` |
 | Diensten | `ServicesSection`, `ServiceCard`, `ServiceTabs`, `ServiceDetailDrawer` |
 | Conversie | `AudienceToggle`, `QuickRequestForm`, `CTASection`, `ProcessAccordion` |
 | Motion | `RevealOnScroll` |
-| Data | `pageHeroContent`, `siteConfig`, `projectLogos`, `crewPhotos`, `homeServices`/`services`, `faq`, `seo`, `navigation`, `content` (deployments) |
+| Data | `pageHeroContent`, `siteConfig`, `projectLogos`, `crewPhotos`, `services`, `faq`, `seo`, `navigation`, `content` |
 
 ---
 

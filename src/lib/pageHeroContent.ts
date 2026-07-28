@@ -48,7 +48,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     highlights: [
       { label: "Snel schakelen" },
       { label: "Duidelijke briefing" },
-      { label: "Betrouwbare crew" },
+      { label: "Hilversum · landelijk" },
       { label: "Eén aanspreekpunt" },
     ],
     interactiveCards: [

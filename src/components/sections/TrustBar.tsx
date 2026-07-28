@@ -35,6 +35,9 @@ export default function TrustBar() {
             <h2 className="mt-2 text-xl font-black tracking-tight text-[#0B1F4D] sm:text-2xl">
               Professionele crew voor events, horeca en productie
             </h2>
+            <p className="mt-2 text-sm leading-6 text-[#101828]/65">
+              Gevestigd in Hilversum · landelijk inzetbaar
+            </p>
           </div>
           <Link
             href="/projecten"

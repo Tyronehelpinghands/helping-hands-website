@@ -46,7 +46,7 @@ export default function LogoCarousel({ showCta = true }: LogoCarouselProps) {
           {track.map((logo, index) => (
             <div
               key={`${logo.id}-${index}`}
-              className="w-[200px] shrink-0 sm:w-[240px] lg:w-[280px]"
+              className="w-[220px] shrink-0 sm:w-[260px] lg:w-[300px]"
             >
               <ProjectLogoCard logo={logo} variant="carousel" />
             </div>

@@ -6,6 +6,10 @@ import { useState } from "react";
 import PageHeroHighlights from "@/components/sections/PageHeroHighlights";
 import PageHeroInteractiveCard from "@/components/sections/PageHeroInteractiveCard";
 import { homeHeroCollage } from "@/lib/crewPhotos";
+import {
+  contactPhoneDisplay,
+  contactPhoneTel,
+} from "@/lib/navigation";
 import type { PageHeroContent, PageHeroTheme } from "@/lib/pageHeroContent";
 import { cn } from "@/lib/utils";
 
@@ -114,6 +118,7 @@ function StaffingHeroMedia({
 
   return (
     <div className="min-w-0 space-y-4">
+      {/* Mobile: 3 tiles only; sm+: full collage for denser first viewport */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3 lg:grid-rows-2 lg:gap-3">
         {collage.map((photo, index) => {
           const isHero = index === 0;
@@ -125,7 +130,7 @@ function StaffingHeroMedia({
                 isHero
                   ? "col-span-2 aspect-[16/10] lg:col-span-2 lg:row-span-2 lg:aspect-auto lg:min-h-[22rem]"
                   : "aspect-[4/5] lg:aspect-auto lg:min-h-[10.5rem]",
-                index === 4 && "hidden sm:block",
+                index >= 3 && "hidden sm:block",
               )}
             >
               <Image
@@ -146,9 +151,10 @@ function StaffingHeroMedia({
         })}
       </div>
 
+      {/* Interactive cards: desktop/tablet only — reduces mobile hero density */}
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border p-3 shadow-xl backdrop-blur-sm sm:p-4",
+          "relative hidden overflow-hidden rounded-2xl border p-3 shadow-xl backdrop-blur-sm sm:p-4 md:block",
           themeShell[theme].panel,
         )}
       >
@@ -303,6 +309,18 @@ export default function PageHero({ content }: PageHeroProps) {
           )}
 
           <PageHeroHighlights highlights={content.highlights} />
+
+          {showStaffingMedia ? (
+            <p className="mt-5 text-sm leading-6 text-white/70">
+              Hilversum · landelijk inzetbaar ·{" "}
+              <a
+                href={`tel:${contactPhoneTel}`}
+                className="font-semibold text-white underline-offset-4 transition hover:text-[#F28C28] hover:underline"
+              >
+                Bel {contactPhoneDisplay}
+              </a>
+            </p>
+          ) : null}
         </div>
 
         {showStaffingMedia ? (

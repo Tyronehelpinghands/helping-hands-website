@@ -31,8 +31,10 @@ export default function WhyHelpingHands() {
             Crew die meedenkt, niet alleen invult.
           </h2>
           <p className="mt-5 text-base leading-8 text-[#101828]/75 sm:text-lg">
-            Wij bouwen aan het beste crewbedrijf van Nederland: professioneel,
-            betrouwbaar en modern — met korte lijnen voor opdrachtgevers en crew.
+            Praktisch, betrouwbaar en met korte lijnen — voor opdrachtgevers die
+            snel willen schakelen én crew die op locatie weet wat er speelt.
+            Bijvoorbeeld: load-in en floor support op festivals, of horeca- en
+            keukenondersteuning tijdens drukke diensten.
           </p>
         </div>
 

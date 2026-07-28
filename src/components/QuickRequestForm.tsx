@@ -23,6 +23,28 @@ const deploymentTypes = [
 
 const crewSizes = ["1-3", "4-8", "9-15", "15+"];
 
+function buildRequestPlainText(input: {
+  type: string;
+  crewSize: string;
+  when: string;
+  location: string;
+  contact: string;
+}) {
+  return [
+    "Hallo Helping Hands,",
+    "",
+    "Ik wil graag crew aanvragen:",
+    "",
+    `Type inzet: ${input.type}`,
+    `Aantal mensen: ${input.crewSize}`,
+    `Wanneer: ${input.when || "n.n.b."}`,
+    `Locatie: ${input.location || "n.n.b."}`,
+    `Contact: ${input.contact || "n.n.b."}`,
+    "",
+    "Graag hoor ik wat er mogelijk is.",
+  ].join("\n");
+}
+
 export default function QuickRequestForm() {
   const [type, setType] = useState(deploymentTypes[0]);
   const [crewSize, setCrewSize] = useState(crewSizes[1]);
@@ -30,35 +52,35 @@ export default function QuickRequestForm() {
   const [location, setLocation] = useState("");
   const [contact, setContact] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const plain = buildRequestPlainText({ type, crewSize, when, location, contact });
     const subject = encodeURIComponent(
       `Crewaanvraag: ${type} (${crewSize} personen)`,
     );
-    const body = encodeURIComponent(
-      [
-        "Hallo Helping Hands,",
-        "",
-        "Ik wil graag crew aanvragen:",
-        "",
-        `Type inzet: ${type}`,
-        `Aantal mensen: ${crewSize}`,
-        `Wanneer: ${when || "n.n.b."}`,
-        `Locatie: ${location || "n.n.b."}`,
-        `Contact: ${contact || "n.n.b."}`,
-        "",
-        "Graag hoor ik wat er mogelijk is.",
-      ].join("\n"),
-    );
+    const body = encodeURIComponent(plain);
 
     window.location.href = `mailto:${planningEmail}?subject=${subject}&body=${body}`;
     setSubmitted(true);
   }
 
+  async function copyRequest() {
+    const plain = buildRequestPlainText({ type, crewSize, when, location, contact });
+    try {
+      await navigator.clipboard.writeText(plain);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   function resetForm() {
     setSubmitted(false);
+    setCopied(false);
     setWhen("");
     setLocation("");
     setContact("");
@@ -75,8 +97,9 @@ export default function QuickRequestForm() {
             Vraag snel crew aan
           </h2>
           <p className="mt-5 text-lg leading-8 text-white/75">
-            Kies het type inzet, aantal mensen en deel de eerste details. Je
-            aanvraag opent in je e-mail naar {planningEmail}.
+            Vul de eerste details in. Daarna opent je e-mailprogramma met een
+            kant-en-klare aanvraag naar {planningEmail}. Werkt dat niet? Kopieer
+            de tekst en mail of app ons.
           </p>
           <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-5">
             <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#F28C28]">
@@ -126,8 +149,8 @@ export default function QuickRequestForm() {
                 Je e-mailprogramma opent.
               </p>
               <p className="mt-3 leading-7 text-[#101828]/75">
-                Controleer de aanvraag en verstuur hem. Komt er niets op? Mail
-                dan direct naar{" "}
+                Controleer de aanvraag en verstuur hem. Komt er niets op? Kopieer
+                de tekst hieronder, of mail naar{" "}
                 <a
                   href={`mailto:${planningEmail}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
@@ -140,13 +163,6 @@ export default function QuickRequestForm() {
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactPhoneDisplay}
-                </a>
-                , vast{" "}
-                <a
-                  href={`tel:${contactPhoneLandlineTel}`}
-                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
-                >
-                  {contactPhoneLandlineDisplay}
                 </a>{" "}
                 of{" "}
                 <a
@@ -159,13 +175,22 @@ export default function QuickRequestForm() {
                 </a>
                 .
               </p>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="mt-6 min-h-11 rounded-full bg-[#173A8A] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
-              >
-                Nieuwe aanvraag
-              </button>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={copyRequest}
+                  className="min-h-11 rounded-full border-2 border-[#173A8A] px-6 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                >
+                  {copied ? "Gekopieerd" : "Kopieer aanvraagtekst"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="min-h-11 rounded-full bg-[#173A8A] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0B1F4D] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+                >
+                  Nieuwe aanvraag
+                </button>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
@@ -260,26 +285,13 @@ export default function QuickRequestForm() {
               </label>
 
               <p className="rounded-xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/70">
-                Voor spoedaanvragen:{" "}
-                <a
-                  href={`mailto:${planningEmail}`}
-                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
-                >
-                  {planningEmail}
-                </a>
-                , mobiel{" "}
+                “Aanvraag openen” start je e-mailclient. Lukt dat niet? Gebruik
+                “Kopieer aanvraagtekst”, bel{" "}
                 <a
                   href={`tel:${contactPhoneTel}`}
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {contactPhoneDisplay}
-                </a>
-                , vast{" "}
-                <a
-                  href={`tel:${contactPhoneLandlineTel}`}
-                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
-                >
-                  {contactPhoneLandlineDisplay}
                 </a>{" "}
                 of{" "}
                 <a
@@ -293,12 +305,21 @@ export default function QuickRequestForm() {
                 .
               </p>
 
-              <button
-                type="submit"
-                className="min-h-11 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.01] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
-              >
-                Aanvraag versturen
-              </button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="submit"
+                  className="min-h-11 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:scale-[1.01] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:flex-1"
+                >
+                  Aanvraag openen in e-mail
+                </button>
+                <button
+                  type="button"
+                  onClick={copyRequest}
+                  className="min-h-11 w-full cursor-pointer rounded-full border-2 border-[#173A8A] px-8 py-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 sm:w-auto sm:shrink-0"
+                >
+                  {copied ? "Gekopieerd" : "Kopieer aanvraagtekst"}
+                </button>
+              </div>
             </div>
           )}
         </form>
