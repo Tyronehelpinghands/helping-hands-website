@@ -9,6 +9,7 @@ import {
   Loader2,
   Mail,
   MessageCircle,
+  RefreshCw,
   Send,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -41,6 +42,8 @@ export type IntegrationHubProps = {
   gmailMissing: string[];
   gmailSender?: string;
   gmailCanConnect?: boolean;
+  shiftbaseConfigured?: boolean;
+  moneybirdConfigured?: boolean;
   mailboxes: SharedMailbox[];
   whatsappTemplates: Array<{ id: string; label: string; body: string }>;
   gmailFlash?: GmailFlash | null;
@@ -67,6 +70,8 @@ export default function IntegrationsHubClient({
   gmailMissing,
   gmailSender,
   gmailCanConnect = false,
+  shiftbaseConfigured = false,
+  moneybirdConfigured = false,
   mailboxes,
   whatsappTemplates,
   gmailFlash = null,
@@ -83,11 +88,92 @@ export default function IntegrationsHubClient({
   const [mailFeedback, setMailFeedback] = useState<string | null>(null);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [hideToken, setHideToken] = useState(false);
+  const [liveChecks, setLiveChecks] = useState<
+    Record<string, { loading: boolean; ok: boolean | null; message: string | null }>
+  >({});
 
   const pendingToken =
     !hideToken && gmailFlash?.pendingRefreshToken
       ? gmailFlash.pendingRefreshToken
       : null;
+
+  async function runLiveCheck(provider: string) {
+    setLiveChecks((prev) => ({
+      ...prev,
+      [provider]: { loading: true, ok: null, message: null },
+    }));
+    try {
+      const res = await fetch(
+        `/api/integrations/health?provider=${encodeURIComponent(provider)}`,
+        { cache: "no-store" },
+      );
+      const data = (await res.json()) as {
+        result?: { ok: boolean; message: string };
+        error?: string;
+      };
+      if (!res.ok || !data.result) {
+        setLiveChecks((prev) => ({
+          ...prev,
+          [provider]: {
+            loading: false,
+            ok: false,
+            message: data.error ?? `Test mislukt (${res.status})`,
+          },
+        }));
+        return;
+      }
+      setLiveChecks((prev) => ({
+        ...prev,
+        [provider]: {
+          loading: false,
+          ok: data.result!.ok,
+          message: data.result!.message,
+        },
+      }));
+    } catch {
+      setLiveChecks((prev) => ({
+        ...prev,
+        [provider]: {
+          loading: false,
+          ok: false,
+          message: "Netwerkfout tijdens test",
+        },
+      }));
+    }
+  }
+
+  function LiveTestButton({ provider }: { provider: string }) {
+    const state = liveChecks[provider];
+    return (
+      <div className="space-y-1">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="gap-1.5"
+          disabled={state?.loading}
+          onClick={() => runLiveCheck(provider)}
+        >
+          {state?.loading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          Test API
+        </Button>
+        {state?.message ? (
+          <p
+            className={cn(
+              "text-[11px] leading-snug",
+              state.ok ? "text-green-700" : "text-red-700",
+            )}
+          >
+            {state.message}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
 
   async function copyRefreshToken() {
     if (!pendingToken) return;
@@ -218,7 +304,7 @@ export default function IntegrationsHubClient({
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between gap-2">
@@ -244,6 +330,7 @@ export default function IntegrationsHubClient({
                 <CheckCircle2 className="h-3.5 w-3.5" /> Live
               </p>
             )}
+            <LiveTestButton provider="supabase_auth" />
           </CardContent>
         </Card>
 
@@ -266,19 +353,22 @@ export default function IntegrationsHubClient({
                 ? "Cloud API env aanwezig."
                 : `Ontbreekt: ${whatsappMissing.join(", ") || "token + phone id"}.`}
             </p>
-            <a
-              href={planningWaMeUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "w-fit gap-1.5",
-              )}
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              Open WhatsApp
-              <ExternalLink className="h-3 w-3" />
-            </a>
+            <div className="flex flex-wrap items-start gap-2">
+              <a
+                href={planningWaMeUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "w-fit gap-1.5",
+                )}
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+                Open WhatsApp
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              <LiveTestButton provider="whatsapp" />
+            </div>
           </CardContent>
         </Card>
 
@@ -301,7 +391,7 @@ export default function IntegrationsHubClient({
                 ? "OAuth env aanwezig."
                 : `Ontbreekt: ${gmailMissing.join(", ") || "OAuth vars"}.`}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-start gap-2">
               <a
                 href={mailto(
                   siteConfig.planningEmail,
@@ -332,6 +422,7 @@ export default function IntegrationsHubClient({
                   Gmail koppelen
                 </a>
               )}
+              <LiveTestButton provider="gmail" />
             </div>
           </CardContent>
         </Card>
@@ -340,28 +431,54 @@ export default function IntegrationsHubClient({
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between gap-2">
               <CardTitle className="text-base font-black text-[#0B1F4D]">
-                Shiftbase / Moneybird
+                Shiftbase
               </CardTitle>
-              <SettingsStatusBadge status="Binnenkort" />
+              <SettingsStatusBadge status={configBadge(shiftbaseConfigured)} />
             </div>
             <CardDescription>
-              Planning & facturatie — status elders te controleren.
+              Planning / crew sync — live API-test.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
-              Geen fake “connected”. Controleer via Instellingen of het
-              integratiepanel.
+              {shiftbaseConfigured
+                ? "SHIFTBASE_API_TOKEN aanwezig. Klik Test API om te controleren."
+                : "SHIFTBASE_API_TOKEN ontbreekt in Vercel."}
             </p>
-            <Link
-              href="/dashboard/intern/instellingen"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "sm" }),
-                "w-fit",
-              )}
-            >
-              Naar instellingen
-            </Link>
+            <LiveTestButton provider="shiftbase" />
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-base font-black text-[#0B1F4D]">
+                Moneybird
+              </CardTitle>
+              <SettingsStatusBadge status={configBadge(moneybirdConfigured)} />
+            </div>
+            <CardDescription>
+              Facturatie API — geen auto-send in MVP.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-xs text-[#101828]/65">
+            <p>
+              {moneybirdConfigured
+                ? "Env aanwezig. Klik Test API om te controleren."
+                : "MONEYBIRD_ACCESS_TOKEN / ADMINISTRATION_ID ontbreken."}
+            </p>
+            <div className="flex flex-wrap items-start gap-2">
+              <LiveTestButton provider="moneybird" />
+              <Link
+                href="/dashboard/intern/instellingen"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "w-fit",
+                )}
+              >
+                Instellingen
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>

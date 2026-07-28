@@ -361,7 +361,7 @@ function buildRawEmail(input: {
   return toBase64Url(lines.join("\r\n"));
 }
 
-async function refreshGoogleAccessToken(): Promise<
+export async function refreshGoogleAccessToken(): Promise<
   { ok: true; accessToken: string } | { ok: false; error: string }
 > {
   const clientId = getGoogleClientId();
@@ -403,6 +403,69 @@ async function refreshGoogleAccessToken(): Promise<
     return { ok: true, accessToken: data.access_token };
   } catch {
     return { ok: false, error: "OAuth token refresh netwerkfout." };
+  }
+}
+
+/**
+ * Live check: refresh token → Gmail profile. Geen secrets in return.
+ */
+export async function probeGmailConnection(): Promise<{
+  ok: boolean;
+  configured: boolean;
+  message: string;
+  missing?: string[];
+}> {
+  const missing = await getGmailMissingConfigAsync();
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      configured: false,
+      message: `Gmail OAuth incompleet. Ontbreekt: ${missing.join(", ")}.`,
+      missing,
+    };
+  }
+
+  const tokenResult = await refreshGoogleAccessToken();
+  if (!tokenResult.ok) {
+    return {
+      ok: false,
+      configured: true,
+      message: tokenResult.error,
+    };
+  }
+
+  try {
+    const res = await fetch(
+      "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+      {
+        headers: { Authorization: `Bearer ${tokenResult.accessToken}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        configured: true,
+        message: `Gmail API bereikbaar maar profile-check faalde (${res.status}). Controleer scopes en refresh token.`,
+      };
+    }
+
+    const data = (await res.json()) as { emailAddress?: string };
+    const email = data.emailAddress?.trim();
+    return {
+      ok: true,
+      configured: true,
+      message: email
+        ? `Gmail API werkt (account: ${email}).`
+        : "Gmail API werkt (token + profile OK).",
+    };
+  } catch {
+    return {
+      ok: false,
+      configured: true,
+      message: "Gmail API-netwerkfout tijdens healthcheck.",
+    };
   }
 }
 

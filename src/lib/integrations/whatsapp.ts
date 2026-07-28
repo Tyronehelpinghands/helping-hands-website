@@ -125,6 +125,69 @@ export function getWhatsAppConfigStatus(): WhatsAppConfigStatus {
   };
 }
 
+/**
+ * Live check tegen Graph API (phone number). Geen tokens in return.
+ */
+export async function probeWhatsAppConnection(): Promise<{
+  ok: boolean;
+  configured: boolean;
+  message: string;
+  missing?: string[];
+}> {
+  const missing = getWhatsAppMissingEnvVars();
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      configured: false,
+      message: `WhatsApp Cloud API incompleet. Ontbreekt: ${missing.join(", ")}. wa.me werkt wel.`,
+      missing,
+    };
+  }
+
+  const token = getWhatsAppAccessToken()!;
+  const phoneNumberId = getWhatsAppPhoneNumberId()!;
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}?fields=display_phone_number,verified_name`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        configured: true,
+        message: `WhatsApp Graph API fout (${res.status}). Controleer token en phone number id.`,
+      };
+    }
+
+    const data = (await res.json()) as {
+      display_phone_number?: string;
+      verified_name?: string;
+    };
+    const label = [data.verified_name, data.display_phone_number]
+      .filter(Boolean)
+      .join(" · ");
+
+    return {
+      ok: true,
+      configured: true,
+      message: label
+        ? `WhatsApp Cloud API werkt (${label}).`
+        : "WhatsApp Cloud API werkt.",
+    };
+  } catch {
+    return {
+      ok: false,
+      configured: true,
+      message: "WhatsApp Graph API-netwerkfout tijdens healthcheck.",
+    };
+  }
+}
+
 export async function sendWhatsAppMessage(
   input: WhatsAppSendInput,
 ): Promise<WhatsAppSendResult> {
