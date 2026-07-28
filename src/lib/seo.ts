@@ -132,6 +132,44 @@ export function websiteJsonLd() {
   };
 }
 
+/** ContactPoints for /contact (planning, applications, general). */
+export function contactPointsJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: siteConfig.planningEmail,
+        telephone: siteConfig.phoneTel,
+        areaServed: "NL",
+        availableLanguage: ["nl"],
+        description: "Personeels- en crewaanvragen",
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "HR",
+        email: siteConfig.applicationsEmail,
+        areaServed: "NL",
+        availableLanguage: ["nl"],
+        description: "Crew aanmelden en sollicitaties",
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        email: siteConfig.email,
+        telephone: siteConfig.phoneTel,
+        areaServed: "NL",
+        availableLanguage: ["nl"],
+        description: "Algemene vragen",
+      },
+    ],
+  };
+}
+
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

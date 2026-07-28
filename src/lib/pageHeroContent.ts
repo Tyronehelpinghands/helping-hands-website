@@ -290,30 +290,36 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
   },
   "/contact": {
     eyebrow: "Contact",
-    title: "Laten we je aanvraag helder maken.",
+    title: "Personeel nodig of aanmelden als crew?",
     description:
-      "Stuur je personeelsvraag, projectinformatie of samenwerking door. We denken mee over functies, aantallen, tijden en briefing.",
+      "Vertel ons wat je nodig hebt. Voor personeelsaanvragen, samenwerkingen en crew-aanmeldingen helpen we je snel naar de juiste vervolgstap.",
     theme: "contact",
-    primaryCta: { label: "Mail ons", href: "mailto:planning@helpinghandsagency.nl" },
-    secondaryCta: { label: "Crew aanmelden", href: "/vacatures" },
-    // Topics live only in the hero tab control — avoid duplicating the same labels as pills.
-    highlights: [],
+    primaryCta: { label: "Personeel aanvragen", href: "/contact#aanvraag" },
+    secondaryCta: { label: "Crew aanmelden", href: "/contact#aanmelden" },
+    highlights: [
+      { label: "Snel schakelen" },
+      { label: "Duidelijke briefing" },
+      { label: "Korte lijnen" },
+    ],
     interactiveCards: [
       {
         title: "Personeelsaanvraag",
-        description: "Datum, locatie, functies en aantal mensen — wij reageren snel.",
+        description:
+          "Datum, locatie, functies en aantal mensen — mail naar planning.",
       },
       {
-        title: "Samenwerking",
-        description: "Vragen over structurele inzet of terugkerende projecten.",
+        title: "Crew aanmelden",
+        description:
+          "Ervaring en beschikbaarheid — mail naar aanmeldingen.",
       },
       {
-        title: "Planning",
-        description: "Afstemming over bezetting, briefing en tijden op locatie.",
+        title: "Algemene vraag",
+        description: "Samenwerking of overige vragen — mail naar info.",
       },
       {
-        title: "Administratie",
-        description: "Facturatie, uren en praktische vragen na afloop.",
+        title: "Spoed",
+        description:
+          "Korte doorlooptijd? Vink spoed aan en bel of app direct.",
       },
     ],
   },

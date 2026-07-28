@@ -50,7 +50,22 @@ export const contactFaqs: FaqItem[] = [
   {
     question: "Kan ik een spoedaanvraag doen?",
     answer:
-      "Ja. Geef bij je aanvraag aan dat het spoed is en deel de harde deadline. We kijken wat er nog mogelijk is met beschikbare crew.",
+      "Ja. Vink spoed aan in het formulier, deel de harde deadline en bel of app ons bij échte urgentie. We kijken wat er nog mogelijk is met beschikbare crew.",
+  },
+  {
+    question: "Hoe snel reageren jullie op een aanvraag?",
+    answer:
+      "We streven ernaar om zo snel mogelijk terug te koppelen, vooral bij complete aanvragen. Bij spoed: bel of WhatsApp direct naast je mail.",
+  },
+  {
+    question: "Werken jullie landelijk?",
+    answer:
+      "Ja. Helping Hands Agency is gevestigd in Hilversum en levert crew door heel Nederland.",
+  },
+  {
+    question: "Kan ik meerdere functies tegelijk aanvragen?",
+    answer:
+      "Ja. Vermeld alle functies en aantallen in één aanvraag — bijvoorbeeld stagehands, barbacks en runners tegelijk.",
   },
   {
     question: "Waar mail ik als opdrachtgever of als crew?",
@@ -60,7 +75,12 @@ export const contactFaqs: FaqItem[] = [
   {
     question: "Wordt mijn aanvraag automatisch verstuurd?",
     answer:
-      "Nee — het formulier helpt je je aanvraag compleet en scherp te maken. Daarna mail je de gegevens naar planning. Zo pakt ons team je vraag direct op.",
+      "Nee. Het formulier opent je e-mailprogramma met een kant-en-klare tekst naar het juiste adres. Jij verstuurt de mail — of kopieert de tekst als mailto niet werkt.",
+  },
+  {
+    question: "Wat gebeurt er met mijn gegevens?",
+    answer:
+      "We gebruiken je gegevens alleen om je aanvraag, aanmelding of vraag op te volgen. We delen ze niet voor marketingdoeleinden.",
   },
 ];
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ContactTabs from "@/components/ContactTabs";
+import ContactChecklist from "@/components/contact/ContactChecklist";
+import ContactProcess from "@/components/contact/ContactProcess";
 import CrewPhotoGrid from "@/components/CrewPhotoGrid";
 import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
 import FaqSection from "@/components/sections/FaqSection";
@@ -14,18 +16,28 @@ import {
 } from "@/lib/crewPhotos";
 import { contactFaqs } from "@/lib/faq";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
-import { applicationsEmail, contactEmail, plannerEmail, planningEmail } from "@/lib/navigation";
-import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
+import {
+  applicationsEmail,
+  contactEmail,
+  plannerEmail,
+  planningEmail,
+} from "@/lib/navigation";
+import {
+  buildPageMetadata,
+  contactPointsJsonLd,
+  faqJsonLd,
+} from "@/lib/seo";
 import {
   formatAddressSingleLine,
   siteConfig,
 } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact",
+  title: "Contact | Personeel aanvragen bij Helping Hands Agency",
   description:
-    "Personeel aanvragen of crew aanmelden bij Helping Hands Agency. Deel datum, locatie, functies, tijden, kleding/PBM en briefing — ook voor spoedaanvragen.",
+    "Vraag crew of personeel aan voor events, horeca, stagebouw, productie, logistiek en hospitality. Neem contact op met Helping Hands Agency of meld je aan als medewerker.",
   path: "/contact",
+  absoluteTitle: true,
 });
 
 export default function ContactPage() {
@@ -37,7 +49,7 @@ export default function ContactPage() {
           { name: "Contact", path: "/contact" },
         ]}
       />
-      <JsonLd data={faqJsonLd(contactFaqs)} />
+      <JsonLd data={[faqJsonLd(contactFaqs), contactPointsJsonLd()]} />
       <PageHero content={getPageHeroContent("/contact")} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -46,26 +58,41 @@ export default function ContactPage() {
             Personeel aanvragen of crew aanmelden
           </h2>
           <p className="mt-4 text-base leading-8 text-[#101828]/75">
-            Voor opdrachtgevers: deel je planning zo compleet mogelijk. Voor crew:
-            meld je aan met ervaring en beschikbaarheid, of bekijk eerst de{" "}
+            Voor opdrachtgevers: deel je planning zo compleet mogelijk. Voor
+            crew: meld je aan met ervaring en beschikbaarheid, of bekijk eerst
+            de{" "}
             <Link
               href="/vacatures"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               vacatures
+            </Link>{" "}
+            en{" "}
+            <Link
+              href="/medewerkers"
+              className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+            >
+              werken bij
             </Link>
             .
           </p>
         </div>
 
-        <ContactTabs />
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.75fr)] lg:items-start">
+          <ContactTabs />
+          <div className="lg:sticky lg:top-28">
+            <ContactChecklist />
+          </div>
+        </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <ContactProcess />
+
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
           <PhotoBackgroundCard photo={contactRequestPhoto} className="min-h-[14rem]">
             <div className="p-8 text-white">
               <h2 className="text-xl font-black">Personeelsaanvragen</h2>
               <p className="mt-4 text-sm text-white/80">
-                Crew aanvragen voor events, horeca en productie — ook spoed
+                Crew voor events, horeca en productie — ook spoed
               </p>
               <a
                 href={`mailto:${planningEmail}`}
@@ -87,12 +114,6 @@ export default function ContactPage() {
                 className="mt-2 block font-semibold text-white underline-offset-4 hover:underline"
               >
                 {siteConfig.phoneDisplay}
-              </a>
-              <a
-                href={`tel:${siteConfig.phoneLandlineTel}`}
-                className="mt-1 block text-sm font-semibold text-white/90 underline-offset-4 hover:underline"
-              >
-                Vast {siteConfig.phoneLandlineDisplay}
               </a>
               <a
                 href={siteConfig.whatsappUrl}
@@ -127,11 +148,33 @@ export default function ContactPage() {
               >
                 {applicationsEmail}
               </a>
-              <p className="mt-4 text-sm leading-6 text-white/80">
-                Voor werken bij Helping Hands mail je naar {applicationsEmail}.
-              </p>
+              <Link
+                href="/vacatures"
+                className="mt-4 inline-flex text-sm font-bold text-white underline-offset-4 hover:underline"
+              >
+                Bekijk vacatures →
+              </Link>
             </div>
           </PhotoBackgroundCard>
+
+          <div className="flex min-h-[14rem] flex-col justify-end rounded-2xl border border-slate-200/80 bg-[#0B1F4D] p-8 text-white shadow-xl">
+            <h2 className="text-xl font-black">Algemene vragen</h2>
+            <p className="mt-4 text-sm text-white/80">
+              Samenwerking, overige vragen of doorverwijzing
+            </p>
+            <a
+              href={`mailto:${contactEmail}`}
+              className="mt-2 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
+            >
+              {contactEmail}
+            </a>
+            <Link
+              href="/opdrachtgevers"
+              className="mt-4 inline-flex text-sm font-bold text-white underline-offset-4 hover:underline"
+            >
+              Voor opdrachtgevers →
+            </Link>
+          </div>
         </div>
 
         <div className="mt-10 rounded-2xl border border-slate-200/80 bg-[#F5F7FA] p-6 sm:p-8">
@@ -187,27 +230,12 @@ export default function ContactPage() {
                 <span className="text-[#101828]/55"> (personeelsaanvragen)</span>
                 <br />
                 <a
-                  href={`mailto:${plannerEmail}`}
-                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
-                >
-                  {plannerEmail}
-                </a>
-                <span className="text-[#101828]/55"> (planner)</span>
-                <br />
-                <a
                   href={`mailto:${applicationsEmail}`}
                   className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   {applicationsEmail}
                 </a>
                 <span className="text-[#101828]/55"> (aanmeldingen)</span>
-                <br />
-                <a
-                  href={`mailto:${siteConfig.ownerEmail}`}
-                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
-                >
-                  {siteConfig.ownerEmail}
-                </a>
               </dd>
             </div>
             <div>
@@ -233,7 +261,11 @@ export default function ContactPage() {
             Van aanvraag tot crew op de vloer
           </h2>
           <div className="mt-6">
-            <CrewPhotoGrid photos={contactStrip} columns={4} aspectClassName="aspect-[4/5]" />
+            <CrewPhotoGrid
+              photos={contactStrip}
+              columns={4}
+              aspectClassName="aspect-[4/5]"
+            />
           </div>
         </div>
       </section>
@@ -241,9 +273,37 @@ export default function ContactPage() {
       <FaqSection
         items={contactFaqs}
         title="Vragen over aanvragen en aanmelden"
-        description="Spoed, briefinggegevens en waar je het beste naartoe mailt."
+        description="Spoed, briefinggegevens, privacy en waar je het beste naartoe mailt."
         className="bg-white py-20 sm:py-28"
       />
+
+      <section className="bg-[#0B1F4D] px-4 py-16 text-white sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+              Klaar om crew of personeel aan te vragen?
+            </h2>
+            <p className="mt-4 text-base leading-8 text-white/75">
+              Vul het formulier in of mail direct naar planning. Voor werken bij
+              Helping Hands: aanmeldingen of vacatures.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/contact#aanvraag"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+            >
+              Personeel aanvragen
+            </Link>
+            <Link
+              href="/vacatures"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-7 py-3.5 text-sm font-bold text-white transition hover:bg-white/10"
+            >
+              Vacatures
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
