@@ -391,6 +391,17 @@ export default function IntegrationsHubClient({
                 ? "OAuth env aanwezig."
                 : `Ontbreekt: ${gmailMissing.join(", ") || "OAuth vars"}.`}
             </p>
+            {!gmailConfigured &&
+              gmailCanConnect &&
+              gmailMissing.includes("GOOGLE_REFRESH_TOKEN") && (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11px] text-amber-950">
+                  Client ID/secret staan al. Klik <strong>Gmail koppelen</strong>,
+                  log in met het Google-account van je mailbox, en zet daarna het
+                  getoonde token in Vercel als{" "}
+                  <code className="rounded bg-amber-100 px-1">GOOGLE_REFRESH_TOKEN</code>{" "}
+                  (of laat opslaan in company_settings als SQL al gedraaid is).
+                </p>
+              )}
             <div className="flex flex-wrap items-start gap-2">
               <a
                 href={mailto(

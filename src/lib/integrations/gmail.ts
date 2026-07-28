@@ -417,10 +417,14 @@ export async function probeGmailConnection(): Promise<{
 }> {
   const missing = await getGmailMissingConfigAsync();
   if (missing.length > 0) {
+    const onlyRefresh =
+      missing.length === 1 && missing[0] === "GOOGLE_REFRESH_TOKEN";
     return {
       ok: false,
       configured: false,
-      message: `Gmail OAuth incompleet. Ontbreekt: ${missing.join(", ")}.`,
+      message: onlyRefresh
+        ? "GOOGLE_REFRESH_TOKEN ontbreekt. Klik op Integraties → Gmail koppelen (Google-login). Daarna wordt het token opgeslagen of eenmalig getoond om in Vercel te plakken."
+        : `Gmail OAuth incompleet. Ontbreekt: ${missing.join(", ")}.`,
       missing,
     };
   }
