@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { CrewBentoItem } from "@/lib/crewPhotos";
+import StaggerReveal from "@/components/StaggerReveal";
 import { cn } from "@/lib/utils";
 
 type HomeCrewBentoProps = {
@@ -118,7 +119,10 @@ export default function HomeCrewBento({ photos }: HomeCrewBentoProps) {
         aria-hidden="true"
       />
 
-      <div className="relative grid grid-cols-2 gap-2.5 sm:grid-cols-12 sm:gap-4 lg:gap-5">
+      <StaggerReveal
+        className="relative grid grid-cols-2 gap-2.5 sm:grid-cols-12 sm:gap-4 lg:gap-5"
+        stepMs={75}
+      >
         {tiles.map((photo, index) => (
           <CrewBentoTile
             key={`${photo.src}-${index}`}
@@ -127,7 +131,7 @@ export default function HomeCrewBento({ photos }: HomeCrewBentoProps) {
             layoutClass={LAYOUT_CLASS[index] ?? "aspect-[4/3] sm:col-span-3"}
           />
         ))}
-      </div>
+      </StaggerReveal>
     </div>
   );
 }

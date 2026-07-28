@@ -79,12 +79,23 @@ const themeShell: Record<
   },
 };
 
-function HeroCta({ href, label, variant }: { href: string; label: string; variant: "primary" | "secondary" }) {
+function HeroCta({
+  href,
+  label,
+  variant,
+  pulse,
+}: {
+  href: string;
+  label: string;
+  variant: "primary" | "secondary";
+  pulse?: boolean;
+}) {
   const className = cn(
     "inline-flex min-h-11 w-full items-center justify-center rounded-full px-8 py-3.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F4D] sm:w-auto sm:text-base",
     variant === "primary"
       ? "bg-[#F28C28] text-white shadow-xl shadow-black/25 hover:bg-[#de7c1f]"
       : "border-2 border-white/35 bg-white/5 text-white backdrop-blur-sm hover:bg-white hover:text-[#0B1F4D]",
+    pulse && variant === "primary" && "home-cta-pulse",
   );
 
   if (href.startsWith("mailto:") || href.startsWith("tel:")) {
@@ -126,12 +137,13 @@ function StaffingHeroMedia({
             <div
               key={photo.src}
               className={cn(
-                "relative overflow-hidden rounded-2xl bg-white/10",
+                "home-hero-tile relative overflow-hidden rounded-2xl bg-white/10",
                 isHero
                   ? "col-span-2 aspect-[16/10] lg:col-span-2 lg:row-span-2 lg:aspect-auto lg:min-h-[22rem]"
                   : "aspect-[4/5] lg:aspect-auto lg:min-h-[10.5rem]",
                 index >= 3 && "hidden sm:block",
               )}
+              style={{ animationDelay: `${0.2 + index * 0.08}s` }}
             >
               <Image
                 src={photo.src}
@@ -283,7 +295,7 @@ export default function PageHero({ content }: PageHeroProps) {
             fill
             loading="lazy"
             sizes="100vw"
-            className="object-cover opacity-[0.22]"
+            className="home-hero-atmosphere-img object-cover opacity-[0.22]"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0B1F4D]/75 via-[#0B1F4D]/55 to-[#0B1F4D]/85" />
         </div>
@@ -292,31 +304,59 @@ export default function PageHero({ content }: PageHeroProps) {
         className={cn(
           "pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full blur-3xl",
           theme.glowA,
+          showStaffingMedia && "home-hero-glow",
         )}
       />
       <div
         className={cn(
           "pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full blur-3xl",
           theme.glowB,
+          showStaffingMedia && "home-hero-glow",
         )}
       />
 
       <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8 lg:pb-20 lg:pt-36 xl:pb-24">
-        <div className="min-w-0">
-          <p className={cn("text-sm font-bold uppercase tracking-[0.2em]", theme.eyebrow)}>
+        <div className={cn("min-w-0", showStaffingMedia && "home-hero-copy")}>
+          <p
+            className={cn(
+              "text-sm font-bold uppercase tracking-[0.2em]",
+              theme.eyebrow,
+              showStaffingMedia && "home-hero-item",
+            )}
+          >
             {content.eyebrow}
           </p>
-          <h1 className="mt-3 max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+          <h1
+            className={cn(
+              "mt-3 max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl",
+              showStaffingMedia && "home-hero-item",
+            )}
+          >
             {content.title}
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
+          <p
+            className={cn(
+              "mt-5 max-w-xl text-base leading-8 text-white/85 sm:text-lg",
+              showStaffingMedia && "home-hero-item",
+            )}
+          >
             {content.description}
           </p>
 
           {(content.primaryCta || content.secondaryCta) && (
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div
+              className={cn(
+                "mt-8 flex flex-col gap-3 sm:flex-row",
+                showStaffingMedia && "home-hero-item",
+              )}
+            >
               {content.primaryCta ? (
-                <HeroCta href={content.primaryCta.href} label={content.primaryCta.label} variant="primary" />
+                <HeroCta
+                  href={content.primaryCta.href}
+                  label={content.primaryCta.label}
+                  variant="primary"
+                  pulse={showStaffingMedia}
+                />
               ) : null}
               {content.secondaryCta ? (
                 <HeroCta
@@ -328,11 +368,13 @@ export default function PageHero({ content }: PageHeroProps) {
             </div>
           )}
 
-          <PageHeroHighlights highlights={content.highlights} />
+          <div className={cn(showStaffingMedia && "home-hero-item")}>
+            <PageHeroHighlights highlights={content.highlights} />
+          </div>
 
           {showStaffingMedia ? (
             <>
-              <p className="mt-5 text-sm leading-6 text-white/70">
+              <p className="home-hero-item mt-5 text-sm leading-6 text-white/70">
                 Hilversum · landelijk inzetbaar ·{" "}
                 <a
                   href={`tel:${contactPhoneTel}`}
@@ -341,7 +383,7 @@ export default function PageHero({ content }: PageHeroProps) {
                   Bel {contactPhoneDisplay}
                 </a>
               </p>
-              <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
+              <div className="home-hero-item -mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
                 {mobileServiceChips.map((chip) => (
                   <Link
                     key={chip.href}

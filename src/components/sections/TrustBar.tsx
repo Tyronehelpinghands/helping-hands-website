@@ -1,4 +1,5 @@
 import Link from "next/link";
+import StaggerReveal from "@/components/StaggerReveal";
 
 const items = [
   {
@@ -47,11 +48,14 @@ export default function TrustBar() {
           </Link>
         </div>
 
-        <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        <StaggerReveal
+          className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5"
+          stepMs={80}
+        >
           {items.map((item) => (
-            <li
+            <div
               key={item.label}
-              className="flex min-h-[7.5rem] flex-col rounded-2xl border border-slate-200/80 bg-[#F5F7FA] px-4 py-5 sm:px-5"
+              className="flex min-h-[7.5rem] flex-col rounded-2xl border border-slate-200/80 bg-[#F5F7FA] px-4 py-5 transition duration-300 hover:-translate-y-0.5 hover:border-[#F28C28]/40 hover:bg-white hover:shadow-md sm:px-5"
             >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
                 {item.label}
@@ -62,9 +66,9 @@ export default function TrustBar() {
               <p className="mt-auto pt-2 text-sm leading-6 text-[#101828]/65">
                 {item.detail}
               </p>
-            </li>
+            </div>
           ))}
-        </ul>
+        </StaggerReveal>
       </div>
     </section>
   );

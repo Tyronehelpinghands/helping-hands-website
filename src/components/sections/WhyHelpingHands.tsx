@@ -1,4 +1,5 @@
 import Link from "next/link";
+import StaggerReveal from "@/components/StaggerReveal";
 
 const reasons = [
   {
@@ -55,7 +56,7 @@ export default function WhyHelpingHands() {
           </p>
         </aside>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerReveal className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" stepMs={70}>
           {reasons.map((reason, index) => (
             <article
               key={reason.title}
@@ -72,7 +73,7 @@ export default function WhyHelpingHands() {
               </p>
             </article>
           ))}
-        </div>
+        </StaggerReveal>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link

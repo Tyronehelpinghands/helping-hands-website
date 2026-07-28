@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import StaggerReveal from "@/components/StaggerReveal";
 import { deployments } from "@/lib/content";
 import { homeDeploymentPhotos } from "@/lib/crewPhotos";
 
 export default function DeploymentCards() {
   return (
-    <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <StaggerReveal className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stepMs={80}>
       {deployments.map((item) => {
         const photo = homeDeploymentPhotos[item.label];
         return (
@@ -23,7 +24,7 @@ export default function DeploymentCards() {
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   loading="lazy"
-                  className="object-cover transition duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                  className="object-cover transition duration-700 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               ) : (
                 <div className="absolute inset-0 bg-[#0B1F4D]" />
@@ -35,7 +36,7 @@ export default function DeploymentCards() {
                 </span>
                 <h3 className="mt-3 text-2xl font-black text-white">{item.label}</h3>
                 <p className="mt-2 text-sm leading-6 text-white/80">{item.detail}</p>
-                <span className="mt-3 text-xs font-bold text-white/70 underline-offset-4 group-hover:text-white group-hover:underline">
+                <span className="mt-3 text-xs font-bold text-white/70 underline-offset-4 transition group-hover:text-white group-hover:underline">
                   Bekijk projectervaring
                 </span>
               </div>
@@ -43,6 +44,6 @@ export default function DeploymentCards() {
           </Link>
         );
       })}
-    </div>
+    </StaggerReveal>
   );
 }
