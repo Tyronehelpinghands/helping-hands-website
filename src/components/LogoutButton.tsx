@@ -5,17 +5,20 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { clearDemoRole } from "@/lib/authRedirects";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 type LogoutButtonProps = {
   className?: string;
   variant?: "sidebar" | "default";
+  /** Optionele login-type query na uitloggen. */
+  loginType?: "intern" | "medewerker" | "opdrachtgever";
 };
 
 export default function LogoutButton({
   className,
   variant = "default",
+  loginType,
 }: LogoutButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -23,10 +26,12 @@ export default function LogoutButton({
   async function handleLogout() {
     setLoading(true);
     try {
-      clearDemoRole();
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      router.push("/login");
+      if (isSupabaseConfigured()) {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      }
+      const loginUrl = loginType ? `/login?type=${loginType}` : "/login";
+      router.push(loginUrl);
       router.refresh();
     } finally {
       setLoading(false);

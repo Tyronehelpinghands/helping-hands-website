@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import EmployeePortalShell from "@/components/employee-portal/EmployeePortalShell";
-import { requirePortalAccess } from "@/lib/auth-server";
+import { employeeRoles } from "@/lib/auth/roles";
+import { requireRole } from "@/lib/auth/requireRole";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,9 @@ export default async function EmployeePortalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requirePortalAccess("medewerker");
+  const profile = await requireRole(employeeRoles, {
+    redirectTo: "/portaal/medewerkers",
+  });
 
-  return <EmployeePortalShell>{children}</EmployeePortalShell>;
+  return <EmployeePortalShell profile={profile}>{children}</EmployeePortalShell>;
 }

@@ -1,30 +1,15 @@
 import { NextResponse } from "next/server";
 import { isInternRole } from "@/lib/auth";
-import {
-  getDemoInternalProfile,
-  getDemoRoleFromCookies,
-  getSessionProfile,
-} from "@/lib/auth-server";
-import { isDemoApiAccessAllowed } from "@/lib/demoAccess";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
+/** Alleen echte Supabase-sessies met intern-rol mogen integratie-API’s gebruiken. */
 export async function requireInternApiAccess() {
-  const demoRole = await getDemoRoleFromCookies();
-  if (demoRole === "internal" && isDemoApiAccessAllowed()) {
-    return { profile: getDemoInternalProfile() };
-  }
-
-  const { user, profile } = await getSessionProfile();
+  const { user, profile } = await getCurrentUser();
 
   if (!user) {
     return {
       error: NextResponse.json(
-        {
-          ok: false,
-          error:
-            demoRole === "internal" && !isDemoApiAccessAllowed()
-              ? "Demo-API-toegang is uitgeschakeld. Zet ALLOW_DEMO_API_ACCESS=true of log in met een intern account."
-              : "Niet ingelogd",
-        },
+        { ok: false, error: "Niet ingelogd" },
         { status: 401 },
       ),
     };

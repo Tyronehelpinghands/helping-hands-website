@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Home, LogOut, Menu } from "lucide-react";
+import { Home, Menu } from "lucide-react";
 import { BrandLogoImage } from "@/components/BrandLogo";
+import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -14,8 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { DEMO_CLIENT_PROFILE } from "@/lib/clientPortal";
-import { performPortalLogout } from "@/lib/authRedirects";
+import { getRoleLabel, type Profile } from "@/lib/auth";
 import {
   clientPortalNavItems,
   isClientPortalNavActive,
@@ -49,7 +49,15 @@ function SidebarNav({ pathname, onNavigate }: { pathname: string; onNavigate?: (
   );
 }
 
-function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function SidebarInner({
+  profile,
+  pathname,
+  onNavigate,
+}: {
+  profile: Profile;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
@@ -77,25 +85,18 @@ function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?:
       </div>
       <div className="border-t border-white/10 p-4">
         <p className="truncate text-sm font-semibold text-white">
-          {DEMO_CLIENT_PROFILE.companyName}
+          {profile.full_name ?? profile.email ?? "Opdrachtgever"}
         </p>
-        <p className="text-xs text-white/55">{DEMO_CLIENT_PROFILE.customerType}</p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-3 w-full border-white/20 bg-transparent text-white hover:bg-white/10"
-          onClick={() => void performPortalLogout("opdrachtgever")}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Uitloggen
-        </Button>
+        <p className="text-xs text-white/55">{getRoleLabel(profile.role)}</p>
+        <div className="mt-3">
+          <LogoutButton variant="sidebar" loginType="opdrachtgever" />
+        </div>
       </div>
     </div>
   );
 }
 
-export default function ClientPortalSidebar() {
+export default function ClientPortalSidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname() ?? "";
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -106,7 +107,7 @@ export default function ClientPortalSidebar() {
   return (
     <>
       <aside className="hidden w-64 shrink-0 flex-col bg-[#0B1F4D] lg:flex">
-        <SidebarInner pathname={pathname} />
+        <SidebarInner profile={profile} pathname={pathname} />
       </aside>
       <div className="flex items-center justify-between border-b border-slate-200 bg-[#0B1F4D] px-4 py-3 lg:hidden">
         <Link href="/" className="flex items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38bdf8]">
@@ -136,7 +137,7 @@ export default function ClientPortalSidebar() {
             <SheetHeader className="sr-only">
               <SheetTitle>Opdrachtgeversportaal menu</SheetTitle>
             </SheetHeader>
-            <SidebarInner pathname={pathname} onNavigate={closeMenu} />
+            <SidebarInner profile={profile} pathname={pathname} onNavigate={closeMenu} />
           </SheetContent>
         </Sheet>
       </div>

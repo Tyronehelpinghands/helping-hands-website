@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ClientPortalShell from "@/components/client-portal/ClientPortalShell";
-import { requirePortalAccess } from "@/lib/auth-server";
+import { clientRoles } from "@/lib/auth/roles";
+import { requireRole } from "@/lib/auth/requireRole";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,9 @@ export default async function ClientPortalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requirePortalAccess("opdrachtgever");
+  const profile = await requireRole(clientRoles, {
+    redirectTo: "/portaal/opdrachtgevers",
+  });
 
-  return <ClientPortalShell>{children}</ClientPortalShell>;
+  return <ClientPortalShell profile={profile}>{children}</ClientPortalShell>;
 }

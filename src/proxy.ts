@@ -1,9 +1,12 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
-  // TODO: Supabase Auth koppelen — role-based portal toegang afdwingen
-  // TODO: /portaal/medewerkers en /portaal/opdrachtgevers niet naar intern redirecten
+/**
+ * Next.js 16: Proxy (voorheen middleware).
+ * Ververst de Supabase-sessie en bewaakt interne/medewerkers/opdrachtgevers
+ * routes server-side. Publieke pagina's blijven publiek.
+ */
+export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
 

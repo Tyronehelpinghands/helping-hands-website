@@ -2,8 +2,6 @@ type PortalBannerVariant = "generic" | "intern" | "employee" | "client";
 
 type PortalBannerProps = {
   variant?: PortalBannerVariant;
-  /** Toon of demo-API (integraties) aan staat. */
-  apiEnabled?: boolean;
 };
 
 const copy: Record<
@@ -11,34 +9,33 @@ const copy: Record<
   { badge: string; title: string; detail: string }
 > = {
   generic: {
-    badge: "Demo",
-    title: "Portaal in demo-modus",
+    badge: "Demo-data",
+    title: "Portaal toont voorbeelddata",
     detail:
-      "UI-demo voor presentatie. Geen productie-data; echte auth en rechten volgen.",
+      "Je bent ingelogd. De schermen gebruiken nog testdata tot de live-integraties zijn gekoppeld.",
   },
   intern: {
-    badge: "Demo intern",
-    title: "Intern dashboard — demo",
+    badge: "Demo-data",
+    title: "Intern dashboard — voorbeelddata",
     detail:
-      "Planning, urengoedkeuring en administratie zijn demo-data. Integratie-API’s werken alleen met echte intern-login of ALLOW_DEMO_API_ACCESS.",
+      "Planning, uren en administratie zijn nog demo-data. Integratie-API’s werken alleen met je echte intern-account.",
   },
   employee: {
-    badge: "Demo crew",
-    title: "Medewerkersportaal — demo",
+    badge: "Demo-data",
+    title: "Medewerkersportaal — voorbeelddata",
     detail:
-      "Bekijk shifts en uren. Goedkeuren van uren gebeurt alleen intern bij planning — niet in dit portaal.",
+      "Shifts en uren zijn voorbeelddata. Uren goedkeuren gebeurt alleen intern bij planning.",
   },
   client: {
-    badge: "Demo klant",
-    title: "Opdrachtgeversportaal — demo",
+    badge: "Demo-data",
+    title: "Opdrachtgeversportaal — voorbeelddata",
     detail:
-      "Aanvragen, planning en factuurstatus. Geen marges, uurtarieven of interne crewgegevens.",
+      "Aanvragen, planning en factuurstatus zijn voorbeelddata. Geen marges of interne crewgegevens.",
   },
 };
 
 export default function PortalBanner({
   variant = "generic",
-  apiEnabled = false,
 }: PortalBannerProps) {
   const content = copy[variant];
 
@@ -56,11 +53,6 @@ export default function PortalBanner({
         </p>
         <p className="text-xs leading-5 text-[#101828]/70 sm:text-right sm:text-sm">
           {content.detail}
-          {variant === "intern" ? (
-            <span className="mt-0.5 block font-medium text-[#9a3412]">
-              Integratie-API: {apiEnabled ? "aan (demo)" : "uit (veilig default)"}
-            </span>
-          ) : null}
         </p>
       </div>
     </div>

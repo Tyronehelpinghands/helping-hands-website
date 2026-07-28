@@ -11,7 +11,7 @@ export type PortalConfig = {
 };
 
 // Authenticatie via Supabase Auth + profiles.role
-// Rollen: admin, planner, medewerker, opdrachtgever
+// Rollen: owner, admin, planner, sales, finance, crew, client
 
 export const portals: PortalConfig[] = [
   {

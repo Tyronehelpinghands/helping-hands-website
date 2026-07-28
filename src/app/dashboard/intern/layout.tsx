@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import InternDashboardShell from "@/components/dashboard/InternDashboardShell";
-import { requireDashboardAccess } from "@/lib/auth-server";
+import { internalRoles } from "@/lib/auth/roles";
+import { requireRole } from "@/lib/auth/requireRole";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export default async function InternDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const profile = await requireDashboardAccess(["admin", "planner"]);
+  const profile = await requireRole(internalRoles, { redirectTo: "/dashboard/intern" });
 
   return (
     <InternDashboardShell profile={profile}>{children}</InternDashboardShell>

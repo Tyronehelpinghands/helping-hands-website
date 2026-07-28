@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import {
   Building2,
   Loader2,
@@ -15,13 +15,7 @@ import {
   PROFILE_INCOMPLETE_MESSAGE,
   resolveLoginDestination,
 } from "@/lib/auth";
-import {
-  clearDemoRole,
-  getRedirectForRole,
-  LOGIN_PORTAL_CARDS,
-  persistDemoRole,
-  type DemoUserRole,
-} from "@/lib/authRedirects";
+import { LOGIN_PORTAL_CARDS } from "@/lib/authRedirects";
 import { contactEmail } from "@/lib/navigation";
 import type { PortalType } from "@/lib/portals";
 import { createClient } from "@/lib/supabase/client";
@@ -38,17 +32,12 @@ type LoginSelectorProps = {
   initialType: PortalType | null;
   configError?: string | null;
   redirectTo?: string | null;
-  /** Server-side flags (env is niet beschikbaar in de browser zonder NEXT_PUBLIC_). */
-  demoUiAllowed?: boolean;
-  demoApiAllowed?: boolean;
 };
 
 export default function LoginSelector({
   initialType,
   configError = null,
   redirectTo = null,
-  demoUiAllowed = true,
-  demoApiAllowed = false,
 }: LoginSelectorProps) {
   const router = useRouter();
   const supabaseEnabled = isSupabaseConfigured();
@@ -61,31 +50,6 @@ export default function LoginSelector({
   const activeCard =
     LOGIN_PORTAL_CARDS.find((card) => card.portalType === activePortal) ?? null;
 
-  // Op loginpagina altijd opnieuw inloggen — verwijder oude demo-sessie.
-  useEffect(() => {
-    clearDemoRole();
-  }, []);
-
-  function handleDemoLogin(demoRole: DemoUserRole) {
-    if (!demoUiAllowed) {
-      setError("Demo-login is uitgeschakeld op deze omgeving (ALLOW_DEMO_ACCESS=false).");
-      return;
-    }
-
-    void (async () => {
-      if (supabaseEnabled) {
-        try {
-          const supabase = createClient();
-          await supabase.auth.signOut();
-        } catch {
-          // Demo-login mag doorgaan zonder Supabase-sessie.
-        }
-      }
-      persistDemoRole(demoRole);
-      window.location.assign(getRedirectForRole(demoRole));
-    })();
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -96,7 +60,9 @@ export default function LoginSelector({
     }
 
     if (!supabaseEnabled) {
-      setError("Gebruik de demo-knoppen om in te loggen. Echte auth volgt later.");
+      setError(
+        "Inloggen is nog niet beschikbaar. Neem contact op via " + contactEmail + ".",
+      );
       return;
     }
 
@@ -131,7 +97,6 @@ export default function LoginSelector({
         return;
       }
 
-      // Altijd rol-correct redirecten; gekozen portaal alleen als de rol dat mag.
       const destination = resolveLoginDestination(
         profile.role,
         activePortal,
@@ -148,16 +113,19 @@ export default function LoginSelector({
   }
 
   const PortalIcon = activePortal ? portalIcons[activePortal] : ShieldCheck;
+  const accountRequestMailto = `mailto:${contactEmail}?subject=${encodeURIComponent(
+    "Accountaanvraag Helping Hands portaal",
+  )}&body=${encodeURIComponent(
+    "Hallo Helping Hands,\n\nIk wil graag toegang tot het portaal.\n\nNaam:\nBedrijf/rol:\nGewenst portaal (intern / medewerker / opdrachtgever):\n\nMet vriendelijke groet,\n",
+  )}`;
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6 rounded-xl border border-[#F28C28]/30 bg-[#FFF7ED] px-4 py-3 text-sm text-[#0B1F4D]">
+      <div className="mb-6 rounded-xl border border-[#173A8A]/20 bg-white px-4 py-3 text-sm text-[#0B1F4D]">
         <p className="font-bold">Kies jouw portaal — intern is niet de standaard voor iedereen.</p>
         <p className="mt-1 text-[#101828]/75">
-          Demo-login toont UI met testdata.
-          {demoApiAllowed
-            ? " Integratie-API’s staan aan voor deze omgeving (ALLOW_DEMO_API_ACCESS)."
-            : " Integratie-API’s blijven uit zonder echte intern-login (veilig default)."}
+          Log in met je Helping Hands-account. Je wordt doorgestuurd op basis van
+          je rol. Nog geen account? Vraag toegang aan via e-mail.
         </p>
       </div>
 
@@ -217,7 +185,11 @@ export default function LoginSelector({
 
               <button
                 type="button"
-                onClick={() => handleDemoLogin(card.demoRole)}
+                onClick={() => {
+                  setActivePortal(card.portalType);
+                  setError(null);
+                  document.getElementById("login-email")?.focus();
+                }}
                 className={`mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full px-6 py-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   isActive
                     ? "bg-[#F28C28] text-white shadow-lg shadow-[#F28C28]/25 hover:bg-[#de7c1f] focus:ring-[#F28C28] focus:ring-offset-[#0B1F4D]"
@@ -231,110 +203,100 @@ export default function LoginSelector({
         })}
       </div>
 
-      {supabaseEnabled ? (
-        <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-[#173A8A]/20 bg-[#0B1F4D] p-6 shadow-2xl shadow-[#0B1F4D]/30 sm:p-8">
-          <div className="pointer-events-none absolute -right-16 top-0 h-48 w-48 rounded-full bg-[#38bdf8]/10 blur-3xl" />
-          <div className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#F28C28]/10 blur-3xl" />
+      <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-[#173A8A]/20 bg-[#0B1F4D] p-6 shadow-2xl shadow-[#0B1F4D]/30 sm:p-8">
+        <div className="pointer-events-none absolute -right-16 top-0 h-48 w-48 rounded-full bg-[#38bdf8]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#F28C28]/10 blur-3xl" />
 
-          <div className="relative flex flex-wrap items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#38bdf8]/25 bg-[#173A8A]/50 text-[#7dd3fc]">
-              <PortalIcon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#7dd3fc]">
-                Supabase login
-              </p>
-              <h2 className="mt-1 text-2xl font-black text-white sm:text-3xl">
-                {activeCard ? activeCard.title : "Kies een portaal hierboven"}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-                {activeCard
-                  ? "Log in met je account. Je wordt doorgestuurd op basis van je rol (en het gekozen portaal als dat mag)."
-                  : "Selecteer eerst intern, medewerker of opdrachtgever. Je landt altijd in het portaal dat bij jouw rol past."}
-              </p>
-            </div>
+        <div className="relative flex flex-wrap items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#38bdf8]/25 bg-[#173A8A]/50 text-[#7dd3fc]">
+            <PortalIcon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
           </div>
-
-          {error ? (
-            <div
-              className="relative mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-100"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : null}
-
-          <form onSubmit={handleSubmit} className="relative mt-8 space-y-5">
-            <label className="block">
-              <span className="text-sm font-bold text-white/90">E-mailadres</span>
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="naam@voorbeeld.nl"
-                disabled={loading}
-                className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none transition focus:border-[#38bdf8]/50 focus:ring-2 focus:ring-[#38bdf8]/20 disabled:opacity-60"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-bold text-white/90">Wachtwoord</span>
-              <input
-                type="password"
-                name="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                disabled={loading}
-                className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none transition focus:border-[#38bdf8]/50 focus:ring-2 focus:ring-[#38bdf8]/20 disabled:opacity-60"
-              />
-            </label>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[#38bdf8] focus:ring-offset-2 focus:ring-offset-[#0B1F4D] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : null}
-                {loading ? "Bezig met inloggen…" : "Inloggen met account"}
-              </button>
-              <Link
-                href="/forgot-password"
-                className="text-sm font-semibold text-[#7dd3fc] underline-offset-4 transition hover:text-white hover:underline"
-              >
-                Wachtwoord vergeten
-              </Link>
-            </div>
-          </form>
-
-          <p className="relative mt-4 text-xs leading-5 text-white/45">
-            Nog geen account? Neem contact op via{" "}
-            <a
-              href={`mailto:${contactEmail}`}
-              className="font-semibold text-[#7dd3fc] underline-offset-4 hover:underline"
-            >
-              {contactEmail}
-            </a>
-            .
-          </p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#7dd3fc]">
+              Inloggen
+            </p>
+            <h2 className="mt-1 text-2xl font-black text-white sm:text-3xl">
+              {activeCard ? activeCard.title : "Kies een portaal hierboven"}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
+              {activeCard
+                ? "Log in met je e-mailadres en wachtwoord. Je landt in het portaal dat bij jouw rol past."
+                : "Selecteer eerst intern, medewerker of opdrachtgever."}
+            </p>
+          </div>
         </div>
-      ) : (
-        error && (
+
+        {error ? (
           <div
-            className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="relative mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-100"
             role="alert"
           >
             {error}
           </div>
-        )
-      )}
+        ) : null}
+
+        <form onSubmit={handleSubmit} className="relative mt-8 space-y-5">
+          <label className="block">
+            <span className="text-sm font-bold text-white/90">E-mailadres</span>
+            <input
+              id="login-email"
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="naam@voorbeeld.nl"
+              disabled={loading || !supabaseEnabled}
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none transition focus:border-[#38bdf8]/50 focus:ring-2 focus:ring-[#38bdf8]/20 disabled:opacity-60"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-bold text-white/90">Wachtwoord</span>
+            <input
+              type="password"
+              name="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={loading || !supabaseEnabled}
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none transition focus:border-[#38bdf8]/50 focus:ring-2 focus:ring-[#38bdf8]/20 disabled:opacity-60"
+            />
+          </label>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="submit"
+              disabled={loading || !supabaseEnabled}
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[#38bdf8] focus:ring-offset-2 focus:ring-offset-[#0B1F4D] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : null}
+              {loading ? "Bezig met inloggen…" : "Inloggen"}
+            </button>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-[#7dd3fc] underline-offset-4 transition hover:text-white hover:underline"
+            >
+              Wachtwoord vergeten
+            </Link>
+          </div>
+        </form>
+
+        <p className="relative mt-4 text-xs leading-5 text-white/45">
+          Nog geen account?{" "}
+          <a
+            href={accountRequestMailto}
+            className="font-semibold text-[#7dd3fc] underline-offset-4 hover:underline"
+          >
+            Vraag een account aan
+          </a>{" "}
+          via {contactEmail}.
+        </p>
+      </div>
     </div>
   );
 }

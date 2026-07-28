@@ -2,7 +2,6 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import InternDashboardSidebar from "@/components/dashboard/InternDashboardSidebar";
 import PortalBanner from "@/components/PortalBanner";
 import type { Profile } from "@/lib/auth";
-import { isDemoApiAccessAllowed } from "@/lib/demoAccess";
 
 type InternDashboardShellProps = {
   profile: Profile;
@@ -17,16 +16,12 @@ export default function InternDashboardShell({
   title,
   subtitle,
 }: InternDashboardShellProps) {
-  const isDemo = profile.id.startsWith("demo-");
-
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden lg:flex-row">
       <InternDashboardSidebar profile={profile} />
       <div className="flex min-w-0 flex-1 flex-col bg-[#F5F7FA]">
         <DashboardHeader profile={profile} title={title} subtitle={subtitle} />
-        {isDemo ? (
-          <PortalBanner variant="intern" apiEnabled={isDemoApiAccessAllowed()} />
-        ) : null}
+        <PortalBanner variant="intern" />
         <div className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {children}
         </div>

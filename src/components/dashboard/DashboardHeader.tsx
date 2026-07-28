@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Profile } from "@/lib/auth";
+import { getRoleLabel, type Profile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 import { dashboardNotifications } from "@/data/dashboardMockData";
 import { getInternPageMeta } from "@/lib/intern-page-meta";
@@ -32,17 +32,6 @@ type DashboardHeaderProps = {
   title?: string;
   subtitle?: string;
 };
-
-function getRoleLabel(role: Profile["role"]): string {
-  switch (role) {
-    case "admin":
-      return "Administrator";
-    case "planner":
-      return "Planner";
-    default:
-      return "Gebruiker";
-  }
-}
 
 function LogoutMenuItem() {
   const router = useRouter();

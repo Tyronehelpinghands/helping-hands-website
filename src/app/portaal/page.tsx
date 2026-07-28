@@ -24,7 +24,7 @@ export default function PortaalPage() {
       <PortalHeroMark
         label="Portalen"
         title="Helping Hands Portalen"
-        description="Kies het portaal dat bij jouw rol hoort. Intern, crew en opdrachtgever zijn gescheiden — demo-login is alleen UI tenzij integratie-API’s expliciet zijn aangezet."
+        description="Kies het portaal dat bij jouw rol hoort. Intern, crew en opdrachtgever zijn gescheiden. Log in met je Helping Hands-account."
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

@@ -16,20 +16,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { Profile } from "@/lib/auth";
+import { getRoleLabel, type Profile } from "@/lib/auth";
 import { internNavItems, isInternNavActive } from "@/lib/intern-nav";
 import { cn } from "@/lib/utils";
-
-function getRoleLabel(role: Profile["role"]): string {
-  switch (role) {
-    case "admin":
-      return "Administrator";
-    case "planner":
-      return "Planner";
-    default:
-      return "Gebruiker";
-  }
-}
 
 function SidebarNav({
   pathname,

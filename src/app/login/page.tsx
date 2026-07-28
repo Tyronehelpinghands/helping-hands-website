@@ -7,11 +7,7 @@ import {
   getDashboardPathForRole,
   isValidRole,
 } from "@/lib/auth";
-import { getSessionProfile } from "@/lib/auth-server";
-import {
-  isDemoApiAccessAllowed,
-  isDemoUiAccessAllowed,
-} from "@/lib/demoAccess";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { getPortalByType } from "@/lib/portals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { noIndexMetadata } from "@/lib/seo";
@@ -25,6 +21,7 @@ const errorMessages: Record<string, string> = {
   profile:
     "Je account is nog niet volledig ingesteld. Neem contact op met Helping Hands.",
   auth: "Authenticatie is mislukt. Probeer opnieuw in te loggen.",
+  unauthorized: "Je hebt geen toegang tot deze pagina met je huidige rol.",
 };
 
 export const dynamic = "force-dynamic";
@@ -32,20 +29,27 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; error?: string; next?: string }>;
+  searchParams: Promise<{
+    type?: string;
+    error?: string;
+    next?: string;
+    redirectTo?: string;
+  }>;
 }) {
   const params = await searchParams;
   const initialType = getPortalByType(params.type ?? null);
-  const redirectTo = params.next ?? null;
+  const redirectTo = params.redirectTo ?? params.next ?? null;
   const configError = !isSupabaseConfigured()
     ? "Supabase is nog niet geconfigureerd op deze omgeving."
-    : (params.error ? errorMessages[params.error] : null);
+    : params.error
+      ? (errorMessages[params.error] ?? null)
+      : null;
 
   if (isSupabaseConfigured()) {
     try {
-      const { user, profile } = await getSessionProfile();
+      const { user, profile } = await getCurrentUser();
       if (user && profile && isValidRole(profile.role)) {
-        // Met ?type= op de loginpagina blijven — gebruiker kiest demo of ander portaal.
+        // Met ?type= op de loginpagina blijven — gebruiker wisselt bewust van portaalkeuze.
         if (!params.type) {
           const destination =
             redirectTo && canAccessDashboardPath(profile.role, redirectTo)
@@ -55,7 +59,7 @@ export default async function LoginPage({
         }
       }
     } catch {
-      // Supabase niet bereikbaar — toon loginpagina met foutmelding.
+      // Supabase niet bereikbaar — toon loginpagina.
     }
   }
 
@@ -93,8 +97,6 @@ export default async function LoginPage({
           initialType={initialType}
           configError={configError}
           redirectTo={redirectTo}
-          demoUiAllowed={isDemoUiAccessAllowed()}
-          demoApiAllowed={isDemoApiAccessAllowed()}
         />
       </section>
     </>

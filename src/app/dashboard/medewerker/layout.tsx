@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { requireDashboardAccess } from "@/lib/auth-server";
+import { employeeRoles } from "@/lib/auth/roles";
+import { requireRole } from "@/lib/auth/requireRole";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,6 @@ export default async function MedewerkerDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireDashboardAccess(["medewerker"]);
+  await requireRole(employeeRoles, { redirectTo: "/dashboard/medewerker" });
   return children;
 }
