@@ -296,12 +296,8 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     theme: "contact",
     primaryCta: { label: "Mail ons", href: "mailto:planning@helpinghandsagency.nl" },
     secondaryCta: { label: "Crew aanmelden", href: "/vacatures" },
-    highlights: [
-      { label: "Personeelsaanvraag" },
-      { label: "Samenwerking" },
-      { label: "Planning" },
-      { label: "Administratie" },
-    ],
+    // Topics live only in the hero tab control — avoid duplicating the same labels as pills.
+    highlights: [],
     interactiveCards: [
       {
         title: "Personeelsaanvraag",

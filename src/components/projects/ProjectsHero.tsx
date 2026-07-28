@@ -1,8 +1,4 @@
 import Link from "next/link";
-import {
-  countProjectLogosByCategory,
-  projectLogos,
-} from "@/lib/projectLogos";
 import { cn } from "@/lib/utils";
 
 const heroCards = [
@@ -43,10 +39,6 @@ function HeroCta({
 }
 
 export default function ProjectsHero() {
-  const opdrachtgevers = countProjectLogosByCategory("Opdrachtgevers");
-  const festivals = countProjectLogosByCategory("Projecten & festivals");
-  const locaties = countProjectLogosByCategory("Locaties");
-
   return (
     <section className="relative overflow-hidden bg-[#0B1F4D] text-white">
       <div
@@ -115,21 +107,9 @@ export default function ProjectsHero() {
               </li>
             ))}
           </ul>
-
-          <p className="mt-6 text-xs leading-6 text-white/55">
-            {projectLogos.length} vermeldingen · {opdrachtgevers} opdrachtgevers ·{" "}
-            {festivals} projecten & festivals · {locaties} locaties
-          </p>
         </div>
 
         <div className="relative">
-          <div className="absolute -right-2 -top-4 z-10 rounded-full border border-white/20 bg-[#F28C28] px-3 py-1.5 text-xs font-bold text-white shadow-lg sm:-right-4 sm:-top-6">
-            Crewervaring
-          </div>
-          <div className="absolute -bottom-3 left-4 z-10 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm sm:left-8">
-            Landelijke inzet
-          </div>
-
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {heroCards.map((card, index) => (
               <article

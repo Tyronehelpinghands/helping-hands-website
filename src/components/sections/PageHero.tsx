@@ -180,6 +180,75 @@ function StaffingHeroMedia({
   );
 }
 
+/** Contact hero: single segmented topic control (no duplicate highlight pills). */
+function ContactTopicTabs({
+  cards,
+  activeIndex,
+  onSelect,
+}: {
+  cards: PageHeroContent["interactiveCards"];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  const activeCard = cards[activeIndex] ?? cards[0];
+
+  return (
+    <div className="min-w-0">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 shadow-2xl backdrop-blur-sm sm:p-6 lg:p-8",
+          themeShell.contact.panel,
+        )}
+      >
+        <p className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-white/55">
+          Waar kunnen we mee helpen?
+        </p>
+
+        <div
+          role="tablist"
+          aria-label="Contactonderwerpen"
+          className="grid grid-cols-2 gap-1.5 rounded-2xl bg-black/25 p-1.5 sm:flex sm:flex-nowrap sm:gap-1"
+        >
+          {cards.map((card, index) => {
+            const isActive = activeIndex === index;
+            return (
+              <button
+                key={card.title}
+                type="button"
+                role="tab"
+                id={`contact-topic-tab-${index}`}
+                aria-selected={isActive}
+                aria-controls="contact-topic-panel"
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => onSelect(index)}
+                className={cn(
+                  "inline-flex min-h-11 w-full min-w-0 items-center justify-center rounded-xl px-2 py-2.5 text-center text-sm font-bold leading-snug transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F4D] sm:flex-1 sm:px-3",
+                  isActive
+                    ? "bg-[#F28C28] text-white shadow-lg shadow-[#F28C28]/25"
+                    : "text-white/80 hover:bg-white/10 hover:text-white",
+                )}
+              >
+                <span className="max-w-full text-balance hyphens-none">{card.title}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {activeCard ? (
+          <div
+            id="contact-topic-panel"
+            role="tabpanel"
+            aria-labelledby={`contact-topic-tab-${activeIndex}`}
+            className="mt-4 rounded-xl border border-white/10 bg-black/15 px-4 py-3"
+          >
+            <p className="text-sm leading-6 text-white/80">{activeCard.description}</p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export default function PageHero({ content }: PageHeroProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const theme = themeShell[content.theme];
@@ -238,6 +307,12 @@ export default function PageHero({ content }: PageHeroProps) {
             activeIndex={activeIndex}
             onSelect={setActiveIndex}
           />
+        ) : content.theme === "contact" ? (
+          <ContactTopicTabs
+            cards={content.interactiveCards}
+            activeIndex={activeIndex}
+            onSelect={setActiveIndex}
+          />
         ) : (
           <div className="min-w-0">
             <div
@@ -253,9 +328,7 @@ export default function PageHero({ content }: PageHeroProps) {
                     ? "Kies je richting"
                     : content.theme === "projecten"
                       ? "Sectoren & locaties"
-                      : content.theme === "contact"
-                        ? "Waar kunnen we mee helpen?"
-                        : "Meer informatie"}
+                      : "Meer informatie"}
               </p>
 
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">

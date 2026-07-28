@@ -75,16 +75,18 @@ export default function OverOnsPage() {
       <section id="missie" className="scroll-mt-28 bg-white py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            <Reveal>
+            <Reveal className="min-w-0">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
                 Wie wij zijn
               </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-[#0B1F4D] sm:text-4xl lg:text-5xl">
+              <h2 className="mt-3 max-w-xl text-3xl font-black tracking-tight text-[#0B1F4D] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
                 {overOnsIntro.title}
               </h2>
-              <div className="mt-6 space-y-4 text-base leading-8 text-[#101828]/80 sm:text-lg">
+              <div className="mt-6 max-w-prose space-y-5 text-base leading-7 text-[#101828]/85 sm:text-[1.0625rem] sm:leading-8">
                 {overOnsIntro.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+                  <p key={paragraph.slice(0, 40)} className="text-pretty">
+                    {paragraph}
+                  </p>
                 ))}
               </div>
             </Reveal>
