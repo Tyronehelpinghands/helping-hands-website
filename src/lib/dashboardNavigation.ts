@@ -5,6 +5,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Link2,
   MessageSquare,
   Settings,
   TrendingUp,
@@ -27,6 +28,7 @@ export const DASHBOARD_ROUTES = {
   financien: "/dashboard/intern/financien",
   risicoActies: "/dashboard/intern/risico-acties",
   berichten: "/dashboard/intern/berichten",
+  integraties: "/dashboard/intern/integraties",
   instellingen: "/dashboard/intern/instellingen",
 } as const;
 
@@ -57,6 +59,11 @@ export const dashboardNavItems: DashboardNavItem[] = [
   },
   { href: DASHBOARD_ROUTES.berichten, label: "Berichten", icon: MessageSquare },
   {
+    href: DASHBOARD_ROUTES.integraties,
+    label: "Integraties",
+    icon: Link2,
+  },
+  {
     href: DASHBOARD_ROUTES.instellingen,
     label: "Instellingen",
     icon: Settings,
@@ -74,6 +81,7 @@ export type DashboardModuleName =
   | "Financiën"
   | "Risico & Acties"
   | "Berichten"
+  | "Integraties"
   | "Instellingen";
 
 /** Centrale module-links — gebruik overal waar modules naar elkaar verwijzen. */
@@ -88,6 +96,7 @@ export const MODULE_LINKS: Record<DashboardModuleName, string> = {
   Financiën: DASHBOARD_ROUTES.financien,
   "Risico & Acties": DASHBOARD_ROUTES.risicoActies,
   Berichten: DASHBOARD_ROUTES.berichten,
+  Integraties: DASHBOARD_ROUTES.integraties,
   Instellingen: DASHBOARD_ROUTES.instellingen,
 };
 

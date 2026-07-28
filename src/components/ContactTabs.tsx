@@ -3,14 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  buildClientMailto,
-  buildClientRequestPlainText,
-  buildGeneralMailto,
-  buildGeneralQuestionPlainText,
-  buildWorkerApplicationPlainText,
-  buildWorkerMailto,
   clientInzetTypes,
+  getFallbackMailtoHint,
   type ContactAudience,
+  type ContactFormType,
   workerInterestOptions,
 } from "@/lib/contact";
 import {
@@ -28,6 +24,12 @@ type FieldDef = {
   fullWidth?: boolean;
   placeholder?: string;
   section?: string;
+};
+
+const audienceToFormType: Record<ContactAudience, ContactFormType> = {
+  client: "staff_request",
+  worker: "crew_application",
+  general: "general_contact",
 };
 
 const clientFields: FieldDef[] = [
@@ -213,35 +215,109 @@ function groupClientFields() {
   }));
 }
 
+function readString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function buildRequestBody(
+  audience: ContactAudience,
+  formData: FormData,
+  options: {
+    isUrgent: boolean;
+    inzetType: string;
+    interests: string[];
+  },
+) {
+  const formType = audienceToFormType[audience];
+  const website = readString(formData, "website");
+
+  if (audience === "client") {
+    const clothingPbm = readString(formData, "kleding-pbm");
+    return {
+      formType,
+      website,
+      isUrgent: options.isUrgent,
+      companyName: readString(formData, "bedrijfsnaam"),
+      contactName: readString(formData, "contactpersoon"),
+      email: readString(formData, "email"),
+      phone: readString(formData, "telefoon"),
+      date: readString(formData, "datum"),
+      location: readString(formData, "locatie"),
+      startTime: readString(formData, "starttijd"),
+      endTime: readString(formData, "eindtijd"),
+      functions: readString(formData, "functies"),
+      numberOfPeople: readString(formData, "aantal"),
+      inzetType: options.inzetType,
+      clothing: clothingPbm,
+      pbm: clothingPbm,
+      onSiteContact: readString(formData, "contact-locatie"),
+      briefing: readString(formData, "briefing"),
+    };
+  }
+
+  if (audience === "worker") {
+    const experience = readString(formData, "ervaring");
+    return {
+      formType,
+      website,
+      name: readString(formData, "naam"),
+      email: readString(formData, "email"),
+      phone: readString(formData, "telefoon"),
+      city: readString(formData, "woonplaats"),
+      age: readString(formData, "leeftijd"),
+      interests: options.interests,
+      experience,
+      availability: readString(formData, "beschikbaarheid"),
+      contractType: readString(formData, "contractvorm"),
+      license: readString(formData, "rijbewijs"),
+      transport: readString(formData, "vervoer"),
+      message: experience,
+      motivation: experience,
+    };
+  }
+
+  return {
+    formType,
+    website,
+    name: readString(formData, "naam"),
+    email: readString(formData, "email"),
+    phone: readString(formData, "telefoon"),
+    subject: readString(formData, "onderwerp"),
+    message: readString(formData, "bericht"),
+  };
+}
+
 export default function ContactTabs() {
   const [activeTab, setActiveTab] = useState<ContactAudience>("client");
-  const [submittedTab, setSubmittedTab] = useState<ContactAudience | null>(null);
   const [isUrgent, setIsUrgent] = useState(false);
   const [inzetType, setInzetType] = useState<string>(clientInzetTypes[0]);
   const [interests, setInterests] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
-  const [lastPlainText, setLastPlainText] = useState("");
-  const [lastMailto, setLastMailto] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submittedFormType, setSubmittedFormType] =
+    useState<ContactFormType | null>(null);
 
   function switchTab(tab: ContactAudience) {
     setActiveTab(tab);
-    setSubmittedTab(null);
-    setCopied(false);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    setSubmittedFormType(null);
   }
 
-  // Sync the active tab with the URL hash (#aanvraag / #aanmelden) so hero
-  // CTAs and direct links land on the right tab, both on load and when the
-  // hash changes afterwards.
   useEffect(() => {
     function applyHash(hash: string) {
       if (hash === "#aanmelden") {
         setActiveTab("worker");
-        setSubmittedTab(null);
-        setCopied(false);
+        setSuccessMessage(null);
+        setErrorMessage(null);
+        setSubmittedFormType(null);
       } else if (hash === "#aanvraag") {
         setActiveTab("client");
-        setSubmittedTab(null);
-        setCopied(false);
+        setSuccessMessage(null);
+        setErrorMessage(null);
+        setSubmittedFormType(null);
       }
     }
 
@@ -251,10 +327,6 @@ export default function ContactTabs() {
       applyHash(window.location.hash);
     }
 
-    // Next.js Link performs client-side navigation for same-page hash links,
-    // which doesn't reliably fire a native "hashchange" event. Reading the
-    // clicked anchor's href directly makes tab switching work regardless of
-    // how the navigation is handled under the hood.
     function handleClick(event: MouseEvent) {
       const target = event.target;
       if (!(target instanceof Element)) return;
@@ -282,48 +354,69 @@ export default function ContactTabs() {
     );
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    if (isSubmitting) return;
 
-    if (activeTab === "client") {
-      formData.set("type-inzet", inzetType);
-      const plain = buildClientRequestPlainText(formData, isUrgent);
-      const mailto = buildClientMailto(formData, isUrgent);
-      setLastPlainText(plain);
-      setLastMailto(mailto);
-      window.location.href = mailto;
-      setSubmittedTab("client");
-      return;
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const formType = audienceToFormType[activeTab];
+    const payload = buildRequestBody(activeTab, formData, {
+      isUrgent,
+      inzetType,
+      interests,
+    });
+
+    setIsSubmitting(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    setSubmittedFormType(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+      } | null;
+
+      if (!response.ok || !result?.ok) {
+        setErrorMessage(
+          result?.error ||
+            "Verzenden is mislukt. Probeer het opnieuw of mail ons direct.",
+        );
+        setSubmittedFormType(formType);
+        return;
+      }
+
+      setSuccessMessage(
+        result.message ||
+          "Bedankt! Je bericht is verzonden. We nemen zo snel mogelijk contact met je op.",
+      );
+      setSubmittedFormType(formType);
+      form.reset();
+      setIsUrgent(false);
+      setInzetType(clientInzetTypes[0]);
+      setInterests([]);
+    } catch {
+      setErrorMessage(
+        "Verzenden is mislukt. Controleer je verbinding of mail ons direct.",
+      );
+      setSubmittedFormType(formType);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (activeTab === "worker") {
-      const plain = buildWorkerApplicationPlainText(formData, interests);
-      const mailto = buildWorkerMailto(formData, interests);
-      setLastPlainText(plain);
-      setLastMailto(mailto);
-      window.location.href = mailto;
-      setSubmittedTab("worker");
-      return;
-    }
-
-    const plain = buildGeneralQuestionPlainText(formData);
-    const mailto = buildGeneralMailto(formData);
-    setLastPlainText(plain);
-    setLastMailto(mailto);
-    window.location.href = mailto;
-    setSubmittedTab("general");
   }
 
-  async function copyLastText() {
-    if (!lastPlainText) return;
-    try {
-      await navigator.clipboard.writeText(lastPlainText);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2500);
-    } catch {
-      setCopied(false);
-    }
+  function resetFormView() {
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    setSubmittedFormType(null);
   }
 
   const tabClass = (tab: ContactAudience) =>
@@ -333,6 +426,11 @@ export default function ContactTabs() {
         ? "bg-[#0B1F4D] text-white shadow-lg"
         : "text-[#173A8A] hover:bg-white",
     );
+
+  const fallback =
+    submittedFormType != null
+      ? getFallbackMailtoHint(submittedFormType)
+      : getFallbackMailtoHint(audienceToFormType[activeTab]);
 
   return (
     <div
@@ -344,7 +442,13 @@ export default function ContactTabs() {
         role="tablist"
         aria-label="Contactformulier"
       >
-        <button type="button" role="tab" aria-selected={activeTab === "client"} className={tabClass("client")} onClick={() => switchTab("client")}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "client"}
+          className={tabClass("client")}
+          onClick={() => switchTab("client")}
+        >
           Personeel aanvragen
         </button>
         <button
@@ -357,58 +461,48 @@ export default function ContactTabs() {
         >
           Aanmelden als medewerker
         </button>
-        <button type="button" role="tab" aria-selected={activeTab === "general"} className={tabClass("general")} onClick={() => switchTab("general")}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "general"}
+          className={tabClass("general")}
+          onClick={() => switchTab("general")}
+        >
           Algemene vraag
         </button>
       </div>
 
       <div className="mt-8" aria-live="polite">
-        {submittedTab ? (
+        {successMessage ? (
           <div className="rounded-2xl bg-[#0B1F4D] p-8 text-white">
-            <p className="text-2xl font-black">
-              {submittedTab === "client"
-                ? isUrgent
-                  ? "Spoedaanvraag klaar om te mailen."
-                  : "Aanvraag klaar om te mailen."
-                : submittedTab === "worker"
-                  ? "Aanmelding klaar om te mailen."
-                  : "Vraag klaar om te mailen."}
-            </p>
-            <p className="mt-3 leading-7 text-white/75">
-              Je e-mailprogramma opent met de gegevens. Verstuur de mail om hem
-              bij ons te laten landen
-              {submittedTab === "client"
-                ? ` (${planningEmail})`
-                : submittedTab === "worker"
-                  ? ` (${applicationsEmail})`
-                  : ` (${contactEmail})`}
-              . Komt er niets op? Kopieer de tekst of mail handmatig.
-            </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={lastMailto || "#"}
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
-              >
-                Opnieuw openen in e-mail
-              </a>
-              <button
-                type="button"
-                onClick={copyLastText}
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                {copied ? "Gekopieerd" : "Kopieer aanvraagtekst"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSubmittedTab(null)}
-                className="inline-flex min-h-11 items-center justify-center rounded-full px-6 py-3 text-sm font-bold text-white/80 underline-offset-4 hover:text-white hover:underline"
-              >
-                Formulier opnieuw
-              </button>
-            </div>
+            <p className="text-2xl font-black">Verzonden</p>
+            <p className="mt-3 leading-7 text-white/75">{successMessage}</p>
+            <button
+              type="button"
+              onClick={resetFormView}
+              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
+            >
+              Nog een bericht sturen
+            </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="relative">
+            {/* Honeypot — keep visually hidden for bots */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+            >
+              <label>
+                Website
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+
             {activeTab === "client" ? (
               <>
                 <label className="mb-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#F28C28]/35 bg-[#FFF7ED] px-4 py-3">
@@ -508,9 +602,8 @@ export default function ContactTabs() {
             <p className="mt-6 rounded-2xl bg-[#F5F7FA] p-4 text-sm leading-6 text-[#101828]/75">
               {activeTab === "client" ? (
                 <>
-                  “Open in e-mail” start je e-mailclient naar {planningEmail}.
-                  Lukt dat niet? Gebruik “Kopieer aanvraagtekst” na het
-                  voorbereiden.
+                  Je aanvraag gaat naar planning ({planningEmail}). Bij spoed
+                  bel of WhatsApp ons ook direct.
                 </>
               ) : activeTab === "worker" ? (
                 <>
@@ -531,7 +624,7 @@ export default function ContactTabs() {
                   .
                 </>
               ) : (
-                <>Algemene vragen mailen we naar {contactEmail}.</>
+                <>Algemene vragen gaan naar {contactEmail}.</>
               )}
             </p>
 
@@ -540,18 +633,40 @@ export default function ContactTabs() {
               op te volgen. We delen ze niet voor marketingdoeleinden.
             </p>
 
+            {errorMessage ? (
+              <div
+                role="alert"
+                className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
+              >
+                <p>{errorMessage}</p>
+                <p className="mt-2">
+                  Lukt verzenden niet? Mail direct naar{" "}
+                  <a
+                    href={`mailto:${fallback.email}`}
+                    className="font-bold underline-offset-4 hover:underline"
+                  >
+                    {fallback.email}
+                  </a>
+                  .
+                </p>
+              </div>
+            ) : null}
+
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
-                className="min-h-11 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:w-auto"
+                disabled={isSubmitting}
+                className="min-h-11 w-full cursor-pointer rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#F28C28]/25 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
               >
-                {activeTab === "client"
-                  ? isUrgent
-                    ? "Spoedaanvraag openen in e-mail"
-                    : "Aanvraag openen in e-mail"
-                  : activeTab === "worker"
-                    ? "Aanmelding openen in e-mail"
-                    : "Vraag openen in e-mail"}
+                {isSubmitting
+                  ? "Bezig met verzenden…"
+                  : activeTab === "client"
+                    ? isUrgent
+                      ? "Spoedaanvraag verzenden"
+                      : "Aanvraag verzenden"
+                    : activeTab === "worker"
+                      ? "Aanmelding verzenden"
+                      : "Bericht verzenden"}
               </button>
             </div>
           </form>

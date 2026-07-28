@@ -113,9 +113,9 @@ export function buildCockpitKpis(): CockpitKpi[] {
     {
       id: "integrations",
       title: "Integraties",
-      value: "3 actief",
-      detail: "Shiftbase · Moneybird · HubSpot (demo)",
-      href: DASHBOARD_ROUTES.instellingen,
+      value: "Hub",
+      detail: "WhatsApp · Gmail · Supabase status",
+      href: DASHBOARD_ROUTES.integraties,
       icon: "integrations",
     },
   ];

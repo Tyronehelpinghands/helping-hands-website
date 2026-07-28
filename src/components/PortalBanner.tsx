@@ -18,7 +18,7 @@ const copy: Record<
     badge: "Demo-data",
     title: "Intern dashboard — voorbeelddata",
     detail:
-      "Planning, uren en administratie zijn nog demo-data. Integratie-API’s werken alleen met je echte intern-account.",
+      "Veel modules tonen nog demo-data. Auth is live; WhatsApp/Gmail via Integraties (wa.me/mailto direct, API bij env).",
   },
   employee: {
     badge: "Demo-data",

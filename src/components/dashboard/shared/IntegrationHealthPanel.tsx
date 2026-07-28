@@ -54,13 +54,15 @@ export const SHARED_INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
     id: "gmail",
     name: "Gmail / Google Workspace",
     description: "E-mail, aanmeldingen en communicatie.",
-    checkable: false,
+    checkUrl: "/api/integrations/gmail/status",
+    checkable: true,
   },
   {
     id: "whatsapp",
     name: "WhatsApp Business",
     description: "Crewberichten, oproepen en briefings.",
-    checkable: false,
+    checkUrl: "/api/integrations/whatsapp/status",
+    checkable: true,
   },
   {
     id: "supabase",
@@ -136,6 +138,8 @@ export default function IntegrationHealthPanel({
         message = message ?? "Niet geconfigureerd";
       } else if (data.ok === true) {
         message = message ?? "Koppeling voorbereid";
+      } else if (data.ok === false) {
+        message = message ?? "Controle mislukt of niet gekoppeld";
       }
 
       setStates((prev) => ({

@@ -362,13 +362,15 @@ export const INTEGRATION_DEFINITIONS = [
     id: "gmail",
     name: "Gmail / Google Workspace",
     description: "E-mail, aanmeldingen en communicatie.",
-    checkable: false,
+    checkUrl: "/api/integrations/gmail/status",
+    checkable: true,
   },
   {
     id: "whatsapp",
     name: "WhatsApp Business",
     description: "Crewberichten, oproepen en briefings.",
-    checkable: false,
+    checkUrl: "/api/integrations/whatsapp/status",
+    checkable: true,
   },
   {
     id: "fooks",
@@ -384,16 +386,16 @@ export const SECURITY_CHECKLIST = [
   "Moneybird token server-side",
   "Shiftbase token server-side",
   "Google Maps key server-side",
-  "Echte login/auth nog niet actief",
-  "Dashboard routes moeten later beveiligd worden",
-  "Rollen moeten later worden afgedwongen",
+  "WhatsApp / Gmail tokens server-side",
+  "Supabase Auth + requireRole op interne routes",
+  "Integratie-API’s via requireInternApiAccess",
   "Audit logs later toevoegen",
 ];
 
 export const SECURITY_STATUS_CARDS = [
-  { id: "auth", label: "Auth", status: "Nog niet actief" as const },
-  { id: "roles", label: "Rollen", status: "Voorbereid" as const },
+  { id: "auth", label: "Auth", status: "Actief" as const },
+  { id: "roles", label: "Rollen", status: "Actief" as const },
   { id: "secrets", label: "API secrets", status: "Server-side voorbereid" as const },
-  { id: "protection", label: "Dashboard protection", status: "Nog bouwen" as const },
+  { id: "protection", label: "Dashboard protection", status: "Actief" as const },
   { id: "audit", label: "Audit logs", status: "Binnenkort" as const },
 ];

@@ -19,12 +19,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import IntegrationHealthPanel from "@/components/dashboard/shared/IntegrationHealthPanel";
+import SettingsStatusBadge from "@/components/dashboard/instellingen/SettingsStatusBadge";
 import QuickActions from "@/components/dashboard/QuickActions";
 import {
   buildAttentionItems,
   buildCockpitKpis,
   type CockpitKpi,
 } from "@/lib/dashboardOverview";
+import {
+  DASHBOARD_MODULE_CARDS,
+  moduleStatusLabel,
+  moduleStatusToBadge,
+} from "@/lib/dashboardModules";
+import { DASHBOARD_ROUTES } from "@/lib/dashboardNavigation";
 import { quickActions } from "@/data/dashboardMockData";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +85,52 @@ export default function InternDashboardOverview() {
           );
         })}
       </div>
+
+      <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg font-black text-[#0B1F4D]">
+                Modules
+              </CardTitle>
+              <CardDescription>
+                Live = echte data/auth · Demo = voorbeelddata · Binnenkort =
+                nog niet beschikbaar
+              </CardDescription>
+            </div>
+            <Link
+              href={DASHBOARD_ROUTES.integraties}
+              className="text-sm font-semibold text-[#173A8A] hover:underline"
+            >
+              Integratiehub →
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {DASHBOARD_MODULE_CARDS.map((mod) => (
+              <Link
+                key={mod.id}
+                href={mod.href}
+                className="rounded-xl border border-slate-200/80 bg-[#F5F7FA]/40 p-3 transition hover:border-[#38bdf8]/30 hover:bg-white hover:shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-bold text-[#0B1F4D]">{mod.title}</p>
+                  <SettingsStatusBadge
+                    status={moduleStatusToBadge(mod.status)}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-[#101828]/55">
+                  {mod.description}
+                </p>
+                <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-[#101828]/40">
+                  {moduleStatusLabel(mod.status)}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">

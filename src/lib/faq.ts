@@ -77,7 +77,7 @@ export const contactFaqs: FaqItem[] = [
   {
     question: "Wordt mijn aanvraag automatisch verstuurd?",
     answer:
-      "Nee. Het formulier opent je e-mailprogramma met een kant-en-klare tekst naar het juiste adres. Jij verstuurt de mail — of kopieert de tekst als mailto niet werkt.",
+      "Ja. Het contactformulier stuurt je bericht via e-mail naar het juiste adres: planning@ voor personeelsaanvragen, aanmeldingen@ voor crewaanmeldingen en info@ voor algemene vragen. Lukt verzenden niet, dan kun je direct mailen.",
   },
   {
     question: "Wat gebeurt er met mijn gegevens?",

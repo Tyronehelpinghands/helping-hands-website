@@ -58,6 +58,11 @@ const pageMeta: Record<string, InternPageMeta> = {
     subtitle:
       "Beheer communicatie met crew, opdrachtgevers, sollicitanten en interne planning.",
   },
+  "/dashboard/intern/integraties": {
+    title: "Integraties",
+    subtitle:
+      "Supabase, WhatsApp, Gmail en overige koppelingen — echte status, geen nep-connected.",
+  },
   "/dashboard/intern/instellingen": {
     title: "Instellingen",
     subtitle:
