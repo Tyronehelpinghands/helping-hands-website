@@ -3,6 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import PhotoBackgroundCard from "@/components/PhotoBackgroundCard";
+import AfnameAnnuleringSection from "@/components/opdrachtgevers/AfnameAnnuleringSection";
+import BriefingChecklistSection from "@/components/opdrachtgevers/BriefingChecklistSection";
+import MidCta from "@/components/opdrachtgevers/MidCta";
+import PersoneelsvormenSection from "@/components/opdrachtgevers/PersoneelsvormenSection";
+import TeamSection from "@/components/opdrachtgevers/TeamSection";
+import TrustPoints from "@/components/opdrachtgevers/TrustPoints";
+import UitvalSection from "@/components/opdrachtgevers/UitvalSection";
+import UrenRegistratieSection from "@/components/opdrachtgevers/UrenRegistratieSection";
+import ZekerheidGrid from "@/components/opdrachtgevers/ZekerheidGrid";
 import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
@@ -17,12 +26,12 @@ import {
   opdrachtgeversProcessPhotos,
 } from "@/lib/crewPhotos";
 import { opdrachtgeversFaqs } from "@/lib/faq";
-import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
+import { buildPageMetadata, faqJsonLd, serviceJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Opdrachtgevers — personeel voor events & horeca",
+  title: "Personeel inhuren voor events en horeca",
   description:
-    "Event personeel Nederland inhuren: crew evenementen, stagehands, horeca- en restaurantpersoneel. Helder aanvraagproces, briefing en één aanspreekpunt.",
+    "Betrouwbare eventcrew, stagehands en horecamedewerkers met duidelijke briefing, urencontrole en bereikbare planning. Vraag direct personeel aan.",
   path: "/opdrachtgevers",
 });
 
@@ -33,17 +42,6 @@ const clientTypes = [
   "Restaurants en horecalocaties",
   "Beurzen en zakelijke events",
   "Stadion- en locatieproducties",
-];
-
-const requestInfo = [
-  "Datum",
-  "Locatie",
-  "Start- en eindtijd",
-  "Functie(s)",
-  "Aantal mensen",
-  "Kledingvoorschriften",
-  "Contactpersoon op locatie",
-  "Eventuele briefing",
 ];
 
 const process = [
@@ -78,8 +76,21 @@ export default function OpdrachtgeversPage() {
           { name: "Opdrachtgevers", path: "/opdrachtgevers" },
         ]}
       />
-      <JsonLd data={faqJsonLd(opdrachtgeversFaqs)} />
+      <JsonLd
+        data={[
+          faqJsonLd(opdrachtgeversFaqs),
+          serviceJsonLd({
+            name: "Personeel inhuren voor events en horeca",
+            description:
+              "Eventcrew, stagehands en horecamedewerkers inhuren met briefing, urencontrole en bereikbare planning.",
+            path: "/opdrachtgevers",
+          }),
+        ]}
+      />
       <PageHero content={getPageHeroContent("/opdrachtgevers")} />
+
+      {/* 2. Trust points */}
+      <TrustPoints />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mb-14 max-w-3xl">
@@ -131,6 +142,7 @@ export default function OpdrachtgeversPage() {
           </p>
         </div>
 
+        {/* 3. Voor wie wij werken */}
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Voor wie wij werken</h2>
@@ -154,6 +166,7 @@ export default function OpdrachtgeversPage() {
           </div>
         </div>
 
+        {/* 4. Welke functies */}
         <div className="mt-12 grid gap-12 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-black text-[#0B1F4D]">Welke functies wij leveren</h2>
@@ -202,8 +215,9 @@ export default function OpdrachtgeversPage() {
           </div>
         </PhotoBackgroundCard>
 
+        {/* 5. Zo werkt samenwerken */}
         <div className="mt-16">
-          <h2 className="text-2xl font-black text-[#0B1F4D]">Hoe het aanvraagproces werkt</h2>
+          <h2 className="text-2xl font-black text-[#0B1F4D]">Zo werkt samenwerken</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {process.map((item, index) => {
               const photo = opdrachtgeversProcessPhotos[index];
@@ -223,42 +237,46 @@ export default function OpdrachtgeversPage() {
             })}
           </div>
         </div>
-
-        <div className="mt-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
-          <h2 className="text-2xl font-black text-[#0B1F4D]">
-            Welke informatie wij nodig hebben
-          </h2>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {requestInfo.map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-3 rounded-xl bg-[#F5F7FA] px-4 py-3 text-sm font-semibold text-[#101828]"
-              >
-                <span className="h-2 w-2 rounded-full bg-[#F28C28]" />
-                {item}
-              </div>
-            ))}
-          </div>
-          <Link
-            href="/contact"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
-          >
-            Personeel aanvragen
-          </Link>
-        </div>
       </section>
 
+      {/* 6. Zekerheid tijdens iedere inzet */}
+      <ZekerheidGrid />
+
+      {/* 7. Personeelsvormen en accreditatie + verzekering */}
+      <PersoneelsvormenSection />
+
+      {/* 8. Urenregistratie en controle */}
+      <UrenRegistratieSection />
+
+      {/* 9. Uitval, bereikbaarheid en vervanging */}
+      <UitvalSection />
+
+      <MidCta />
+
+      {/* 10. Minimale afname en annuleringen */}
+      <AfnameAnnuleringSection />
+
+      {/* 11. Team achter de planning */}
+      <TeamSection />
+
+      {/* 12. Benodigde opdrachtinformatie (uitgebreide checklist) */}
+      <BriefingChecklistSection />
+
+      {/* 13. FAQ */}
       <FaqSection
         items={opdrachtgeversFaqs}
         title="Vragen van opdrachtgevers"
-        description="Over sectoren, briefing en hoe projectervaring op de site bedoeld is."
+        description="Over sectoren, personeelsvormen, uren, uitval, afname en briefing."
       />
 
+      {/* 14. Closing CTA */}
       <CTASection
         title="Crew nodig op korte termijn?"
         description="Stuur je planning door en wij denken mee over de juiste bezetting."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact"
+        secondaryLabel="Bekijk projectervaring"
+        secondaryHref="/projecten"
         backgroundImage={opdrachtgeversCtaPhoto.src}
         backgroundAlt={opdrachtgeversCtaPhoto.alt}
       />

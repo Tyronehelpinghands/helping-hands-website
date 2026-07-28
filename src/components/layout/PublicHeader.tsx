@@ -32,6 +32,7 @@ export default function PublicHeader() {
   const [mobileAccordion, setMobileAccordion] = useState<DropdownId>(
     pathname === "/" ? "diensten" : null,
   );
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
   const darkHero = pathHasDarkHero(pathname);
   const inverted = darkHero && !scrolled && !menuOpen;
@@ -77,9 +78,12 @@ export default function PublicHeader() {
     };
   }, [menuOpen]);
 
-  useEffect(() => {
+  // Close menu/dropdowns during render on route change (avoids a redundant
+  // effect-driven re-render pass for what is effectively derived state).
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     closeAll();
-  }, [pathname, closeAll]);
+  }
 
   useEffect(() => {
     if (!openDropdown) return;
@@ -111,8 +115,7 @@ export default function PublicHeader() {
         data-scrolled={scrolled ? "true" : "false"}
         data-inverted={inverted ? "true" : "false"}
         className={cn(
-          "fixed inset-x-0 top-0 w-full max-w-[100vw] overflow-x-clip transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300",
-          menuOpen ? "z-[80]" : "z-50",
+          "fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] overflow-x-clip transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300",
           inverted
             ? "border-b border-white/10 bg-transparent"
             : scrolled

@@ -261,6 +261,88 @@ export const overOnsCtaPhoto: CrewPhoto = {
   alt: "Team aan het werk op scaffolding",
 };
 
+/** Over ons (rebuild) — hero bento: mix van foto's en gradient/icon-kaarten in component. */
+export const aboutHeroPhotos: CrewPhoto[] = [
+  {
+    src: "/images/crew/scaffolding-team-wide.webp",
+    alt: "Helping Hands crew bouwt scaffolding op locatie",
+    objectPosition: "50% 35%",
+  },
+  {
+    src: "/images/crew/thumbs-up-branded.webp",
+    alt: "Crewlid in Helping Hands shirt geeft thumbs up",
+    objectPosition: "50% 0%",
+  },
+  {
+    src: "/images/crew/crew-woman-branded.webp",
+    alt: "Crewlid met Helping Hands branding op locatie",
+    objectPosition: "50% 16%",
+  },
+];
+
+/** Over ons (rebuild) — bento "Van eerste klus naar verantwoordelijkheid op locatie". */
+export const aboutBentoPhotos: CrewBentoItem[] = [
+  {
+    src: "/images/crew/crew-field-01.webp",
+    alt: "Crew op trailer tijdens laden en lossen",
+    caption: "Eerste klus, duidelijke briefing",
+    sizes: "(max-width: 640px) 100vw, 58vw",
+    objectPosition: "50% 25%",
+  },
+  {
+    src: "/images/crew/arena-flightcase.webp",
+    alt: "Helping Hands crew met flightcase in een stadion",
+    caption: "Meedraaien in een groter team",
+    sizes: "(max-width: 640px) 50vw, 42vw",
+    objectPosition: "50% 22%",
+  },
+  {
+    src: "/images/crew/scaffolding-climb.webp",
+    alt: "Crew klimt in scaffolding tijdens opbouw",
+    caption: "Verantwoordelijkheid op de vloer",
+    sizes: "(max-width: 640px) 50vw, 42vw",
+    objectPosition: "50% 18%",
+  },
+  {
+    src: "/images/crew/forklift-operator.webp",
+    alt: "Helping Hands crew op heftruck tijdens logistiek",
+    caption: "Specialistische taken oppakken",
+    sizes: "(max-width: 640px) 50vw, 25vw",
+    objectPosition: "50% 25%",
+  },
+  {
+    src: "/images/crew/standbouw-ladder.webp",
+    alt: "Crew bouwt een beursstand op met ladder en boormachine",
+    caption: "Vast onderdeel van de crew",
+    sizes: "(max-width: 640px) 50vw, 25vw",
+    objectPosition: "50% 20%",
+  },
+  {
+    src: "/images/crew/festival-flex-hammer.webp",
+    alt: "Crew tijdens festivalopbouw met branding",
+    caption: "Op weg naar teamcaptain",
+    sizes: "(max-width: 640px) 100vw, 50vw",
+    objectPosition: "50% 20%",
+  },
+];
+
+/** Over ons (rebuild) — For medewerkers / opdrachtgevers split secties. */
+export const aboutEmployeesPhoto: CrewPhoto = {
+  src: "/images/crew/crew-field-03.webp",
+  alt: "Helping Hands team overlegt op locatie",
+};
+
+export const aboutClientsPhoto: CrewPhoto = {
+  src: "/images/crew/stadium-flightcase-push.webp",
+  alt: "Professionele crew inzet in een stadion",
+};
+
+/** Over ons (rebuild) — eind-CTA achtergrond. */
+export const aboutCtaPhoto: CrewPhoto = {
+  src: "/images/crew/concert-globe-stage.webp",
+  alt: "Grootschalige live productie",
+};
+
 /** Contact / personeel aanvragen. */
 export const contactRequestPhoto: CrewPhoto = {
   src: "/images/crew/arena-flightcase.webp",

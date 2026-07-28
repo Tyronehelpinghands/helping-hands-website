@@ -7,6 +7,7 @@ export const navLinks = [
   { href: "/medewerkers", label: "Medewerkers" },
   { href: "/vacatures", label: "Vacatures" },
   { href: "/projecten", label: "Projecten" },
+  { href: "/locaties", label: "Locaties" },
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
   { href: "/login", label: "Login" },
@@ -102,6 +103,11 @@ export const navDropdowns: NavDropdownConfig[] = [
         description: "Filter op event, horeca, keuken, bar, stagebouw en meer.",
         href: "/diensten",
       },
+      {
+        title: "Locaties",
+        description: "Bekijk onze werkgebieden per stad en regio.",
+        href: "/locaties",
+      },
     ],
     cta: { label: "Bekijk alle diensten", href: "/diensten" },
   },
@@ -153,6 +159,62 @@ export const navDropdowns: NavDropdownConfig[] = [
       },
     ],
     cta: { label: "Aanmelden", href: employeeApplyMailto },
+  },
+];
+
+export type MobileNavLink = { label: string; href: string };
+
+export type MobileNavGroup = {
+  id: NavDropdownConfig["id"];
+  label: string;
+  href: string;
+  items: MobileNavLink[];
+};
+
+/** Curated flat link lists for the mobile drawer accordions (mobile-only; desktop dropdowns use navDropdowns). */
+export const mobileNavGroups: MobileNavGroup[] = [
+  {
+    id: "diensten",
+    label: "Diensten",
+    href: "/diensten",
+    items: [
+      { label: "Alle diensten", href: "/diensten" },
+      { label: "Event crew", href: "/diensten/event-crew" },
+      { label: "Horeca personeel", href: "/diensten/horeca-personeel" },
+      { label: "Restaurant personeel", href: "/diensten/restaurant-personeel" },
+      { label: "Keukenpersoneel", href: "/diensten/keukenpersoneel" },
+      { label: "Barpersoneel", href: "/diensten/barpersoneel" },
+      { label: "Stagehands", href: "/diensten/stagehands" },
+      {
+        label: "Productie assistentie",
+        href: "/diensten/productie-assistentie",
+      },
+      { label: "Logistiek", href: "/diensten/logistiek" },
+      { label: "Hospitality", href: "/diensten/hospitality" },
+      { label: "Locaties", href: "/locaties" },
+    ],
+  },
+  {
+    id: "opdrachtgevers",
+    label: "Opdrachtgevers",
+    href: "/opdrachtgevers",
+    items: [
+      { label: "Personeel aanvragen", href: "/contact" },
+      { label: "Voor opdrachtgevers", href: "/opdrachtgevers" },
+      { label: "Projectervaring", href: "/projecten" },
+      { label: "Diensten bekijken", href: "/diensten" },
+    ],
+  },
+  {
+    id: "medewerkers",
+    label: "Medewerkers",
+    href: "/medewerkers",
+    items: [
+      { label: "Werken bij Helping Hands", href: "/medewerkers" },
+      { label: "Vacatures bekijken", href: "/vacatures" },
+      { label: "Crew aanmelden", href: employeeApplyMailto },
+      { label: "Medewerkersportaal", href: "/portaal/medewerkers" },
+    ],
   },
 ];
 

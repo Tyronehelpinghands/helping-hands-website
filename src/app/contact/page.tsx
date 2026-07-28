@@ -246,10 +246,6 @@ export default function ContactPage() {
               <dt className="font-bold text-[#0B1F4D]">BTW</dt>
               <dd>{siteConfig.vat}</dd>
             </div>
-            <div className="sm:col-span-2">
-              <dt className="font-bold text-[#0B1F4D]">IBAN</dt>
-              <dd>{siteConfig.iban}</dd>
-            </div>
           </dl>
         </div>
 

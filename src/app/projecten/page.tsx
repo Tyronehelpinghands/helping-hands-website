@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import MobileProjectCta from "@/components/projects/MobileProjectCta";
 import ProjectCta from "@/components/projects/ProjectCta";
@@ -12,6 +13,7 @@ import ProjectsHero from "@/components/projects/ProjectsHero";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
+import { getAllProjectCases } from "@/data/projectCases";
 import {
   projectenPageDescription,
   projectenPageTitle,
@@ -92,6 +94,73 @@ export default function ProjectenPage() {
       </section>
 
       <ProjectLogoGrid />
+
+      <section className="bg-[#F5F7FA] py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <RevealOnScroll>
+            <div className="max-w-3xl">
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+                Projectcases
+              </p>
+              <h2 className="mt-3 text-2xl font-black text-[#0B1F4D] sm:text-3xl">
+                Uitgelicht: locaties en producties
+              </h2>
+              <p className="mt-4 text-base leading-8 text-[#101828]/75">
+                Een aantal locaties uitgelicht met functies, werkzaamheden en
+                context — inclusief links naar onze diensten en{" "}
+                <Link
+                  href="/locaties"
+                  className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  regionale werkgebieden
+                </Link>
+                .
+              </p>
+            </div>
+          </RevealOnScroll>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {getAllProjectCases().map((item) => (
+              <Link
+                key={item.slug}
+                href={`/projecten/${item.slug}`}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-[#F28C28]/45 hover:shadow-md"
+              >
+                {item.images[0] ? (
+                  <div className="relative flex aspect-[16/9] items-center justify-center bg-white p-6">
+                    <Image
+                      src={item.images[0].src}
+                      alt={item.images[0].alt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-contain p-6"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex aspect-[16/9] items-center justify-center bg-[#0B1F4D]/5 text-sm font-bold text-[#173A8A]">
+                    {item.city}
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
+                    {item.venueType}
+                  </p>
+                  <h3 className="mt-2 text-lg font-black text-[#0B1F4D]">
+                    {item.name}
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-6 text-[#101828]/70">
+                    {item.summary}
+                  </p>
+                  <span className="mt-4 inline-flex text-sm font-bold text-[#173A8A] transition group-hover:text-[#F28C28]">
+                    Bekijk projectervaring →
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <ProjectSectorBento />
       <ProjectCta variant="mid" />
       <ProjectStorySection />

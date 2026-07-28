@@ -27,11 +27,20 @@ const serviceLinks = [
   { href: "/diensten", label: "Alle diensten" },
 ];
 
+const locationLinks = [
+  { href: "/locaties/event-crew-amsterdam", label: "Amsterdam" },
+  { href: "/locaties/stagehands-utrecht", label: "Utrecht" },
+  { href: "/locaties/horeca-personeel-hilversum", label: "Hilversum" },
+  { href: "/locaties/festival-crew-rotterdam", label: "Rotterdam" },
+  { href: "/locaties/eventpersoneel-den-haag", label: "Den Haag" },
+  { href: "/locaties", label: "Alle locaties" },
+];
+
 export default function Footer() {
   return (
     <footer className="mt-auto bg-[#0B1F4D] text-white">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex">
               <Image
@@ -88,6 +97,21 @@ export default function Footer() {
             <ul className="mt-4 space-y-2.5 text-sm text-white/70">
               {serviceLinks.map((link) => (
                 <li key={link.label}>
+                  <Link href={link.href} className="transition hover:text-white">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F28C28]">
+              Locaties
+            </p>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+              {locationLinks.map((link) => (
+                <li key={link.href}>
                   <Link href={link.href} className="transition hover:text-white">
                     {link.label}
                   </Link>
@@ -203,7 +227,7 @@ export default function Footer() {
           </div>
           <p>
             {siteConfig.name} · {formatAddressSingleLine()} · KvK{" "}
-            {siteConfig.kvk} · BTW {siteConfig.vat} · IBAN {siteConfig.iban}
+            {siteConfig.kvk} · BTW {siteConfig.vat}
           </p>
         </div>
       </div>

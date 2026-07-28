@@ -7,6 +7,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
 import PageHero from "@/components/sections/PageHero";
+import { getLocationsForService } from "@/data/locations";
 import {
   getPublishedServiceLandings,
   getServiceLanding,
@@ -53,6 +54,7 @@ export default async function ServiceLandingPage({ params }: PageProps) {
   const otherLandings = getPublishedServiceLandings().filter(
     (item) => item.slug !== (slug as ServiceLandingSlug),
   );
+  const availableLocations = getLocationsForService(landing.slug);
   const interactiveCards =
     related.length > 0
       ? related.slice(0, 4).map((service) => ({
@@ -196,6 +198,38 @@ export default async function ServiceLandingPage({ params }: PageProps) {
             >
               Alle diensten filteren
             </Link>
+          </div>
+        ) : null}
+
+        {availableLocations.length > 0 ? (
+          <div className="mt-14">
+            <h2 className="text-2xl font-black text-[#0B1F4D]">
+              Beschikbaar in onder andere
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#101828]/70">
+              Deze dienst zetten we regelmatig in op onderstaande locaties.
+              Landelijk actief? Ook buiten deze steden vragen aan kan altijd.
+            </p>
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {availableLocations.map((location) => (
+                <li key={location.slug}>
+                  <Link
+                    href={location.path}
+                    className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-[#173A8A] transition hover:border-[#F28C28]/50"
+                  >
+                    {landing.title} in {location.city}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/locaties"
+                  className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-[#173A8A] transition hover:border-[#F28C28]/50"
+                >
+                  Alle locaties
+                </Link>
+              </li>
+            </ul>
           </div>
         ) : null}
 

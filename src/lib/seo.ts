@@ -183,6 +183,31 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   };
 }
 
+/** AboutPage JSON-LD — geen fake reviews/ratings, alleen echte org-referentie. */
+export function aboutPageJsonLd(input: {
+  path: string;
+  name: string;
+  description: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: input.name,
+    url: absoluteUrl(input.path),
+    description: input.description,
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    about: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  };
+}
+
 export function faqJsonLd(faqs: { question: string; answer: string }[]) {
   return {
     "@context": "https://schema.org",
@@ -296,6 +321,104 @@ export function jobPostingJsonLd(input: {
   }
 
   return posting;
+}
+
+/**
+ * EmploymentAgency JSON-LD scoped to a city for /locaties/[slug] pages.
+ * Reuses the organization's real address/identifiers — areaServed communicates
+ * regional coverage without claiming a separate legal branch/office.
+ */
+export function locationEmploymentAgencyJsonLd(input: {
+  city: string;
+  province: string;
+  path: string;
+  description: string;
+}) {
+  const { address } = siteConfig;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "EmploymentAgency",
+    name: `${siteConfig.name} — ${input.city}`,
+    url: absoluteUrl(input.path),
+    description: input.description,
+    parentOrganization: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: address.street,
+      postalCode: address.postalCode,
+      addressLocality: address.city,
+      addressCountry: address.countryCode,
+    },
+    areaServed: {
+      "@type": "City",
+      name: input.city,
+      containedInPlace: {
+        "@type": "AdministrativeArea",
+        name: input.province,
+      },
+    },
+    telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
+    email: siteConfig.planningEmail,
+  };
+}
+
+/** CreativeWork JSON-LD for a project case page. No Review/AggregateRating without real reviews. */
+export function projectCaseCreativeWorkJsonLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  city: string;
+  images?: string[];
+}) {
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: input.name,
+    headline: input.name,
+    description: input.description,
+    url: absoluteUrl(input.path),
+    about: input.city,
+    author: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: absoluteUrl(siteConfig.defaultOgImage),
+    },
+  };
+
+  if (input.images && input.images.length > 0) {
+    data.image = input.images.map((src) => absoluteUrl(src));
+  }
+
+  return data;
+}
+
+/** ItemList JSON-LD for the /locaties overview page. */
+export function locationsItemListJsonLd(
+  items: { name: string; path: string }[],
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Werkgebieden Helping Hands Agency",
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: absoluteUrl(item.path),
+    })),
+  };
 }
 
 /** Map free-text employment labels to schema.org employmentType where possible. */

@@ -222,9 +222,9 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     eyebrow: "Voor opdrachtgevers",
     title: "Personeel nodig zonder gedoe?",
     description:
-      "Wij helpen met crewplanning, briefing, functies, aantallen en uitvoering. Van losse inzet tot terugkerende projectondersteuning.",
+      "Voor events, producties, podiumbouw, logistiek en horeca regelen wij functies, aantallen, planning, briefing, accreditatie, urenregistratie en begeleiding op locatie — van losse inzet tot terugkerende projectondersteuning.",
     theme: "opdrachtgevers",
-    primaryCta: { label: "Aanvraag doen", href: "/contact" },
+    primaryCta: { label: "Personeel aanvragen", href: "/contact" },
     secondaryCta: { label: "Bekijk projectervaring", href: "/projecten" },
     highlights: [
       { label: "Snelle aanvraag" },

@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { getAllLocations } from "@/data/locations";
+import { getAllProjectCases } from "@/data/projectCases";
 import { getPublishedServiceLandings } from "@/lib/services";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -9,6 +11,7 @@ const marketingRoutes = [
   "/medewerkers",
   "/vacatures",
   "/projecten",
+  "/locaties",
   "/over-ons",
   "/contact",
 ] as const;
@@ -31,5 +34,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.75,
   }));
 
-  return [...core, ...landings];
+  const locations = getAllLocations().map((location) => ({
+    url: `${base}${location.path}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  const projectCases = getAllProjectCases().map((item) => ({
+    url: `${base}/projecten/${item.slug}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...core, ...landings, ...locations, ...projectCases];
 }

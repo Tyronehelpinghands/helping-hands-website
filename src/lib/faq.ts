@@ -1,3 +1,5 @@
+import { MINIMUM_BILLABLE_HOURS } from "@/lib/opdrachtgeversPolicy";
+
 export type FaqItem = {
   question: string;
   answer: string;
@@ -104,6 +106,50 @@ export const opdrachtgeversFaqs: FaqItem[] = [
     question: "Claimen jullie officiële partnerships via de projectlogo’s?",
     answer:
       "Nee. Logo’s en namen geven projectervaring en inzetgebieden weer. Officiële partnership claimen we alleen als dat expliciet vermeld staat.",
+  },
+  {
+    question: "Werken jullie met loondienst, payroll of zzp?",
+    answer:
+      "Het merendeel van onze medewerkers werkt via loondienst of payroll — voor payroll werken we samen met Fooks Payrolling. Zzp zetten we alleen in als dat beter past bij de opdracht; dit melden we vooraf en leggen we vast in onze administratie.",
+  },
+  {
+    question: "Hoe zit het met verzekering en aansprakelijkheid van jullie medewerkers?",
+    answer:
+      "Onze medewerkers zijn voor hun inzet verzekerd op een manier die past bij hun dienstverband. De precieze dekking en aansprakelijkheidsafspraken leggen we niet op de website vast — die staan in de opdrachtbevestiging en onze algemene voorwaarden. Vraag ze gerust op via contact.",
+  },
+  {
+    question: "Hoe werkt de urenregistratie bij een inzet?",
+    answer:
+      "Crew checkt in en uit via een roosterapp op locatie. Een teamcaptain, crewchief of planner controleert de uren aan de hand van de planning, waarna jij of je contactpersoon op locatie de uren accordeert voor verwerking.",
+  },
+  {
+    question: "Wat gebeurt er als de geregistreerde uren afwijken van de planning?",
+    answer:
+      "Bij afwijkingen nemen wij eerst contact met je op om dit uit te zoeken, voordat uren definitief worden verwerkt richting facturatie. Zo voorkomen we discussie achteraf.",
+  },
+  {
+    question: "Wat gebeurt er als een medewerker tijdens een dienst uitvalt?",
+    answer:
+      "We proberen zo snel mogelijk vervanging te regelen vanuit beschikbare crew. Dit lukt in de meeste gevallen, maar we kunnen niet garanderen dat er op elk moment, voor elke functie, direct een vervanger klaarstaat — vooral bij zeer kort dagelijkse spoed of specialistische functies.",
+  },
+  {
+    question: "Zijn jullie ook buiten kantoortijden bereikbaar?",
+    answer:
+      "Tijdens kantoortijden zijn we altijd bereikbaar via telefoon, WhatsApp en mail. Bij lopende producties houden we ook daarbuiten actief een lijn open voor spoedmeldingen — dit is geen garantie dat elke melding letterlijk elke minuut van de nacht direct wordt opgepakt.",
+  },
+  {
+    question: "Is er een minimale afname per medewerker?",
+    answer: `Ja. Per medewerker per inzet rekenen wij standaard minimaal ${MINIMUM_BILLABLE_HOURS} declarabele uren, tenzij in de opdrachtbevestiging schriftelijk iets anders is afgesproken.`,
+  },
+  {
+    question: "Hoe gaan jullie om met annuleringen of wijzigingen?",
+    answer:
+      "Hoe eerder je een wijziging of annulering doorgeeft, hoe beter we crew elders kunnen inzetten. Een individuele ziekmelding of no-show van één crewlid geldt niet als annulering van de hele opdracht. Exacte termijnen en eventuele gevolgen staan in de opdrachtbevestiging en onze algemene voorwaarden.",
+  },
+  {
+    question: "Waar vind ik jullie algemene voorwaarden?",
+    answer:
+      "Onze algemene voorwaarden delen we op aanvraag. Vraag ze op via contact, dan sturen we ze je toe voordat je een opdracht bevestigt.",
   },
 ];
 

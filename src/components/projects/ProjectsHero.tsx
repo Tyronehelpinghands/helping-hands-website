@@ -11,7 +11,7 @@ const heroCards = [
 const trustBullets = [
   "Crewervaring",
   "Diverse sectoren",
-  "Landelijke inzet",
+  "NL · BE · DE",
   "Projectmatig",
 ] as const;
 

@@ -1,326 +1,194 @@
-# Homepage-analyse — Helping Hands Agency
+# Homepage-analyse + SEO-score — Helping Hands Agency
 
-**Datum:** 28 juli 2026 (post-polish `09c1a14` + sprint 2)  
+**Datum:** 28 juli 2026  
 **Live:** https://helping-hands-website.vercel.app/  
-**Bron:** `src/app/page.tsx` + componenten + live snapshot  
-**Scope:** Analyse-baseline; sprint 2 implementeert resterende P1–P5-items hieronder
-
-### Sprint 2 (implementatie)
-
-- Case-snippet “Uit de praktijk” + missiezin 2022 in Why  
-- Subtiele full-bleed hero-atmosfeer (lazy, lage opacity)  
-- Mobiele dienstchips (Event / Stagehands / Horeca / Productie)  
-- CTA-fatigue: Why zonder oranje primary; ServiceCards 1 primary knop  
-- Homepage OG-image → crewfoto `concert-globe-stage.webp`  
-- Logo-carousel via `next/image`  
-- Service cards visueel lichter
+**Commit-basis:** o.a. `97d88ce` (crop-fix) + motion `17df5eb` + sprint 2  
+**Bron:** live HTML + `src/app/page.tsx` / `seo.ts` / `siteConfig.ts` / `pageHeroContent.ts`
 
 ---
 
-## Context: wat is er net verbeterd?
+## Executive summary
 
-Sinds de polish van juli 2026 (`09c1a14`) staat o.a.:
+De homepage is een **sterke, conversiegerichte landing** met duidelijke “inhuren”-propositie, dual funnel, eigen crewbeelden, motion en solide SEO-techniek.  
 
-- Lichtere **mobiele hero** (3 collage-tiles; interactive cards vanaf `md`)
-- Trustregel **Hilversum · landelijk · Bel…** in hero + TrustBar
-- Soft claim “beste crewbedrijf van Nederland” **verwijderd**
-- **Eén LCP `priority`** (hero-tile); bento lazy
-- Bento-foto’s **gededupliceerd** t.o.v. hero
-- Diensten-intro **ingekort**; dubbele oranje CTA in intro weg
-- QuickRequest: duidelijke mailto-copy + **Kopieer aanvraagtekst**
-- Header: **WhatsApp** naast bel
-- Sectorcards klikbaar naar `/projecten`
-- `.env.example` met `NEXT_PUBLIC_SITE_URL`
+**Totaalscore homepage: 8.5 / 10**  
+**SEO-score homepage: 8.6 / 10**
 
-Deze analyse beschrijft de **huidige** homepage — niet de oude gaps als open bugs.
+Grootste SEO-risico: **canonical/OG wijzen naar `helpinghandsagency.nl` terwijl de publieke host nu Vercel is** — zolang DNS/domein niet 1:1 klopt, verwatert signaal.
 
 ---
 
-## 1. Eerste indruk & scores
+## Scores (1–10)
 
-### Eerste ~3 seconden (live)
+| Dimensie | Score | Toelichting |
+|----------|------:|-------------|
+| Professionaliteit | **8.5** | Consistente brand, echte foto’s, nette secties |
+| Vertrouwen | **8.5** | Hilversum/trust, FAQ, veilige logo-claims, tel/WhatsApp |
+| Visuele creativiteit | **8** | Collage, bento, ken-burns, stagger motion |
+| Duidelijkheid | **9** | H1 “inhuren” + dual CTA’s |
+| Conversiekracht | **8.5** | Sticky CTA, QuickRequest + kopieer, spoedkanalen |
+| **SEO** | **8.6** | Sterke on-page + schema; canonical/env aandacht |
+| Mobiele ervaring | **8** | Lichtere hero, chips, sticky bar |
+| Interactiviteit | **8.5** | Motion + drawers/tabs zonder Framer |
+| Beeldgebruik | **8.5** | Lokale webp’s; face-crop thumbs-up gefixt |
+| Merkuitstraling | **8.5** | Navy/oranje + crew-identiteit |
 
-1. Navy hero + oranje accent  
-2. Merk: **Helping Hands Agency**  
-3. H1: *Event crew en horecapersoneel inhuren voor events en producties.*  
-4. CTA’s: **Personeel aanvragen** / **Crew aanmelden**  
-5. Trust pills + *Hilversum · landelijk · Bel 06…*  
-6. Desktop: crew-collage + service cards; mobiel: collage zonder cards  
-
-| Vraag | Oordeel |
-|-------|---------|
-| Duidelijk wat HH doet? | **Ja** — “inhuren” + foto’s |
-| Professioneel genoeg? | **Ja** — branded crew, consistente UI |
-| Onderscheidend? | **Sterk** t.o.v. generieke uitzend-templates |
-| Dual funnel (client + crew)? | **Ja** — hero + sticky CTA + AudienceToggle |
-| Mobiele first fold? | **Beter** dan vóór polish; collage onder CTA blijft nog relatief lang |
-
-### Scores (1–10) — juli 2026 post-polish
-
-| Dimensie | Score | Δ vs pre-polish | Toelichting |
-|----------|------:|:---------------:|-------------|
-| Professionaliteit | **8.5** | = | Brand + eigen foto’s |
-| Vertrouwen | **8.5** | +0.5 | Local/trust + veilige claims + tel/WhatsApp |
-| Visuele creativiteit | **7.5** | = | Collage/bento sterk; gradient-hero nog abstract |
-| Duidelijkheid | **9** | +0.5 | Sterke H1, kortere diensten-intro |
-| Conversiekracht | **8.5** | +0.5 | Kopieer-fallback + spoedkanalen |
-| SEO-potentie | **8.5** | = | Title/H1/landings/schema; env-canonical blijft |
-| Mobiele ervaring | **8** | +1 | Lichtere hero; tabs al select op mobiel |
-| Interactiviteit | **8** | = | Tabs, drawer, process, carousel |
-| Beeldgebruik | **8.5** | +0.5 | Minder overlap hero↔bento |
-| Merkuitstraling | **8.5** | = | Navy/oranje + echte crew |
-
-**Gemiddelde ≈ 8.4** — homepage is conversie- en merk-klaar. Resterende winst zit in diepte (cases), performance-finetune, en lengte/CTA-herhaling.
+**Gemiddelde ≈ 8.5**
 
 ---
 
-## 2. Sterke punten
+## Live SEO-check (juli 2026)
 
-1. Crystal-clear **inhuren**-propositie (title + H1 + meta)  
-2. Eigen crewfotografie (geen stock-only) in hero, bento, sectoren, CTA  
-3. Dual audience overal aanwezig zonder verwarring  
-4. Sticky header (inverted → glass) + sticky mobile CTA + desktop float  
-5. Veilige logo-claimtaal + disclaimer + FAQ over projectervaring  
-6. SEO-foundation: landings, FAQ/Organization/WebSite JSON-LD, interne links  
-7. QuickRequest met mailto **én** kopieer-fallback + tel/WhatsApp/vast  
-8. Sectievolgorde volgt bewijs → diensten → proces → aanvraag  
-9. Banned brands afwezig in actieve catalogus  
-10. Local SEO: Hilversum zichtbaar in hero, TrustBar, FAQ, footer  
+| Element | Live waarde |
+|---------|-------------|
+| **Title** | `Helping Hands Agency \| Event crew & horecapersoneel inhuren` |
+| **Meta description** | Huur event crew, stagehands en horecapersoneel… festivals, stadions, beurzen… |
+| **Canonical** | `https://helpinghandsagency.nl` |
+| **OG image** | `https://helpinghandsagency.nl/images/crew/concert-globe-stage.webp` |
+| **H1** | Event crew en horecapersoneel inhuren voor events en producties. |
+| **JSON-LD scripts** | 4 (o.a. Organization/EmploymentAgency, WebSite, FAQPage) |
 
----
+### H2-structuur (live)
 
-## 3. Zwakke punten (resterend)
+1. Professionele crew voor events, horeca en productie  
+2. Projectervaring en inzetgebieden  
+3. Onze crew in actie  
+4. Crew en ondersteuning voor elke fase van je productie.  
+5. Waar wij worden ingezet  
+6. Zo werken wij  
+7. Crew die meedenkt, niet alleen invult.  
+8. Voor elke productie de juiste handen.  
+9. Vraag snel crew aan  
+10. Antwoorden voor opdrachtgevers en crew  
 
-1. Pagina is **lang**; veel herhaalde “Personeel aanvragen” (cards + Why + Audience + Floating + eind-CTA)  
-2. Hero-achtergrond blijft **abstract gradient** — weinig full-bleed atmosfeer  
-3. Interactive hero-cards verdwijnen op mobiel → mobiele bezoeker mist snelle dienst-scan tot Diensten  
-4. Geen harde metrics (reactietijd, #crew, cases) — trust is soft  
-5. Carousel gebruikt nog `<img>` (lazy ok; sizing/CLS minder strak dan `next/image`)  
-6. Canonical hangt aan `NEXT_PUBLIC_SITE_URL` / default domain — preview vs productie blijft aandachtspunt  
-7. OG-image nog logo-achtig i.p.v. sterke crew-shot  
-8. Missie/verhaal Tyrone 2022 leeft sterker op `/over-ons` dan op home  
-9. Service cards nog relatief “card-heavy” (borders/shadows)  
-10. Deployment-foto’s overlap deels met hero-sectorbeelden (bewust breed, maar herkenbaar)
+→ Eén H1, logische H2’s, keyword “crew / personeel / inhuren / events / horeca” terugkerend zonder stuffing.
 
 ---
 
-## 4. Hero
+## SEO-scorekaart (detail)
 
-| Element | Huidige staat |
-|---------|----------------|
-| H1 | Event crew en horecapersoneel **inhuren**… ✅ |
-| CTA’s | Personeel aanvragen → `/contact`; Crew aanmelden → `/vacatures` |
-| Trust | Pills + Hilversum/landelijk/`tel:` |
-| Media | 3 tiles mobiel / 5 vanaf `sm`; cards vanaf `md` |
-| LCP | Alleen collage[0] `priority` ✅ |
+| SEO-onderdeel | Score | Status |
+|---------------|------:|--------|
+| Title tag | **9** | Merk + primaire intent “inhuren” |
+| Meta description | **8.5** | Diensten + context + benefit; ~155–170 tekens-achtig |
+| H1 | **9.5** | Exact match intent; niet te lang |
+| Heading-hiërarchie | **9** | 1× H1, duidelijke H2’s |
+| Keyword coverage | **8.5** | event crew, horeca, stagehands, festivals/stadions… |
+| Interne links | **9** | Landings `/diensten/*`, projecten, contact, vacatures |
+| Alt-teksten | **8.5** | Beschrijvend op crewfoto’s |
+| Canonical | **6.5** | Domein ≠ live Vercel-host (risico) |
+| Open Graph / Twitter | **8.5** | Crew-OG aanwezig; URL volgt siteConfig |
+| Structured data | **9** | Org + EmploymentAgency + WebSite + FAQ |
+| Local SEO | **8.5** | Hilversum in body/FAQ/address schema |
+| Sitemap / robots | **9** | Core + landings; dashboards geblokkeerd |
+| Content depth | **8** | FAQ + diensten + missie; weinig unieke cases |
+| Performance SEO | **8** | 1 LCP priority; veel client islands / motion |
+| Thin/duplicate risk | **8.5** | Landings bestaan; home is hub |
 
-**Oordeel:** desktop compositie is sterk; mobiel is merkbaar lichter. Volgende stap optioneel: één soft full-bleed foto achter gradient (lage opacity), of mobiele mini-dienstchips i.p.v. volle cards.
-
----
-
-## 5. Header / navigatie
-
-- Transparent op dark hero → glass/compact na scroll  
-- Progress bar aanwezig  
-- Tel + WhatsApp vanaf `sm`  
-- CTA “Personeel aanvragen” / mobiel “Aanvragen”  
-- MobileMenu met Escape/overlay  
-
-**Oordeel:** voldoet aan sticky-scroll brief. Finetune: header-contrast bij scroll over collage; 320px spacing blijven bewaken.
+**Gewogen SEO-totaal: 8.6 / 10**
 
 ---
 
-## 6. Sectievolgorde (huidig)
+## Wat SEO al goed doet
 
-1. PageHero  
+1. **Intent-match:** title + H1 op “event crew / horecapersoneel **inhuren**”  
+2. **EmploymentAgency + Organization** schema met adres, KvK, telefoons, `knowsAbout`  
+3. **FAQPage** JSON-LD gekoppeld aan zichtbare FAQ  
+4. **WebSite** schema in layout  
+5. **Published SEO-landings** + interne deep links vanaf home  
+6. **robots.txt** blokkeert login/dashboard/api; sitemap wijst marketing + landings  
+7. **Local:** Hilversum zichtbaar (hero, TrustBar, FAQ)  
+8. **OG** gebruikt crewfoto i.p.v. alleen logo  
+9. Veilige claimtaal (geen nep-AggregateRating / partnerclaims)
+
+---
+
+## SEO-zwaktes / risico’s
+
+1. **Canonical naar `helpinghandsagency.nl` terwijl traffic op `*.vercel.app` zit**  
+   - Als custom domain niet (correct) live is: Google kan de verkeerde host indexeren of signalen splitsen.  
+   - Fix: `NEXT_PUBLIC_SITE_URL` gelijk trekken aan de échte productie-host.
+
+2. **OG/canonical absolute URLs** volgen dezelfde env — zelfde risico.
+
+3. **Weinige “proof snippets” met unieke long-tail** (bijv. “event crew Hilversum inhuren” in body is soft; kan 1 zin sterker).
+
+4. **Geen BreadcrumbList** op home (niet kritiek voor `/`).
+
+5. **Motion/JS islands** kunnen LCP/INP raken → indirect SEO via Core Web Vitals.
+
+6. **Case-content** nog generiek (“festival load-in”) — veilig, maar weinig unikere indexeerbare diepte.
+
+---
+
+## Keyword mapping (home)
+
+| Intent | Aanwezig? | Waar |
+|--------|-----------|------|
+| event crew inhuren | ✅ | title, H1, meta, diensten |
+| horecapersoneel inhuren | ✅ | title, H1, meta |
+| stagehands | ✅ | meta, diensten-links |
+| personeel festival / stadion / beurs | ✅ | meta + sectoren |
+| crew agency / crewbedrijf Nederland | ⚠️ soft | merk + body, niet exact in title |
+| event crew Hilversum | ✅ | local phrases + FAQ |
+| bar/keuken/restaurant personeel | ✅ | diensten + FAQ |
+
+---
+
+## UX / conversie (kort)
+
+**Sterk:** dual CTA, sticky mobile bar, QuickRequest + kopieer, spoed tel/WhatsApp, motion die premium voelt.  
+**Let op:** lange pagina; CTA’s nog frequent (bewust verminderd in sprint 2).  
+**Beeld:** thumbs-up face-crop gefixt (`object-position: 50% 0%`).
+
+---
+
+## Sectievolgorde (huidig)
+
+1. Hero (+ motion + collage)  
 2. TrustBar  
 3. LogoCarousel  
-4. HomeCrewBento  
-5. ServicesSection  
-6. DeploymentCards  
-7. ProcessAccordion  
-8. WhyHelpingHands  
+4. Crew bento  
+5. Diensten  
+6. Sectoren  
+7. Werkwijze  
+8. Why (+ missie + case)  
 9. AudienceToggle  
-10. QuickRequestForm  
-11. FaqSection  
-12. CTASection  
+10. QuickRequest  
+11. FAQ  
+12. Eind-CTA  
 
-**Oordeel:** behouden. Eventueel AudienceToggle eerder als compact strip — geen harde noodzaak.
-
-| Sectie | Advies |
-|--------|--------|
-| Hero | Keep + optioneel atmosfeer |
-| TrustBar | Keep |
-| LogoCarousel | Keep; next/image overwegen |
-| Bento | Keep |
-| Diensten | Keep; card-UI licht vereenvoudigen |
-| Sectoren | Keep (nu met link `/projecten`) |
-| Werkwijze | Keep |
-| Why | Keep (claims veilig) |
-| Audience | Keep |
-| QuickRequest | Keep |
-| FAQ / CTA | Keep |
+→ Conversieflow blijft sterk; SEO-hubrol oké.
 
 ---
 
-## 7. Beeldgebruik
+## Prioriteiten (SEO eerst)
 
-- **Hero set:** scaffolding-wide, thumbs-up, stadium, chef, standbouw  
-- **Bento set:** arena, crew-woman, harness, scaffolding-portrait, forklift, crew-field-03  
-- **Sectoren:** festival / concert / stadium / beurs / horeca / producties  
+### P1 — Techniek
+- Productie-`NEXT_PUBLIC_SITE_URL` = echte live domain  
+- Verifieer dat canonical/OG/sitemap/host allemaal dezelfde origin gebruiken  
 
-Overlap hero↔bento is bewust verlaagd. Sectoren delen nog sfeer met hero (logistiek/scaffolding) — acceptabel. Geen externe hotlinks.
+### P2 — On-page
+- 1–2 extra lokale zinnen (“event crew Hilversum / Midden-Nederland”) in TrustBar of Why  
+- Optioneel title-test: `… inhuren | Hilversum` alleen als domein lokaal moet ranken  
 
----
+### P3 — Diepte
+- 1 echte case-blok met unieke tekst (zonder partnership-claim)  
+- OG 1200×630 dedicated crop (nu landscape crew — oké, kan scherper)
 
-## 8. Logo-carousel
-
-- Claim: Crewervaring / projectervaring — **geen partnerships**  
-- Priority: Crewstars, Factor F, TAP Crew, Backstage Masters, Jaarbeurs  
-- Banned (ID&T, Ironman, The Good Guyz, Your Productions, LOC7000, Q-dance): **niet in catalogus**  
-- Disclaimer + `/projecten` CTA aanwezig  
-- Cards iets groter na polish  
-
-Restpunt: `ProjectLogoCard` carousel = lazy `<img>`; broken → `null` (kan gaten geven).
-
----
-
-## 9. Diensten
-
-- Featured-first + drawer + landingslinks  
-- Mobiel: `<select>` i.p.v. volle tabstrip ✅  
-- Intro: 1 alinea + landingslinks + knoppenrij (zonder extra oranje CTA)  
-
-Restpunt: 9 filters op desktop blijven breed; cards kunnen visueel lichter.
-
----
-
-## 10. Conversie
-
-| Pad | Status |
-|-----|--------|
-| Primary CTA | Overal aanwezig; soms te frequent |
-| QuickRequest | Mailto + **Kopieer** + spoedblok |
-| Sticky mobile | Personeel \| Werken |
-| Header | Tel + WhatsApp + Aanvragen |
-| Eind-CTA | Dual: contact + vacatures |
-
-**Risico:** CTA-fatigue, niet te weinig CTA’s.  
-**Kans:** 1 echte case-snippet of “wat we nodig hebben”-checklist dichter bij QuickRequest.
-
----
-
-## 11. SEO
-
-| Item | Waarde / status |
-|------|-----------------|
-| Title | `Helping Hands Agency \| Event crew & horecapersoneel inhuren` |
-| H1 | Matcht intent “inhuren” |
-| Description | `siteConfig.description` (events/horeca/briefing) |
-| Schemas | FAQPage (home) + Organization + WebSite (layout) |
-| Canonical | `siteConfig.url` ← `NEXT_PUBLIC_SITE_URL` |
-| Interne links | Sterk naar `/diensten/*`, `/projecten`, `/contact`, `/vacatures` |
-
-**Primair keywords:** event crew inhuren, horecapersoneel inhuren, stagehands, personeel evenementen, crew agency Nederland.  
-**Lokaal:** Hilversum / Midden-Nederland — aanwezig in body + FAQ.
-
----
-
-## 12. Content & tone
-
-- Direct B2B Nederlands, operationeel  
-- Claims veilig na polish  
-- Dual voice behouden  
-- Missie (jongeren/2022) nog dun op home — oké als bewuste keuze  
-
----
-
-## 13. Interactie
-
-Aanwezig: RevealOnScroll, header progress, carousel pause/hover, service drawer, process stepper/accordion, audience toggle, hero cards (md+).  
-Geen Framer Motion. Reduced-motion grotendeels gerespecteerd.
-
----
-
-## 14. Mobile
-
-- Sticky CTA + `pb-20` voorkomt bedekking  
-- Hero lichter; collage blijft onder fold-content  
-- Service filter = select  
-- QuickRequest type-grid nog lang maar bruikbaar  
-- Geen horizontale page-scroll verwacht bij huidige layouts  
-
----
-
-## 15. Performance
-
-| Onderwerp | Status |
-|-----------|--------|
-| LCP priority | 1× hero ✅ |
-| Bento | lazy ✅ |
-| Images | webp + `next/image` op kernsecties |
-| Client islands | Nog veel (hero, services, process, forms) — acceptabel |
-| Carousel | `<img>` lazy |
-| CWV focus | LCP hero; CLS via aspect boxes |
-
----
-
-## 16. Prioriteiten (volgende iteratie)
-
-### P1 — Diepte & conversie
-- Optioneel 1 case-snippet (zonder partnership-claim) nabij Why of QuickRequest  
-- CTA-herhaling in Why/Audience finetunen (niet verwijderen waar het waarde heeft)
-
-### P2 — Visuele premium
-- Subtiele full-bleed hero-atmosfeer (lage opacity)  
-- OG-image crew-shot 1200×630  
-- Service cards visueel lichter
-
-### P3 — Mobiel dienst-scan
-- Compacte dienstchips op mobiel i.p.v. niets tot Diensten-sectie
-
-### P4 — Techniek
-- Production `NEXT_PUBLIC_SITE_URL` op Vercel verifiëren  
-- Carousel naar `next/image` waar zinvol  
-
-### P5 — Merkverhaal
-- 1 zin missie/Tyrone 2022 op home (niet in hero — bij Why of Audience)
-
----
-
-## Top 10 resterende verbeteringen
-
-1. Case-snippet zonder partnership-claim  
-2. Hero full-bleed atmosfeer (subtiel)  
-3. Mobiele mini-dienstchips  
-4. CTA-fatigue reduceren in mid-page  
-5. OG crew-image  
-6. Canonical/env productie check  
-7. Carousel `next/image`  
-8. Service card UI lichter  
-9. 1 zin maatschappelijke missie op home  
-10. Optioneel harde trust-metric alleen als echt meetbaar  
-
----
-
-## Componentkaart
-
-| UI | Pad |
-|----|-----|
-| Page | `src/app/page.tsx` |
-| Hero | `sections/PageHero`, highlights, interactive cards |
-| Trust / Why / FAQ | `TrustBar`, `WhyHelpingHands`, `FaqSection` |
-| Logo’s | `LogoCarousel`, `ProjectLogoCard` |
-| Crew | `HomeCrewBento`, `crewPhotos.ts` |
-| Diensten | `ServicesSection`, `ServiceTabs`, `ServiceCard`, drawer |
-| Sectoren | `DeploymentCards` |
-| Conversie | `QuickRequestForm`, `AudienceToggle`, `CTASection`, `FloatingCTA` |
-| Header | `PublicHeader`, `MobileMenu`, `useScrollHeader` |
+### P4 — CWV
+- Motion sparend houden; LCP blijft 1× hero priority  
+- Monitor INP na motion-release  
 
 ---
 
 ## Conclusie
 
-De homepage is **niet meer “basis”**: professioneel, dual-funnel, SEO-klaar, veilig in claims, en na `09c1a14` merkbaar beter op mobiel en conversie-frictie. Volgende stappen zijn **premium diepte** (cases, atmosfeer, OG) en **finetune** (CTA-volume, carousel techniek, env), geen layout-teardown.
+| Vraag | Antwoord |
+|-------|----------|
+| Is de homepage “af” als landing? | **Ja, op hoog niveau** — polish + motion + conversie |
+| SEO-klaar om te ranken? | **Ja voor foundation**; winst zit in **domein/canonical consistentie** + lokale/case-diepte |
+| SEO-score | **8.6 / 10** |
+| Homepage-totaal | **8.5 / 10** |
 
-*Implementatieprompt voor resterende items: `docs/homepage-improvement-cursor-prompt.md` (update indien nieuwe sprint).*
+*Dit document vervangt de eerdere baseline als actuele stand van juli 2026.*
