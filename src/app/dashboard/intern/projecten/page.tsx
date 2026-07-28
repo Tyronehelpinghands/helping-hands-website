@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
-import ProjectsDashboardClient from "@/components/projects/ProjectsDashboardClient";
-import { getProjectsPageData } from "@/lib/projects-server";
+import { ProjectsMvpClient } from "@/components/dashboard/mvp/ProjectsMvpClient";
+import {
+  getClients,
+  getDashboardStats,
+  getInvoiceDrafts,
+  getProjects,
+  getShifts,
+  getTasks,
+  getTimeEntries,
+} from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Projecten | Intern dashboard",
@@ -9,9 +17,26 @@ export const metadata: Metadata = {
 };
 
 export default async function InternProjectenPage() {
-  const { projects, source } = await getProjectsPageData();
+  const [projects, clients, shifts, timeEntries, invoices, tasks, stats] =
+    await Promise.all([
+      getProjects(),
+      getClients(),
+      getShifts(),
+      getTimeEntries(),
+      getInvoiceDrafts(),
+      getTasks(),
+      getDashboardStats(),
+    ]);
 
   return (
-    <ProjectsDashboardClient initialProjects={projects} dataSource={source} />
+    <ProjectsMvpClient
+      projects={projects}
+      clients={clients}
+      shifts={shifts}
+      timeEntries={timeEntries}
+      invoices={invoices}
+      tasks={tasks}
+      tablesReady={stats.tablesReady}
+    />
   );
 }

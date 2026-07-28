@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireInternApiAccess } from "@/lib/api-auth";
-import { getGmailConfigStatus } from "@/lib/integrations/gmail";
+import { getGmailConfigStatusAsync } from "@/lib/integrations/gmail";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +9,7 @@ export async function GET() {
   const auth = await requireInternApiAccess();
   if ("error" in auth && auth.error) return auth.error;
 
-  const status = getGmailConfigStatus();
+  const status = await getGmailConfigStatusAsync();
 
   if (!status.configured) {
     return NextResponse.json({
@@ -20,14 +20,16 @@ export async function GET() {
       missing: status.missing,
       sender: status.sender,
       mailboxes: status.mailboxes,
+      canConnect: status.canConnect,
     });
   }
 
   return NextResponse.json({
     ok: true,
     configured: true,
-    message: "Gmail API OAuth env-vars aanwezig (server-side).",
+    message: "Gmail API OAuth geconfigureerd (server-side).",
     sender: status.sender,
     mailboxes: status.mailboxes,
+    canConnect: status.canConnect,
   });
 }

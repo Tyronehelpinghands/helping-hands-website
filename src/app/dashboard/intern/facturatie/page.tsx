@@ -1,14 +1,32 @@
 import type { Metadata } from "next";
-import InvoiceDashboardClient from "@/components/dashboard/facturatie/InvoiceDashboardClient";
+import { InvoiceMvpClient } from "@/components/dashboard/mvp/InvoiceMvpClient";
+import {
+  getApprovedUninvoicedTimeEntries,
+  getDashboardStats,
+  getInvoiceDrafts,
+  getProjects,
+} from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Facturatie | Intern dashboard",
   description:
-    "Maak factuurconcepten op basis van goedgekeurde uren en stuur concepten naar Moneybird.",
+    "Maak factuurconcepten op basis van goedgekeurde uren. Moneybird blijft voorbereid.",
 };
 
-// TODO: later alleen interne admins/planners toegang geven via echte auth/rollen
+export default async function InternFacturatiePage() {
+  const [drafts, projects, approvedEntries, stats] = await Promise.all([
+    getInvoiceDrafts(),
+    getProjects(),
+    getApprovedUninvoicedTimeEntries(),
+    getDashboardStats(),
+  ]);
 
-export default function InternFacturatiePage() {
-  return <InvoiceDashboardClient />;
+  return (
+    <InvoiceMvpClient
+      drafts={drafts}
+      projects={projects}
+      approvedEntries={approvedEntries}
+      tablesReady={stats.tablesReady}
+    />
+  );
 }

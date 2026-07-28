@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import HoursDashboardClient from "@/components/dashboard/uren/HoursDashboardClient";
+import { HoursMvpClient } from "@/components/dashboard/mvp/HoursMvpClient";
+import {
+  getCrewMembers,
+  getDashboardStats,
+  getProjects,
+  getTimeEntries,
+} from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Urenregistratie | Intern dashboard",
@@ -7,8 +13,20 @@ export const metadata: Metadata = {
     "Controleer en keur uren goed per project en crewlid, bereken reiskosten en bereid facturatie voor.",
 };
 
-// TODO: later koppelen aan echte auth/rollen — layout beveiligt al admin/planner via intern layout
+export default async function InternUrenregistratiePage() {
+  const [entries, projects, crew, stats] = await Promise.all([
+    getTimeEntries(),
+    getProjects(),
+    getCrewMembers(),
+    getDashboardStats(),
+  ]);
 
-export default function InternUrenregistratiePage() {
-  return <HoursDashboardClient />;
+  return (
+    <HoursMvpClient
+      entries={entries}
+      projects={projects}
+      crew={crew}
+      tablesReady={stats.tablesReady}
+    />
+  );
 }

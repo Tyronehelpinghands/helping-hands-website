@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   CheckCircle2,
+  Copy,
   ExternalLink,
   Loader2,
   Mail,
@@ -24,6 +25,13 @@ import type { IntegrationStatusType } from "@/lib/settings";
 import { siteConfig } from "@/lib/siteConfig";
 import { cn } from "@/lib/utils";
 
+export type GmailFlash = {
+  status: string;
+  message?: string;
+  needsEnv?: boolean;
+  pendingRefreshToken?: string | null;
+};
+
 export type IntegrationHubProps = {
   supabaseConfigured: boolean;
   whatsappConfigured: boolean;
@@ -32,8 +40,10 @@ export type IntegrationHubProps = {
   gmailConfigured: boolean;
   gmailMissing: string[];
   gmailSender?: string;
+  gmailCanConnect?: boolean;
   mailboxes: SharedMailbox[];
   whatsappTemplates: Array<{ id: string; label: string; body: string }>;
+  gmailFlash?: GmailFlash | null;
 };
 
 function configBadge(configured: boolean): IntegrationStatusType {
@@ -56,8 +66,10 @@ export default function IntegrationsHubClient({
   gmailConfigured,
   gmailMissing,
   gmailSender,
+  gmailCanConnect = false,
   mailboxes,
   whatsappTemplates,
+  gmailFlash = null,
 }: IntegrationHubProps) {
   const [waTo, setWaTo] = useState(siteConfig.phoneTel.replace("+", ""));
   const [waBody, setWaBody] = useState(whatsappTemplates[0]?.body ?? "");
@@ -69,6 +81,23 @@ export default function IntegrationsHubClient({
   const [mailBody, setMailBody] = useState("");
   const [mailSending, setMailSending] = useState(false);
   const [mailFeedback, setMailFeedback] = useState<string | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
+  const [hideToken, setHideToken] = useState(false);
+
+  const pendingToken =
+    !hideToken && gmailFlash?.pendingRefreshToken
+      ? gmailFlash.pendingRefreshToken
+      : null;
+
+  async function copyRefreshToken() {
+    if (!pendingToken) return;
+    try {
+      await navigator.clipboard.writeText(pendingToken);
+      setTokenCopied(true);
+    } catch {
+      setTokenCopied(false);
+    }
+  }
 
   async function sendWhatsAppApi() {
     setWaSending(true);
@@ -128,6 +157,67 @@ export default function IntegrationsHubClient({
 
   return (
     <div className="space-y-6">
+      {gmailFlash?.status === "error" && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+        >
+          Gmail-koppeling mislukt
+          {gmailFlash.message ? `: ${gmailFlash.message}` : "."}
+        </div>
+      )}
+
+      {gmailFlash?.status === "connected" && !pendingToken && (
+        <div
+          role="status"
+          className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+        >
+          Gmail OAuth gelukt.
+          {gmailConfigured
+            ? " API is klaar voor verzenden."
+            : " Zet ontbrekende env-vars in Vercel indien nodig."}
+        </div>
+      )}
+
+      {pendingToken && (
+        <div
+          role="status"
+          className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+        >
+          <p className="font-semibold">
+            Zet <code className="rounded bg-amber-100 px-1">GOOGLE_REFRESH_TOKEN</code>{" "}
+            in Vercel
+          </p>
+          <p className="text-xs text-amber-900/80">
+            Dit token wordt één keer getoond (alleen voor ingelogde interne
+            gebruikers). Kopieer het naar Vercel env en redeploy. Deel het niet.
+          </p>
+          <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-white/80 p-3 text-xs">
+            {pendingToken}
+          </pre>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={copyRefreshToken}
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {tokenCopied ? "Gekopieerd" : "Kopieer token"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setHideToken(true)}
+            >
+              Verberg
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
           <CardHeader className="pb-2">
@@ -211,20 +301,38 @@ export default function IntegrationsHubClient({
                 ? "OAuth env aanwezig."
                 : `Ontbreekt: ${gmailMissing.join(", ") || "OAuth vars"}.`}
             </p>
-            <a
-              href={mailto(
-                siteConfig.planningEmail,
-                "Helping Hands",
-                "Hoi,\n\n",
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={mailto(
+                  siteConfig.planningEmail,
+                  "Helping Hands",
+                  "Hoi,\n\n",
+                )}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "w-fit gap-1.5",
+                )}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Open mailto
+              </a>
+              {!gmailConfigured && (
+                <a
+                  href="/api/gmail/connect"
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "w-fit gap-1.5",
+                  )}
+                  title={
+                    gmailCanConnect
+                      ? "Start Google OAuth"
+                      : "Zet eerst GOOGLE_CLIENT_ID en GOOGLE_CLIENT_SECRET in Vercel"
+                  }
+                >
+                  Gmail koppelen
+                </a>
               )}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "w-fit gap-1.5",
-              )}
-            >
-              <Mail className="h-3.5 w-3.5" />
-              Open mailto
-            </a>
+            </div>
           </CardContent>
         </Card>
 

@@ -1,31 +1,27 @@
 import type { Metadata } from "next";
-import SalesDashboardClient from "@/components/dashboard/sales/SalesDashboardClient";
-import {
-  pipelineDeals,
-  salesFollowUps,
-  salesKpiCards,
-  salesLeads,
-  salesPipeline,
-} from "@/data/salesMockData";
-import { isHubSpotConfigured } from "@/lib/hubspot";
+import { SalesMvpClient } from "@/components/dashboard/mvp/SalesMvpClient";
+import { getClients, getDashboardStats, getLeads } from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Sales dashboard | Intern dashboard",
   description:
-    "Beheer leads, deals, follow-ups en HubSpot synchronisatie voor Helping Hands Agency.",
+    "Beheer opdrachtgevers, leads en follow-ups voor Helping Hands Agency.",
 };
 
-export default function InternSalesPage() {
-  const hubspotConfigured = isHubSpotConfigured();
+export default async function InternSalesPage() {
+  const [clients, leads, stats] = await Promise.all([
+    getClients(),
+    getLeads(),
+    getDashboardStats(),
+  ]);
 
   return (
-    <SalesDashboardClient
-      kpiCards={salesKpiCards}
-      pipeline={salesPipeline}
-      deals={pipelineDeals}
-      leads={salesLeads}
-      followUps={salesFollowUps}
-      hubspotConfigured={hubspotConfigured}
+    <SalesMvpClient
+      clients={clients}
+      leads={leads}
+      tablesReady={stats.tablesReady}
+      errorMessage={stats.errorMessage}
+      mode="sales"
     />
   );
 }

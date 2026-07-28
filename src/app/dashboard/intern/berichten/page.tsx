@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
-import MessagesDashboardClient from "@/components/dashboard/berichten/MessagesDashboardClient";
+import { MessagesMvpClient } from "@/components/dashboard/mvp/MessagesMvpClient";
+import {
+  getDashboardStats,
+  getInternalMessages,
+} from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Berichten | Intern dashboard",
   description:
-    "Beheer communicatie met crew, opdrachtgevers, sollicitanten en interne planning.",
+    "Berichtconcepten met mailto/WhatsApp-fallbacks. Automatisch verzenden later.",
 };
 
-// TODO: later koppelen aan echte auth/rollen zodat alleen interne admins/planners communicatie kunnen beheren
+export default async function InternBerichtenPage() {
+  const [messages, stats] = await Promise.all([
+    getInternalMessages(),
+    getDashboardStats(),
+  ]);
 
-export default function InternBerichtenPage() {
-  return <MessagesDashboardClient />;
+  return (
+    <MessagesMvpClient messages={messages} tablesReady={stats.tablesReady} />
+  );
 }

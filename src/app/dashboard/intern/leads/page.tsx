@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import LeadsDashboardClient from "@/components/leads/LeadsDashboardClient";
-import { getLeadsPageData } from "@/lib/leads-server";
-import { isHubSpotConfigured } from "@/lib/hubspot";
+import { LeadsMvpClient } from "@/components/dashboard/mvp/SalesMvpClient";
+import { getDashboardStats, getLeads } from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Leads | Intern dashboard",
@@ -10,15 +9,13 @@ export const metadata: Metadata = {
 };
 
 export default async function InternLeadsPage() {
-  const { leads, followUps, source } = await getLeadsPageData();
-  const hubspotConfigured = isHubSpotConfigured();
+  const [leads, stats] = await Promise.all([getLeads(), getDashboardStats()]);
 
   return (
-    <LeadsDashboardClient
-      initialLeads={leads}
-      initialFollowUps={followUps}
-      dataSource={source}
-      hubspotConfigured={hubspotConfigured}
+    <LeadsMvpClient
+      leads={leads}
+      tablesReady={stats.tablesReady}
+      errorMessage={stats.errorMessage}
     />
   );
 }

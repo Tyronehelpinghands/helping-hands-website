@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
-import FinanceDashboardClient from "@/components/dashboard/financien/FinanceDashboardClient";
+import { FinanceMvpClient } from "@/components/dashboard/mvp/FinanceMvpClient";
+import {
+  getDashboardStats,
+  getFinanceSummary,
+} from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Financiën | Intern dashboard",
   description:
-    "Inzicht in omzet, kosten, marge, btw, openstaande facturen en financiële acties.",
+    "Inzicht in omzet, kosten, marge en openstaande concepten uit echte data.",
 };
 
-// TODO: later alleen interne admins/planners toegang geven via echte auth/rollen
+export default async function InternFinancienPage() {
+  const [summary, stats] = await Promise.all([
+    getFinanceSummary(),
+    getDashboardStats(),
+  ]);
 
-export default function InternFinancienPage() {
-  return <FinanceDashboardClient />;
+  return (
+    <FinanceMvpClient summary={summary} tablesReady={stats.tablesReady} />
+  );
 }

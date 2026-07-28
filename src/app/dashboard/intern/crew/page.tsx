@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import CrewDashboardClient from "@/components/dashboard/crew/CrewDashboardClient";
+import { CrewMvpClient } from "@/components/dashboard/mvp/CrewMvpClient";
+import { getCrewMembers, getDashboardStats } from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Crew | Intern dashboard",
@@ -7,8 +8,11 @@ export const metadata: Metadata = {
     "Beheer crewleden, beschikbaarheid, functies, certificaten en Shiftbase-koppeling.",
 };
 
-// TODO: later koppelen aan echte auth/rollen — layout beveiligt al admin/planner via intern layout
+export default async function InternCrewPage() {
+  const [crew, stats] = await Promise.all([
+    getCrewMembers(),
+    getDashboardStats(),
+  ]);
 
-export default function InternCrewPage() {
-  return <CrewDashboardClient />;
+  return <CrewMvpClient crew={crew} tablesReady={stats.tablesReady} />;
 }

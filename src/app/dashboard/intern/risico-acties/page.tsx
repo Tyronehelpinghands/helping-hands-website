@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import RiskActionDashboardClient from "@/components/dashboard/risico-acties/RiskActionDashboardClient";
+import { TasksMvpClient } from "@/components/dashboard/mvp/TasksMvpClient";
+import { getDashboardStats, getTasks } from "@/lib/dashboard/queries";
 
 export const metadata: Metadata = {
   title: "Risico & Acties | Intern dashboard",
@@ -7,8 +8,8 @@ export const metadata: Metadata = {
     "Beheer operationele risico's, openstaande acties, deadlines en opvolging.",
 };
 
-// TODO: later alleen interne admins/planners toegang geven via echte auth/rollen
+export default async function InternRisicoActiesPage() {
+  const [tasks, stats] = await Promise.all([getTasks(), getDashboardStats()]);
 
-export default function InternRisicoActiesPage() {
-  return <RiskActionDashboardClient />;
+  return <TasksMvpClient tasks={tasks} tablesReady={stats.tablesReady} />;
 }
