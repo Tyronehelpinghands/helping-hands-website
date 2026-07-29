@@ -117,11 +117,23 @@ export default function IntegrationsHubClient({
         ok?: boolean;
         message?: string;
         error?: string;
+        statusCode?: number | null;
+        endpointUsed?: string;
+        imported?: number;
+        updated?: number;
+        skipped?: number;
       };
       if (!res.ok || data.ok === false) {
         setShiftbaseSyncOk(false);
+        const statusPart =
+          data.statusCode != null ? `HTTP ${data.statusCode}` : `HTTP ${res.status}`;
+        const endpointPart = data.endpointUsed
+          ? ` · endpoint ${data.endpointUsed}`
+          : "";
+        const cause =
+          data.error || data.message || "Medewerkers synchroniseren mislukt.";
         setShiftbaseSyncMessage(
-          data.error || data.message || "Medewerkers synchroniseren mislukt.",
+          `${statusPart}${endpointPart}. ${cause} Actie: Controleer Public API token, App Center Plus en endpoint.`,
         );
         return;
       }
@@ -131,7 +143,9 @@ export default function IntegrationsHubClient({
       );
     } catch {
       setShiftbaseSyncOk(false);
-      setShiftbaseSyncMessage("Netwerkfout tijdens synchroniseren.");
+      setShiftbaseSyncMessage(
+        "Netwerkfout tijdens synchroniseren. Actie: Controleer Public API token, App Center Plus en endpoint.",
+      );
     } finally {
       setShiftbaseSyncing(false);
     }
@@ -497,8 +511,8 @@ export default function IntegrationsHubClient({
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
               {shiftbaseConfigured
-                ? "Shiftbase API key/token aanwezig. Synchroniseer medewerkers naar Crew, of test de API."
-                : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in Vercel."}
+                ? "Shiftbase API key/token aanwezig. Synchroniseer medewerkers via /users naar Crew, of test de API."
+                : "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt in Vercel."}
             </p>
             {shiftbaseSyncMessage ? (
               <p

@@ -22,6 +22,8 @@ type SyncEmployeesResponse = {
   errors?: string[];
   message?: string;
   error?: string;
+  statusCode?: number | null;
+  endpointUsed?: string;
 };
 
 export default function ShiftbaseSyncPanel({
@@ -42,36 +44,52 @@ export default function ShiftbaseSyncPanel({
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/shiftbase/config-status");
-      const data = await res.json();
+      const res = await fetch("/api/shiftbase/status");
+      const data = (await res.json()) as {
+        connected?: boolean;
+        ok?: boolean;
+        statusCode?: number | null;
+        endpointUsed?: string;
+        message?: string;
+        error?: string;
+      };
 
       if (!res.ok) {
         setState("not_linked");
         setMessage(
           typeof data.error === "string"
             ? data.error
-            : "Niet ingelogd of geen toegang.",
+            : typeof data.message === "string"
+              ? data.message
+              : "Niet ingelogd of geen toegang.",
         );
         return;
       }
 
-      if (data.configured) {
-        const testRes = await fetch("/api/shiftbase/test");
-        const testData = await testRes.json();
-        if (testRes.ok && testData.ok) {
-          setState("ready");
-          setMessage("Shiftbase koppeling actief.");
-        } else {
-          setState("error");
-          setMessage(
-            typeof testData.error === "string"
-              ? testData.error.slice(0, 120)
-              : "Koppeling geconfigureerd maar API-test mislukt.",
-          );
-        }
-      } else {
+      if (data.connected || data.ok) {
+        setState("ready");
+        setMessage(
+          data.message ||
+            `Shiftbase koppeling actief${data.endpointUsed ? ` (${data.endpointUsed})` : ""}.`,
+        );
+      } else if (data.statusCode == null && !data.connected) {
         setState("not_linked");
-        setMessage("SHIFTBASE_API_TOKEN ontbreekt op de server.");
+        setMessage(
+          data.message ||
+            "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt op de server.",
+        );
+      } else {
+        setState("error");
+        const statusPart =
+          data.statusCode != null ? `HTTP ${data.statusCode}` : "Fout";
+        const endpointPart = data.endpointUsed
+          ? ` · ${data.endpointUsed}`
+          : "";
+        setMessage(
+          `${statusPart}${endpointPart}. ${
+            data.message || "Koppeling geconfigureerd maar API-test mislukt."
+          } Actie: Controleer Public API token, App Center Plus en endpoint.`,
+        );
       }
     } catch {
       setState("not_linked");
@@ -91,10 +109,17 @@ export default function ShiftbaseSyncPanel({
       const data = (await res.json()) as SyncEmployeesResponse;
       if (!res.ok || data.ok === false) {
         setState("error");
-        setMessage(
+        const statusPart =
+          data.statusCode != null ? `HTTP ${data.statusCode}` : `HTTP ${res.status}`;
+        const endpointPart = data.endpointUsed
+          ? ` · ${data.endpointUsed}`
+          : "";
+        const cause =
           data.error ||
-            data.message ||
-            "Medewerkers synchroniseren mislukt.",
+          data.message ||
+          "Medewerkers synchroniseren mislukt.";
+        setMessage(
+          `${statusPart}${endpointPart}. ${cause} Actie: Controleer Public API token, App Center Plus en endpoint.`,
         );
         return;
       }
@@ -103,7 +128,9 @@ export default function ShiftbaseSyncPanel({
       onSynced?.();
     } catch {
       setState("error");
-      setMessage("Netwerkfout tijdens synchroniseren.");
+      setMessage(
+        "Netwerkfout tijdens synchroniseren. Actie: Controleer Public API token, App Center Plus en endpoint.",
+      );
     } finally {
       setSyncing(false);
     }

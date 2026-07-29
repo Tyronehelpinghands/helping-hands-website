@@ -15,7 +15,11 @@ export async function GET() {
 
   if (!isShiftbaseConfigured()) {
     return NextResponse.json(
-      { ok: false, error: "SHIFTBASE_API_TOKEN is niet geconfigureerd op de server" },
+      {
+        ok: false,
+        error:
+          "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd op de server",
+      },
       { status: 503 },
     );
   }

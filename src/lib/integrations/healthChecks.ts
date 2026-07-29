@@ -156,7 +156,7 @@ async function checkShiftbase(): Promise<Omit<IntegrationHealthResult, "provider
       ok: false,
       status: "Ontbreekt",
       message:
-        "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in Vercel.",
+        "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt in Vercel.",
     };
   }
 

@@ -12,10 +12,12 @@ import type {
   ShiftbaseSyncStatus,
 } from "@/lib/dashboard/types";
 import {
-  fetchShiftbaseEmployees,
+  fetchShiftbaseEmployeesWithMeta,
   formatShiftbaseError,
   isShiftbaseConfigured,
   sanitizeShiftbaseUiMessage,
+  ShiftbaseApiError,
+  SHIFTBASE_SYNC_NOTES,
   syncShiftToShiftbase,
   type ShiftbaseEmployee,
 } from "@/lib/shiftbase";
@@ -35,6 +37,8 @@ export type EmployeeSyncResult = {
   skipped: number;
   errors: string[];
   message: string;
+  statusCode?: number | null;
+  endpointUsed?: string;
 };
 
 type ProjectWithClient = Project & {
@@ -229,6 +233,7 @@ function buildCrewPayloadFromShiftbase(
     phone: employee.phone?.trim() || existing?.phone || null,
     city,
     status,
+    notes: SHIFTBASE_SYNC_NOTES,
     shiftbase_user_id: employee.id || existing?.shiftbase_user_id || null,
   };
 
@@ -256,7 +261,6 @@ function buildCrewPayloadFromShiftbase(
     payload.certificates = [];
     payload.has_drivers_license = false;
     payload.has_car = false;
-    payload.notes = null;
     if (!employee.skills?.length) payload.skills = [];
   }
 
@@ -264,8 +268,8 @@ function buildCrewPayloadFromShiftbase(
 }
 
 /**
- * Import/update Shiftbase employees into `crew_members`.
- * Match order: shiftbase_user_id → e-mail. Never deletes local-only crew.
+ * Import/update Shiftbase users into `crew_members`.
+ * Upsert op e-mail; zonder e-mail → overgeslagen. Nooit lokale-only crew verwijderen.
  */
 export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncResult> {
   if (!isShiftbaseConfigured()) {
@@ -274,16 +278,25 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
       imported: 0,
       updated: 0,
       skipped: 0,
-      errors: ["SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd."],
+      errors: ["SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd."],
       message: "Shiftbase is niet geconfigureerd op de server.",
+      statusCode: null,
+      endpointUsed: "/users",
     };
   }
 
   let employees: ShiftbaseEmployee[];
+  let endpointUsed = "/users";
   try {
-    employees = await fetchShiftbaseEmployees();
+    const result = await fetchShiftbaseEmployeesWithMeta();
+    employees = result.employees;
+    endpointUsed = result.endpointUsed;
   } catch (err) {
     const error = sanitizeShiftbaseUiMessage(formatShiftbaseError(err));
+    const statusCode =
+      err instanceof ShiftbaseApiError ? err.status : null;
+    const path =
+      err instanceof ShiftbaseApiError ? err.path : endpointUsed;
     return {
       ok: false,
       imported: 0,
@@ -291,6 +304,8 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
       skipped: 0,
       errors: [error],
       message: error,
+      statusCode,
+      endpointUsed: path,
     };
   }
 
@@ -315,6 +330,7 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
       skipped: 0,
       errors: [message],
       message,
+      endpointUsed,
     };
   }
 
@@ -338,20 +354,18 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
   const errors: string[] = [];
 
   for (const employee of employees) {
-    const name = employee.fullName?.trim();
-    if (!employee.id && !employee.email && !name) {
-      skipped += 1;
-      continue;
-    }
-    if (!name) {
+    const emailKey = normalizeEmail(employee.email);
+    // Upsert op e-mail; zonder e-mail overslaan.
+    if (!emailKey) {
       skipped += 1;
       continue;
     }
 
-    const emailKey = normalizeEmail(employee.email);
+    const name = employee.fullName?.trim() || emailKey;
+
     const match =
       (employee.id ? byShiftbaseId.get(employee.id) : undefined) ??
-      (emailKey ? byEmail.get(emailKey) : undefined);
+      byEmail.get(emailKey);
 
     const payload = buildCrewPayloadFromShiftbase(employee, match);
 
@@ -363,20 +377,15 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
           .eq("id", match.id);
         if (error) {
           errors.push(
-            `${name || employee.id}: ${sanitizeShiftbaseUiMessage(error.message)}`,
+            `${name}: ${sanitizeShiftbaseUiMessage(error.message)}`,
           );
           continue;
         }
         updated += 1;
         const refreshed = { ...match, ...payload } as CrewMatchRow;
         if (employee.id) byShiftbaseId.set(employee.id, refreshed);
-        if (emailKey) byEmail.set(emailKey, refreshed);
+        byEmail.set(emailKey, refreshed);
       } else {
-        if (!employee.id && !emailKey) {
-          // Avoid duplicate nameless inserts without a stable key
-          skipped += 1;
-          continue;
-        }
         const { data: inserted, error } = await supabase
           .from("crew_members")
           .insert(payload)
@@ -386,7 +395,7 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
           .single();
         if (error) {
           errors.push(
-            `${name || employee.id}: ${sanitizeShiftbaseUiMessage(error.message)}`,
+            `${name}: ${sanitizeShiftbaseUiMessage(error.message)}`,
           );
           continue;
         }
@@ -402,7 +411,7 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
       }
     } catch (err) {
       errors.push(
-        `${name || employee.id}: ${sanitizeShiftbaseUiMessage(
+        `${name}: ${sanitizeShiftbaseUiMessage(
           err instanceof Error ? err.message : "Onbekende fout",
         )}`,
       );
@@ -423,6 +432,8 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
     updated,
     skipped,
     errors: errors.slice(0, 10),
-    message: `Medewerkers gesynchroniseerd: ${parts.join(", ")}.`,
+    message: `Medewerkers gesynchroniseerd via ${endpointUsed}: ${parts.join(", ")}.`,
+    endpointUsed,
+    statusCode: 200,
   };
 }

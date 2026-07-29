@@ -41,14 +41,14 @@ export async function GET() {
       rawKeyPresent: Boolean(process.env.SHIFTBASE_API_KEY?.trim()),
       endpoints: {
         test: SHIFTBASE_ENDPOINTS.test,
-        employees: SHIFTBASE_ENDPOINTS.employees,
+        users: SHIFTBASE_ENDPOINTS.users,
         shifts: SHIFTBASE_ENDPOINTS.shifts,
         timesheets: SHIFTBASE_ENDPOINTS.timesheets,
       },
       resolvedTestUrl: resolveShiftbaseUrl(SHIFTBASE_ENDPOINTS.test),
     },
     hint: configured
-      ? "Key/token is zichtbaar in deze runtime. Gebruik Test API. Tip: Public API-token + base https://api.shiftbase.com/api"
-      : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt. Applicatie-tokens ≠ automatisch Public API.",
+      ? "Key/token is zichtbaar in deze runtime. Gebruik Test API of /api/shiftbase/status. Endpoint: /users (niet /employees). Auth: Authorization: API <token>."
+      : "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt. Public API-token via App center → Public API.",
   });
 }

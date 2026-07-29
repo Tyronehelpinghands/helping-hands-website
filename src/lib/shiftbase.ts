@@ -1,10 +1,9 @@
 /**
  * Shiftbase API — server-side only.
  * Docs: https://developer.shiftbase.com/
- * Auth: Authorization: API {token}
+ * Auth: Authorization: API {token}  (NOT Bearer)
  *
- * Endpoint paths zijn configureerbaar via env vars als jouw account
- * afwijkende routes gebruikt.
+ * Medewerkers: GET /users (niet /employees — die route bestaat niet in de Public API).
  */
 
 import type { PlanningShift } from "@/data/planningMockData";
@@ -18,32 +17,45 @@ const SHIFTBASE_BASE_URL_CANDIDATES = [
   "https://api.shiftbase.com/api/v1",
 ] as const;
 
-/** Configureerbare endpoints — pas aan indien jouw account afwijkende routes gebruikt */
+/**
+ * Endpoints voor medewerkers-sync.
+ * Probeer /users eerst; /employees is onjuist en geeft 404.
+ */
+export const SHIFTBASE_EMPLOYEE_ENDPOINTS = [
+  process.env.SHIFTBASE_ENDPOINT_USERS?.trim() || "/users",
+  "/users?active=true",
+] as const;
+
+/** Configureerbare endpoints — medewerkers via /users, niet /employees */
 export const SHIFTBASE_ENDPOINTS = {
-  employees: process.env.SHIFTBASE_ENDPOINT_EMPLOYEES ?? "/employees",
+  /** @deprecated Gebruik users — alias voor backwards compatibility */
+  employees: SHIFTBASE_EMPLOYEE_ENDPOINTS[0],
+  users: SHIFTBASE_EMPLOYEE_ENDPOINTS[0],
   employee: (id: string) =>
-    (process.env.SHIFTBASE_ENDPOINT_EMPLOYEE ?? "/employees/{id}").replace(
-      "{id}",
-      id,
-    ),
+    (process.env.SHIFTBASE_ENDPOINT_USER ?? "/users/{id}").replace("{id}", id),
+  user: (id: string) =>
+    (process.env.SHIFTBASE_ENDPOINT_USER ?? "/users/{id}").replace("{id}", id),
   shifts: process.env.SHIFTBASE_ENDPOINT_SHIFTS ?? "/shifts",
   shift: (id: string) =>
     (process.env.SHIFTBASE_ENDPOINT_SHIFT ?? "/shifts/{id}").replace("{id}", id),
   timesheets: process.env.SHIFTBASE_ENDPOINT_TIMESHEETS ?? "/timesheets",
-  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/employees?limit=1",
+  test: process.env.SHIFTBASE_ENDPOINT_TEST ?? "/users",
 } as const;
 
-/** Probe paths used only for connection healthchecks */
+/** Probe paths used only for connection healthchecks — nooit /employees */
 const SHIFTBASE_TEST_PATHS = [
   SHIFTBASE_ENDPOINTS.test,
-  "/employees?limit=1",
-  "/Employees?limit=1",
-  "/employee?limit=1",
-  "/departments?limit=1",
-  "/Departments?limit=1",
-  "/locations?limit=1",
+  "/users",
+  "/users?active=true",
   "/accounts",
 ] as const;
+
+export const SHIFTBASE_SYNC_NOTES = "Gesynchroniseerd vanuit Shiftbase";
+
+export const SHIFTBASE_404_EMPLOYEES_HINT =
+  "Endpoint /employees bestaat niet in de Shiftbase Public API. Gebruik /users. " +
+  "Controleer de documentatie op developer.shiftbase.com. " +
+  "Actie: Controleer Public API token, App Center Plus en endpoint.";
 
 export type ShiftbaseEmployeeAddress = {
   shiftbaseEmployeeId: string;
@@ -92,10 +104,10 @@ export type TravelCalculationResult = {
 };
 
 export function getShiftbaseApiToken(): string | undefined {
-  // Prefer SHIFTBASE_API_TOKEN; also accept SHIFTBASE_API_KEY (common Vercel naming).
+  // Prefer SHIFTBASE_API_KEY; accept SHIFTBASE_API_TOKEN as alias.
   const raw =
-    process.env.SHIFTBASE_API_TOKEN?.trim() ||
-    process.env.SHIFTBASE_API_KEY?.trim();
+    process.env.SHIFTBASE_API_KEY?.trim() ||
+    process.env.SHIFTBASE_API_TOKEN?.trim();
   if (!raw) return undefined;
   const token = raw.replace(/^['"]|['"]$/g, "").trim();
   return token || undefined;
@@ -125,26 +137,89 @@ export function isShiftbaseConfigured(): boolean {
   return Boolean(getShiftbaseApiToken());
 }
 
+export class ShiftbaseApiError extends Error {
+  readonly status: number;
+  readonly path: string;
+  readonly body: string;
+
+  constructor(status: number, path: string, body = "") {
+    const snippet = body.trim().slice(0, 200);
+    super(
+      snippet
+        ? `Shiftbase API fout (${status}) op ${path}: ${snippet}`
+        : `Shiftbase API fout (${status}) op ${path}`,
+    );
+    this.name = "ShiftbaseApiError";
+    this.status = status;
+    this.path = path;
+    this.body = body;
+  }
+}
+
 export function formatShiftbaseError(error: unknown): string {
+  const status =
+    error instanceof ShiftbaseApiError
+      ? error.status
+      : typeof error === "object" &&
+          error &&
+          "status" in error &&
+          typeof (error as { status: unknown }).status === "number"
+        ? (error as { status: number }).status
+        : undefined;
+  const path =
+    error instanceof ShiftbaseApiError
+      ? error.path
+      : typeof error === "object" &&
+          error &&
+          "path" in error &&
+          typeof (error as { path: unknown }).path === "string"
+        ? (error as { path: string }).path
+        : undefined;
+
+  if (status === 401 || status === 403) {
+    return (
+      `Shiftbase authenticatie mislukt (${status})${path ? ` op ${path}` : ""}. ` +
+      `Controleer SHIFTBASE_API_KEY (Settings → App center → Public API). ` +
+      `Actie: Controleer Public API token, App Center Plus en endpoint.`
+    );
+  }
+  if (status === 404) {
+    return (
+      `Shiftbase endpoint niet gevonden (404)${path ? ` op ${path}` : ""}. ` +
+      SHIFTBASE_404_EMPLOYEES_HINT
+    );
+  }
+
   if (error instanceof Error) {
     const msg = error.message;
     if (msg.includes("401") || msg.includes("403")) {
-      return "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY (Settings → App center → Public API).";
+      return (
+        "Shiftbase authenticatie mislukt. Controleer SHIFTBASE_API_KEY " +
+        "(Settings → App center → Public API). " +
+        "Actie: Controleer Public API token, App Center Plus en endpoint."
+      );
     }
     if (msg.includes("429")) {
       return "Shiftbase rate limit bereikt. Probeer later opnieuw.";
     }
     if (msg.includes("niet geconfigureerd")) {
-      return "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd op de server.";
+      return "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd op de server.";
     }
     if (msg.includes("404") || msg.includes("geen geldig endpoint")) {
-      return msg;
+      return msg.includes("/employees") || msg.includes("404")
+        ? msg.includes("developer.shiftbase.com")
+          ? msg
+          : `${msg} ${SHIFTBASE_404_EMPLOYEES_HINT}`
+        : msg;
     }
     if (msg.includes("Shiftbase API fout") || msg.includes("Shiftbase endpoint")) {
       return msg;
     }
   }
-  return "Shiftbase koppeling mislukt. Controleer token en API-toegang.";
+  return (
+    "Shiftbase koppeling mislukt. " +
+    "Actie: Controleer Public API token, App Center Plus en endpoint."
+  );
 }
 
 export function sanitizeShiftbaseUiMessage(message: unknown): string {
@@ -155,24 +230,30 @@ export function sanitizeShiftbaseUiMessage(message: unknown): string {
     .replace(/API\s+[A-Za-z0-9_-]{8,}/gi, "[token]")
     .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "[token]")
     .replace(/Authorization[:\s]+[^\s]+/gi, "Authorization: [verborgen]");
-  return safe.length > 200 ? `${safe.slice(0, 200)}…` : safe;
+  return safe.length > 400 ? `${safe.slice(0, 400)}…` : safe;
 }
 
 type ShiftbaseRequestOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
 };
 
+/**
+ * Server-side Shiftbase HTTP helper.
+ * Auth: `Authorization: API ${key}` — nooit Bearer. Logt nooit de token.
+ */
 export async function shiftbaseRequest<T = unknown>(
-  endpoint: string,
+  path: string,
   options: ShiftbaseRequestOptions = {},
 ): Promise<T> {
   const token = getShiftbaseApiToken();
   if (!token) {
-    throw new Error("SHIFTBASE_API_TOKEN is niet geconfigureerd");
+    throw new Error(
+      "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd",
+    );
   }
 
-  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = resolveShiftbaseUrl(endpoint);
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const url = resolveShiftbaseUrl(cleanPath);
 
   const response = await fetch(url, {
     ...options,
@@ -182,6 +263,7 @@ export async function shiftbaseRequest<T = unknown>(
       Authorization: `API ${token}`,
       ...options.headers,
     },
+    cache: options.cache ?? "no-store",
   });
 
   if (!response.ok) {
@@ -189,10 +271,10 @@ export async function shiftbaseRequest<T = unknown>(
     console.error(
       "[Shiftbase] Request failed:",
       response.status,
-      path,
+      cleanPath,
       body.slice(0, 500),
     );
-    throw new Error(`Shiftbase API fout (${response.status}) op ${path}`);
+    throw new ShiftbaseApiError(response.status, cleanPath, body);
   }
 
   const text = await response.text();
@@ -382,11 +464,13 @@ function extractList<T>(data: unknown, mapper: (item: Record<string, unknown>) =
     const obj = data as Record<string, unknown>;
     const list =
       obj.data ??
-      obj.employees ??
       obj.users ??
+      obj.employees ??
+      obj.result ??
+      obj.records ??
+      obj.results ??
       obj.shifts ??
       obj.timesheets ??
-      obj.results ??
       obj.items;
     if (Array.isArray(list)) {
       return list.map((item) => mapper(item as Record<string, unknown>));
@@ -406,7 +490,9 @@ async function probeShiftbaseEndpoint(
 }> {
   const token = getShiftbaseApiToken();
   if (!token) {
-    throw new Error("SHIFTBASE_API_TOKEN is niet geconfigureerd");
+    throw new Error(
+      "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd",
+    );
   }
 
   const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
@@ -428,6 +514,7 @@ export async function testShiftbaseConnection(): Promise<{
   message: string;
   endpoint?: string;
   baseUrl?: string;
+  statusCode?: number;
   attempts?: Array<{ baseUrl: string; path: string; status: number }>;
 }> {
   const customTest = process.env.SHIFTBASE_ENDPOINT_TEST?.trim();
@@ -440,7 +527,7 @@ export async function testShiftbaseConnection(): Promise<{
   const attempts: Array<{ baseUrl: string; path: string; status: number }> =
     [];
   let lastStatus = 0;
-  let lastPath = paths[0] ?? "/employees";
+  let lastPath = paths[0] ?? "/users";
   let lastBase = bases[0] ?? getShiftbaseApiBaseUrl();
 
   for (const baseUrl of bases) {
@@ -461,20 +548,24 @@ export async function testShiftbaseConnection(): Promise<{
           message: `Shiftbase API bereikbaar (${result.baseUrl}${result.path}).`,
           endpoint: result.path,
           baseUrl: result.baseUrl,
+          statusCode: result.status,
           attempts,
         };
       }
 
       if (result.status === 401 || result.status === 403) {
-        throw new Error(
-          `Shiftbase authenticatie mislukt (${result.status}) op ${result.baseUrl}${result.path}. ` +
-            `Token wordt wel ontvangen, maar geweigerd. Maak/controleer een token via App center → Public API en plak die exact in SHIFTBASE_API_KEY.`,
+        throw new ShiftbaseApiError(
+          result.status,
+          result.path,
+          `Token geweigerd op ${result.baseUrl}${result.path}`,
         );
       }
 
       if (result.status === 429) {
-        throw new Error(
-          `Shiftbase rate limit bereikt (429) op ${result.baseUrl}${result.path}`,
+        throw new ShiftbaseApiError(
+          429,
+          result.path,
+          `Rate limit op ${result.baseUrl}${result.path}`,
         );
       }
     }
@@ -488,36 +579,121 @@ export async function testShiftbaseConnection(): Promise<{
   throw new Error(
     `Shiftbase gaf geen geldig endpoint (laatste ${lastStatus} op ${lastBase}${lastPath}). ` +
       `Samples: ${sample}. ` +
-      `Zet in Vercel SHIFTBASE_API_BASE_URL=https://api.shiftbase.com/api (zonder /v1), redeploy, en test opnieuw. ` +
-      `Premium/App Center Plus is OK — het gaat om de juiste base URL + Public API-tokenwaarde.`,
+      `Gebruik /users (niet /employees). ` +
+      `Zet in Vercel SHIFTBASE_API_BASE_URL=${DEFAULT_BASE_URL}, redeploy, en test opnieuw. ` +
+      SHIFTBASE_404_EMPLOYEES_HINT,
   );
 }
 
 /**
- * Haalt medewerkers op via GET /employees (configureerbaar).
- * Filtert lege records zonder id én zonder bruikbare naam/e-mail.
+ * Haalt medewerkers op via GET /users (fallback /users?active=true).
+ * Probeert nooit /employees — die route bestaat niet in de Public API.
  */
-export async function getShiftbaseEmployees(): Promise<ShiftbaseEmployee[]> {
-  const data = await shiftbaseRequest(SHIFTBASE_ENDPOINTS.employees);
-  return extractList(data, mapEmployee).filter(
-    (e) => e.id || e.email || (e.fullName && e.fullName.trim().length > 0),
-  );
+export async function getShiftbaseEmployees(): Promise<{
+  employees: ShiftbaseEmployee[];
+  endpointUsed: string;
+}> {
+  let lastError: unknown;
+
+  for (const endpoint of SHIFTBASE_EMPLOYEE_ENDPOINTS) {
+    try {
+      const data = await shiftbaseRequest(endpoint);
+      const employees = extractList(data, mapEmployee).filter(
+        (e) => e.id || e.email || (e.fullName && e.fullName.trim().length > 0),
+      );
+      return { employees, endpointUsed: endpoint };
+    } catch (err) {
+      lastError = err;
+      if (err instanceof ShiftbaseApiError && err.status === 404) {
+        // Probeer volgende endpoint; na alle 404's duidelijke fout.
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  if (lastError instanceof ShiftbaseApiError && lastError.status === 404) {
+    throw new ShiftbaseApiError(
+      404,
+      lastError.path,
+      SHIFTBASE_404_EMPLOYEES_HINT,
+    );
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Shiftbase medewerkers ophalen mislukt");
 }
 
-/** Alias — zelfde als getShiftbaseEmployees. */
+/** Alias — zelfde als getShiftbaseEmployees (retourneert alleen de lijst). */
 export async function fetchShiftbaseEmployees(): Promise<ShiftbaseEmployee[]> {
+  const { employees } = await getShiftbaseEmployees();
+  return employees;
+}
+
+/**
+ * Zelfde als getShiftbaseEmployees, met endpoint metadata voor sync/status UI.
+ */
+export async function fetchShiftbaseEmployeesWithMeta(): Promise<{
+  employees: ShiftbaseEmployee[];
+  endpointUsed: string;
+}> {
   return getShiftbaseEmployees();
 }
 
 export async function getShiftbaseEmployeeById(id: string): Promise<ShiftbaseEmployee> {
   const data = await shiftbaseRequest<Record<string, unknown>>(
-    SHIFTBASE_ENDPOINTS.employee(id),
+    SHIFTBASE_ENDPOINTS.user(id),
   );
-  const employee = (data.data ?? data.employee ?? data.User ?? data.user ?? data) as Record<
+  const employee = (data.data ?? data.user ?? data.User ?? data.employee ?? data) as Record<
     string,
     unknown
   >;
   return mapEmployee(employee);
+}
+
+/** Safe status probe — GET /users, never returns the token. */
+export async function probeShiftbaseUsersStatus(): Promise<{
+  connected: boolean;
+  statusCode: number | null;
+  endpointUsed: string;
+  message: string;
+}> {
+  if (!isShiftbaseConfigured()) {
+    return {
+      connected: false,
+      statusCode: null,
+      endpointUsed: "/users",
+      message:
+        "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt op de server.",
+    };
+  }
+
+  const endpoint = SHIFTBASE_EMPLOYEE_ENDPOINTS[0];
+  try {
+    await shiftbaseRequest(endpoint);
+    return {
+      connected: true,
+      statusCode: 200,
+      endpointUsed: endpoint,
+      message: `Shiftbase verbonden via ${endpoint}.`,
+    };
+  } catch (err) {
+    if (err instanceof ShiftbaseApiError) {
+      return {
+        connected: false,
+        statusCode: err.status,
+        endpointUsed: err.path || endpoint,
+        message: formatShiftbaseError(err),
+      };
+    }
+    return {
+      connected: false,
+      statusCode: null,
+      endpointUsed: endpoint,
+      message: formatShiftbaseError(err),
+    };
+  }
 }
 
 export async function getShiftbaseShifts(params?: {

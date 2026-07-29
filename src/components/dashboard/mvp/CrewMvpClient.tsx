@@ -67,9 +67,20 @@ export function CrewMvpClient({
         imported?: number;
         updated?: number;
         skipped?: number;
+        statusCode?: number | null;
+        endpointUsed?: string;
       };
       if (!res.ok || data.ok === false) {
-        showToast(data.error || data.message || "Synchroniseren mislukt.");
+        const statusPart =
+          data.statusCode != null ? `HTTP ${data.statusCode}` : `HTTP ${res.status}`;
+        const endpointPart = data.endpointUsed
+          ? ` · ${data.endpointUsed}`
+          : "";
+        const cause =
+          data.error || data.message || "Synchroniseren mislukt.";
+        showToast(
+          `${statusPart}${endpointPart}. ${cause} Actie: Controleer Public API token, App Center Plus en endpoint.`,
+        );
         return;
       }
       showToast(
@@ -78,7 +89,9 @@ export function CrewMvpClient({
       );
       router.refresh();
     } catch {
-      showToast("Netwerkfout tijdens synchroniseren.");
+      showToast(
+        "Netwerkfout tijdens synchroniseren. Actie: Controleer Public API token, App Center Plus en endpoint.",
+      );
     } finally {
       setSyncing(false);
     }

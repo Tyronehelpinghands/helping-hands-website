@@ -718,7 +718,7 @@ create unique index if not exists crew_members_shiftbase_user_id_uidx
   where shiftbase_user_id is not null;
 ```
 
-**Sync gedrag:** `POST /api/shiftbase/sync-employees` (owner/admin/planner) haalt `GET /employees` op, matched op `shiftbase_user_id` of e-mail, en upsert naar `crew_members`. Lokale-only crew wordt niet verwijderd. Skills/uurkost/notities blijven staan tenzij Shiftbase die levert en lokaal leeg is.
+**Sync gedrag:** `POST /api/shiftbase/sync-employees` (owner/admin/planner) haalt `GET /users` op (niet `/employees`), matched op e-mail (upsert) of `shiftbase_user_id`, en schrijft naar `crew_members`. Zonder e-mail → overgeslagen. Lokale-only crew wordt niet verwijderd. Zie `docs/shiftbase-integration.md`.
 
 ---
 
