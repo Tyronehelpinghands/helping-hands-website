@@ -5,14 +5,19 @@
 
 import type { PlanningShift } from "@/data/planningMockData";
 import type {
+  CrewMember,
+  CrewMemberStatus,
   Project,
   Shift,
   ShiftbaseSyncStatus,
 } from "@/lib/dashboard/types";
 import {
+  fetchShiftbaseEmployees,
   formatShiftbaseError,
   isShiftbaseConfigured,
+  sanitizeShiftbaseUiMessage,
   syncShiftToShiftbase,
+  type ShiftbaseEmployee,
 } from "@/lib/shiftbase";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,9 +28,33 @@ export type MvpShiftbaseSyncResult = {
   message?: string;
 };
 
+export type EmployeeSyncResult = {
+  ok: boolean;
+  imported: number;
+  updated: number;
+  skipped: number;
+  errors: string[];
+  message: string;
+};
+
 type ProjectWithClient = Project & {
   clients?: { company_name?: string | null } | null;
 };
+
+type CrewMatchRow = Pick<
+  CrewMember,
+  | "id"
+  | "full_name"
+  | "email"
+  | "phone"
+  | "city"
+  | "role_type"
+  | "skills"
+  | "hourly_cost"
+  | "status"
+  | "notes"
+  | "shiftbase_user_id"
+>;
 
 /** Normalize Supabase `time` / `HH:mm` into `HH:mm:ss`. */
 function normalizeTime(time: string | null | undefined, fallback: string): string {
@@ -179,4 +208,221 @@ export async function syncMvpShiftToShiftbase(
     });
     return { status: "fout", error, message: error };
   }
+}
+
+function normalizeEmail(email: string | null | undefined): string | null {
+  const value = email?.trim().toLowerCase();
+  return value || null;
+}
+
+function buildCrewPayloadFromShiftbase(
+  employee: ShiftbaseEmployee,
+  existing?: CrewMatchRow | null,
+): Record<string, unknown> {
+  const city = employee.city ?? employee.address?.city ?? existing?.city ?? null;
+  const status: CrewMemberStatus =
+    employee.status ?? existing?.status ?? "active";
+
+  const payload: Record<string, unknown> = {
+    full_name: employee.fullName.trim() || existing?.full_name || "Onbekend",
+    email: employee.email?.trim() || existing?.email || null,
+    phone: employee.phone?.trim() || existing?.phone || null,
+    city,
+    status,
+    shiftbase_user_id: employee.id || existing?.shiftbase_user_id || null,
+  };
+
+  if (employee.roleType?.trim()) {
+    payload.role_type = employee.roleType.trim();
+  } else if (!existing) {
+    payload.role_type = null;
+  }
+
+  // Only fill cost/skills when Shiftbase provides them; never wipe local values.
+  if (
+    employee.hourlyCost != null &&
+    Number.isFinite(employee.hourlyCost) &&
+    (!existing || existing.hourly_cost == null)
+  ) {
+    payload.hourly_cost = employee.hourlyCost;
+  }
+
+  if (employee.skills?.length && (!existing || !(existing.skills || []).length)) {
+    payload.skills = employee.skills;
+  }
+
+  if (!existing) {
+    payload.employment_type = "payroll";
+    payload.certificates = [];
+    payload.has_drivers_license = false;
+    payload.has_car = false;
+    payload.notes = null;
+    if (!employee.skills?.length) payload.skills = [];
+  }
+
+  return payload;
+}
+
+/**
+ * Import/update Shiftbase employees into `crew_members`.
+ * Match order: shiftbase_user_id → e-mail. Never deletes local-only crew.
+ */
+export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncResult> {
+  if (!isShiftbaseConfigured()) {
+    return {
+      ok: false,
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: ["SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY is niet geconfigureerd."],
+      message: "Shiftbase is niet geconfigureerd op de server.",
+    };
+  }
+
+  let employees: ShiftbaseEmployee[];
+  try {
+    employees = await fetchShiftbaseEmployees();
+  } catch (err) {
+    const error = sanitizeShiftbaseUiMessage(formatShiftbaseError(err));
+    return {
+      ok: false,
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: [error],
+      message: error,
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: existingRows, error: loadError } = await supabase
+    .from("crew_members")
+    .select(
+      "id, full_name, email, phone, city, role_type, skills, hourly_cost, status, notes, shiftbase_user_id",
+    );
+
+  if (loadError) {
+    const missingColumn =
+      /shiftbase_user_id/i.test(loadError.message) ||
+      loadError.code === "42703";
+    const message = missingColumn
+      ? "Kolom shiftbase_user_id ontbreekt. Voer de SQL-migratie uit docs/internal-dashboard-database.md uit in Supabase."
+      : sanitizeShiftbaseUiMessage(loadError.message);
+    return {
+      ok: false,
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: [message],
+      message,
+    };
+  }
+
+  const existing = (existingRows ?? []) as CrewMatchRow[];
+  const byShiftbaseId = new Map<string, CrewMatchRow>();
+  const byEmail = new Map<string, CrewMatchRow>();
+
+  for (const row of existing) {
+    if (row.shiftbase_user_id) {
+      byShiftbaseId.set(String(row.shiftbase_user_id), row);
+    }
+    const email = normalizeEmail(row.email);
+    if (email && !byEmail.has(email)) {
+      byEmail.set(email, row);
+    }
+  }
+
+  let imported = 0;
+  let updated = 0;
+  let skipped = 0;
+  const errors: string[] = [];
+
+  for (const employee of employees) {
+    const name = employee.fullName?.trim();
+    if (!employee.id && !employee.email && !name) {
+      skipped += 1;
+      continue;
+    }
+    if (!name) {
+      skipped += 1;
+      continue;
+    }
+
+    const emailKey = normalizeEmail(employee.email);
+    const match =
+      (employee.id ? byShiftbaseId.get(employee.id) : undefined) ??
+      (emailKey ? byEmail.get(emailKey) : undefined);
+
+    const payload = buildCrewPayloadFromShiftbase(employee, match);
+
+    try {
+      if (match) {
+        const { error } = await supabase
+          .from("crew_members")
+          .update(payload)
+          .eq("id", match.id);
+        if (error) {
+          errors.push(
+            `${name || employee.id}: ${sanitizeShiftbaseUiMessage(error.message)}`,
+          );
+          continue;
+        }
+        updated += 1;
+        const refreshed = { ...match, ...payload } as CrewMatchRow;
+        if (employee.id) byShiftbaseId.set(employee.id, refreshed);
+        if (emailKey) byEmail.set(emailKey, refreshed);
+      } else {
+        if (!employee.id && !emailKey) {
+          // Avoid duplicate nameless inserts without a stable key
+          skipped += 1;
+          continue;
+        }
+        const { data: inserted, error } = await supabase
+          .from("crew_members")
+          .insert(payload)
+          .select(
+            "id, full_name, email, phone, city, role_type, skills, hourly_cost, status, notes, shiftbase_user_id",
+          )
+          .single();
+        if (error) {
+          errors.push(
+            `${name || employee.id}: ${sanitizeShiftbaseUiMessage(error.message)}`,
+          );
+          continue;
+        }
+        imported += 1;
+        if (inserted) {
+          const row = inserted as CrewMatchRow;
+          if (row.shiftbase_user_id) {
+            byShiftbaseId.set(String(row.shiftbase_user_id), row);
+          }
+          const insertedEmail = normalizeEmail(row.email);
+          if (insertedEmail) byEmail.set(insertedEmail, row);
+        }
+      }
+    } catch (err) {
+      errors.push(
+        `${name || employee.id}: ${sanitizeShiftbaseUiMessage(
+          err instanceof Error ? err.message : "Onbekende fout",
+        )}`,
+      );
+    }
+  }
+
+  const ok = errors.length === 0;
+  const parts = [
+    `${imported} geïmporteerd`,
+    `${updated} bijgewerkt`,
+    `${skipped} overgeslagen`,
+  ];
+  if (errors.length) parts.push(`${errors.length} fout(en)`);
+
+  return {
+    ok,
+    imported,
+    updated,
+    skipped,
+    errors: errors.slice(0, 10),
+    message: `Medewerkers gesynchroniseerd: ${parts.join(", ")}.`,
+  };
 }

@@ -38,7 +38,7 @@ RLS: alleen internal roles via `get_my_role()` / `is_internal_role()`.
 | `/dashboard/intern/leads` | Leads CRUD, status, follow-up |
 | `/dashboard/intern/projecten` | Projecten CRUD + detail (shifts/uren/facturen/taken) |
 | `/dashboard/intern/planning` | Weeklijst, shift aanmaken, crew toewijzen |
-| `/dashboard/intern/crew` | Crew CRUD, skills, kosten |
+| `/dashboard/intern/crew` | Crew CRUD, skills, kosten + Shiftbase medewerkers-sync |
 | `/dashboard/intern/urenregistratie` | Uren invoeren, berekenen, approve/reject |
 | `/dashboard/intern/facturatie` | Concept uit goedgekeurde uren, CSV-export |
 | `/dashboard/intern/financien` | Aggregaten uit concepten/uren (geen fake charts) |
@@ -103,7 +103,7 @@ Layout blijft `requireRole(internalRoles)`. Mutaties checken opnieuw server-side
 | Supabase Auth | Actief |
 | Supabase Database | Actief na SQL |
 | Resend / contact | Actief indien key + route |
-| Shiftbase | Voorbereid |
+| Shiftbase | Actief (shifts + medewerkers-sync via `/api/shiftbase/sync-employees`) |
 | Moneybird | Voorbereid (geen auto-send) |
 | WhatsApp | Voorbereid (+ wa.me) |
 | Gmail | Voorbereid (+ mailto) |

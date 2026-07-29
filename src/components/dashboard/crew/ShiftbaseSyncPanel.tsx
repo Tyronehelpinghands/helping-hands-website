@@ -14,10 +14,25 @@ import {
 
 type SyncState = "unknown" | "not_linked" | "ready" | "error";
 
-export default function ShiftbaseSyncPanel() {
+type SyncEmployeesResponse = {
+  ok?: boolean;
+  imported?: number;
+  updated?: number;
+  skipped?: number;
+  errors?: string[];
+  message?: string;
+  error?: string;
+};
+
+export default function ShiftbaseSyncPanel({
+  onSynced,
+}: {
+  onSynced?: () => void;
+}) {
   const [state, setState] = useState<SyncState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     void checkConnection();
@@ -66,12 +81,40 @@ export default function ShiftbaseSyncPanel() {
     }
   }
 
+  async function syncEmployees() {
+    setSyncing(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/shiftbase/sync-employees", {
+        method: "POST",
+      });
+      const data = (await res.json()) as SyncEmployeesResponse;
+      if (!res.ok || data.ok === false) {
+        setState("error");
+        setMessage(
+          data.error ||
+            data.message ||
+            "Medewerkers synchroniseren mislukt.",
+        );
+        return;
+      }
+      setState("ready");
+      setMessage(data.message || "Medewerkers gesynchroniseerd.");
+      onSynced?.();
+    } catch {
+      setState("error");
+      setMessage("Netwerkfout tijdens synchroniseren.");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   const badge = (() => {
     switch (state) {
       case "ready":
         return (
           <Badge className="border-green-200 bg-green-50 text-green-700 hover:bg-green-50">
-            Koppeling voorbereid
+            Koppeling actief
           </Badge>
         );
       case "error":
@@ -98,8 +141,8 @@ export default function ShiftbaseSyncPanel() {
               Shiftbase koppeling
             </CardTitle>
             <CardDescription>
-              Crewleden, planning, beschikbaarheid en uren kunnen later met Shiftbase
-              worden gesynchroniseerd.
+              Importeer medewerkers uit Shiftbase naar het interne crew-overzicht.
+              Bestaande lokale crew wordt niet verwijderd.
             </CardDescription>
           </div>
           {badge}
@@ -117,7 +160,7 @@ export default function ShiftbaseSyncPanel() {
             size="sm"
             variant="outline"
             onClick={() => void checkConnection()}
-            disabled={loading}
+            disabled={loading || syncing}
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -141,9 +184,19 @@ export default function ShiftbaseSyncPanel() {
             <ExternalLink className="h-4 w-4" />
             Open Shiftbase
           </Button>
-          <Button type="button" size="sm" disabled className="opacity-60">
-            <RefreshCw className="h-4 w-4" />
-            Medewerkers synchroniseren — Binnenkort
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => void syncEmployees()}
+            disabled={syncing || loading || state === "not_linked"}
+            className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+          >
+            {syncing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Medewerkers synchroniseren
           </Button>
         </div>
       </CardContent>

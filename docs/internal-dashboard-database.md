@@ -168,12 +168,16 @@ create table if not exists public.crew_members (
   status text not null default 'active'
     check (status in ('active', 'inactive', 'onboarding')),
   notes text,
+  shiftbase_user_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists crew_members_status_idx on public.crew_members (status);
 create index if not exists crew_members_city_idx on public.crew_members (city);
+create unique index if not exists crew_members_shiftbase_user_id_uidx
+  on public.crew_members (shiftbase_user_id)
+  where shiftbase_user_id is not null;
 
 drop trigger if exists crew_members_set_updated_at on public.crew_members;
 create trigger crew_members_set_updated_at
@@ -695,6 +699,26 @@ begin
   end if;
 end $$;
 ```
+
+---
+
+## Migration: Shiftbase employee id on `crew_members`
+
+Run this if `public.crew_members` already exists without `shiftbase_user_id` (idempotent). Required before **Medewerkers synchroniseren**.
+
+```sql
+-- -----------------------------------------------------------------------------
+-- Shiftbase employee/user id on public.crew_members
+-- -----------------------------------------------------------------------------
+alter table public.crew_members
+  add column if not exists shiftbase_user_id text;
+
+create unique index if not exists crew_members_shiftbase_user_id_uidx
+  on public.crew_members (shiftbase_user_id)
+  where shiftbase_user_id is not null;
+```
+
+**Sync gedrag:** `POST /api/shiftbase/sync-employees` (owner/admin/planner) haalt `GET /employees` op, matched op `shiftbase_user_id` of e-mail, en upsert naar `crew_members`. Lokale-only crew wordt niet verwijderd. Skills/uurkost/notities blijven staan tenzij Shiftbase die levert en lokaal leeg is.
 
 ---
 

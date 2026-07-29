@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isInternRole } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import type { UserRole } from "@/lib/supabase/types";
+
+const PLANNER_API_ROLES: UserRole[] = ["owner", "admin", "planner"];
 
 /** Alleen echte Supabase-sessies met intern-rol mogen integratie-API’s gebruiken. */
 export async function requireInternApiAccess() {
@@ -38,4 +41,24 @@ export async function requireInternApiAccess() {
   }
 
   return { profile };
+}
+
+/** Planner/admin/owner — voor muterende sync-acties (crew, shifts). */
+export async function requirePlannerApiAccess() {
+  const auth = await requireInternApiAccess();
+  if ("error" in auth && auth.error) return auth;
+
+  if (!PLANNER_API_ROLES.includes(auth.profile.role)) {
+    return {
+      error: NextResponse.json(
+        {
+          ok: false,
+          error: "Alleen planner, admin of owner mag medewerkers synchroniseren.",
+        },
+        { status: 403 },
+      ),
+    };
+  }
+
+  return { profile: auth.profile };
 }

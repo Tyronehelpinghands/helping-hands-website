@@ -54,11 +54,19 @@ export type ShiftbaseEmployeeAddress = {
   country?: string;
 };
 
+export type ShiftbaseEmployeeStatus = "active" | "inactive" | "onboarding";
+
 export type ShiftbaseEmployee = {
   id: string;
   fullName: string;
   email?: string;
   phone?: string;
+  city?: string;
+  roleType?: string;
+  /** Mapped ops status when Shiftbase exposes one; omit if unknown. */
+  status?: ShiftbaseEmployeeStatus;
+  hourlyCost?: number;
+  skills?: string[];
   address?: ShiftbaseEmployeeAddress;
   raw?: Record<string, unknown>;
 };
@@ -192,20 +200,160 @@ export async function shiftbaseRequest<T = unknown>(
   return JSON.parse(text) as T;
 }
 
-function mapEmployee(raw: Record<string, unknown>): ShiftbaseEmployee {
-  const id = String(raw.id ?? raw.employee_id ?? raw.user_id ?? "");
-  const firstName = String(raw.first_name ?? raw.firstName ?? "");
-  const lastName = String(raw.last_name ?? raw.lastName ?? "");
-  const fullName =
-    String(raw.full_name ?? raw.name ?? `${firstName} ${lastName}`.trim()) || id;
+/**
+ * Shiftbase list items are often wrapped: `{ User: { ... } }` or `{ Employee: { ... } }`.
+ * Flatten known wrappers so field mapping stays consistent.
+ */
+function unwrapEmployeeRecord(raw: Record<string, unknown>): Record<string, unknown> {
+  for (const key of ["User", "Employee", "user", "employee"] as const) {
+    const nested = raw[key];
+    if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+      const n = nested as Record<string, unknown>;
+      if (
+        n.id != null ||
+        n.employee_id != null ||
+        n.user_id != null ||
+        n.first_name != null ||
+        n.firstName != null ||
+        n.email != null
+      ) {
+        return { ...raw, ...n };
+      }
+    }
+  }
+  return raw;
+}
 
-  const addressRaw = (raw.address ?? raw.home_address ?? {}) as Record<string, unknown>;
+function pickString(
+  raw: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = raw[key];
+    if (value == null || value === "") continue;
+    const s = String(value).trim();
+    if (s) return s;
+  }
+  return undefined;
+}
+
+function mapEmployeeStatus(
+  raw: Record<string, unknown>,
+): ShiftbaseEmployeeStatus | undefined {
+  const rawStatus = raw.status ?? raw.employee_status ?? raw.user_status;
+  const activeFlag = raw.active ?? raw.is_active ?? raw.isActive;
+
+  if (activeFlag === false || activeFlag === 0 || activeFlag === "0") {
+    return "inactive";
+  }
+  if (activeFlag === true || activeFlag === 1 || activeFlag === "1") {
+    return "active";
+  }
+
+  if (rawStatus == null) return undefined;
+  const s = String(rawStatus).trim().toLowerCase();
+  if (["0", "inactive", "blocked", "deleted", "archived", "disabled"].includes(s)) {
+    return "inactive";
+  }
+  if (["onboarding", "pending", "invited", "new"].includes(s)) {
+    return "onboarding";
+  }
+  if (["1", "active", "employed", "enabled"].includes(s)) {
+    return "active";
+  }
+  return undefined;
+}
+
+function mapSkills(raw: Record<string, unknown>): string[] | undefined {
+  const value = raw.skills ?? raw.skill_names ?? raw.competences;
+  if (Array.isArray(value)) {
+    const skills = value
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (item && typeof item === "object") {
+          const o = item as Record<string, unknown>;
+          return String(o.name ?? o.title ?? o.skill ?? "").trim();
+        }
+        return "";
+      })
+      .filter(Boolean);
+    return skills.length ? skills : undefined;
+  }
+  if (typeof value === "string" && value.trim()) {
+    return value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return undefined;
+}
+
+function mapEmployee(rawInput: Record<string, unknown>): ShiftbaseEmployee {
+  const raw = unwrapEmployeeRecord(rawInput);
+  const id = String(
+    raw.id ?? raw.employee_id ?? raw.user_id ?? raw.ID ?? "",
+  );
+  const firstName = pickString(raw, ["first_name", "firstName", "firstname"]) ?? "";
+  const lastName = pickString(raw, ["last_name", "lastName", "lastname"]) ?? "";
+  const fullName =
+    pickString(raw, ["full_name", "fullName", "name", "display_name"]) ||
+    `${firstName} ${lastName}`.trim() ||
+    id;
+
+  const addressRaw = (
+    (raw.address && typeof raw.address === "object"
+      ? raw.address
+      : raw.home_address && typeof raw.home_address === "object"
+        ? raw.home_address
+        : {}) as Record<string, unknown>
+  );
+
+  const city =
+    pickString(raw, ["city", "woonplaats", "residence_city"]) ??
+    (addressRaw.city ? String(addressRaw.city) : undefined);
+
+  const phone = pickString(raw, [
+    "phone",
+    "mobile",
+    "cellphone",
+    "cell_phone",
+    "mobile_phone",
+    "phone_number",
+    "telephone",
+  ]);
+
+  const hourlyRaw =
+    raw.hourly_cost ??
+    raw.hourly_wage ??
+    raw.hour_rate ??
+    raw.hourly_rate ??
+    raw.wage;
+  const hourlyCost =
+    hourlyRaw != null && hourlyRaw !== ""
+      ? Number(hourlyRaw)
+      : undefined;
+
+  const roleType = pickString(raw, [
+    "role",
+    "role_name",
+    "job_title",
+    "function",
+    "function_name",
+    "department_name",
+    "default_department",
+    "position",
+  ]);
 
   return {
     id,
     fullName,
-    email: raw.email ? String(raw.email) : undefined,
-    phone: raw.phone ? String(raw.phone) : raw.mobile ? String(raw.mobile) : undefined,
+    email: pickString(raw, ["email", "email_address", "mail"]),
+    phone,
+    city,
+    roleType,
+    status: mapEmployeeStatus(raw),
+    hourlyCost: Number.isFinite(hourlyCost) ? hourlyCost : undefined,
+    skills: mapSkills(raw),
     address: {
       shiftbaseEmployeeId: id,
       street: addressRaw.street ? String(addressRaw.street) : undefined,
@@ -219,7 +367,7 @@ function mapEmployee(raw: Record<string, unknown>): ShiftbaseEmployee {
         : addressRaw.postalCode
           ? String(addressRaw.postalCode)
           : undefined,
-      city: addressRaw.city ? String(addressRaw.city) : undefined,
+      city: addressRaw.city ? String(addressRaw.city) : city,
       country: addressRaw.country ? String(addressRaw.country) : "NL",
     },
     raw,
@@ -233,7 +381,13 @@ function extractList<T>(data: unknown, mapper: (item: Record<string, unknown>) =
   if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
     const list =
-      obj.data ?? obj.employees ?? obj.shifts ?? obj.timesheets ?? obj.results ?? obj.items;
+      obj.data ??
+      obj.employees ??
+      obj.users ??
+      obj.shifts ??
+      obj.timesheets ??
+      obj.results ??
+      obj.items;
     if (Array.isArray(list)) {
       return list.map((item) => mapper(item as Record<string, unknown>));
     }
@@ -339,16 +493,30 @@ export async function testShiftbaseConnection(): Promise<{
   );
 }
 
+/**
+ * Haalt medewerkers op via GET /employees (configureerbaar).
+ * Filtert lege records zonder id én zonder bruikbare naam/e-mail.
+ */
 export async function getShiftbaseEmployees(): Promise<ShiftbaseEmployee[]> {
   const data = await shiftbaseRequest(SHIFTBASE_ENDPOINTS.employees);
-  return extractList(data, mapEmployee);
+  return extractList(data, mapEmployee).filter(
+    (e) => e.id || e.email || (e.fullName && e.fullName.trim().length > 0),
+  );
+}
+
+/** Alias — zelfde als getShiftbaseEmployees. */
+export async function fetchShiftbaseEmployees(): Promise<ShiftbaseEmployee[]> {
+  return getShiftbaseEmployees();
 }
 
 export async function getShiftbaseEmployeeById(id: string): Promise<ShiftbaseEmployee> {
   const data = await shiftbaseRequest<Record<string, unknown>>(
     SHIFTBASE_ENDPOINTS.employee(id),
   );
-  const employee = (data.data ?? data.employee ?? data) as Record<string, unknown>;
+  const employee = (data.data ?? data.employee ?? data.User ?? data.user ?? data) as Record<
+    string,
+    unknown
+  >;
   return mapEmployee(employee);
 }
 

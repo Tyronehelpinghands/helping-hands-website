@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus } from "lucide-react";
+import { Loader2, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ export function CrewMvpClient({
   const router = useRouter();
   const { toast, showToast } = useToast();
   const [pending, startTransition] = useTransition();
+  const [syncing, setSyncing] = useState(false);
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<CrewMember | null>(null);
   const [q, setQ] = useState("");
@@ -53,6 +54,36 @@ export function CrewMvpClient({
     });
   }, [crew, q, statusFilter]);
 
+  async function syncFromShiftbase() {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/shiftbase/sync-employees", {
+        method: "POST",
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+        imported?: number;
+        updated?: number;
+        skipped?: number;
+      };
+      if (!res.ok || data.ok === false) {
+        showToast(data.error || data.message || "Synchroniseren mislukt.");
+        return;
+      }
+      showToast(
+        data.message ||
+          `Medewerkers gesynchroniseerd (${data.imported ?? 0} nieuw, ${data.updated ?? 0} bijgewerkt).`,
+      );
+      router.refresh();
+    } catch {
+      showToast("Netwerkfout tijdens synchroniseren.");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <MvpPageHeader
@@ -60,19 +91,33 @@ export function CrewMvpClient({
         description="Medewerkers zonder BSN/IBAN — alleen operationele gegevens."
         notice={
           tablesReady
-            ? "Shiftbase-sync: Voorbereid — nog niet gekoppeld."
+            ? "Shiftbase: synchroniseer medewerkers via de knop hiernaast. Lokale crew wordt niet gewist."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
-          <Button
-            className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-            onClick={() => {
-              setEdit(null);
-              setOpen(true);
-            }}
-          >
-            <Plus className="mr-1 h-4 w-4" /> Crew toevoegen
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={syncing || !tablesReady}
+              onClick={() => void syncFromShiftbase()}
+            >
+              {syncing ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-1 h-4 w-4" />
+              )}
+              Medewerkers synchroniseren
+            </Button>
+            <Button
+              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              onClick={() => {
+                setEdit(null);
+                setOpen(true);
+              }}
+            >
+              <Plus className="mr-1 h-4 w-4" /> Crew toevoegen
+            </Button>
+          </div>
         }
       />
 

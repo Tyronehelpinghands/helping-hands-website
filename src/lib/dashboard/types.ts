@@ -117,6 +117,8 @@ export type CrewMember = {
   hourly_cost: number | null;
   status: CrewMemberStatus;
   notes: string | null;
+  /** Shiftbase user/employee id for sync (optional until migration). */
+  shiftbase_user_id?: string | null;
   created_at: string;
   updated_at: string;
 };

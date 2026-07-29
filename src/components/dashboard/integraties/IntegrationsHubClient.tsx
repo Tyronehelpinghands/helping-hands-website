@@ -94,11 +94,48 @@ export default function IntegrationsHubClient({
   const [liveChecks, setLiveChecks] = useState<
     Record<string, { loading: boolean; ok: boolean | null; message: string | null }>
   >({});
+  const [shiftbaseSyncing, setShiftbaseSyncing] = useState(false);
+  const [shiftbaseSyncMessage, setShiftbaseSyncMessage] = useState<string | null>(
+    null,
+  );
+  const [shiftbaseSyncOk, setShiftbaseSyncOk] = useState<boolean | null>(null);
 
   const pendingToken =
     !hideToken && gmailFlash?.pendingRefreshToken
       ? gmailFlash.pendingRefreshToken
       : null;
+
+  async function syncShiftbaseEmployees() {
+    setShiftbaseSyncing(true);
+    setShiftbaseSyncMessage(null);
+    setShiftbaseSyncOk(null);
+    try {
+      const res = await fetch("/api/shiftbase/sync-employees", {
+        method: "POST",
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok || data.ok === false) {
+        setShiftbaseSyncOk(false);
+        setShiftbaseSyncMessage(
+          data.error || data.message || "Medewerkers synchroniseren mislukt.",
+        );
+        return;
+      }
+      setShiftbaseSyncOk(true);
+      setShiftbaseSyncMessage(
+        data.message || "Medewerkers gesynchroniseerd.",
+      );
+    } catch {
+      setShiftbaseSyncOk(false);
+      setShiftbaseSyncMessage("Netwerkfout tijdens synchroniseren.");
+    } finally {
+      setShiftbaseSyncing(false);
+    }
+  }
 
   async function runLiveCheck(provider: string) {
     setLiveChecks((prev) => ({
@@ -460,10 +497,47 @@ export default function IntegrationsHubClient({
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
               {shiftbaseConfigured
-                ? "Shiftbase API key/token aanwezig. Klik Test API om te controleren."
+                ? "Shiftbase API key/token aanwezig. Synchroniseer medewerkers naar Crew, of test de API."
                 : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt in Vercel."}
             </p>
-            <LiveTestButton provider="shiftbase" />
+            {shiftbaseSyncMessage ? (
+              <p
+                className={
+                  shiftbaseSyncOk === false
+                    ? "text-red-700"
+                    : "text-green-700"
+                }
+              >
+                {shiftbaseSyncMessage}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap items-start gap-2">
+              <LiveTestButton provider="shiftbase" />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                disabled={!shiftbaseConfigured || shiftbaseSyncing}
+                onClick={() => void syncShiftbaseEmployees()}
+              >
+                {shiftbaseSyncing ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3.5 w-3.5" />
+                )}
+                Medewerkers synchroniseren
+              </Button>
+              <Link
+                href="/dashboard/intern/crew"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "w-fit",
+                )}
+              >
+                Naar Crew
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

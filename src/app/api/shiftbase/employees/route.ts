@@ -29,7 +29,9 @@ export async function GET() {
         fullName: e.fullName,
         email: e.email,
         phone: e.phone,
-        city: e.address?.city,
+        city: e.city ?? e.address?.city,
+        roleType: e.roleType,
+        status: e.status,
       })),
     });
   } catch (error) {
