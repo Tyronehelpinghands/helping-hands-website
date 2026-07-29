@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ConditionalSiteChrome from "@/components/ConditionalSiteChrome";
 import JsonLd from "@/components/seo/JsonLd";
@@ -65,6 +66,7 @@ export default function RootLayout({
         <ConditionalSiteChrome>
           <main className="flex-1">{children}</main>
         </ConditionalSiteChrome>
+        <Analytics />
       </body>
     </html>
   );
