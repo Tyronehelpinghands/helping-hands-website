@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getEmployeePortalStats } from "@/lib/employeePortal";
+import type { EmployeePortalStats } from "@/lib/employeePortal";
 
 const statConfig = [
   {
@@ -40,9 +40,11 @@ const statConfig = [
   },
 ];
 
-export default function EmployeeStats() {
-  const stats = getEmployeePortalStats();
-
+export default function EmployeeStats({
+  stats,
+}: {
+  stats: EmployeePortalStats;
+}) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {statConfig.map((item) => {

@@ -9,11 +9,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
-import { DEMO_EMPLOYEE_HOURS, formatShiftDate } from "@/lib/employeePortal";
+import type { EmployeeHoursEntry } from "@/lib/employeePortal";
+import { formatShiftDate } from "@/lib/employeePortal";
 
-export default function HoursSummary() {
-  const recent = DEMO_EMPLOYEE_HOURS.slice(0, 3);
-  const pending = DEMO_EMPLOYEE_HOURS.filter(
+export default function HoursSummary({
+  hours = [],
+}: {
+  hours?: EmployeeHoursEntry[];
+}) {
+  const recent = hours.slice(0, 3);
+  const pending = hours.filter(
     (h) =>
       h.status === "Ingediend" ||
       h.status === "Concept" ||
@@ -41,20 +46,26 @@ export default function HoursSummary() {
         </Link>
       </CardHeader>
       <CardContent className="space-y-2">
-        {recent.map((entry) => (
-          <div
-            key={entry.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2.5"
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#0B1F4D]">{entry.projectName}</p>
-              <p className="text-xs text-slate-500">
-                {formatShiftDate(entry.date)} · {entry.workedHours.toFixed(2)} u
-              </p>
+        {recent.length === 0 ? (
+          <p className="text-sm text-slate-500">Nog geen uren geregistreerd.</p>
+        ) : (
+          recent.map((entry) => (
+            <div
+              key={entry.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2.5"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[#0B1F4D]">
+                  {entry.projectName}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {formatShiftDate(entry.date)} · {entry.workedHours.toFixed(2)} u
+                </p>
+              </div>
+              <EmployeeStatusBadge status={entry.status} variant="hours" />
             </div>
-            <EmployeeStatusBadge status={entry.status} variant="hours" />
-          </div>
-        ))}
+          ))
+        )}
       </CardContent>
     </Card>
   );

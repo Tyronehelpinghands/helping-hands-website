@@ -724,8 +724,8 @@ create unique index if not exists crew_members_shiftbase_user_id_uidx
 
 ## Security notes
 
-- RLS: only internal roles via `is_internal_role()` → `get_my_role()`.
-- Crew/client roles cannot read or write these tables.
+- RLS: internal roles via `is_internal_role()` → `get_my_role()`.
+- Crew portal access (own rows): see [`employee-portal-supabase.md`](./employee-portal-supabase.md) (`my_crew_member_id()`, extra SELECT/UPDATE policies, `crew_availability`).
 - App mutations also call `requireRole` server-side.
 - Do **not** store BSN, IBAN, or other sensitive payroll documents in these tables.
 - Never expose the service role key to the client.

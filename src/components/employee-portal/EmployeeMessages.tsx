@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/sheet";
 import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
 import type { EmployeeMessage } from "@/lib/employeePortal";
-import { DEMO_EMPLOYEE_MESSAGES } from "@/lib/employeePortal";
 import { formatDateTime } from "@/lib/dashboardHelpers";
 
 type EmployeeMessagesProps = {
@@ -30,7 +29,7 @@ type EmployeeMessagesProps = {
 };
 
 export default function EmployeeMessages({
-  messages = DEMO_EMPLOYEE_MESSAGES,
+  messages = [],
   compact = false,
 }: EmployeeMessagesProps) {
   const [localMessages, setLocalMessages] = useState(messages);
@@ -83,29 +82,29 @@ export default function EmployeeMessages({
           ) : null}
         </CardHeader>
         <CardContent className="space-y-2">
-          {!compact ? (
-            <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-              Berichten worden later gekoppeld aan WhatsApp Business, Gmail of interne
-              notificaties.
+          {display.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Geen berichten. Planning kan berichten sturen via het interne dashboard.
             </p>
-          ) : null}
-          {display.map((msg) => (
-            <button
-              key={msg.id}
-              type="button"
-              onClick={() => openMessage(msg)}
-              className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left transition hover:border-[#173A8A]/30 hover:bg-slate-50"
-            >
-              <div className="min-w-0">
-                <p className="font-semibold text-[#0B1F4D]">{msg.title}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{msg.body}</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  {msg.type} · {formatDateTime(msg.createdAt)}
-                </p>
-              </div>
-              <EmployeeStatusBadge status={msg.status} variant="message" />
-            </button>
-          ))}
+          ) : (
+            display.map((msg) => (
+              <button
+                key={msg.id}
+                type="button"
+                onClick={() => openMessage(msg)}
+                className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left transition hover:border-[#173A8A]/30 hover:bg-slate-50"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-[#0B1F4D]">{msg.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-600">{msg.body}</p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {msg.type} · {formatDateTime(msg.createdAt)}
+                  </p>
+                </div>
+                <EmployeeStatusBadge status={msg.status} variant="message" />
+              </button>
+            ))
+          )}
         </CardContent>
       </Card>
 

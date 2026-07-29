@@ -19,16 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
 import type { EmployeeAvailability } from "@/lib/employeePortal";
 
 type AvailabilityFormProps = {
   onSave?: (entry: EmployeeAvailability) => void;
+  saving?: boolean;
 };
 
-export default function AvailabilityForm({ onSave }: AvailabilityFormProps) {
+export default function AvailabilityForm({
+  onSave,
+  saving = false,
+}: AvailabilityFormProps) {
   const [date, setDate] = useState("");
-  const [availability, setAvailability] = useState<EmployeeAvailability["availability"]>("Beschikbaar");
+  const [availability, setAvailability] =
+    useState<EmployeeAvailability["availability"]>("Beschikbaar");
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("22:00");
   const [notes, setNotes] = useState("");
@@ -48,9 +52,7 @@ export default function AvailabilityForm({ onSave }: AvailabilityFormProps) {
     };
 
     onSave?.(entry);
-    setSavedMessage(
-      "Beschikbaarheid lokaal opgeslagen. Later wordt dit gekoppeld aan Shiftbase of Supabase.",
-    );
+    setSavedMessage("Beschikbaarheid opgeslagen.");
     setDate("");
     setNotes("");
   }
@@ -62,7 +64,10 @@ export default function AvailabilityForm({ onSave }: AvailabilityFormProps) {
           <CalendarCheck className="h-5 w-5 text-[#173A8A]" />
           Beschikbaarheid doorgeven
         </CardTitle>
-        <CardDescription>Kies een dag en geef aan wanneer je kunt werken.</CardDescription>
+        <CardDescription>
+          Kies een dag en geef aan wanneer je kunt werken. Planning ziet dit in het
+          dashboard.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,8 +141,12 @@ export default function AvailabilityForm({ onSave }: AvailabilityFormProps) {
             </p>
           ) : null}
 
-          <Button type="submit" className="min-h-11 w-full bg-[#173A8A] hover:bg-[#0B1F4D] sm:w-auto">
-            Opslaan
+          <Button
+            type="submit"
+            disabled={saving}
+            className="min-h-11 w-full bg-[#173A8A] hover:bg-[#0B1F4D] sm:w-auto"
+          >
+            {saving ? "Opslaan…" : "Opslaan"}
           </Button>
         </form>
       </CardContent>

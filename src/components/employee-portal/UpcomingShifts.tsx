@@ -27,7 +27,6 @@ import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadg
 import ShiftDetailDrawer from "@/components/employee-portal/ShiftDetailDrawer";
 import type { EmployeeShift } from "@/lib/employeePortal";
 import {
-  DEMO_EMPLOYEE_SHIFTS,
   formatShiftDate,
   formatShiftTimeRange,
   getGoogleMapsUrl,
@@ -44,7 +43,7 @@ type UpcomingShiftsProps = {
 };
 
 export default function UpcomingShifts({
-  shifts = DEMO_EMPLOYEE_SHIFTS,
+  shifts = [],
   compact = false,
   showFilters = false,
   title = "Aankomende planning",
@@ -95,7 +94,9 @@ export default function UpcomingShifts({
         </CardHeader>
         <CardContent className="space-y-3">
           {displayShifts.length === 0 ? (
-            <p className="text-sm text-slate-500">Geen diensten gevonden voor dit filter.</p>
+            <p className="text-sm text-slate-500">
+              Geen aankomende diensten. Zodra planning een shift toewijst, zie je die hier.
+            </p>
           ) : (
             displayShifts.map((shift) => (
               <button
@@ -151,6 +152,7 @@ export default function UpcomingShifts({
 }
 
 export function NextShiftHighlight({ shift }: { shift: EmployeeShift }) {
+  const mapsQuery = shift.locationAddress || shift.locationName;
   return (
     <Card className="border-[#173A8A]/20 bg-gradient-to-br from-white to-[#173A8A]/5 shadow-sm">
       <CardHeader>
@@ -165,23 +167,27 @@ export function NextShiftHighlight({ shift }: { shift: EmployeeShift }) {
           <span>{formatShiftTimeRange(shift.startTime, shift.endTime)}</span>
           <EmployeeStatusBadge status={shift.status} variant="shift" />
         </div>
-        <p className="text-sm text-slate-600">
-          <MapPin className="mr-1 inline h-4 w-4" />
-          {shift.locationAddress}
-        </p>
+        {mapsQuery ? (
+          <p className="text-sm text-slate-600">
+            <MapPin className="mr-1 inline h-4 w-4" />
+            {mapsQuery}
+          </p>
+        ) : null}
         {shift.meetingPoint ? (
           <p className="text-sm text-slate-600">Meldtijd: {shift.meetingPoint}</p>
         ) : null}
         <div className="flex flex-wrap gap-2 pt-2">
-          <a
-            href={getGoogleMapsUrl(shift.locationAddress)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ size: "sm" }), "bg-[#173A8A] text-white hover:bg-[#0B1F4D]")}
-          >
-            <Navigation className="mr-2 h-4 w-4" />
-            Open in Google Maps
-          </a>
+          {mapsQuery ? (
+            <a
+              href={getGoogleMapsUrl(mapsQuery)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ size: "sm" }), "bg-[#173A8A] text-white hover:bg-[#0B1F4D]")}
+            >
+              <Navigation className="mr-2 h-4 w-4" />
+              Open in Google Maps
+            </a>
+          ) : null}
           <Link
             href="/portaal/medewerkers/planning"
             className={buttonVariants({ size: "sm", variant: "outline" })}

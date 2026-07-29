@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   CalendarCheck,
   CalendarDays,
@@ -15,26 +16,46 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import EmployeeDocuments from "@/components/employee-portal/EmployeeDocuments";
-import EmployeeIntegrationStatus from "@/components/employee-portal/EmployeeIntegrationStatus";
 import EmployeeMessages from "@/components/employee-portal/EmployeeMessages";
 import EmployeeStats from "@/components/employee-portal/EmployeeStats";
 import HoursSummary from "@/components/employee-portal/HoursSummary";
-import UpcomingShifts, { NextShiftHighlight } from "@/components/employee-portal/UpcomingShifts";
-import { getNextShift, getPendingActions } from "@/lib/employeePortal";
+import NoCrewProfileState from "@/components/employee-portal/NoCrewProfileState";
+import UpcomingShifts, {
+  NextShiftHighlight,
+} from "@/components/employee-portal/UpcomingShifts";
+import { getEmployeePortalBundle } from "@/lib/employee-portal/data";
 import { cn } from "@/lib/utils";
 
-export default function EmployeePortalOverviewPage() {
-  const nextShift = getNextShift();
-  const actions = getPendingActions();
+export default async function EmployeePortalOverviewPage() {
+  const bundle = await getEmployeePortalBundle();
+  if (!bundle) redirect("/login");
+
+  if (!bundle.hasCrewProfile) {
+    return <NoCrewProfileState displayName={bundle.displayName} />;
+  }
+
+  const { nextShift, pendingActions: actions, shifts, hours, messages, documents, stats } =
+    bundle;
 
   return (
     <div className="space-y-6">
-      <EmployeeStats />
+      <EmployeeStats stats={stats} />
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
-          {nextShift ? <NextShiftHighlight shift={nextShift} /> : null}
-          <UpcomingShifts compact />
+          {nextShift ? <NextShiftHighlight shift={nextShift} /> : (
+            <Card className="border-slate-200/80 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg font-black text-[#0B1F4D]">
+                  Geen aankomende dienst
+                </CardTitle>
+                <CardDescription>
+                  Zodra planning een shift aan jou toewijst, verschijnt die hier.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+          <UpcomingShifts shifts={shifts} compact />
         </div>
         <div className="space-y-6">
           <Card className="border-slate-200/80 bg-white shadow-sm">
@@ -62,13 +83,13 @@ export default function EmployeePortalOverviewPage() {
               )}
             </CardContent>
           </Card>
-          <HoursSummary />
+          <HoursSummary hours={hours} />
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <EmployeeMessages compact />
-        <EmployeeDocuments compact />
+        <EmployeeMessages messages={messages} compact />
+        <EmployeeDocuments documents={documents} compact />
       </div>
 
       <Card className="border-slate-200/80 bg-white shadow-sm">
@@ -109,8 +130,6 @@ export default function EmployeePortalOverviewPage() {
           </Link>
         </CardContent>
       </Card>
-
-      <EmployeeIntegrationStatus />
     </div>
   );
 }

@@ -1,16 +1,11 @@
 "use client";
 
 /**
- * Medewerkersportaal uren — alleen bekijken en correcties doorgeven.
- *
- * TODO: Medewerker mag alleen eigen uren bekijken
- * TODO: Medewerker mag alleen correctieverzoek maken
- * TODO: Medewerker mag nooit status Goedgekeurd zetten
- * TODO: Alleen interne admin/planning mag uren goedkeuren via /dashboard/intern/urenregistratie
- * TODO: Later afdwingen met Supabase Auth + Row Level Security
+ * Medewerkersportaal uren — bekijken en correcties doorgeven.
+ * Goedkeuring gebeurt alleen in het interne dashboard.
  */
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Eye, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,12 +32,12 @@ import HoursDetailDrawer from "@/components/employee-portal/HoursDetailDrawer";
 import type { EmployeeHoursEntry } from "@/lib/employeePortal";
 import {
   canEmployeeSubmitHoursCorrection,
-  DEMO_EMPLOYEE_HOURS,
   formatShiftDate,
 } from "@/lib/employeePortal";
+import { submitHoursCorrectionAction } from "@/lib/employee-portal/mutations";
 
 export default function HoursCheckTable({
-  entries = DEMO_EMPLOYEE_HOURS,
+  entries = [],
 }: {
   entries?: EmployeeHoursEntry[];
 }) {
@@ -51,6 +46,8 @@ export default function HoursCheckTable({
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [viewEntry, setViewEntry] = useState<EmployeeHoursEntry | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   function openView(entry: EmployeeHoursEntry) {
     setViewEntry(entry);
@@ -63,29 +60,44 @@ export default function HoursCheckTable({
   }
 
   function handleCorrectionSubmit(entryId: string, data: HoursCorrectionFormData) {
-    const correctionRequest = buildCorrectionRequest(data);
-    setLocalEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === entryId
-          ? {
-              ...entry,
-              status: "Correctie aangevraagd" as const,
-              correctionRequest,
-            }
-          : entry,
-      ),
-    );
-    if (viewEntry?.id === entryId) {
-      setViewEntry((prev) =>
-        prev
-          ? {
-              ...prev,
-              status: "Correctie aangevraagd",
-              correctionRequest,
-            }
-          : prev,
+    setError(null);
+    startTransition(async () => {
+      const result = await submitHoursCorrectionAction({
+        entryId,
+        reason: data.reason,
+        requestedStartTime: data.requestedStartTime,
+        requestedEndTime: data.requestedEndTime,
+        requestedBreakMinutes: data.requestedBreakMinutes,
+        explanation: data.explanation,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      const correctionRequest = buildCorrectionRequest(data);
+      setLocalEntries((prev) =>
+        prev.map((entry) =>
+          entry.id === entryId
+            ? {
+                ...entry,
+                status: "Correctie aangevraagd" as const,
+                correctionRequest,
+              }
+            : entry,
+        ),
       );
-    }
+      if (viewEntry?.id === entryId) {
+        setViewEntry((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: "Correctie aangevraagd",
+                correctionRequest,
+              }
+            : prev,
+        );
+      }
+    });
   }
 
   return (
@@ -99,75 +111,92 @@ export default function HoursCheckTable({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="hidden md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Datum</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>Eind</TableHead>
-                  <TableHead>Pauze</TableHead>
-                  <TableHead>Uren</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Acties</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          {error ? (
+            <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
+          {localEntries.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Nog geen uren voor jou geregistreerd.
+            </p>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Datum</TableHead>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Start</TableHead>
+                      <TableHead>Eind</TableHead>
+                      <TableHead>Pauze</TableHead>
+                      <TableHead>Uren</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Acties</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {localEntries.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell>{formatShiftDate(entry.date)}</TableCell>
+                        <TableCell className="max-w-[200px] truncate font-medium">
+                          {entry.projectName}
+                        </TableCell>
+                        <TableCell>{entry.startTime}</TableCell>
+                        <TableCell>{entry.endTime}</TableCell>
+                        <TableCell>{entry.breakMinutes} min</TableCell>
+                        <TableCell>{entry.workedHours.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <EmployeeStatusBadge status={entry.status} variant="hours" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <HoursActions
+                            entry={entry}
+                            onView={() => openView(entry)}
+                            onCorrection={() => openCorrection(entry)}
+                            disabled={pending}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="space-y-3 md:hidden">
                 {localEntries.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>{formatShiftDate(entry.date)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate font-medium">
-                      {entry.projectName}
-                    </TableCell>
-                    <TableCell>{entry.startTime}</TableCell>
-                    <TableCell>{entry.endTime}</TableCell>
-                    <TableCell>{entry.breakMinutes} min</TableCell>
-                    <TableCell>{entry.workedHours.toFixed(2)}</TableCell>
-                    <TableCell>
+                  <div
+                    key={entry.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-[#0B1F4D]">{entry.projectName}</p>
+                        <p className="text-sm text-slate-600">
+                          {formatShiftDate(entry.date)}
+                        </p>
+                      </div>
                       <EmployeeStatusBadge status={entry.status} variant="hours" />
-                    </TableCell>
-                    <TableCell className="text-right">
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {entry.startTime} – {entry.endTime} · Pauze {entry.breakMinutes} min ·{" "}
+                      {entry.workedHours.toFixed(2)} u
+                    </p>
+                    <div className="mt-3">
                       <HoursActions
                         entry={entry}
                         onView={() => openView(entry)}
                         onCorrection={() => openCorrection(entry)}
+                        stacked
+                        disabled={pending}
                       />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="space-y-3 md:hidden">
-            {localEntries.map((entry) => (
-              <div
-                key={entry.id}
-                className="rounded-xl border border-slate-200 bg-slate-50/50 p-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-bold text-[#0B1F4D]">{entry.projectName}</p>
-                    <p className="text-sm text-slate-600">{formatShiftDate(entry.date)}</p>
+                    </div>
                   </div>
-                  <EmployeeStatusBadge status={entry.status} variant="hours" />
-                </div>
-                <p className="mt-2 text-sm text-slate-600">
-                  {entry.startTime} – {entry.endTime} · Pauze {entry.breakMinutes} min ·{" "}
-                  {entry.workedHours.toFixed(2)} u
-                </p>
-                <div className="mt-3">
-                  <HoursActions
-                    entry={entry}
-                    onView={() => openView(entry)}
-                    onCorrection={() => openCorrection(entry)}
-                    stacked
-                  />
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -193,11 +222,13 @@ function HoursActions({
   onView,
   onCorrection,
   stacked = false,
+  disabled = false,
 }: {
   entry: EmployeeHoursEntry;
   onView: () => void;
   onCorrection: () => void;
   stacked?: boolean;
+  disabled?: boolean;
 }) {
   const canCorrect = canEmployeeSubmitHoursCorrection(entry);
 
@@ -218,6 +249,7 @@ function HoursActions({
           type="button"
           variant={stacked ? "outline" : "ghost"}
           size="sm"
+          disabled={disabled}
           className={
             stacked
               ? "min-h-11 w-full justify-center border-[#F28C28]/30 text-[#c46a12] hover:bg-[#F28C28]/10"

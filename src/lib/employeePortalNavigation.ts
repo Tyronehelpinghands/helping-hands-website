@@ -77,7 +77,7 @@ export type EmployeePortalPageMeta = {
 
 export const employeePortalPageMeta: Record<string, EmployeePortalPageMeta> = {
   [EMPLOYEE_PORTAL_BASE]: {
-    title: "Welkom terug, Demo Medewerker",
+    title: "Overzicht",
     subtitle: "Bekijk je planning, beschikbaarheid, uren en berichten.",
   },
   [`${EMPLOYEE_PORTAL_BASE}/planning`]: {
@@ -106,7 +106,17 @@ export const employeePortalPageMeta: Record<string, EmployeePortalPageMeta> = {
   },
 };
 
-export function getEmployeePortalPageMeta(pathname: string): EmployeePortalPageMeta {
+export function getEmployeePortalPageMeta(
+  pathname: string,
+  displayName?: string | null,
+): EmployeePortalPageMeta {
+  if (pathname === EMPLOYEE_PORTAL_BASE || pathname === `${EMPLOYEE_PORTAL_BASE}/`) {
+    const name = displayName?.trim() || "medewerker";
+    return {
+      title: `Welkom terug, ${name}`,
+      subtitle: "Bekijk je planning, beschikbaarheid, uren en berichten.",
+    };
+  }
   if (employeePortalPageMeta[pathname]) {
     return employeePortalPageMeta[pathname];
   }

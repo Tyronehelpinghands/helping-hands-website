@@ -5,9 +5,20 @@ import { Bell } from "lucide-react";
 import { getRoleLabel, type Profile } from "@/lib/auth";
 import { getEmployeePortalPageMeta } from "@/lib/employeePortalNavigation";
 
-export default function EmployeePortalHeader({ profile }: { profile: Profile }) {
+export default function EmployeePortalHeader({
+  profile,
+  displayName,
+}: {
+  profile: Profile;
+  displayName?: string | null;
+}) {
   const pathname = usePathname() ?? "";
-  const { title, subtitle } = getEmployeePortalPageMeta(pathname);
+  const name =
+    displayName?.trim() ||
+    profile.full_name?.trim() ||
+    profile.email?.split("@")[0] ||
+    "medewerker";
+  const { title, subtitle } = getEmployeePortalPageMeta(pathname, name);
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur-sm">
@@ -29,9 +40,7 @@ export default function EmployeePortalHeader({ profile }: { profile: Profile }) 
             <Bell className="h-5 w-5" />
           </button>
           <div className="hidden text-right sm:block">
-            <p className="text-sm font-semibold text-[#0B1F4D]">
-              {profile.full_name ?? profile.email ?? "Medewerker"}
-            </p>
+            <p className="text-sm font-semibold text-[#0B1F4D]">{name}</p>
             <p className="text-xs text-slate-500">{getRoleLabel(profile.role)}</p>
           </div>
         </div>
