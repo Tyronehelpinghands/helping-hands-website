@@ -284,6 +284,11 @@ create table if not exists public.shifts (
   status text not null default 'open'
     check (status in ('open', 'assigned', 'confirmed', 'completed', 'cancelled')),
   notes text,
+  shiftbase_shift_id text,
+  shiftbase_sync_status text not null default 'niet_gesynct'
+    check (shiftbase_sync_status in ('niet_gesynct', 'gesynct', 'fout', 'overgeslagen')),
+  shiftbase_last_synced_at timestamptz,
+  shiftbase_sync_error text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -646,6 +651,49 @@ values
     }'::jsonb
   )
 on conflict (key) do nothing;
+```
+
+---
+
+## Migration: Shiftbase sync columns on `shifts`
+
+Run this in the Supabase SQL editor if `public.shifts` already exists without Shiftbase fields (idempotent):
+
+```sql
+-- -----------------------------------------------------------------------------
+-- Shiftbase sync metadata on public.shifts
+-- -----------------------------------------------------------------------------
+alter table public.shifts
+  add column if not exists shiftbase_shift_id text;
+
+alter table public.shifts
+  add column if not exists shiftbase_sync_status text not null default 'niet_gesynct';
+
+alter table public.shifts
+  add column if not exists shiftbase_last_synced_at timestamptz;
+
+alter table public.shifts
+  add column if not exists shiftbase_sync_error text;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'shifts_shiftbase_sync_status_check'
+  ) then
+    alter table public.shifts
+      add constraint shifts_shiftbase_sync_status_check
+      check (
+        shiftbase_sync_status in (
+          'niet_gesynct',
+          'gesynct',
+          'fout',
+          'overgeslagen'
+        )
+      );
+  end if;
+end $$;
 ```
 
 ---

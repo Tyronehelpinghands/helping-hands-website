@@ -139,7 +139,7 @@ export async function POST(request: Request) {
   const recipient = getRecipientForFormType(formType);
   const from = getContactFromEmail();
   const payload = buildPayload(formType, body, recipient);
-  const { subject, text } = formatContactEmail(payload);
+  const { subject, text, html } = formatContactEmail(payload);
 
   const resend = new Resend(apiKey);
   const { data, error } = await resend.emails.send({
@@ -148,6 +148,7 @@ export async function POST(request: Request) {
     replyTo: payload.email,
     subject,
     text,
+    html,
   });
 
   if (error) {

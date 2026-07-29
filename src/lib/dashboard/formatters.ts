@@ -7,6 +7,7 @@ import type {
   ProjectStatus,
   ProjectType,
   ShiftStatus,
+  ShiftbaseSyncStatus,
   TaskPriority,
   TaskStatus,
   TimeEntryStatus,
@@ -146,6 +147,22 @@ export function shiftStatusLabel(status: ShiftStatus): string {
       return "Afgerond";
     case "cancelled":
       return "Geannuleerd";
+  }
+}
+
+export function shiftbaseSyncStatusLabel(
+  status: ShiftbaseSyncStatus | null | undefined,
+): string {
+  switch (status) {
+    case "gesynct":
+      return "Gesynct";
+    case "fout":
+      return "Fout";
+    case "overgeslagen":
+      return "Overgeslagen";
+    case "niet_gesynct":
+    default:
+      return "Niet gesynct";
   }
 }
 

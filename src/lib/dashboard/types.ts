@@ -39,6 +39,12 @@ export type ShiftStatus =
   | "completed"
   | "cancelled";
 
+export type ShiftbaseSyncStatus =
+  | "niet_gesynct"
+  | "gesynct"
+  | "fout"
+  | "overgeslagen";
+
 export type TimeEntryStatus =
   | "draft"
   | "submitted"
@@ -150,6 +156,10 @@ export type Shift = {
   assigned_people: number;
   status: ShiftStatus;
   notes: string | null;
+  shiftbase_shift_id?: string | null;
+  shiftbase_sync_status?: ShiftbaseSyncStatus;
+  shiftbase_last_synced_at?: string | null;
+  shiftbase_sync_error?: string | null;
   created_at: string;
   updated_at: string;
   projects?: Pick<Project, "id" | "project_name"> | null;

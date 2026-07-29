@@ -19,11 +19,13 @@ import type {
   ProjectStatus,
   ProjectType,
   ShiftStatus,
+  ShiftbaseSyncStatus,
   TaskPriority,
   TaskStatus,
   TimeEntryStatus,
   InternalMessageStatus,
 } from "@/lib/dashboard/types";
+import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 
 const ALL_INTERNAL: UserRole[] = [
   "owner",
@@ -349,7 +351,12 @@ export async function updateCrewMemberAction(
 
 export async function createShiftAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<
+  ActionResult<{
+    id: string;
+    shiftbaseSync?: { status: ShiftbaseSyncStatus; message?: string };
+  }>
+> {
   await requireRole(PLANNER_ROLES);
   const project_id = strOrNull(formData.get("project_id"));
   const shift_date = strOrNull(formData.get("shift_date"));
@@ -380,16 +387,37 @@ export async function createShiftAction(
     .single();
 
   if (error) return fail(error.message);
+
+  const sync = await syncMvpShiftToShiftbase(data.id);
   revalidateDashboard(["/dashboard/intern/planning", "/dashboard/intern/projecten"]);
-  return ok({ id: data.id });
+  return ok({
+    id: data.id,
+    shiftbaseSync: {
+      status: sync.status,
+      message: sync.message ?? sync.error,
+    },
+  });
 }
 
 export async function assignCrewToShiftAction(
   shiftId: string,
   crewMemberId: string | null,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<
+  ActionResult<{
+    id: string;
+    shiftbaseSync?: { status: ShiftbaseSyncStatus; message?: string };
+  }>
+> {
   await requireRole(PLANNER_ROLES);
   const supabase = await createClient();
+  const { data: existing, error: loadError } = await supabase
+    .from("shifts")
+    .select("id, shiftbase_shift_id")
+    .eq("id", shiftId)
+    .maybeSingle();
+
+  if (loadError) return fail(loadError.message);
+
   const { error } = await supabase
     .from("shifts")
     .update({
@@ -400,8 +428,20 @@ export async function assignCrewToShiftAction(
     .eq("id", shiftId);
 
   if (error) return fail(error.message);
+
+  let shiftbaseSync:
+    | { status: ShiftbaseSyncStatus; message?: string }
+    | undefined;
+  if (existing?.shiftbase_shift_id) {
+    const sync = await syncMvpShiftToShiftbase(shiftId);
+    shiftbaseSync = {
+      status: sync.status,
+      message: sync.message ?? sync.error,
+    };
+  }
+
   revalidateDashboard(["/dashboard/intern/planning"]);
-  return ok({ id: shiftId });
+  return ok({ id: shiftId, shiftbaseSync });
 }
 
 export async function updateShiftStatusAction(

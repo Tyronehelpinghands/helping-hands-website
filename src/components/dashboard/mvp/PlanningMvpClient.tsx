@@ -31,12 +31,14 @@ import {
   formatDate,
   formatTime,
   shiftStatusLabel,
+  shiftbaseSyncStatusLabel,
 } from "@/lib/dashboard/formatters";
 import type {
   CrewMember,
   Project,
   Shift,
   ShiftStatus,
+  ShiftbaseSyncStatus,
 } from "@/lib/dashboard/types";
 
 const STATUSES: ShiftStatus[] = [
@@ -46,6 +48,38 @@ const STATUSES: ShiftStatus[] = [
   "completed",
   "cancelled",
 ];
+
+function syncBadgeTone(
+  status: ShiftbaseSyncStatus | null | undefined,
+): "ok" | "warn" | "danger" | "neutral" | "info" {
+  switch (status) {
+    case "gesynct":
+      return "ok";
+    case "fout":
+      return "danger";
+    case "overgeslagen":
+      return "warn";
+    default:
+      return "neutral";
+  }
+}
+
+function toastAfterCreate(
+  sync?: { status: ShiftbaseSyncStatus; message?: string },
+): string {
+  const base = "Shift aangemaakt.";
+  if (!sync) return base;
+  if (sync.status === "gesynct") {
+    return `${base} Gesynchroniseerd met Shiftbase`;
+  }
+  if (sync.status === "overgeslagen") {
+    return `${base} Shiftbase niet geconfigureerd — alleen in Supabase opgeslagen`;
+  }
+  if (sync.status === "fout") {
+    return `${base} Shiftbase sync mislukt: ${sync.message || "onbekende fout"}`;
+  }
+  return base;
+}
 
 export function PlanningMvpClient({
   shifts,
@@ -99,6 +133,10 @@ export function PlanningMvpClient({
         }
       />
 
+      <p className="text-sm text-slate-600">
+        Nieuwe shifts syncen automatisch naar Shiftbase als de API is gekoppeld.
+      </p>
+
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <MvpBadge tone="warn">{openCount} open</MvpBadge>
         <MvpBadge tone="danger">{understaffed} onderbezet</MvpBadge>
@@ -130,11 +168,13 @@ export function PlanningMvpClient({
               <th className="px-3 py-2">Bezetting</th>
               <th className="px-3 py-2">Crew</th>
               <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Shiftbase</th>
             </tr>
           </thead>
           <tbody>
             {visible.map((s) => {
               const short = (s.assigned_people || 0) < (s.required_people || 1);
+              const syncStatus = s.shiftbase_sync_status ?? "niet_gesynct";
               return (
                 <tr key={s.id} className="border-b last:border-0">
                   <td className="px-3 py-2 font-semibold text-[#0B1F4D]">
@@ -199,6 +239,11 @@ export function PlanningMvpClient({
                       ))}
                     </TextSelect>
                   </td>
+                  <td className="px-3 py-2">
+                    <MvpBadge tone={syncBadgeTone(syncStatus)}>
+                      {shiftbaseSyncStatusLabel(syncStatus)}
+                    </MvpBadge>
+                  </td>
                 </tr>
               );
             })}
@@ -216,7 +261,7 @@ export function PlanningMvpClient({
             const res = await createShiftAction(fd);
             if (res.ok) {
               setOpen(false);
-              showToast("Shift aangemaakt.");
+              showToast(toastAfterCreate(res.data.shiftbaseSync));
               router.refresh();
             } else showToast(res.error);
           });
