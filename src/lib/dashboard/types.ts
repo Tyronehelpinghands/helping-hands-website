@@ -1,4 +1,4 @@
-/** Types for internal dashboard Supabase tables (MVP). */
+/** Types for internal dashboard Supabase tables. */
 
 export type ClientStatus = "active" | "prospect" | "inactive";
 

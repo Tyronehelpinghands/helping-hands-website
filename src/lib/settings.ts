@@ -367,8 +367,8 @@ export const INTEGRATION_DEFINITIONS = [
   },
   {
     id: "whatsapp",
-    name: "WhatsApp Business",
-    description: "Crewberichten, oproepen en briefings.",
+    name: "WhatsApp",
+    description: "Crewberichten via wa.me; Cloud API optioneel.",
     checkUrl: "/api/integrations/whatsapp/status",
     checkable: true,
   },
@@ -395,7 +395,7 @@ export const SECURITY_CHECKLIST = [
 export const SECURITY_STATUS_CARDS = [
   { id: "auth", label: "Auth", status: "Actief" as const },
   { id: "roles", label: "Rollen", status: "Actief" as const },
-  { id: "secrets", label: "API secrets", status: "Server-side voorbereid" as const },
+  { id: "secrets", label: "API secrets", status: "Server-side" as const },
   { id: "protection", label: "Dashboard protection", status: "Actief" as const },
-  { id: "audit", label: "Audit logs", status: "Binnenkort" as const },
+  { id: "audit", label: "Audit logs", status: "Voorbereid" as const },
 ];

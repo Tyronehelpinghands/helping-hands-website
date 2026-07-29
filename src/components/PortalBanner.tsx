@@ -5,38 +5,40 @@ type PortalBannerProps = {
 };
 
 const copy: Record<
-  PortalBannerVariant,
+  Exclude<PortalBannerVariant, "intern">,
   { badge: string; title: string; detail: string }
 > = {
   generic: {
-    badge: "Demo-data",
-    title: "Portaal toont voorbeelddata",
+    badge: "Portaal",
+    title: "Je bent ingelogd",
     detail:
-      "Je bent ingelogd. De schermen gebruiken nog testdata tot de live-integraties zijn gekoppeld.",
-  },
-  intern: {
-    badge: "Demo-data",
-    title: "Intern dashboard — voorbeelddata",
-    detail:
-      "Veel modules tonen nog demo-data. Auth is live; WhatsApp/Gmail via Integraties (wa.me/mailto direct, API bij env).",
+      "Gebruik het menu om naar je overzicht, planning of berichten te gaan.",
   },
   employee: {
-    badge: "Demo-data",
-    title: "Medewerkersportaal — voorbeelddata",
+    badge: "Medewerker",
+    title: "Medewerkersportaal",
     detail:
-      "Shifts en uren zijn voorbeelddata. Uren goedkeuren gebeurt alleen intern bij planning.",
+      "Bekijk je shifts en uren. Goedkeuring van uren gebeurt via planning.",
   },
   client: {
-    badge: "Demo-data",
-    title: "Opdrachtgeversportaal — voorbeelddata",
+    badge: "Opdrachtgever",
+    title: "Opdrachtgeversportaal",
     detail:
-      "Aanvragen, planning en factuurstatus zijn voorbeelddata. Geen marges of interne crewgegevens.",
+      "Volg aanvragen, planning en factuurstatus. Interne crewgegevens zijn niet zichtbaar.",
   },
 };
 
+/**
+ * Status banner for client/employee portals.
+ * Intern ops dashboard has no banner — it is production, not a demo strip.
+ */
 export default function PortalBanner({
   variant = "generic",
 }: PortalBannerProps) {
+  if (variant === "intern") {
+    return null;
+  }
+
   const content = copy[variant];
 
   return (

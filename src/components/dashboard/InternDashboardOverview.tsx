@@ -94,8 +94,7 @@ export default function InternDashboardOverview() {
                 Modules
               </CardTitle>
               <CardDescription>
-                Live = echte data/auth · Demo = voorbeelddata · Binnenkort =
-                nog niet beschikbaar
+                Live modules voor planning, sales, crew en administratie
               </CardDescription>
             </div>
             <Link
@@ -139,7 +138,7 @@ export default function InternDashboardOverview() {
               Vandaag aandacht nodig
             </CardTitle>
             <CardDescription>
-              Openstaande taken uit demo-modules — later gekoppeld aan Supabase.
+              Openstaande taken en follow-ups die aandacht vragen.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

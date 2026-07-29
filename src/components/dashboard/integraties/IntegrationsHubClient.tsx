@@ -49,8 +49,11 @@ export type IntegrationHubProps = {
   gmailFlash?: GmailFlash | null;
 };
 
-function configBadge(configured: boolean): IntegrationStatusType {
-  return configured ? "Voorbereid" : "Niet gekoppeld";
+function configBadge(
+  configured: boolean,
+  whenReady: IntegrationStatusType = "Voorbereid",
+): IntegrationStatusType {
+  return configured ? whenReady : "Niet gekoppeld";
 }
 
 function mailto(to: string, subject?: string, body?: string) {
@@ -343,7 +346,7 @@ export default function IntegrationsHubClient({
               <SettingsStatusBadge status={configBadge(whatsappConfigured)} />
             </div>
             <CardDescription>
-              wa.me direct · Cloud API bij env.
+              wa.me direct · Cloud API optioneel.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
@@ -378,10 +381,12 @@ export default function IntegrationsHubClient({
               <CardTitle className="text-base font-black text-[#0B1F4D]">
                 Gmail
               </CardTitle>
-              <SettingsStatusBadge status={configBadge(gmailConfigured)} />
+              <SettingsStatusBadge
+                status={configBadge(gmailConfigured, "Actief")}
+              />
             </div>
             <CardDescription>
-              mailto direct · API bij OAuth env.
+              mailto direct · Gmail API bij OAuth.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
@@ -444,10 +449,12 @@ export default function IntegrationsHubClient({
               <CardTitle className="text-base font-black text-[#0B1F4D]">
                 Shiftbase
               </CardTitle>
-              <SettingsStatusBadge status={configBadge(shiftbaseConfigured)} />
+              <SettingsStatusBadge
+                status={configBadge(shiftbaseConfigured, "Actief")}
+              />
             </div>
             <CardDescription>
-              Planning / crew sync — live API-test.
+              Planning / crew sync — live API.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
@@ -469,7 +476,7 @@ export default function IntegrationsHubClient({
               <SettingsStatusBadge status={configBadge(moneybirdConfigured)} />
             </div>
             <CardDescription>
-              Facturatie API — geen auto-send in MVP.
+              Facturatie API — concepten lokaal; geen auto-send.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
@@ -501,8 +508,8 @@ export default function IntegrationsHubClient({
               WhatsApp — snelle acties
             </CardTitle>
             <CardDescription>
-              Templates openen wa.me. API-send alleen als Cloud API geconfigureerd
-              is.
+              Open wa.me direct. Cloud API-verzending alleen als WhatsApp
+              Business Cloud is geconfigureerd.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -580,7 +587,7 @@ export default function IntegrationsHubClient({
               Gmail — mailboxen & verzenden
             </CardTitle>
             <CardDescription>
-              Gedeelde adressen uit siteConfig. Geen nep-inbox.
+              Gedeelde mailboxen uit siteConfig · Gmail API of mailto.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

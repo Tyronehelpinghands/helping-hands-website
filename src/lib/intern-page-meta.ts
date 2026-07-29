@@ -10,8 +10,8 @@ const pageMeta: Record<string, InternPageMeta> = {
       "Centrale cockpit voor planning, crew, uren, facturatie en communicatie.",
   },
   "/dashboard/intern/sales": {
-    title: "Sales dashboard",
-    subtitle: "Beheer leads, deals, follow-ups en HubSpot synchronisatie.",
+    title: "Sales",
+    subtitle: "Beheer opdrachtgevers, leads en follow-ups.",
   },
   "/dashboard/intern/leads": {
     title: "Leads",
@@ -26,7 +26,7 @@ const pageMeta: Record<string, InternPageMeta> = {
   "/dashboard/intern/planning": {
     title: "Planning",
     subtitle:
-      "Plan crew op events, restaurants en producties met overzicht per dag, week en project.",
+      "Plan crew op events, restaurants en producties — met Shiftbase-sync.",
   },
   "/dashboard/intern/crew": {
     title: "Crew",
@@ -46,7 +46,7 @@ const pageMeta: Record<string, InternPageMeta> = {
   "/dashboard/intern/financien": {
     title: "Financiën",
     subtitle:
-      "Inzicht in omzet, kosten, marge, btw, openstaande facturen en financiële acties.",
+      "Inzicht in omzet, kosten, marge, openstaande concepten en financiële acties.",
   },
   "/dashboard/intern/risico-acties": {
     title: "Risico & Acties",
@@ -61,7 +61,7 @@ const pageMeta: Record<string, InternPageMeta> = {
   "/dashboard/intern/integraties": {
     title: "Integraties",
     subtitle:
-      "Supabase, WhatsApp, Gmail en overige koppelingen — echte status, geen nep-connected.",
+      "Supabase, Shiftbase, Gmail, Resend en overige koppelingen — live status.",
   },
   "/dashboard/intern/instellingen": {
     title: "Instellingen",

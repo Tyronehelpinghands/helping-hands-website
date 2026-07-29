@@ -22,7 +22,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 export const metadata: Metadata = {
   title: "Integraties | Intern dashboard",
   description:
-    "Status en live healthchecks voor Supabase, WhatsApp, Gmail, Shiftbase en overige koppelingen.",
+    "Status en live healthchecks voor Supabase, Gmail, Shiftbase, Resend en overige koppelingen.",
 };
 
 export default async function InternIntegratiesPage({
@@ -69,7 +69,7 @@ export default async function InternIntegratiesPage({
           ? "Voorbereid"
           : "Ontbreekt",
       note: stats.tablesReady
-        ? "MVP-tabellen bereikbaar"
+        ? "Dashboard-tabellen bereikbaar"
         : "SQL uit docs/internal-dashboard-database.md nog draaien",
     },
     {
@@ -77,7 +77,7 @@ export default async function InternIntegratiesPage({
       name: "Resend",
       status: resendActive ? "Actief" : "Ontbreekt",
       note: resendActive
-        ? "API key aanwezig (contact)"
+        ? "API key aanwezig (contactformulieren)"
         : "RESEND_API_KEY ontbreekt",
     },
     {
@@ -89,9 +89,9 @@ export default async function InternIntegratiesPage({
     {
       provider: "shiftbase",
       name: "Shiftbase",
-      status: shiftbasePrepared ? "Voorbereid" : "Ontbreekt",
+      status: shiftbasePrepared ? "Actief" : "Ontbreekt",
       note: shiftbasePrepared
-        ? "Token/key aanwezig — klik Test om live API te checken"
+        ? "API gekoppeld — shifts syncen automatisch · klik Test voor live check"
         : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt",
     },
     {
@@ -104,16 +104,16 @@ export default async function InternIntegratiesPage({
     },
     {
       provider: "whatsapp",
-      name: "WhatsApp Business",
-      status: whatsapp.configured ? "Voorbereid" : "Ontbreekt",
+      name: "WhatsApp",
+      status: whatsapp.configured ? "Voorbereid" : "Niet gekoppeld",
       note: whatsapp.configured
         ? "Cloud API env aanwezig — klik Test · wa.me werkt altijd"
-        : "Voorbereid — wa.me fallback",
+        : "wa.me beschikbaar · WhatsApp Business Cloud niet geconfigureerd",
     },
     {
       provider: "gmail",
       name: "Gmail",
-      status: gmail.configured ? "Voorbereid" : "Ontbreekt",
+      status: gmail.configured ? "Actief" : "Ontbreekt",
       note: gmail.configured
         ? "OAuth aanwezig — klik Test om refresh token te valideren"
         : "OAuth incompleet — mailto fallback · Gmail koppelen",
@@ -124,7 +124,7 @@ export default async function InternIntegratiesPage({
     <div className="space-y-6">
       <MvpPageHeader
         title="Integraties"
-        description="Eerlijke status + live Test per API. Geen secrets in de UI."
+        description="Live status en API-tests. Secrets blijven server-side."
       />
 
       <IntegrationsStatusTable initialRows={initialRows} />

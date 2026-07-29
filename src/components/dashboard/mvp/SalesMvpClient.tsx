@@ -83,8 +83,8 @@ export function SalesMvpClient({
         title={mode === "leads" ? "Leads" : "Sales"}
         description={
           mode === "leads"
-            ? "Kansen, status en follow-ups — echte Supabase-data."
-            : "Opdrachtgevers en leads — echte Supabase-data."
+            ? "Kansen, status en follow-ups voor sales."
+            : "Opdrachtgevers, leads en opvolging."
         }
         notice={
           tablesReady

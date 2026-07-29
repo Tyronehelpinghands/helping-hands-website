@@ -71,10 +71,10 @@ export function InvoiceMvpClient({
     <div className="space-y-6">
       <MvpPageHeader
         title="Facturatie"
-        description="Concepten uit goedgekeurde uren. Moneybird: Voorbereid — geen auto-send."
+        description="Factuurconcepten uit goedgekeurde uren, met CSV-export."
         notice={
           tablesReady
-            ? "Moneybird integratie: Voorbereid — nog niet gekoppeld."
+            ? "Moneybird-verzending is nog niet gekoppeld — concepten blijven in Supabase."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
@@ -198,10 +198,10 @@ export function InvoiceMvpClient({
       ) : null}
 
       <div className="rounded-xl border border-dashed border-slate-300 bg-[#F5F7FA]/50 p-4 text-sm text-slate-600">
-        <MvpBadge tone="warn">Voorbereid — nog niet gekoppeld</MvpBadge>
+        <MvpBadge tone="warn">Moneybird — handmatig</MvpBadge>
         <p className="mt-2">
-          Moneybird: concepten blijven lokaal in Supabase. Geen automatische
-          factuurverzending in deze MVP.
+          Concepten worden in Supabase bewaard. Exporteer als CSV of verwerk
+          handmatig in Moneybird; automatische verzending volgt later.
         </p>
       </div>
 

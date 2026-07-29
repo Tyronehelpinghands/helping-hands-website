@@ -117,7 +117,7 @@ export function PlanningMvpClient({
     <div className="space-y-6">
       <MvpPageHeader
         title="Planning"
-        description={`Week ${formatDate(weekFrom)} – ${formatDate(weekTo)}. Lijst-MVP; kalender volgt later.`}
+        description={`Week ${formatDate(weekFrom)} – ${formatDate(weekTo)}. Shifts met Shiftbase-sync.`}
         notice={
           tablesReady
             ? null

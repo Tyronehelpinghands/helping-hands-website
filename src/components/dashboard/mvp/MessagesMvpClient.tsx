@@ -73,7 +73,7 @@ export function MessagesMvpClient({
     <div className="space-y-6">
       <MvpPageHeader
         title="Berichten"
-        description="Concepten en handmatige fallbacks. Automatisch verzenden wordt later gekoppeld."
+        description="Berichtconcepten met Gmail/WhatsApp-fallbacks (mailto / wa.me)."
         notice={
           tablesReady
             ? "WhatsApp/Gmail API: Voorbereid — gebruik kopieer / mailto / wa.me."

@@ -59,8 +59,8 @@ export const SHARED_INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
   },
   {
     id: "whatsapp",
-    name: "WhatsApp Business",
-    description: "Crewberichten, oproepen en briefings.",
+    name: "WhatsApp",
+    description: "Crewberichten via wa.me; Cloud API optioneel.",
     checkUrl: "/api/integrations/whatsapp/status",
     checkable: true,
   },
@@ -108,7 +108,10 @@ export default function IntegrationHealthPanel({
     const initial: Record<string, IntegrationState> = {};
     for (const def of SHARED_INTEGRATION_DEFINITIONS) {
       initial[def.id] = {
-        status: def.checkable ? "Voorbereid" : "Binnenkort",
+        status: def.checkable ? "Voorbereid" : "Actief",
+        message: def.checkable
+          ? undefined
+          : "Auth & database via Supabase",
       };
     }
     setStates(initial);
@@ -214,7 +217,7 @@ export default function IntegrationHealthPanel({
           {SHARED_INTEGRATION_DEFINITIONS.map((def) => {
             const state = states[def.id];
             const status =
-              state?.status ?? (def.checkable ? "Voorbereid" : "Binnenkort");
+              state?.status ?? (def.checkable ? "Voorbereid" : "Actief");
 
             return (
               <div
@@ -254,7 +257,7 @@ export default function IntegrationHealthPanel({
                     Controleren
                   </Button>
                 ) : (
-                  <span className="text-xs text-[#101828]/45">Binnenkort</span>
+                  <span className="text-xs text-[#101828]/45">In gebruik</span>
                 )}
               </div>
             );

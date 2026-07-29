@@ -25,10 +25,10 @@ export function FinanceMvpClient({
     <div className="space-y-6">
       <MvpPageHeader
         title="Financiën"
-        description="Aggregaten uit factuurconcepten en goedgekeurde uren — geen demo-grafieken."
+        description="Omzet, uren, reiskosten en marge op basis van factuurconcepten en goedgekeurde uren."
         notice={
           tablesReady
-            ? "Moneybird sync: Voorbereid — nog niet gekoppeld."
+            ? "Moneybird-verzending is nog niet gekoppeld — cijfers komen uit Supabase."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
       />

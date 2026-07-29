@@ -11,6 +11,7 @@ type InternPlaceholderPageProps = {
   description: string;
 };
 
+/** Fallback empty module shell — not used by live intern routes. */
 export default function InternPlaceholderPage({
   title,
   description,
@@ -26,11 +27,11 @@ export default function InternPlaceholderPage({
       <CardContent>
         <div className="rounded-xl border border-dashed border-slate-200 bg-[#F5F7FA] px-6 py-10 text-center">
           <p className="text-sm font-semibold text-[#0B1F4D]">
-            Deze module wordt binnenkort beschikbaar
+            Deze module is nog niet gekoppeld
           </p>
           <p className="mt-2 text-sm text-[#101828]/60">
-            De navigatie en layout zijn al actief. Functionaliteit volgt in een
-            volgende stap.
+            Navigatie en layout staan klaar. Functionaliteit volgt wanneer de
+            module is aangesloten op Supabase.
           </p>
         </div>
       </CardContent>

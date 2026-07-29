@@ -95,7 +95,7 @@ export function OverviewMvpClient({
     {
       title: "Integraties",
       value: "Hub",
-      detail: "status eerlijk actief/voorbereid",
+      detail: "API-status & koppelingen",
       href: DASHBOARD_ROUTES.integraties,
       icon: Link2,
     },
@@ -116,7 +116,7 @@ export function OverviewMvpClient({
           Welkom{profileName ? `, ${profileName}` : ""}
         </h1>
         <p className="mt-1 text-sm text-[#101828]/60">
-          Rol: {getRoleLabel(profileRole)} · echte Supabase-data of lege staten
+          Rol: {getRoleLabel(profileRole)} · operationeel overzicht
         </p>
       </div>
 

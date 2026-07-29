@@ -103,9 +103,9 @@ export function moduleStatusLabel(status: ModuleStatus): string {
     case "live":
       return "Live";
     case "demo":
-      return "Demo";
+      return "Lokaal";
     case "coming":
-      return "Binnenkort";
+      return "Nog niet gekoppeld";
   }
 }
 

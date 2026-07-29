@@ -1,5 +1,5 @@
 /**
- * MVP Shiftbase sync helpers — server-side only.
+ * Shiftbase sync helpers for internal planning — server-side only.
  * Never throw sync failures out of create/assign flows; persist status on the shift row.
  */
 
@@ -77,7 +77,7 @@ export function buildPlanningShiftFromMvp(
       (shift.shiftbase_sync_status as PlanningShift["shiftbaseSyncStatus"]) ||
       "niet_gesynct",
     shiftbaseLastSyncedAt: shift.shiftbase_last_synced_at ?? undefined,
-    planner: "mvp",
+    planner: "intern",
   };
 }
 
@@ -99,7 +99,7 @@ async function updateShiftSyncFields(
 }
 
 /**
- * Load MVP shift + project and push/update to Shiftbase.
+ * Load shift + project and push/update to Shiftbase.
  * Returns status payload; never throws for sync/API failures.
  */
 export async function syncMvpShiftToShiftbase(
