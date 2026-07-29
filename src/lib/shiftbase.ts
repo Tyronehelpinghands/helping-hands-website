@@ -137,6 +137,11 @@ export function isShiftbaseConfigured(): boolean {
   return Boolean(getShiftbaseApiToken());
 }
 
+/** Opt-in flag. Default off — planning draait op Supabase. */
+export function isShiftbaseEnabled(): boolean {
+  return process.env.SHIFTBASE_ENABLED?.trim().toLowerCase() === "true";
+}
+
 export class ShiftbaseApiError extends Error {
   readonly status: number;
   readonly path: string;

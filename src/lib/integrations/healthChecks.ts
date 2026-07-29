@@ -14,6 +14,7 @@ import {
 import {
   formatShiftbaseError,
   isShiftbaseConfigured,
+  isShiftbaseEnabled,
   testShiftbaseConnection,
 } from "@/lib/shiftbase";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -34,8 +35,13 @@ export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 export type IntegrationHealthResult = {
   provider: IntegrationProvider;
   ok: boolean;
-  /** Actief | Voorbereid | Ontbreekt | Fout */
-  status: "Actief" | "Voorbereid" | "Ontbreekt" | "Fout";
+  /** Actief | Voorbereid | Ontbreekt | Fout | Optioneel — uitgeschakeld */
+  status:
+    | "Actief"
+    | "Voorbereid"
+    | "Ontbreekt"
+    | "Fout"
+    | "Optioneel — uitgeschakeld";
   message: string;
   checkedAt: string;
 };
@@ -151,12 +157,22 @@ async function checkContact(): Promise<Omit<IntegrationHealthResult, "provider" 
 }
 
 async function checkShiftbase(): Promise<Omit<IntegrationHealthResult, "provider" | "checkedAt">> {
+  // Shiftbase is optional. Default: disabled — own Supabase planning is source of truth.
+  if (!isShiftbaseEnabled()) {
+    return {
+      ok: true,
+      status: "Optioneel — uitgeschakeld",
+      message:
+        "Planning draait op eigen Supabase-app. Shiftbase sync is uitgeschakeld (zet SHIFTBASE_ENABLED=true om optioneel te activeren).",
+    };
+  }
+
   if (!isShiftbaseConfigured()) {
     return {
-      ok: false,
-      status: "Ontbreekt",
+      ok: true,
+      status: "Optioneel — uitgeschakeld",
       message:
-        "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt in Vercel.",
+        "SHIFTBASE_ENABLED staat aan, maar API key/token ontbreekt. Planning blijft op Supabase.",
     };
   }
 
@@ -166,19 +182,19 @@ async function checkShiftbase(): Promise<Omit<IntegrationHealthResult, "provider
       return {
         ok: true,
         status: "Actief",
-        message: result.message ?? "Shiftbase API bereikbaar.",
+        message: result.message ?? "Shiftbase API bereikbaar (optionele sync).",
       };
     }
     return {
-      ok: false,
-      status: "Fout",
-      message: result.message ?? "Shiftbase test mislukt.",
+      ok: true,
+      status: "Voorbereid",
+      message: result.message ?? "Shiftbase test mislukt — app-planning blijft werken.",
     };
   } catch (error) {
     return {
-      ok: false,
-      status: "Fout",
-      message: formatShiftbaseError(error),
+      ok: true,
+      status: "Voorbereid",
+      message: `${formatShiftbaseError(error)} — app-planning blijft werken.`,
     };
   }
 }

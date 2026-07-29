@@ -162,9 +162,111 @@ export async function submitHoursCorrectionAction(input: {
 
   if (error) return fail(error.message);
 
+  // Also persist structured correction when app table exists
+  await supabase.from("time_corrections").insert({
+    time_entry_id: input.entryId,
+    crew_member_id: ctx.crew.id,
+    reason,
+    explanation,
+    requested_start_time: input.requestedStartTime || null,
+    requested_end_time: input.requestedEndTime || null,
+    requested_break_minutes: input.requestedBreakMinutes
+      ? Number(input.requestedBreakMinutes)
+      : null,
+    status: "pending",
+  });
+
   revalidateEmployeePortal();
   revalidatePath("/dashboard/intern/uren");
   return ok({ id: input.entryId });
+}
+
+export async function respondToShiftAction(
+  shiftId: string,
+  response: "accepted" | "declined",
+): Promise<ActionResult<{ id: string }>> {
+  const ctx = await requireLinkedCrew();
+  if (ctx.error || !ctx.crew) return fail(ctx.error ?? "Geen medewerkerprofiel.");
+
+  const supabase = await createClient();
+  const { data: shift, error: loadError } = await supabase
+    .from("shifts")
+    .select("id, crew_member_id, status, shift_date")
+    .eq("id", shiftId)
+    .maybeSingle();
+
+  if (loadError) return fail(loadError.message);
+  if (!shift || shift.crew_member_id !== ctx.crew.id) {
+    return fail("Shift niet gevonden of niet aan jou toegewezen.");
+  }
+
+  const now = new Date().toISOString();
+
+  if (response === "accepted") {
+    const { error } = await supabase
+      .from("shifts")
+      .update({ status: "confirmed" })
+      .eq("id", shiftId)
+      .eq("crew_member_id", ctx.crew.id);
+    if (error) return fail(error.message);
+
+    await supabase.from("shift_assignments").upsert(
+      {
+        shift_id: shiftId,
+        crew_member_id: ctx.crew.id,
+        status: "accepted",
+        responded_at: now,
+      },
+      { onConflict: "shift_id,crew_member_id" },
+    );
+  } else {
+    const { error } = await supabase
+      .from("shifts")
+      .update({
+        status: "open",
+        crew_member_id: null,
+        assigned_people: 0,
+      })
+      .eq("id", shiftId)
+      .eq("crew_member_id", ctx.crew.id);
+    if (error) return fail(error.message);
+
+    await supabase.from("shift_assignments").upsert(
+      {
+        shift_id: shiftId,
+        crew_member_id: ctx.crew.id,
+        status: "declined",
+        responded_at: now,
+      },
+      { onConflict: "shift_id,crew_member_id" },
+    );
+  }
+
+  revalidateEmployeePortal();
+  revalidatePath("/dashboard/intern/planning");
+  return ok({ id: shiftId });
+}
+
+export async function markNotificationReadAction(
+  notificationId: string,
+): Promise<ActionResult<{ id: string }>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return fail("Niet ingelogd.");
+
+  const { error } = await supabase
+    .from("app_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("id", notificationId)
+    .eq("user_id", user.id);
+
+  if (error) return fail(error.message);
+  revalidateEmployeePortal();
+  revalidatePath("/portaal/opdrachtgevers");
+  revalidatePath("/dashboard/intern");
+  return ok({ id: notificationId });
 }
 
 export async function updateCrewProfileAction(input: {

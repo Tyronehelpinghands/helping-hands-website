@@ -122,7 +122,7 @@ export default function ClientRequestForm({
       <CardHeader>
         <CardTitle className="text-lg font-black text-[#0B1F4D]">Nieuwe personeelsaanvraag</CardTitle>
         <CardDescription>
-          Vul de gegevens in. In demo-modus wordt de aanvraag lokaal opgeslagen.
+          Vul de gegevens in. Aanvragen worden opgeslagen in Supabase.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -7,6 +7,7 @@ const styles: Record<IntegrationStatusType, string> = {
   Actief: "border-green-200 bg-green-50 text-green-700",
   Fout: "border-red-200 bg-red-50 text-red-700",
   Binnenkort: "border-orange-200 bg-orange-50 text-orange-700",
+  "Optioneel — uitgeschakeld": "border-slate-200 bg-slate-50 text-slate-500",
 };
 
 export default function SettingsStatusBadge({

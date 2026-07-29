@@ -25,8 +25,9 @@ export const SHARED_INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
   {
     id: "shiftbase",
     name: "Shiftbase",
-    description: "Planning, beschikbaarheid, urenregistratie en medewerkers.",
-    checkUrl: "/api/shiftbase",
+    description:
+      "Optioneel — uitgeschakeld. Planning draait op eigen Supabase-app.",
+    checkUrl: "/api/integrations/health?provider=shiftbase",
     checkable: true,
   },
   {
@@ -80,7 +81,11 @@ type IntegrationState = {
 function mapApiToStatus(
   ok: boolean | undefined,
   configured?: boolean,
+  statusHint?: string,
 ): IntegrationStatusType {
+  if (statusHint === "Optioneel — uitgeschakeld") {
+    return "Optioneel — uitgeschakeld";
+  }
   if (ok === true) return "Actief";
   if (configured === false) return "Niet gekoppeld";
   if (ok === false) return "Fout";
@@ -132,14 +137,17 @@ export default function IntegrationHealthPanel({
         error?: string;
         message?: string;
         missing?: string[];
+        result?: { status?: string; message?: string; ok?: boolean };
+        status?: string;
       };
 
-      let message = data.message ?? data.error;
+      const resultStatus = data.result?.status ?? data.status;
+      let message = data.result?.message ?? data.message ?? data.error;
       if (data.missing && data.missing.length > 0) {
         message = `Ontbrekend: ${data.missing.join(", ")}`;
       } else if (data.configured === false) {
         message = message ?? "Niet geconfigureerd";
-      } else if (data.ok === true) {
+      } else if (data.ok === true || data.result?.ok === true) {
         message = message ?? "Koppeling voorbereid";
       } else if (data.ok === false) {
         message = message ?? "Controle mislukt of niet gekoppeld";
@@ -148,7 +156,11 @@ export default function IntegrationHealthPanel({
       setStates((prev) => ({
         ...prev,
         [id]: {
-          status: mapApiToStatus(data.ok, data.configured),
+          status: mapApiToStatus(
+            data.result?.ok ?? data.ok,
+            data.configured,
+            resultStatus,
+          ),
           message,
         },
       }));

@@ -30,13 +30,12 @@ import type { ClientRequest } from "@/lib/clientPortal";
 import { DEMO_CLIENT_REQUESTS, formatClientDate } from "@/lib/clientPortal";
 
 export default function ClientRequestTable({
-  requests: initialRequests = DEMO_CLIENT_REQUESTS,
+  requests = DEMO_CLIENT_REQUESTS,
   compact = false,
 }: {
   requests?: ClientRequest[];
   compact?: boolean;
 }) {
-  const [requests] = useState(initialRequests);
   const [selected, setSelected] = useState<ClientRequest | null>(null);
   const [open, setOpen] = useState(false);
 

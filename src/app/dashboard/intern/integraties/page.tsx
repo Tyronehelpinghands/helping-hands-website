@@ -16,7 +16,7 @@ import {
   WHATSAPP_MESSAGE_TEMPLATES,
 } from "@/lib/integrations/whatsapp";
 import { isMoneybirdConfigured } from "@/lib/server/moneybird";
-import { isShiftbaseConfigured } from "@/lib/shiftbase";
+import { isShiftbaseConfigured, isShiftbaseEnabled } from "@/lib/shiftbase";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const metadata: Metadata = {
@@ -50,6 +50,7 @@ export default async function InternIntegratiesPage({
   const resendActive = Boolean(process.env.RESEND_API_KEY?.trim());
   const moneybirdPrepared = isMoneybirdConfigured();
   const shiftbasePrepared = isShiftbaseConfigured();
+  const shiftbaseEnabled = isShiftbaseEnabled();
 
   const initialRows: IntegrationStatusRow[] = [
     {
@@ -89,10 +90,14 @@ export default async function InternIntegratiesPage({
     {
       provider: "shiftbase",
       name: "Shiftbase",
-      status: shiftbasePrepared ? "Actief" : "Ontbreekt",
-      note: shiftbasePrepared
-        ? "API gekoppeld — shifts syncen automatisch · klik Test voor live check"
-        : "SHIFTBASE_API_TOKEN of SHIFTBASE_API_KEY ontbreekt",
+      status:
+        shiftbaseEnabled && shiftbasePrepared
+          ? "Actief"
+          : "Optioneel — uitgeschakeld",
+      note:
+        shiftbaseEnabled && shiftbasePrepared
+          ? "Optionele sync actief (SHIFTBASE_ENABLED) — planning blijft op Supabase"
+          : "Uitgeschakeld — eigen Supabase-planning is bron van waarheid",
     },
     {
       provider: "moneybird",
@@ -139,6 +144,7 @@ export default async function InternIntegratiesPage({
         gmailSender={gmail.sender}
         gmailCanConnect={canStartGmailOAuth()}
         shiftbaseConfigured={shiftbasePrepared}
+        shiftbaseEnabled={shiftbaseEnabled}
         moneybirdConfigured={moneybirdPrepared}
         mailboxes={gmail.mailboxes}
         whatsappTemplates={[...WHATSAPP_MESSAGE_TEMPLATES]}

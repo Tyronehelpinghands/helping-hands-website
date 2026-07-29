@@ -93,7 +93,8 @@ export type IntegrationStatusType =
   | "Voorbereid"
   | "Actief"
   | "Fout"
-  | "Binnenkort";
+  | "Binnenkort"
+  | "Optioneel — uitgeschakeld";
 
 export type IntegrationStatus = {
   name: string;

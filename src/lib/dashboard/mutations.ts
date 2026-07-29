@@ -19,13 +19,11 @@ import type {
   ProjectStatus,
   ProjectType,
   ShiftStatus,
-  ShiftbaseSyncStatus,
   TaskPriority,
   TaskStatus,
   TimeEntryStatus,
   InternalMessageStatus,
 } from "@/lib/dashboard/types";
-import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 
 const ALL_INTERNAL: UserRole[] = [
   "owner",
@@ -351,12 +349,7 @@ export async function updateCrewMemberAction(
 
 export async function createShiftAction(
   formData: FormData,
-): Promise<
-  ActionResult<{
-    id: string;
-    shiftbaseSync?: { status: ShiftbaseSyncStatus; message?: string };
-  }>
-> {
+): Promise<ActionResult<{ id: string }>> {
   await requireRole(PLANNER_ROLES);
   const project_id = strOrNull(formData.get("project_id"));
   const shift_date = strOrNull(formData.get("shift_date"));
@@ -388,35 +381,30 @@ export async function createShiftAction(
 
   if (error) return fail(error.message);
 
-  const sync = await syncMvpShiftToShiftbase(data.id);
+  if (crew_member_id) {
+    await upsertShiftAssignment(supabase, data.id, crew_member_id);
+    await notifyCrewAssignment(supabase, crew_member_id, data.id, shift_date);
+  }
+
   revalidateDashboard(["/dashboard/intern/planning", "/dashboard/intern/projecten"]);
-  return ok({
-    id: data.id,
-    shiftbaseSync: {
-      status: sync.status,
-      message: sync.message ?? sync.error,
-    },
-  });
+  return ok({ id: data.id });
 }
 
 export async function assignCrewToShiftAction(
   shiftId: string,
   crewMemberId: string | null,
-): Promise<
-  ActionResult<{
-    id: string;
-    shiftbaseSync?: { status: ShiftbaseSyncStatus; message?: string };
-  }>
-> {
+): Promise<ActionResult<{ id: string }>> {
   await requireRole(PLANNER_ROLES);
   const supabase = await createClient();
+
   const { data: existing, error: loadError } = await supabase
     .from("shifts")
-    .select("id, shiftbase_shift_id")
+    .select("id, shift_date")
     .eq("id", shiftId)
     .maybeSingle();
 
   if (loadError) return fail(loadError.message);
+  if (!existing) return fail("Shift niet gevonden.");
 
   const { error } = await supabase
     .from("shifts")
@@ -429,19 +417,58 @@ export async function assignCrewToShiftAction(
 
   if (error) return fail(error.message);
 
-  let shiftbaseSync:
-    | { status: ShiftbaseSyncStatus; message?: string }
-    | undefined;
-  if (existing?.shiftbase_shift_id) {
-    const sync = await syncMvpShiftToShiftbase(shiftId);
-    shiftbaseSync = {
-      status: sync.status,
-      message: sync.message ?? sync.error,
-    };
+  if (crewMemberId) {
+    await upsertShiftAssignment(supabase, shiftId, crewMemberId);
+    await notifyCrewAssignment(
+      supabase,
+      crewMemberId,
+      shiftId,
+      existing.shift_date,
+    );
   }
 
   revalidateDashboard(["/dashboard/intern/planning"]);
-  return ok({ id: shiftId, shiftbaseSync });
+  return ok({ id: shiftId });
+}
+
+async function upsertShiftAssignment(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  shiftId: string,
+  crewMemberId: string,
+) {
+  await supabase.from("shift_assignments").upsert(
+    {
+      shift_id: shiftId,
+      crew_member_id: crewMemberId,
+      status: "pending",
+      responded_at: null,
+    },
+    { onConflict: "shift_id,crew_member_id" },
+  );
+}
+
+async function notifyCrewAssignment(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  crewMemberId: string,
+  shiftId: string,
+  shiftDate: string,
+) {
+  const { data: crew } = await supabase
+    .from("crew_members")
+    .select("profile_id, full_name")
+    .eq("id", crewMemberId)
+    .maybeSingle();
+
+  if (!crew?.profile_id) return;
+
+  await supabase.from("app_notifications").insert({
+    user_id: crew.profile_id,
+    title: "Nieuwe shift toegewezen",
+    body: `Je bent ingepland op ${shiftDate}. Bevestig of wijs af in je planning.`,
+    category: "planning",
+    link: "/portaal/medewerkers/planning",
+    meta: { shift_id: shiftId, crew_member_id: crewMemberId },
+  });
 }
 
 export async function updateShiftStatusAction(
