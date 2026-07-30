@@ -10,6 +10,9 @@ Env (Vercel + lokaal):
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` — canonical site (redirects + invite e-mail links)
+- `SUPABASE_SERVICE_ROLE_KEY` — **server-only**; needed for portaal-uitnodigingen (Auth admin)
+- `RESEND_API_KEY` — **server-only**; branded invite mail (zie ook contactformulier)
 
 Gebruik **nooit** de service role key in de browser of als `NEXT_PUBLIC_*`.
 
@@ -243,6 +246,23 @@ Zorg dat de redirect URLs hierboven kloppen.
 - [ ] Eerste owner gezet (`JOUW_EMAIL_HIER` vervangen)
 - [ ] Site URL + Redirect URLs gezet
 - [ ] Vercel env: `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [ ] Vercel env (uitnodigingen): `SUPABASE_SERVICE_ROLE_KEY` + `RESEND_API_KEY` + `NEXT_PUBLIC_SITE_URL`
 - [ ] Test: zonder login → `/dashboard/intern` redirect naar `/login`
 - [ ] Test: crew-account kan geen `/dashboard/intern` openen
 - [ ] Test: Uitloggen in intern + beide portalen
+- [ ] Test: sales maakt opdrachtgever met e-mail → branded invite → wachtwoord zetten → `/portaal/opdrachtgevers`
+
+---
+
+## 7. Opdrachtgever uitnodigen (portaal)
+
+Sales (`owner` / `admin` / `sales`) kan bij aanmaken of via **Uitnodigen** / **Opnieuw uitnodigen**:
+
+1. `auth.admin.generateLink` (`invite` voor nieuw, `recovery` als het account al bestaat)
+2. `profiles.role = 'client'` + `clients.profile_id = user.id`
+3. Branded HTML via Resend (`src/lib/email/formatPortalInviteEmail.ts`) — knop naar  
+   `${NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`
+
+Code: `src/lib/auth/inviteClient.ts` (alleen server actions). Rate-limit: max 5 invites / e-mail / 15 min (in-memory per instance).
+
+**Fallback:** zonder Resend kun je Supabase Auth e-mailtemplates in het dashboard branden; de app stuurt bij voorkeur zelf de mail zodat het Helping Hands-design vastligt.

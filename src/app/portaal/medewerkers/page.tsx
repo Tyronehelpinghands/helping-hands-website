@@ -23,6 +23,8 @@ import NoCrewProfileState from "@/components/employee-portal/NoCrewProfileState"
 import UpcomingShifts, {
   NextShiftHighlight,
 } from "@/components/employee-portal/UpcomingShifts";
+import PortalNotifications from "@/components/portal/PortalNotifications";
+import { getMyNotifications } from "@/lib/app-notifications";
 import { getEmployeePortalBundle } from "@/lib/employee-portal/data";
 import { cn } from "@/lib/utils";
 
@@ -34,8 +36,16 @@ export default async function EmployeePortalOverviewPage() {
     return <NoCrewProfileState displayName={bundle.displayName} />;
   }
 
-  const { nextShift, pendingActions: actions, shifts, hours, messages, documents, stats } =
-    bundle;
+  const {
+    nextShift,
+    pendingActions: actions,
+    shifts,
+    hours,
+    messages,
+    documents,
+    stats,
+  } = bundle;
+  const notifications = await getMyNotifications(8);
 
   return (
     <div className="space-y-6">
@@ -43,7 +53,9 @@ export default async function EmployeePortalOverviewPage() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
-          {nextShift ? <NextShiftHighlight shift={nextShift} /> : (
+          {nextShift ? (
+            <NextShiftHighlight shift={nextShift} />
+          ) : (
             <Card className="border-slate-200/80 bg-white shadow-sm">
               <CardHeader>
                 <CardTitle className="text-lg font-black text-[#0B1F4D]">
@@ -58,6 +70,10 @@ export default async function EmployeePortalOverviewPage() {
           <UpcomingShifts shifts={shifts} compact />
         </div>
         <div className="space-y-6">
+          <PortalNotifications
+            items={notifications.items}
+            unreadCount={notifications.unreadCount}
+          />
           <Card className="border-slate-200/80 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg font-black text-[#0B1F4D]">
@@ -109,21 +125,30 @@ export default async function EmployeePortalOverviewPage() {
           </Link>
           <Link
             href="/portaal/medewerkers/beschikbaarheid"
-            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "min-h-11 w-full justify-center sm:w-auto",
+            )}
           >
             <CalendarCheck className="mr-2 h-4 w-4" />
             Beschikbaarheid doorgeven
           </Link>
           <Link
             href="/portaal/medewerkers/uren"
-            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "min-h-11 w-full justify-center sm:w-auto",
+            )}
           >
             <Clock className="mr-2 h-4 w-4" />
             Uren controleren
           </Link>
           <Link
             href="/portaal/medewerkers/documenten"
-            className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full justify-center sm:w-auto")}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "min-h-11 w-full justify-center sm:w-auto",
+            )}
           >
             <FileText className="mr-2 h-4 w-4" />
             Documenten bekijken

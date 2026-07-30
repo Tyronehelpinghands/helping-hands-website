@@ -74,6 +74,7 @@ export type MessageType =
 
 export type Client = {
   id: string;
+  profile_id?: string | null;
   company_name: string;
   contact_name: string | null;
   email: string | null;
@@ -186,7 +187,10 @@ export type TimeEntry = {
   created_at: string;
   updated_at: string;
   projects?: Pick<Project, "id" | "project_name" | "default_hourly_rate" | "client_id"> | null;
-  crew_members?: Pick<CrewMember, "id" | "full_name" | "hourly_cost"> | null;
+  crew_members?: Pick<
+    CrewMember,
+    "id" | "full_name" | "hourly_cost" | "shiftbase_user_id"
+  > | null;
 };
 
 export type InvoiceDraft = {

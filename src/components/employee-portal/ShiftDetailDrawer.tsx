@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
+  Check,
   Clock,
   ExternalLink,
   MapPin,
@@ -10,6 +13,7 @@ import {
   Navigation,
   Shirt,
   User,
+  X,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -21,6 +25,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
+import { respondToShiftAction } from "@/lib/employee-portal/mutations";
 import type { EmployeeShift } from "@/lib/employeePortal";
 import {
   formatShiftDate,
@@ -39,7 +44,28 @@ export default function ShiftDetailDrawer({
   open,
   onOpenChange,
 }: ShiftDetailDrawerProps) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<string | null>(null);
+
   if (!shift) return null;
+
+  const canRespond = shift.status === "Aangevraagd";
+
+  function respond(response: "accepted" | "declined") {
+    startTransition(async () => {
+      const res = await respondToShiftAction(shift!.id, response);
+      if (res.ok) {
+        setFeedback(
+          response === "accepted" ? "Shift geaccepteerd." : "Shift afgewezen.",
+        );
+        onOpenChange(false);
+        router.refresh();
+      } else {
+        setFeedback(res.error);
+      }
+    });
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -87,22 +113,42 @@ export default function ShiftDetailDrawer({
           {shift.travelInfo ? (
             <DetailRow icon={Navigation} label="Reisinfo" value={shift.travelInfo} />
           ) : null}
+          {feedback ? (
+            <p className="text-sm font-medium text-[#173A8A]">{feedback}</p>
+          ) : null}
         </div>
 
         <SheetFooter className="flex-col gap-2 sm:flex-col">
-          <Button
-            type="button"
-            className="w-full bg-[#173A8A] hover:bg-[#0B1F4D]"
-            onClick={() => {
-              /* UI-only bevestiging */
-            }}
+          {canRespond ? (
+            <>
+              <Button
+                type="button"
+                className="w-full bg-[#173A8A] hover:bg-[#0B1F4D]"
+                disabled={pending}
+                onClick={() => respond("accepted")}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Accepteren
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={pending}
+                onClick={() => respond("declined")}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Afwijzen
+              </Button>
+            </>
+          ) : null}
+          <a
+            href={`mailto:planning@helpinghandsagency.nl?subject=${encodeURIComponent(`Vraag over shift ${shift.projectName}`)}`}
+            className={buttonVariants({ variant: "outline", className: "w-full" })}
           >
-            Bevestig beschikbaarheid
-          </Button>
-          <Button type="button" variant="outline" className="w-full">
             <MessageCircle className="mr-2 h-4 w-4" />
             Ik heb een vraag
-          </Button>
+          </a>
           <a
             href={getGoogleMapsUrl(shift.locationAddress)}
             target="_blank"
@@ -138,7 +184,7 @@ function DetailRow({
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#173A8A]" aria-hidden="true" />
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
-        <p className="mt-0.5 text-sm text-slate-800">{value}</p>
+        <p className="mt-0.5 text-sm text-slate-800">{value || "—"}</p>
       </div>
     </div>
   );

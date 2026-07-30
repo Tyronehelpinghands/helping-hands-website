@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus } from "lucide-react";
+import { ExternalLink, Loader2, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Field,
   MvpBadge,
@@ -31,6 +31,7 @@ import {
   timeEntryStatusLabel,
 } from "@/lib/dashboard/formatters";
 import type { CrewMember, Project, TimeEntry } from "@/lib/dashboard/types";
+import { cn } from "@/lib/utils";
 
 export function HoursMvpClient({
   entries,
@@ -48,11 +49,16 @@ export function HoursMvpClient({
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [crewFilter, setCrewFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
   const [breakMinutes, setBreakMinutes] = useState("30");
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [bulkSyncing, setBulkSyncing] = useState(false);
 
   const previewHours = calculateWorkedHours(
     startTime,
@@ -61,11 +67,44 @@ export function HoursMvpClient({
   );
 
   const filtered = useMemo(() => {
-    if (statusFilter === "all") return entries;
-    return entries.filter((e) => e.status === statusFilter);
-  }, [entries, statusFilter]);
+    return entries.filter((e) => {
+      if (statusFilter !== "all" && e.status !== statusFilter) return false;
+      if (crewFilter !== "all" && e.crew_member_id !== crewFilter) return false;
+      if (dateFrom && e.work_date < dateFrom) return false;
+      if (dateTo && e.work_date > dateTo) return false;
+      return true;
+    });
+  }, [entries, statusFilter, crewFilter, dateFrom, dateTo]);
 
   const openCount = entries.filter((e) => e.status === "submitted").length;
+
+  async function pushHoursToShiftbase(body: {
+    entryIds?: string[];
+    start_date?: string;
+    end_date?: string;
+  }) {
+    const res = await fetch("/api/shiftbase/push-hours", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json()) as {
+      ok?: boolean;
+      message?: string;
+      error?: string;
+      errors?: string[];
+    };
+    if (!res.ok || data.ok === false) {
+      const detail =
+        data.errors?.slice(0, 2).join(" · ") ||
+        data.error ||
+        data.message ||
+        "Sync mislukt";
+      showToast(detail);
+      return;
+    }
+    showToast(data.message ?? "Uren gesynchroniseerd.");
+  }
 
   return (
     <div className="space-y-6">
@@ -74,7 +113,7 @@ export function HoursMvpClient({
         description={`${openCount} uren ter controle. Alleen intern mag goedkeuren.`}
         notice={
           tablesReady
-            ? "Shiftbase-import: Voorbereid — nog niet gekoppeld."
+            ? "Helping Hands is bron van waarheid. Sync naar Shiftbase is optioneel (API write kan beperkt zijn — dan handmatig in Shiftbase)."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
@@ -87,23 +126,150 @@ export function HoursMvpClient({
         }
       />
 
-      <TextSelect
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        className="w-48"
-      >
-        <option value="all">Alle statussen</option>
-        <option value="submitted">Ingediend</option>
-        <option value="approved">Goedgekeurd</option>
-        <option value="rejected">Afgekeurd</option>
-        <option value="invoiced">Gefactureerd</option>
-        <option value="draft">Concept</option>
-      </TextSelect>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-[#101828]/75 shadow-sm">
+        <p className="font-semibold text-[#0B1F4D]">Fabrice / 28 juni vinden</p>
+        <p className="mt-1 text-xs leading-relaxed">
+          Filter hieronder op crewlid <strong>Fabrice</strong> en datum{" "}
+          <strong>2026-06-28</strong> (of 2025-06-28). De regel staat in
+          Supabase (`time_entries`) — niet automatisch in Shiftbase. Gebruik
+          &quot;Sync naar Shiftbase&quot; of voer dezelfde uren handmatig in in
+          Shiftbase als de API write weigert.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const fabrice = crew.find((c) =>
+                c.full_name.toLowerCase().includes("fabrice"),
+              );
+              if (fabrice) setCrewFilter(fabrice.id);
+              setDateFrom("2026-06-28");
+              setDateTo("2026-06-28");
+              setStatusFilter("all");
+            }}
+          >
+            Zoek Fabrice 28 juni 2026
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const fabrice = crew.find((c) =>
+                c.full_name.toLowerCase().includes("fabrice"),
+              );
+              if (fabrice) setCrewFilter(fabrice.id);
+              setDateFrom("2025-06-28");
+              setDateTo("2025-06-28");
+              setStatusFilter("all");
+            }}
+          >
+            Zoek 28 juni 2025
+          </Button>
+          <a
+            href="https://app.shiftbase.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "gap-1.5",
+            )}
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Open Shiftbase
+          </a>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">
+            Status
+          </label>
+          <TextSelect
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-44"
+          >
+            <option value="all">Alle statussen</option>
+            <option value="submitted">Ingediend</option>
+            <option value="approved">Goedgekeurd</option>
+            <option value="rejected">Afgekeurd</option>
+            <option value="invoiced">Gefactureerd</option>
+            <option value="draft">Concept</option>
+          </TextSelect>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">
+            Crew
+          </label>
+          <TextSelect
+            value={crewFilter}
+            onChange={(e) => setCrewFilter(e.target.value)}
+            className="w-48"
+          >
+            <option value="all">Alle crew</option>
+            {crew.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.full_name}
+              </option>
+            ))}
+          </TextSelect>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">
+            Van
+          </label>
+          <TextInput
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">
+            Tot
+          </label>
+          <TextInput
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="gap-1.5"
+          disabled={bulkSyncing || filtered.length === 0}
+          onClick={() => {
+            setBulkSyncing(true);
+            void pushHoursToShiftbase({
+              entryIds: filtered
+                .filter((e) => e.status === "submitted" || e.status === "approved")
+                .map((e) => e.id),
+              start_date: dateFrom || undefined,
+              end_date: dateTo || undefined,
+            }).finally(() => setBulkSyncing(false));
+          }}
+        >
+          {bulkSyncing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          Sync uren naar Shiftbase
+        </Button>
+      </div>
 
       {filtered.length === 0 ? (
         <MvpEmptyState
           title="Nog geen urenregels"
-          description="Voer uren in of keur later goedgekeurde uren goed voor facturatie."
+          description="Pas filters aan, of voer uren in. Voor Fabrice 28 juni: check of de regel bestaat en filter op naam + datum."
           action={<Button onClick={() => setOpen(true)}>Uren invoeren</Button>}
         />
       ) : (
@@ -129,6 +295,15 @@ export function HoursMvpClient({
                   <div>{e.projects?.project_name || "—"}</div>
                   <div className="text-xs text-slate-500">
                     {e.crew_members?.full_name || "—"}
+                    {e.crew_members?.shiftbase_user_id ? (
+                      <span className="ml-1 text-emerald-700">
+                        · SB {e.crew_members.shiftbase_user_id}
+                      </span>
+                    ) : (
+                      <span className="ml-1 text-amber-700">
+                        · geen Shiftbase-ID
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-3 py-2 text-xs">
@@ -161,6 +336,26 @@ export function HoursMvpClient({
                   ) : null}
                 </td>
                 <td className="px-3 py-2 text-right space-x-1">
+                  {(e.status === "submitted" || e.status === "approved") && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={syncingId === e.id}
+                      onClick={() => {
+                        setSyncingId(e.id);
+                        void pushHoursToShiftbase({ entryIds: [e.id] }).finally(
+                          () => setSyncingId(null),
+                        );
+                      }}
+                    >
+                      {syncingId === e.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      )}
+                      Sync naar Shiftbase
+                    </Button>
+                  )}
                   {e.status === "submitted" ? (
                     <>
                       <Button

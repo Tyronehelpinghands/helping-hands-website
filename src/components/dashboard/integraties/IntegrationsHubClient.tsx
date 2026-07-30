@@ -43,6 +43,8 @@ export type IntegrationHubProps = {
   gmailSender?: string;
   gmailCanConnect?: boolean;
   shiftbaseConfigured?: boolean;
+  /** When false, Shiftbase sync is explicitly disabled (SHIFTBASE_ENABLED=false). */
+  shiftbaseEnabled?: boolean;
   moneybirdConfigured?: boolean;
   mailboxes: SharedMailbox[];
   whatsappTemplates: Array<{ id: string; label: string; body: string }>;
@@ -74,6 +76,7 @@ export default function IntegrationsHubClient({
   gmailSender,
   gmailCanConnect = false,
   shiftbaseConfigured = false,
+  shiftbaseEnabled = true,
   moneybirdConfigured = false,
   mailboxes,
   whatsappTemplates,
@@ -501,57 +504,98 @@ export default function IntegrationsHubClient({
                 Shiftbase
               </CardTitle>
               <SettingsStatusBadge
-                status={configBadge(shiftbaseConfigured, "Actief")}
+                status={
+                  !shiftbaseEnabled
+                    ? "Optioneel — uitgeschakeld"
+                    : shiftbaseConfigured
+                      ? "Actief"
+                      : "Optioneel — beschikbaar"
+                }
               />
             </div>
             <CardDescription>
-              Planning / crew sync — live API.
+              Helping Hands plant in Supabase; sync naar Shiftbase kan aan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
-              {shiftbaseConfigured
-                ? "Shiftbase API key/token aanwezig. Synchroniseer medewerkers via /users naar Crew, of test de API."
-                : "SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN ontbreekt in Vercel."}
+              Shifts en medewerkers staan in Supabase. Zolang je operationeel
+              Shiftbase gebruikt, kun je medewerkers en shifts syncen wanneer de
+              API key staat.
             </p>
-            {shiftbaseSyncMessage ? (
-              <p
-                className={
-                  shiftbaseSyncOk === false
-                    ? "text-red-700"
-                    : "text-green-700"
-                }
-              >
-                {shiftbaseSyncMessage}
+            {!shiftbaseEnabled ? (
+              <p className="text-slate-500">
+                Sync staat uit via{" "}
+                <code className="rounded bg-slate-100 px-1">SHIFTBASE_ENABLED=false</code>
+                . Verwijder die flag of zet{" "}
+                <code className="rounded bg-slate-100 px-1">true</code> om weer
+                te syncen (default: aan als API key aanwezig is).
               </p>
-            ) : null}
-            <div className="flex flex-wrap items-start gap-2">
-              <LiveTestButton provider="shiftbase" />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="gap-1.5"
-                disabled={!shiftbaseConfigured || shiftbaseSyncing}
-                onClick={() => void syncShiftbaseEmployees()}
-              >
-                {shiftbaseSyncing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-3.5 w-3.5" />
-                )}
-                Medewerkers synchroniseren
-              </Button>
-              <Link
-                href="/dashboard/intern/crew"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "w-fit",
-                )}
-              >
-                Naar Crew
-              </Link>
-            </div>
+            ) : (
+              <>
+                <p>
+                  {shiftbaseConfigured
+                    ? "API key aanwezig — auto-sync bij shift aanmaken staat aan. Handmatige sync hieronder."
+                    : "Nog geen API key — zet SHIFTBASE_API_KEY (of TOKEN) in Vercel. Zonder key wordt sync stil overgeslagen."}
+                </p>
+                {shiftbaseSyncMessage ? (
+                  <p
+                    className={
+                      shiftbaseSyncOk === false
+                        ? "text-red-700"
+                        : "text-green-700"
+                    }
+                  >
+                    {shiftbaseSyncMessage}
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap items-start gap-2">
+                  <LiveTestButton provider="shiftbase" />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    disabled={!shiftbaseConfigured || shiftbaseSyncing}
+                    onClick={() => void syncShiftbaseEmployees()}
+                  >
+                    {shiftbaseSyncing ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    Medewerkers synchroniseren
+                  </Button>
+                  <Link
+                    href="/dashboard/intern/crew"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Naar Crew
+                  </Link>
+                  <Link
+                    href="/dashboard/intern/planning"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Naar Planning
+                  </Link>
+                  <Link
+                    href="/dashboard/intern/urenregistratie"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Uren → Shiftbase
+                  </Link>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

@@ -15,6 +15,7 @@ import {
   fetchShiftbaseEmployeesWithMeta,
   formatShiftbaseError,
   isShiftbaseConfigured,
+  pushHoursToShiftbase,
   sanitizeShiftbaseUiMessage,
   ShiftbaseApiError,
   SHIFTBASE_SYNC_NOTES,
@@ -28,6 +29,14 @@ export type MvpShiftbaseSyncResult = {
   shiftbaseShiftId?: string;
   error?: string;
   message?: string;
+};
+
+export type HoursPushResult = {
+  ok: boolean;
+  pushed: number;
+  skipped: number;
+  errors: string[];
+  message: string;
 };
 
 export type EmployeeSyncResult = {
@@ -435,5 +444,136 @@ export async function syncShiftbaseEmployeesToDashboard(): Promise<EmployeeSyncR
     message: `Medewerkers gesynchroniseerd via ${endpointUsed}: ${parts.join(", ")}.`,
     endpointUsed,
     statusCode: 200,
+  };
+}
+
+function normalizeTimeForShiftbase(value: string | null | undefined): string {
+  if (!value) return "09:00";
+  // "09:00:00" → "09:00"
+  return value.slice(0, 5);
+}
+
+/**
+ * Push one or more Supabase time_entries to Shiftbase Timesheets (best-effort POST).
+ * Requires crew_members.shiftbase_user_id. Write support is not fully documented —
+ * 404/405/422 means enter manually in Shiftbase; HH remains source of truth.
+ */
+export async function pushTimeEntriesToShiftbase(params: {
+  entryIds?: string[];
+  startDate?: string;
+  endDate?: string;
+}): Promise<HoursPushResult> {
+  if (!isShiftbaseConfigured()) {
+    return {
+      ok: false,
+      pushed: 0,
+      skipped: 0,
+      errors: ["SHIFTBASE_API_KEY of SHIFTBASE_API_TOKEN is niet geconfigureerd."],
+      message: "Shiftbase niet geconfigureerd — uren blijven alleen in Supabase.",
+    };
+  }
+
+  const supabase = await createClient();
+  let query = supabase
+    .from("time_entries")
+    .select(
+      "id, work_date, start_time, end_time, break_minutes, hours, status, internal_notes, crew_member_id, crew_members(id, full_name, shiftbase_user_id)",
+    )
+    .in("status", ["submitted", "approved"]);
+
+  if (params.entryIds?.length) {
+    query = query.in("id", params.entryIds);
+  }
+  if (params.startDate) {
+    query = query.gte("work_date", params.startDate);
+  }
+  if (params.endDate) {
+    query = query.lte("work_date", params.endDate);
+  }
+
+  const { data: rows, error } = await query;
+  if (error) {
+    return {
+      ok: false,
+      pushed: 0,
+      skipped: 0,
+      errors: [error.message],
+      message: `Uren ophalen mislukt: ${error.message}`,
+    };
+  }
+
+  const entries = rows ?? [];
+  if (entries.length === 0) {
+    return {
+      ok: true,
+      pushed: 0,
+      skipped: 0,
+      errors: [],
+      message:
+        "Geen ingediende/goedgekeurde urenregels gevonden voor deze selectie.",
+    };
+  }
+
+  let pushed = 0;
+  let skipped = 0;
+  const errors: string[] = [];
+
+  for (const entry of entries) {
+    const rawCrew = entry.crew_members as
+      | { id: string; full_name: string; shiftbase_user_id?: string | null }
+      | { id: string; full_name: string; shiftbase_user_id?: string | null }[]
+      | null
+      | undefined;
+    const crew = Array.isArray(rawCrew) ? rawCrew[0] : rawCrew;
+    const name = crew?.full_name ?? "Onbekend";
+    const shiftbaseUserId = crew?.shiftbase_user_id?.trim();
+
+    if (!shiftbaseUserId) {
+      skipped += 1;
+      errors.push(
+        `${name} (${entry.work_date}): geen shiftbase_user_id — sync medewerkers eerst of vul ID in bij Crew.`,
+      );
+      continue;
+    }
+
+    try {
+      await pushHoursToShiftbase({
+        userId: shiftbaseUserId,
+        date: entry.work_date,
+        startTime: normalizeTimeForShiftbase(entry.start_time),
+        endTime: normalizeTimeForShiftbase(entry.end_time),
+        breakMinutes: entry.break_minutes ?? 0,
+        description:
+          entry.internal_notes?.trim() ||
+          `Helping Hands uren ${entry.work_date}`,
+      });
+      pushed += 1;
+    } catch (err) {
+      const msg = formatShiftbaseError(err);
+      const status =
+        err instanceof ShiftbaseApiError ? err.status : undefined;
+      if (status === 404 || status === 405 || status === 422) {
+        errors.push(
+          `${name} (${entry.work_date}): Shiftbase accepteert geen timesheet-write via API (${status}). Voer uren handmatig in in Shiftbase. HH blijft bron.`,
+        );
+      } else {
+        errors.push(`${name} (${entry.work_date}): ${msg}`);
+      }
+    }
+  }
+
+  const okResult = pushed > 0 || (entries.length > 0 && errors.length === 0);
+  const parts = [`${pushed} gepusht`, `${skipped} overgeslagen`];
+  if (errors.length) parts.push(`${errors.length} fout(en)`);
+
+  return {
+    ok: okResult,
+    pushed,
+    skipped,
+    errors: errors.slice(0, 15),
+    message:
+      pushed > 0
+        ? `Uren naar Shiftbase: ${parts.join(", ")}.`
+        : `Geen uren gepusht. ${parts.join(", ")}. Bij API-beperking: voer handmatig in in Shiftbase (HH blijft bron).`,
   };
 }
