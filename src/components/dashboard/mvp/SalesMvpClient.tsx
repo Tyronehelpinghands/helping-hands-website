@@ -20,6 +20,7 @@ import {
 import {
   createClientAction,
   createLeadAction,
+  inviteClientPortalAction,
   updateClientAction,
   updateLeadAction,
   updateLeadStatusAction,
@@ -143,6 +144,7 @@ export function SalesMvpClient({
                 <th className="px-3 py-2">Contact</th>
                 <th className="px-3 py-2">Stad</th>
                 <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Portaal</th>
                 <th className="px-3 py-2" />
               </tr>
             </thead>
@@ -162,17 +164,47 @@ export function SalesMvpClient({
                       {clientStatusLabel(c.status)}
                     </MvpBadge>
                   </td>
+                  <td className="px-3 py-2">
+                    {c.profile_id ? (
+                      <MvpBadge tone="ok">Gekoppeld</MvpBadge>
+                    ) : c.email ? (
+                      <MvpBadge tone="neutral">Niet uitgenodigd</MvpBadge>
+                    ) : (
+                      <span className="text-xs text-slate-400">Geen e-mail</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setEditClient(c);
-                        setClientOpen(true);
-                      }}
-                    >
-                      Bewerken
-                    </Button>
+                    <div className="flex flex-wrap items-center justify-end gap-1">
+                      {c.email ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={pending}
+                          onClick={() => {
+                            startTransition(async () => {
+                              const res = await inviteClientPortalAction(c.id);
+                              refresh(
+                                res.ok
+                                  ? res.data.message
+                                  : res.error,
+                              );
+                            });
+                          }}
+                        >
+                          {c.profile_id ? "Opnieuw uitnodigen" : "Uitnodigen"}
+                        </Button>
+                      ) : null}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditClient(c);
+                          setClientOpen(true);
+                        }}
+                      >
+                        Bewerken
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -300,11 +332,12 @@ export function SalesMvpClient({
               : await createClientAction(fd);
             if (res.ok) {
               setClientOpen(false);
-              refresh(editClient ? "Opdrachtgever bijgewerkt." : "Opdrachtgever aangemaakt.");
+              refresh(res.data.message);
             } else showToast(res.error);
           });
         }}
       >
+        <div key={editClient?.id ?? "new-client"} className="space-y-3">
         <Field label="Bedrijfsnaam" name="company_name">
           <TextInput
             name="company_name"
@@ -350,6 +383,23 @@ export function SalesMvpClient({
         <Field label="Notities" name="notes">
           <TextTextarea name="notes" defaultValue={editClient?.notes ?? ""} />
         </Field>
+        <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-2.5 text-sm text-[#0B1F4D]">
+          <input
+            type="checkbox"
+            name="invite_portal"
+            value="on"
+            defaultChecked={!editClient}
+            className="mt-0.5 h-4 w-4 accent-[#F28C28]"
+          />
+          <span>
+            <span className="font-semibold">Stuur portaal-uitnodiging</span>
+            <span className="mt-0.5 block text-xs text-slate-500">
+              Branded e-mail om in te loggen op /portaal/opdrachtgevers (alleen
+              als er een e-mailadres is).
+            </span>
+          </span>
+        </label>
+        </div>
       </MvpFormDialog>
 
       <MvpFormDialog

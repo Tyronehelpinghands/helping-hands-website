@@ -74,6 +74,7 @@ export type MessageType =
 
 export type Client = {
   id: string;
+  profile_id?: string | null;
   company_name: string;
   contact_name: string | null;
   email: string | null;

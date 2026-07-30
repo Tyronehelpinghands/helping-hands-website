@@ -1,6 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import {
+  inviteClientToPortal,
+  inviteResultMessage,
+} from "@/lib/auth/inviteClient";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { UserRole } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/server";
@@ -77,20 +81,31 @@ function parseSkills(value: FormDataEntryValue | null): string[] {
 
 // ——— Clients ———
 
+function wantsPortalInvite(formData: FormData): boolean {
+  const raw = formData.get("invite_portal");
+  if (raw === null) return false;
+  const value = String(raw).toLowerCase();
+  return value === "on" || value === "true" || value === "1";
+}
+
 export async function createClientAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; message: string }>> {
   await requireRole(SALES_ROLES);
   const company_name = strOrNull(formData.get("company_name"));
   if (!company_name) return fail("Bedrijfsnaam is verplicht.");
+
+  const contact_name = strOrNull(formData.get("contact_name"));
+  const email = strOrNull(formData.get("email"));
+  const sendInvite = wantsPortalInvite(formData);
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("clients")
     .insert({
       company_name,
-      contact_name: strOrNull(formData.get("contact_name")),
-      email: strOrNull(formData.get("email")),
+      contact_name,
+      email,
       phone: strOrNull(formData.get("phone")),
       address: strOrNull(formData.get("address")),
       city: strOrNull(formData.get("city")),
@@ -101,24 +116,45 @@ export async function createClientAction(
     .single();
 
   if (error) return fail(error.message);
+
+  let message = "Opdrachtgever aangemaakt.";
+  if (sendInvite) {
+    const invite = await inviteClientToPortal({
+      clientId: data.id,
+      email: email ?? "",
+      companyName: company_name,
+      contactName: contact_name,
+    });
+    message = inviteResultMessage(invite, email);
+  } else if (!email) {
+    message = "Opdrachtgever aangemaakt (geen e-mail — geen uitnodiging).";
+  } else {
+    message = "Opdrachtgever aangemaakt (geen uitnodiging).";
+  }
+
   revalidateDashboard(["/dashboard/intern/sales", "/dashboard/intern/projecten"]);
-  return ok({ id: data.id });
+  return ok({ id: data.id, message });
 }
 
 export async function updateClientAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; message: string }>> {
   await requireRole(SALES_ROLES);
   const id = strOrNull(formData.get("id"));
   if (!id) return fail("Client-id ontbreekt.");
+
+  const company_name = strOrNull(formData.get("company_name"));
+  const contact_name = strOrNull(formData.get("contact_name"));
+  const email = strOrNull(formData.get("email"));
+  const sendInvite = wantsPortalInvite(formData);
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("clients")
     .update({
-      company_name: strOrNull(formData.get("company_name")),
-      contact_name: strOrNull(formData.get("contact_name")),
-      email: strOrNull(formData.get("email")),
+      company_name,
+      contact_name,
+      email,
       phone: strOrNull(formData.get("phone")),
       address: strOrNull(formData.get("address")),
       city: strOrNull(formData.get("city")),
@@ -128,8 +164,77 @@ export async function updateClientAction(
     .eq("id", id);
 
   if (error) return fail(error.message);
+
+  let message = "Opdrachtgever bijgewerkt.";
+  if (sendInvite) {
+    if (!company_name) {
+      message =
+        "Opdrachtgever bijgewerkt (uitnodiging overgeslagen: bedrijfsnaam ontbreekt).";
+    } else {
+      const invite = await inviteClientToPortal({
+        clientId: id,
+        email: email ?? "",
+        companyName: company_name,
+        contactName: contact_name,
+      });
+      if (invite.ok && invite.invited) {
+        message = invite.existingUser
+          ? `Opdrachtgever bijgewerkt. Nieuwe inlog-mail verstuurd naar ${invite.email}.`
+          : `Opdrachtgever bijgewerkt. Uitnodiging verstuurd naar ${invite.email}.`;
+      } else if (invite.ok) {
+        message = `Opdrachtgever bijgewerkt (${inviteResultMessage(invite, email)}).`;
+      } else {
+        message = `Opdrachtgever bijgewerkt, maar uitnodiging mislukt: ${invite.error}`;
+      }
+    }
+  }
+
   revalidateDashboard(["/dashboard/intern/sales", "/dashboard/intern/projecten"]);
-  return ok({ id });
+  return ok({ id, message });
+}
+
+export async function inviteClientPortalAction(
+  clientId: string,
+): Promise<ActionResult<{ id: string; message: string }>> {
+  await requireRole(SALES_ROLES);
+  if (!clientId.trim()) return fail("Client-id ontbreekt.");
+
+  const supabase = await createClient();
+  const { data: client, error } = await supabase
+    .from("clients")
+    .select("id, company_name, contact_name, email, profile_id")
+    .eq("id", clientId)
+    .maybeSingle();
+
+  if (error) return fail(error.message);
+  if (!client) return fail("Opdrachtgever niet gevonden.");
+  if (!client.email) {
+    return fail("Geen e-mailadres — vul eerst een e-mail in bij de opdrachtgever.");
+  }
+
+  const invite = await inviteClientToPortal({
+    clientId: client.id,
+    email: client.email,
+    companyName: client.company_name,
+    contactName: client.contact_name,
+  });
+
+  if (!invite.ok) return fail(invite.error);
+  if (!invite.invited) {
+    return fail(
+      invite.reason === "missing_config"
+        ? "Uitnodiging niet mogelijk: serverconfiguratie incompleet (SUPABASE_SERVICE_ROLE_KEY / RESEND_API_KEY)."
+        : "Uitnodiging overgeslagen.",
+    );
+  }
+
+  revalidateDashboard(["/dashboard/intern/sales"]);
+  return ok({
+    id: client.id,
+    message: invite.existingUser
+      ? `Nieuwe inlog-mail verstuurd naar ${invite.email}.`
+      : `Uitnodiging verstuurd naar ${invite.email}.`,
+  });
 }
 
 // ——— Leads ———

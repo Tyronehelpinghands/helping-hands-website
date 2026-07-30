@@ -67,3 +67,24 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 - [`shiftbase-integration.md`](./shiftbase-integration.md) — dual mode + hours limitation
 - [`gmail-integration.md`](./gmail-integration.md)
 - [`whatsapp-integration.md`](./whatsapp-integration.md)
+- [`supabase-auth-setup.md`](./supabase-auth-setup.md) — auth, roles, client portal invites
+
+## Client portal invites (sales)
+
+When sales creates an opdrachtgever with an e-mail and **Stuur portaal-uitnodiging** (default on):
+
+1. Server action uses **service role** (`SUPABASE_SERVICE_ROLE_KEY`) to `generateLink` (invite or recovery)
+2. Sets `profiles.role = 'client'` and `clients.profile_id`
+3. Sends a **branded Resend** HTML mail (navy/orange) with CTA to set password via `/auth/callback?next=/update-password`
+
+Env (Vercel + local, **server-only** except site URL):
+
+| Variable | Purpose |
+|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | Auth admin + profile/client link (never `NEXT_PUBLIC_*`) |
+| `RESEND_API_KEY` | Branded invite e-mail |
+| `NEXT_PUBLIC_SITE_URL` | Redirect + logo URLs in the mail |
+| `CONTACT_FROM_EMAIL` | Optional From override (same as contact form) |
+
+Fallback without Resend branding: customize Supabase Auth e-mail templates in the dashboard — this app prefers Resend so the invite is fully Helping Hands branded.
+
