@@ -1,6 +1,6 @@
 # Helping Hands App
 
-Supabase is the **source of truth** for planning, crew, hours and client requests. Shiftbase is **optional / disabled** by default and must not block the product.
+Supabase is the **source of truth** for planning, crew, hours and client requests. Shiftbase sync is **optional but available** while the team still uses Shiftbase operationally (e.g. before BV / app stores).
 
 ## Stack
 
@@ -8,6 +8,7 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 - Supabase Auth + Postgres (RLS)
 - Vercel hosting
 - Resend (contact), Gmail prepared, WhatsApp later
+- Capacitor / PWA code may remain in the repo for a future store release — not required for Shiftbase dual mode
 
 ## Portals
 
@@ -19,10 +20,14 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 
 ## Architecture rules
 
-1. **No automatic Shiftbase sync** on shift create/assign — toast is only `"Shift aangemaakt."`
-2. Shiftbase opt-in via `SHIFTBASE_ENABLED=true` + API key; UI shows **Optioneel — uitgeschakeld** otherwise
-3. No demo bypass, no localStorage as DB, no frontend secrets
-4. Brand: navy `#173A8A` / deep `#0B1F4D` / orange `#F28C28`
+1. **Supabase primary** — shifts, assignments, hours live in HH
+2. **Shiftbase sync available** when `SHIFTBASE_API_KEY` / `TOKEN` is set:
+   - Auto-sync on shift create (skip silently without key → toast `"Shift aangemaakt."`)
+   - On sync failure: keep Supabase shift; show clear error toast
+   - Manual medewerkers sync under Integraties
+3. Optional flag: `SHIFTBASE_ENABLED=false` disables sync; default is **on when key present**
+4. No demo bypass, no localStorage as DB, no frontend secrets
+5. Brand: navy `#173A8A` / deep `#0B1F4D` / orange `#F28C28`
 
 ## Feature matrix (MVP)
 
@@ -32,6 +37,7 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 | Accept / decline shift | — | ✅ | — |
 | Availability | view (crew module) | ✅ | — |
 | Hours + corrections | ✅ approve | ✅ request | — |
+| Optional Shiftbase sync | ✅ | — | — |
 | Client requests | notified | — | ✅ persist |
 | Notifications | insert | ✅ feed | (schema ready) |
 | Mobile bottom nav | sheet sidebar | ✅ | ✅ |
@@ -43,11 +49,12 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 - Employee portal: [`employee-portal-supabase.md`](./employee-portal-supabase.md)
 - App tables: [`helping-hands-app-database.md`](./helping-hands-app-database.md) → run `supabase/helping-hands-app.sql`
 
-## Shiftbase (optional)
+## Shiftbase (optional dual mode)
 
-- Default: disabled — health status **Optioneel — uitgeschakeld** (`ok: true`, does not break integrations)
-- Manual sync only under Integraties → Geavanceerd when `SHIFTBASE_ENABLED=true`
-- Legacy columns on `shifts` / `crew_members` remain for optional sync; no feature depends on them
+- Health: **Optioneel — beschikbaar** / **Actief** when key present; **Optioneel — uitgeschakeld** only if `SHIFTBASE_ENABLED=false`
+- Sync buttons visible under Integraties (not buried as disabled)
+- Hours → Shiftbase: best-effort `POST /timesheets` — if API rejects write, enter manually in Shiftbase; see [`shiftbase-integration.md`](./shiftbase-integration.md)
+- Legacy columns on `shifts` / `crew_members` remain for sync
 
 ## PWA
 
@@ -57,6 +64,6 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 ## Related docs
 
 - [`internal-dashboard-mvp.md`](./internal-dashboard-mvp.md)
-- [`shiftbase-integration.md`](./shiftbase-integration.md) — treat as optional legacy
+- [`shiftbase-integration.md`](./shiftbase-integration.md) — dual mode + hours limitation
 - [`gmail-integration.md`](./gmail-integration.md)
 - [`whatsapp-integration.md`](./whatsapp-integration.md)

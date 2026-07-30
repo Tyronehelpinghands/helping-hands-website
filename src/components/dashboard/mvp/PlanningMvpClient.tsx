@@ -221,7 +221,7 @@ export function PlanningMvpClient({
             const res = await createShiftAction(fd);
             if (res.ok) {
               setOpen(false);
-              showToast("Shift aangemaakt.");
+              showToast(res.data.message ?? "Shift aangemaakt.");
               router.refresh();
             } else showToast(res.error);
           });

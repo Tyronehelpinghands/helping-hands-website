@@ -14,7 +14,7 @@ import {
 import {
   formatShiftbaseError,
   isShiftbaseConfigured,
-  isShiftbaseEnabled,
+  isShiftbaseExplicitlyDisabled,
   testShiftbaseConnection,
 } from "@/lib/shiftbase";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -35,12 +35,13 @@ export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 export type IntegrationHealthResult = {
   provider: IntegrationProvider;
   ok: boolean;
-  /** Actief | Voorbereid | Ontbreekt | Fout | Optioneel — uitgeschakeld */
+  /** Actief | Voorbereid | Ontbreekt | Fout | Optioneel — beschikbaar | Optioneel — uitgeschakeld */
   status:
     | "Actief"
     | "Voorbereid"
     | "Ontbreekt"
     | "Fout"
+    | "Optioneel — beschikbaar"
     | "Optioneel — uitgeschakeld";
   message: string;
   checkedAt: string;
@@ -157,22 +158,22 @@ async function checkContact(): Promise<Omit<IntegrationHealthResult, "provider" 
 }
 
 async function checkShiftbase(): Promise<Omit<IntegrationHealthResult, "provider" | "checkedAt">> {
-  // Shiftbase is optional. Default: disabled — own Supabase planning is source of truth.
-  if (!isShiftbaseEnabled()) {
+  // Dual mode: Supabase is primary; Shiftbase sync is optional but available when key is set.
+  if (isShiftbaseExplicitlyDisabled()) {
     return {
       ok: true,
       status: "Optioneel — uitgeschakeld",
       message:
-        "Planning draait op eigen Supabase-app. Shiftbase sync is uitgeschakeld (zet SHIFTBASE_ENABLED=true om optioneel te activeren).",
+        "Shiftbase sync staat uit (SHIFTBASE_ENABLED=false). Helping Hands plant in Supabase.",
     };
   }
 
   if (!isShiftbaseConfigured()) {
     return {
       ok: true,
-      status: "Optioneel — uitgeschakeld",
+      status: "Optioneel — beschikbaar",
       message:
-        "SHIFTBASE_ENABLED staat aan, maar API key/token ontbreekt. Planning blijft op Supabase.",
+        "Helping Hands plant in Supabase; sync naar Shiftbase kan aan — zet SHIFTBASE_API_KEY (of TOKEN) in Vercel.",
     };
   }
 
@@ -182,19 +183,23 @@ async function checkShiftbase(): Promise<Omit<IntegrationHealthResult, "provider
       return {
         ok: true,
         status: "Actief",
-        message: result.message ?? "Shiftbase API bereikbaar (optionele sync).",
+        message:
+          result.message ??
+          "Shiftbase API bereikbaar. Helping Hands plant in Supabase; sync naar Shiftbase kan aan.",
       };
     }
     return {
       ok: true,
-      status: "Voorbereid",
-      message: result.message ?? "Shiftbase test mislukt — app-planning blijft werken.",
+      status: "Optioneel — beschikbaar",
+      message:
+        result.message ??
+        "API key aanwezig maar test mislukt — Supabase-planning blijft werken.",
     };
   } catch (error) {
     return {
       ok: true,
-      status: "Voorbereid",
-      message: `${formatShiftbaseError(error)} — app-planning blijft werken.`,
+      status: "Optioneel — beschikbaar",
+      message: `${formatShiftbaseError(error)} — Supabase-planning blijft werken.`,
     };
   }
 }

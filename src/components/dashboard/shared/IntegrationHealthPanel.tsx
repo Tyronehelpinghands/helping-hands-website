@@ -26,7 +26,7 @@ export const SHARED_INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
     id: "shiftbase",
     name: "Shiftbase",
     description:
-      "Optioneel — uitgeschakeld. Planning draait op eigen Supabase-app.",
+      "Optioneel — beschikbaar. Helping Hands plant in Supabase; sync naar Shiftbase kan aan.",
     checkUrl: "/api/integrations/health?provider=shiftbase",
     checkable: true,
   },
@@ -85,6 +85,9 @@ function mapApiToStatus(
 ): IntegrationStatusType {
   if (statusHint === "Optioneel — uitgeschakeld") {
     return "Optioneel — uitgeschakeld";
+  }
+  if (statusHint === "Optioneel — beschikbaar") {
+    return "Optioneel — beschikbaar";
   }
   if (ok === true) return "Actief";
   if (configured === false) return "Niet gekoppeld";

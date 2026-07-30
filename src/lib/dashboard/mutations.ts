@@ -9,6 +9,8 @@ import {
   calculateWorkedHours,
 } from "@/lib/dashboard/calculations";
 import { getRateSettings } from "@/lib/dashboard/queries";
+import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
+import { shouldAutoSyncShiftbase } from "@/lib/shiftbase";
 import type {
   ActionResult,
   ClientStatus,
@@ -349,7 +351,7 @@ export async function updateCrewMemberAction(
 
 export async function createShiftAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; message?: string }>> {
   await requireRole(PLANNER_ROLES);
   const project_id = strOrNull(formData.get("project_id"));
   const shift_date = strOrNull(formData.get("shift_date"));
@@ -386,8 +388,18 @@ export async function createShiftAction(
     await notifyCrewAssignment(supabase, crew_member_id, data.id, shift_date);
   }
 
+  let message = "Shift aangemaakt.";
+  if (shouldAutoSyncShiftbase()) {
+    const sync = await syncMvpShiftToShiftbase(data.id);
+    if (sync.status === "gesynct") {
+      message = "Shift aangemaakt en gesynchroniseerd met Shiftbase.";
+    } else if (sync.status === "fout") {
+      message = `Shift aangemaakt in Supabase. Shiftbase sync mislukt: ${sync.error ?? sync.message}`;
+    }
+  }
+
   revalidateDashboard(["/dashboard/intern/planning", "/dashboard/intern/projecten"]);
-  return ok({ id: data.id });
+  return ok({ id: data.id, message });
 }
 
 export async function assignCrewToShiftAction(

@@ -28,7 +28,7 @@ type RowState = IntegrationStatusRow & {
 
 function toneForStatus(status: string): "ok" | "warn" | "neutral" | "danger" {
   if (status === "Actief") return "ok";
-  if (status === "Voorbereid") return "warn";
+  if (status === "Voorbereid" || status === "Optioneel — beschikbaar") return "warn";
   if (status === "Fout") return "danger";
   if (status === "Optioneel — uitgeschakeld") return "neutral";
   return "neutral";

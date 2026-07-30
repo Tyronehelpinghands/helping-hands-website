@@ -137,9 +137,38 @@ export function isShiftbaseConfigured(): boolean {
   return Boolean(getShiftbaseApiToken());
 }
 
-/** Opt-in flag. Default off — planning draait op Supabase. */
+/**
+ * Explicit opt-out. Default is sync allowed when API key is present.
+ */
+export function isShiftbaseExplicitlyDisabled(): boolean {
+  const flag = process.env.SHIFTBASE_ENABLED?.trim().toLowerCase();
+  return flag === "false" || flag === "0" || flag === "no";
+}
+
+/**
+ * Shiftbase availability for UI / health.
+ * Default: available when API key is present (or SHIFTBASE_ENABLED=true).
+ * Set SHIFTBASE_ENABLED=false to disable even with key.
+ */
 export function isShiftbaseEnabled(): boolean {
-  return process.env.SHIFTBASE_ENABLED?.trim().toLowerCase() === "true";
+  if (isShiftbaseExplicitlyDisabled()) return false;
+  const flag = process.env.SHIFTBASE_ENABLED?.trim().toLowerCase();
+  if (flag === "true" || flag === "1" || flag === "yes") return true;
+  return isShiftbaseConfigured();
+}
+
+/**
+ * Auto-sync shifts to Shiftbase after create.
+ * Default: on when API key present. Set SHIFTBASE_ENABLED=false to disable.
+ */
+export function shouldAutoSyncShiftbase(): boolean {
+  if (isShiftbaseExplicitlyDisabled()) return false;
+  return isShiftbaseConfigured();
+}
+
+/** Sync UI may be shown unless explicitly disabled. */
+export function isShiftbaseSyncAllowed(): boolean {
+  return !isShiftbaseExplicitlyDisabled();
 }
 
 export class ShiftbaseApiError extends Error {
@@ -894,4 +923,61 @@ export async function syncHoursFromShiftbase(params?: {
 }): Promise<{ count: number; items: unknown[] }> {
   const items = await getShiftbaseTimesheets(params);
   return { count: items.length, items };
+}
+
+export type ShiftbaseTimesheetPayload = {
+  /** Shiftbase user id */
+  userId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes?: number;
+  /** Optional free-text note */
+  description?: string;
+};
+
+/**
+ * Best-effort POST to Shiftbase Timesheets.
+ * Public docs list Timesheets/TimeTracking but write schemas are not fully public —
+ * callers must treat 404/405/422 as "not supported; enter manually in Shiftbase".
+ */
+export async function createShiftbaseTimesheet(
+  payload: ShiftbaseTimesheetPayload,
+): Promise<{ id: string }> {
+  const body = {
+    user_id: payload.userId,
+    employee_id: payload.userId,
+    date: payload.date,
+    start_date: payload.date,
+    start_time: payload.startTime,
+    end_time: payload.endTime,
+    start: `${payload.date} ${payload.startTime}`,
+    end: `${payload.date} ${payload.endTime}`,
+    break_minutes: payload.breakMinutes ?? 0,
+    description: payload.description,
+    notes: payload.description,
+  };
+
+  const data = await shiftbaseRequest<Record<string, unknown>>(
+    SHIFTBASE_ENDPOINTS.timesheets,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+
+  const nested =
+    data.data && typeof data.data === "object"
+      ? (data.data as Record<string, unknown>)
+      : null;
+  const id = String(
+    data.id ?? data.timesheet_id ?? nested?.id ?? "",
+  );
+  return { id };
+}
+
+export async function pushHoursToShiftbase(
+  payload: ShiftbaseTimesheetPayload,
+): Promise<{ id: string }> {
+  return createShiftbaseTimesheet(payload);
 }

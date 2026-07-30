@@ -16,7 +16,10 @@ import {
   WHATSAPP_MESSAGE_TEMPLATES,
 } from "@/lib/integrations/whatsapp";
 import { isMoneybirdConfigured } from "@/lib/server/moneybird";
-import { isShiftbaseConfigured, isShiftbaseEnabled } from "@/lib/shiftbase";
+import {
+  isShiftbaseConfigured,
+  isShiftbaseExplicitlyDisabled,
+} from "@/lib/shiftbase";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const metadata: Metadata = {
@@ -50,7 +53,8 @@ export default async function InternIntegratiesPage({
   const resendActive = Boolean(process.env.RESEND_API_KEY?.trim());
   const moneybirdPrepared = isMoneybirdConfigured();
   const shiftbasePrepared = isShiftbaseConfigured();
-  const shiftbaseEnabled = isShiftbaseEnabled();
+  const shiftbaseDisabled = isShiftbaseExplicitlyDisabled();
+  const shiftbaseEnabled = !shiftbaseDisabled;
 
   const initialRows: IntegrationStatusRow[] = [
     {
@@ -90,14 +94,16 @@ export default async function InternIntegratiesPage({
     {
       provider: "shiftbase",
       name: "Shiftbase",
-      status:
-        shiftbaseEnabled && shiftbasePrepared
+      status: shiftbaseDisabled
+        ? "Optioneel — uitgeschakeld"
+        : shiftbasePrepared
           ? "Actief"
-          : "Optioneel — uitgeschakeld",
-      note:
-        shiftbaseEnabled && shiftbasePrepared
-          ? "Optionele sync actief (SHIFTBASE_ENABLED) — planning blijft op Supabase"
-          : "Uitgeschakeld — eigen Supabase-planning is bron van waarheid",
+          : "Optioneel — beschikbaar",
+      note: shiftbaseDisabled
+        ? "SHIFTBASE_ENABLED=false — sync uitgeschakeld; planning blijft op Supabase"
+        : shiftbasePrepared
+          ? "Helping Hands plant in Supabase; sync naar Shiftbase kan aan"
+          : "Zet SHIFTBASE_API_KEY om sync beschikbaar te maken",
     },
     {
       provider: "moneybird",

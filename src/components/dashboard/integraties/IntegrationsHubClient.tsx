@@ -43,7 +43,7 @@ export type IntegrationHubProps = {
   gmailSender?: string;
   gmailCanConnect?: boolean;
   shiftbaseConfigured?: boolean;
-  /** When false (default), Shiftbase is optional/disabled — sync UI hidden. */
+  /** When false, Shiftbase sync is explicitly disabled (SHIFTBASE_ENABLED=false). */
   shiftbaseEnabled?: boolean;
   moneybirdConfigured?: boolean;
   mailboxes: SharedMailbox[];
@@ -76,7 +76,7 @@ export default function IntegrationsHubClient({
   gmailSender,
   gmailCanConnect = false,
   shiftbaseConfigured = false,
-  shiftbaseEnabled = false,
+  shiftbaseEnabled = true,
   moneybirdConfigured = false,
   mailboxes,
   whatsappTemplates,
@@ -505,27 +505,38 @@ export default function IntegrationsHubClient({
               </CardTitle>
               <SettingsStatusBadge
                 status={
-                  shiftbaseEnabled && shiftbaseConfigured
-                    ? "Actief"
-                    : "Optioneel — uitgeschakeld"
+                  !shiftbaseEnabled
+                    ? "Optioneel — uitgeschakeld"
+                    : shiftbaseConfigured
+                      ? "Actief"
+                      : "Optioneel — beschikbaar"
                 }
               />
             </div>
             <CardDescription>
-              Optioneel — uitgeschakeld. Planning draait op eigen Supabase-app.
+              Helping Hands plant in Supabase; sync naar Shiftbase kan aan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             <p>
-              Shifts, toewijzingen en beschikbaarheid staan in Supabase. Shiftbase
-              sync is geen onderdeel van de primaire flow.
+              Shifts en medewerkers staan in Supabase. Zolang je operationeel
+              Shiftbase gebruikt, kun je medewerkers en shifts syncen wanneer de
+              API key staat.
             </p>
-            {shiftbaseEnabled ? (
+            {!shiftbaseEnabled ? (
+              <p className="text-slate-500">
+                Sync staat uit via{" "}
+                <code className="rounded bg-slate-100 px-1">SHIFTBASE_ENABLED=false</code>
+                . Verwijder die flag of zet{" "}
+                <code className="rounded bg-slate-100 px-1">true</code> om weer
+                te syncen (default: aan als API key aanwezig is).
+              </p>
+            ) : (
               <>
                 <p>
                   {shiftbaseConfigured
-                    ? "SHIFTBASE_ENABLED=true — optionele sync beschikbaar onder Geavanceerd."
-                    : "SHIFTBASE_ENABLED=true, maar API key/token ontbreekt."}
+                    ? "API key aanwezig — auto-sync bij shift aanmaken staat aan. Handmatige sync hieronder."
+                    : "Nog geen API key — zet SHIFTBASE_API_KEY (of TOKEN) in Vercel. Zonder key wordt sync stil overgeslagen."}
                 </p>
                 {shiftbaseSyncMessage ? (
                   <p
@@ -538,44 +549,52 @@ export default function IntegrationsHubClient({
                     {shiftbaseSyncMessage}
                   </p>
                 ) : null}
-                <details className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <summary className="cursor-pointer font-semibold text-[#0B1F4D]">
-                    Geavanceerd / Optioneel — sync
-                  </summary>
-                  <div className="mt-3 flex flex-wrap items-start gap-2">
-                    <LiveTestButton provider="shiftbase" />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5"
-                      disabled={!shiftbaseConfigured || shiftbaseSyncing}
-                      onClick={() => void syncShiftbaseEmployees()}
-                    >
-                      {shiftbaseSyncing ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-3.5 w-3.5" />
-                      )}
-                      Medewerkers synchroniseren
-                    </Button>
-                    <Link
-                      href="/dashboard/intern/crew"
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "sm" }),
-                        "w-fit",
-                      )}
-                    >
-                      Naar Crew
-                    </Link>
-                  </div>
-                </details>
+                <div className="flex flex-wrap items-start gap-2">
+                  <LiveTestButton provider="shiftbase" />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    disabled={!shiftbaseConfigured || shiftbaseSyncing}
+                    onClick={() => void syncShiftbaseEmployees()}
+                  >
+                    {shiftbaseSyncing ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    Medewerkers synchroniseren
+                  </Button>
+                  <Link
+                    href="/dashboard/intern/crew"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Naar Crew
+                  </Link>
+                  <Link
+                    href="/dashboard/intern/planning"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Naar Planning
+                  </Link>
+                  <Link
+                    href="/dashboard/intern/urenregistratie"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-fit",
+                    )}
+                  >
+                    Uren → Shiftbase
+                  </Link>
+                </div>
               </>
-            ) : (
-              <p className="text-slate-500">
-                Zet <code className="rounded bg-slate-100 px-1">SHIFTBASE_ENABLED=true</code>{" "}
-                alleen als je optioneel wilt syncen. Geen feature hangt hiervan af.
-              </p>
             )}
           </CardContent>
         </Card>
