@@ -1,7 +1,8 @@
 export const siteConfig = {
   name: "Helping Hands Agency",
   shortName: "Helping Hands",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://helpinghandsagency.nl",
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.helpinghandsagency.nl",
   /** Algemene vragen */
   email: "info@helpinghandsagency.nl" as string,
   /** Personeels- / crewaanvragen (opdrachtgevers) */

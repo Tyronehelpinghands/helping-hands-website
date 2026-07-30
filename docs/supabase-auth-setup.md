@@ -43,6 +43,22 @@ https://*.vercel.app/auth/callback
 https://*.vercel.app/update-password
 ```
 
+**Belangrijk:** Site URL moet productie (`www`) zijn — niet een Vercel-preview.
+Verlopen/ongeldige invite-OTP’s redirecten anders naar de homepage met
+`#error=access_denied&error_code=otp_expired…` (hash is alleen client-side zichtbaar).
+De app vangt dat op via `AuthHashErrorHandler` → `/login?type=opdrachtgever&error=otp_expired`.
+
+**Invite redirect:** `inviteClient` gebruikt altijd productie
+`NEXT_PUBLIC_SITE_URL` (fallback `https://www.helpinghandsagency.nl`) voor
+`generateLink` → `redirectTo = …/auth/callback?next=/update-password`.
+Preview/`localhost` in die env-var wordt bewust genegeerd voor invites.
+
+### E-mail OTP / magic link expiry
+
+**Authentication → Settings** (of Providers → Email): verhoog indien beschikbaar
+de expiry voor invite / magic link / recovery (standaard is vaak kort, bijv. 1 uur).
+Bij verlopen links: sales klikt **Opnieuw uitnodigen** in het intern dashboard.
+
 ---
 
 ## 2. SQL: profiles, RLS, trigger, get_my_role
@@ -262,8 +278,13 @@ Sales (`owner` / `admin` / `sales`) kan bij aanmaken of via **Uitnodigen** / **O
 2. `profiles.role = 'client'` + `clients.profile_id = user.id`  
    (column + RLS: [`supabase/clients-profile-id.sql`](../supabase/clients-profile-id.sql) — or full [`supabase/helping-hands-app.sql`](../supabase/helping-hands-app.sql))
 3. Branded HTML via Resend (`src/lib/email/formatPortalInviteEmail.ts`) — knop naar  
-   `${NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`
+   productie-`redirectTo`: `https://www.helpinghandsagency.nl/auth/callback?next=/update-password`  
+   (via `NEXT_PUBLIC_SITE_URL`, nooit een `*.vercel.app` preview)
 
 Code: `src/lib/auth/inviteClient.ts` (alleen server actions). Rate-limit: max 5 invites / e-mail / 15 min (in-memory per instance).
+
+**Verlopen link:** gebruiker landt op `/login?type=opdrachtgever&error=otp_expired` met
+Nederlandse uitleg. Actie: **Opnieuw uitnodigen** vanuit intern dashboard (of contact
+`info@helpinghandsagency.nl`).
 
 **Fallback:** zonder Resend kun je Supabase Auth e-mailtemplates in het dashboard branden; de app stuurt bij voorkeur zelf de mail zodat het Helping Hands-design vastligt.

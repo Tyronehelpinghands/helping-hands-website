@@ -22,6 +22,8 @@ const errorMessages: Record<string, string> = {
     "Je account is nog niet volledig ingesteld. Neem contact op met Helping Hands.",
   auth: "Authenticatie is mislukt. Probeer opnieuw in te loggen.",
   unauthorized: "Je hebt geen toegang tot deze pagina met je huidige rol.",
+  otp_expired:
+    "Deze uitnodigingslink is verlopen of al gebruikt. Vraag een nieuwe uitnodiging aan via Helping Hands.",
 };
 
 export const dynamic = "force-dynamic";
@@ -96,6 +98,7 @@ export default async function LoginPage({
           key={initialType ?? "choose"}
           initialType={initialType}
           configError={configError}
+          showInviteHelp={params.error === "otp_expired"}
           redirectTo={redirectTo}
         />
       </section>

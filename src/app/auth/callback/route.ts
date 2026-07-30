@@ -14,6 +14,27 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next");
+  const authError = searchParams.get("error");
+  const errorCode = searchParams.get("error_code");
+  const errorDescription = (
+    searchParams.get("error_description") ?? ""
+  ).toLowerCase();
+
+  // Query-string auth errors (PKCE / some providers). Hash errors are handled
+  // client-side by AuthHashErrorHandler.
+  if (authError || errorCode) {
+    const isOtpExpired =
+      errorCode === "otp_expired" ||
+      errorDescription.includes("expired") ||
+      (errorDescription.includes("email link") &&
+        errorDescription.includes("invalid"));
+    if (isOtpExpired) {
+      return NextResponse.redirect(
+        `${origin}/login?type=opdrachtgever&error=otp_expired`,
+      );
+    }
+    return NextResponse.redirect(`${origin}/login?error=auth`);
+  }
 
   if (code) {
     const supabase = await createClient();
