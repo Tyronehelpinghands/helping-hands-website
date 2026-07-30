@@ -74,7 +74,8 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 When sales creates an opdrachtgever with an e-mail and **Stuur portaal-uitnodiging** (default on):
 
 1. Server action uses **service role** (`SUPABASE_SERVICE_ROLE_KEY`) to `generateLink` (invite or recovery)
-2. Sets `profiles.role = 'client'` and `clients.profile_id`
+2. Sets `profiles.role = 'client'` and `clients.profile_id`  
+   (requires column: run [`supabase/clients-profile-id.sql`](../supabase/clients-profile-id.sql) if missing)
 3. Sends a **branded Resend** HTML mail (navy/orange) with CTA to set password via `/auth/callback?next=/update-password`
 
 Env (Vercel + local, **server-only** except site URL):

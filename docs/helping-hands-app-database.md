@@ -31,6 +31,11 @@ SQL: [`supabase/helping-hands-app.sql`](../supabase/helping-hands-app.sql)
 
 Supabase → SQL Editor → paste `supabase/helping-hands-app.sql` → Run.
 
+**If you only need the opdrachtgever invite fix** (`column clients.profile_id does not exist`):
+
+paste [`supabase/clients-profile-id.sql`](../supabase/clients-profile-id.sql) → Run.  
+(That snippet is also the first block of `helping-hands-app.sql`.)
+
 Optional: set `clients.profile_id` for client test accounts:
 
 ```sql

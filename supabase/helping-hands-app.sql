@@ -28,6 +28,7 @@ $$;
 grant execute on function public.is_internal_role() to authenticated;
 
 -- Link clients to auth profiles (for opdrachtgeversportaal)
+-- Standalone hotfix (same statements): supabase/clients-profile-id.sql
 alter table public.clients
   add column if not exists profile_id uuid references public.profiles (id) on delete set null;
 

@@ -121,10 +121,18 @@ async function linkClientProfile(
     .eq("id", clientId);
 
   if (error) {
+    const msg = error.message.toLowerCase();
+    const missingColumn =
+      msg.includes("profile_id") &&
+      (msg.includes("does not exist") ||
+        msg.includes("could not find") ||
+        msg.includes("schema cache"));
     throw new Error(
-      error.message.includes("profile_id")
-        ? "Kon opdrachtgever niet koppelen aan portaalaccount (profile_id ontbreekt in database?)."
-        : error.message,
+      missingColumn
+        ? "Draai SQL voor clients.profile_id (supabase/clients-profile-id.sql in Supabase SQL Editor)."
+        : error.message.includes("profile_id")
+          ? "Kon opdrachtgever niet koppelen aan portaalaccount (profile_id ontbreekt in database?). Draai supabase/clients-profile-id.sql."
+          : error.message,
     );
   }
 }

@@ -202,11 +202,19 @@ export async function inviteClientPortalAction(
   const supabase = await createClient();
   const { data: client, error } = await supabase
     .from("clients")
-    .select("id, company_name, contact_name, email, profile_id")
+    .select("id, company_name, contact_name, email")
     .eq("id", clientId)
     .maybeSingle();
 
-  if (error) return fail(error.message);
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("profile_id") && msg.includes("does not exist")) {
+      return fail(
+        "Draai SQL voor clients.profile_id (supabase/clients-profile-id.sql in Supabase SQL Editor).",
+      );
+    }
+    return fail(error.message);
+  }
   if (!client) return fail("Opdrachtgever niet gevonden.");
   if (!client.email) {
     return fail("Geen e-mailadres — vul eerst een e-mail in bij de opdrachtgever.");

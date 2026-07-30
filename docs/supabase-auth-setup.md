@@ -259,7 +259,8 @@ Zorg dat de redirect URLs hierboven kloppen.
 Sales (`owner` / `admin` / `sales`) kan bij aanmaken of via **Uitnodigen** / **Opnieuw uitnodigen**:
 
 1. `auth.admin.generateLink` (`invite` voor nieuw, `recovery` als het account al bestaat)
-2. `profiles.role = 'client'` + `clients.profile_id = user.id`
+2. `profiles.role = 'client'` + `clients.profile_id = user.id`  
+   (column + RLS: [`supabase/clients-profile-id.sql`](../supabase/clients-profile-id.sql) — or full [`supabase/helping-hands-app.sql`](../supabase/helping-hands-app.sql))
 3. Branded HTML via Resend (`src/lib/email/formatPortalInviteEmail.ts`) — knop naar  
    `${NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`
 
