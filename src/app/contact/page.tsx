@@ -34,11 +34,10 @@ import {
 } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact | Personeel aanvragen bij Helping Hands Agency",
+  title: "Contact | Personeel aanvragen of crew melden",
   description:
     "Vraag crew of personeel aan voor events, horeca, stagebouw, productie, logistiek en hospitality. Neem contact op met Helping Hands Agency of meld je aan als medewerker.",
   path: "/contact",
-  absoluteTitle: true,
 });
 
 export default function ContactPage() {

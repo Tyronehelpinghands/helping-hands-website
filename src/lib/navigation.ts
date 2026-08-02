@@ -251,8 +251,8 @@ export const mobileNavGroups: MobileNavGroup[] = [
 export const simpleNavLinks = [
   { href: "/", label: "Home" },
   { href: "/vacatures", label: "Vacatures" },
-  { href: "/projecten", label: "Projecten" },
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
+  { href: "/projecten", label: "Projecten" },
   { href: "/login", label: "Login" },
 ] as const;

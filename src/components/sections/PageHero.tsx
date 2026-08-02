@@ -286,9 +286,9 @@ export default function PageHero({ content }: PageHeroProps) {
 
   const mobileServiceChips = [
     { label: "Event crew", href: "/personeel-inhuren/event-crew" },
-    { label: "Stagehands", href: "/diensten/stagehands" },
-    { label: "Horeca", href: "/diensten/horeca-personeel" },
-    { label: "Productie", href: "/diensten/productie-assistentie" },
+    { label: "Stagehands", href: "/personeel-inhuren/stagehands" },
+    { label: "Horeca", href: "/personeel-inhuren/horeca-personeel" },
+    { label: "Productie", href: "/personeel-inhuren/productie-assistenten" },
   ] as const;
 
   return (

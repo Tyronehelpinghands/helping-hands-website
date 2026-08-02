@@ -20,7 +20,7 @@ import {
 } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Personeel inhuren | Event, horeca & productie",
+  title: "Personeel inhuren | Event crew, horeca & productie",
   description:
     "Personeel inhuren voor events, festivals, horeca, stagebouw en productie. Helping Hands Agency: snelle planning, duidelijke briefing, landelijk inzetbaar.",
   path: "/personeel-inhuren",

@@ -61,6 +61,26 @@ Placeholders (`info@eventcrew.nl`, nepnummers/adressen) horen niet in de codebas
 3. Oude `page_id`-URL’s laten verdwijnen via 301 + canonical (geen handmatige removal tenzij soft-404 blijft hangen)  
 4. Coverage/errors controleren (redirects, 404’s, duplicate canonicals)
 
+## Sitelinks
+
+Google kiest sitelinks **automatisch**. Je kunt ze niet forceren of handmatig instellen (alleen demoten in Search Console als ze slecht zijn).
+
+Wat wél helpt:
+
+1. Belangrijke pagina’s live, geïndexeerd, met unieke title/H1  
+2. Duidelijke interne links vanaf homepage, header en footer (descriptieve anchors: Personeel inhuren, Werken bij, Vacatures, Over ons, Contact, Opdrachtgevers)  
+3. Sitemap indienen + URL-inspectie (“Indexering aanvragen”) voor die URL’s  
+4. Wachten op recrawl (dagen tot weken); nieuwe/gewijzigde structuur heeft tijd nodig  
+
+Gewenste sitelink-kandidaten: `/personeel-inhuren`, `/werken-bij`, `/vacatures`, `/over-ons`, `/contact`, `/opdrachtgevers`.
+
+Search Console: Sitemap → opnieuw indienen → per kern-URL inspecteren → indexering aanvragen. Geen garantie op specifieke labels.
+
 ## GBP
 
 `ReviewCta` toont consistente NAP en linkt naar Google Maps-zoek-URL. Geen nep-reviews, geen review-incentives.
+
+**Handmatig in Google Business Profile controleren/corrigeren** (site is bron van waarheid):
+
+- Postcode: `1211 GN` (niet QN)  
+- Mobiel: `06 5741 6338` (niet 06 87416338)

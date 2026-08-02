@@ -17,7 +17,7 @@ import {
 import { applicationsEmail } from "@/lib/navigation";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Werken bij Helping Hands | Event crew & horeca",
+  title: "Werken bij | Event crew, horeca & stagebouw",
   description:
     "Werken in evenementen, als stagehand of met een horeca bijbaan? Meld je aan bij Helping Hands Agency: duidelijke planning, echte producties, doorgroeikansen.",
   path: "/werken-bij",

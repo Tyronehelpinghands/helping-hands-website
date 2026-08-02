@@ -8,11 +8,23 @@ import {
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
-  navLinks,
   plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
 import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
+
+/** Curated footer nav — descriptive anchors for pages we want as Google sitelinks. */
+const primaryNavLinks = [
+  { href: "/personeel-inhuren", label: "Personeel inhuren" },
+  { href: "/werken-bij", label: "Werken bij" },
+  { href: "/vacatures", label: "Vacatures" },
+  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+  { href: "/over-ons", label: "Over ons" },
+  { href: "/contact", label: "Contact" },
+  { href: "/diensten", label: "Diensten" },
+  { href: "/projecten", label: "Projecten" },
+  { href: "/locaties", label: "Locaties" },
+];
 
 const serviceLinks = [
   { href: "/personeel-inhuren", label: "Personeel inhuren" },
@@ -85,7 +97,7 @@ export default function Footer() {
               Navigatie
             </p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/70">
-              {navLinks.map((link) => (
+              {primaryNavLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="transition hover:text-white">
                     {link.label}
@@ -176,12 +188,30 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/contact" className="transition hover:text-white">
-                  Personeel aanvragen
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/personeel-inhuren"
+                  className="transition hover:text-white"
+                >
+                  Personeel inhuren
+                </Link>
+              </li>
+              <li>
+                <Link href="/werken-bij" className="transition hover:text-white">
+                  Werken bij
                 </Link>
               </li>
               <li>
                 <Link href="/vacatures" className="transition hover:text-white">
                   Vacatures
+                </Link>
+              </li>
+              <li>
+                <Link href="/over-ons" className="transition hover:text-white">
+                  Over ons
                 </Link>
               </li>
               <li>

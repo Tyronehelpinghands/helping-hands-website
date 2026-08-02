@@ -30,7 +30,7 @@ import { opdrachtgeversFaqs } from "@/lib/faq";
 import { buildPageMetadata, faqJsonLd, serviceJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Personeel inhuren voor events en horeca",
+  title: "Opdrachtgevers | Crew inhuren voor events en horeca",
   description:
     "Betrouwbare eventcrew, stagehands en horecamedewerkers met duidelijke briefing, urencontrole en bereikbare planning. Vraag direct personeel aan.",
   path: "/opdrachtgevers",

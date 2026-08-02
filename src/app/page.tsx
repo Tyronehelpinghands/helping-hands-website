@@ -42,6 +42,35 @@ export default function Home() {
         <LogoCarousel />
       </RevealOnScroll>
 
+      <section className="border-y border-[#0B1F4D]/08 bg-white py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <RevealOnScroll>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
+              Direct naar
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold text-[#173A8A] sm:text-base">
+              {[
+                { href: "/personeel-inhuren", label: "Personeel inhuren" },
+                { href: "/werken-bij", label: "Werken bij" },
+                { href: "/vacatures", label: "Vacatures" },
+                { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+                { href: "/over-ons", label: "Over ons" },
+                { href: "/contact", label: "Contact" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="underline-offset-4 transition hover:text-[#0B1F4D] hover:underline"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </RevealOnScroll>
+        </div>
+      </section>
+
       <section className="relative overflow-hidden bg-white py-10 sm:py-14">
         <div
           className="pointer-events-none absolute inset-0 -z-10"
@@ -84,21 +113,21 @@ export default function Home() {
                 Event crew, stagehands, horeca-, keuken- en barpersoneel, productie,
                 logistiek en hospitality — filter hieronder of ga direct naar{" "}
                 <Link
-                  href="/diensten/event-crew"
+                  href="/personeel-inhuren/event-crew"
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   event crew
                 </Link>
                 ,{" "}
                 <Link
-                  href="/diensten/stagehands"
+                  href="/personeel-inhuren/stagehands"
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   stagehands
                 </Link>{" "}
                 of{" "}
                 <Link
-                  href="/diensten/horeca-personeel"
+                  href="/personeel-inhuren/horeca-personeel"
                   className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                 >
                   horeca personeel
@@ -107,25 +136,25 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
-                  href="/diensten"
+                  href="/personeel-inhuren"
                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#173A8A] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#0B1F4D]"
                 >
-                  Bekijk alle diensten
+                  Personeel inhuren
                 </Link>
                 <Link
-                  href="/diensten/event-crew"
+                  href="/personeel-inhuren/event-crew"
                   className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
                 >
                   Event crew
                 </Link>
                 <Link
-                  href="/diensten/stagehands"
+                  href="/personeel-inhuren/stagehands"
                   className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
                 >
                   Stagehands
                 </Link>
                 <Link
-                  href="/diensten/horeca-personeel"
+                  href="/personeel-inhuren/horeca-personeel"
                   className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] bg-white px-7 py-3.5 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA]"
                 >
                   Horeca
@@ -229,10 +258,10 @@ export default function Home() {
         <CTASection
           title="Personeel nodig voor je volgende productie?"
           description="Stuur je datum, locatie, tijden, functies en aantal mensen door. Wij denken mee over de planning en bezetting."
-          buttonLabel="Vraag direct personeel aan"
+          buttonLabel="Contact — personeel aanvragen"
           buttonHref="/contact"
-          secondaryLabel="Bekijk vacatures"
-          secondaryHref="/vacatures"
+          secondaryLabel="Personeel inhuren"
+          secondaryHref="/personeel-inhuren"
           backgroundImage={ctaBackgroundPhoto.src}
           backgroundAlt={ctaBackgroundPhoto.alt}
         />

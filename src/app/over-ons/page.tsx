@@ -18,11 +18,10 @@ import { aboutFaqs } from "@/lib/aboutFaq";
 import { aboutPageJsonLd, buildPageMetadata, faqJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Over Helping Hands Agency | Crewbedrijf met maatschappelijke missie",
+  title: "Over ons | Crewbedrijf met maatschappelijke missie",
   description:
     "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt: een crewbedrijf met een maatschappelijke missie. Ontdek onze aanpak voor medewerkers en opdrachtgevers binnen events, horeca, stagebouw, productie en logistiek.",
   path: "/over-ons",
-  absoluteTitle: true,
 });
 
 const pageAnchors = [
