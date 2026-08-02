@@ -415,3 +415,76 @@ body.mobile-menu-open [data-mobile-project-cta] {
     @apply font-sans;
   }
 }
+
+/* Coverage map (NL / BE / DE) — CSS-only motion */
+@keyframes hh-coverage-map-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hh-coverage-country-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hh-coverage-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}
+
+.hh-coverage-map__countries,
+.hh-coverage-map__marker {
+  opacity: 0;
+}
+
+.hh-coverage-map--ready .hh-coverage-map__countries {
+  animation: hh-coverage-map-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hh-coverage-map--ready .hh-coverage-map__country {
+  animation: hh-coverage-country-in 0.55s ease-out both;
+}
+
+.hh-coverage-map--ready .hh-coverage-map__marker {
+  animation: hh-coverage-map-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+
+.hh-coverage-map__pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: hh-coverage-pulse 2.6s ease-out infinite;
+}
+
+.hh-coverage-map__pulse--late {
+  animation-delay: 0.9s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hh-coverage-map__countries,
+  .hh-coverage-map__country,
+  .hh-coverage-map__marker,
+  .hh-coverage-map__pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
