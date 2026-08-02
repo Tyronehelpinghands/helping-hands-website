@@ -2,9 +2,10 @@ import { siteConfig } from "@/lib/siteConfig";
 
 export const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/personeel-inhuren", label: "Personeel inhuren" },
   { href: "/diensten", label: "Diensten" },
   { href: "/opdrachtgevers", label: "Opdrachtgevers" },
-  { href: "/medewerkers", label: "Medewerkers" },
+  { href: "/werken-bij", label: "Werken bij" },
   { href: "/vacatures", label: "Vacatures" },
   { href: "/projecten", label: "Projecten" },
   { href: "/locaties", label: "Locaties" },
@@ -52,20 +53,25 @@ export const navDropdowns: NavDropdownConfig[] = [
     panelDescription: "Crew en ondersteuning voor elke fase van je productie.",
     items: [
       {
+        title: "Personeel inhuren",
+        description: "Overzicht van alle inhuur-landingspagina's.",
+        href: "/personeel-inhuren",
+      },
+      {
         title: "Event crew",
         description:
           "Floor support, publieksstromen, runners en algemene eventondersteuning.",
-        href: "/diensten/event-crew",
+        href: "/personeel-inhuren/event-crew",
       },
       {
         title: "Stagehands",
         description: "Laden, lossen, opbouw, afbouw en materiaalhandling.",
-        href: "/diensten/stagehands",
+        href: "/personeel-inhuren/stagehands",
       },
       {
         title: "Horeca support",
         description: "Barbacks, runners, bediening, uitgifte en hospitality.",
-        href: "/diensten/horeca-personeel",
+        href: "/personeel-inhuren/horeca-personeel",
       },
       {
         title: "Restaurant personeel",
@@ -73,30 +79,30 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/diensten/restaurant-personeel",
       },
       {
-        title: "Keukenpersoneel",
-        description: "Keukenhulpen, afwassers en zelfstandig werkend koks.",
-        href: "/diensten/keukenpersoneel",
+        title: "Keukenhulp",
+        description: "Keukenhulpen, afwassers en ondersteuning in de brigade.",
+        href: "/personeel-inhuren/keukenhulp",
       },
       {
         title: "Barpersoneel",
         description: "Bartenders, barbacks en dranken runners voor bars en events.",
-        href: "/diensten/barpersoneel",
+        href: "/personeel-inhuren/barpersoneel",
       },
       {
-        title: "Productie assistentie",
+        title: "Productie-assistenten",
         description:
           "Backstage support, runners en praktische productieondersteuning.",
-        href: "/diensten/productie-assistentie",
+        href: "/personeel-inhuren/productie-assistenten",
       },
       {
         title: "Logistiek",
         description: "Materiaalstromen, back-of-house en transportbewegingen.",
-        href: "/diensten/logistiek",
+        href: "/personeel-inhuren/logistiek-personeel",
       },
       {
         title: "Hospitality",
         description: "Hosts, guest support, VIP-begeleiding en ontvangst.",
-        href: "/diensten/hospitality",
+        href: "/personeel-inhuren/hospitality-personeel",
       },
       {
         title: "Alle diensten",
@@ -109,7 +115,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/locaties",
       },
     ],
-    cta: { label: "Bekijk alle diensten", href: "/diensten" },
+    cta: { label: "Personeel inhuren", href: "/personeel-inhuren" },
   },
   {
     id: "opdrachtgevers",
@@ -120,7 +126,12 @@ export const navDropdowns: NavDropdownConfig[] = [
       {
         title: "Personeel aanvragen",
         description: "Deel datum, locatie, tijden, functies en aantal mensen.",
-        href: "/contact",
+        href: "/contact?type=personeel-aanvragen",
+      },
+      {
+        title: "Personeel inhuren",
+        description: "Alle inhuur-landingspagina's op een rij.",
+        href: "/personeel-inhuren",
       },
       {
         title: "Voor opdrachtgevers",
@@ -129,14 +140,22 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/opdrachtgevers",
       },
     ],
-    cta: { label: "Vraag crew aan", href: "/contact" },
+    cta: {
+      label: "Vraag crew aan",
+      href: "/contact?type=personeel-aanvragen",
+    },
   },
   {
     id: "medewerkers",
-    label: "Medewerkers",
-    href: "/medewerkers",
+    label: "Werken bij",
+    href: "/werken-bij",
     panelTitle: "Werken bij Helping Hands",
     items: [
+      {
+        title: "Werken bij",
+        description: "Shifts, begeleiding en doorgroeien op echte producties.",
+        href: "/werken-bij",
+      },
       {
         title: "Bekijk vacatures",
         description: "Openstaande functies voor events, horeca en producties.",
@@ -150,10 +169,15 @@ export const navDropdowns: NavDropdownConfig[] = [
       {
         title: "Doorgroeien",
         description: "Van crewlid naar teamcaptain.",
-        href: "/medewerkers",
+        href: "/werken-bij",
+      },
+      {
+        title: "Werken als eventmedewerker",
+        description: "Floor support, runners en events.",
+        href: "/werken-als/eventmedewerker",
       },
     ],
-    cta: { label: "Aanmelden", href: employeeApplyMailto },
+    cta: { label: "Aanmelden", href: "/contact?type=crew-aanmelden" },
   },
 ];
 
@@ -171,21 +195,25 @@ export const mobileNavGroups: MobileNavGroup[] = [
   {
     id: "diensten",
     label: "Diensten",
-    href: "/diensten",
+    href: "/personeel-inhuren",
     items: [
-      { label: "Alle diensten", href: "/diensten" },
-      { label: "Event crew", href: "/diensten/event-crew" },
-      { label: "Horeca personeel", href: "/diensten/horeca-personeel" },
+      { label: "Personeel inhuren", href: "/personeel-inhuren" },
+      { label: "Event crew", href: "/personeel-inhuren/event-crew" },
+      { label: "Horeca personeel", href: "/personeel-inhuren/horeca-personeel" },
       { label: "Restaurant personeel", href: "/diensten/restaurant-personeel" },
-      { label: "Keukenpersoneel", href: "/diensten/keukenpersoneel" },
-      { label: "Barpersoneel", href: "/diensten/barpersoneel" },
-      { label: "Stagehands", href: "/diensten/stagehands" },
+      { label: "Keukenhulp", href: "/personeel-inhuren/keukenhulp" },
+      { label: "Barpersoneel", href: "/personeel-inhuren/barpersoneel" },
+      { label: "Stagehands", href: "/personeel-inhuren/stagehands" },
       {
-        label: "Productie assistentie",
-        href: "/diensten/productie-assistentie",
+        label: "Productie-assistenten",
+        href: "/personeel-inhuren/productie-assistenten",
       },
-      { label: "Logistiek", href: "/diensten/logistiek" },
-      { label: "Hospitality", href: "/diensten/hospitality" },
+      { label: "Logistiek", href: "/personeel-inhuren/logistiek-personeel" },
+      {
+        label: "Hospitality",
+        href: "/personeel-inhuren/hospitality-personeel",
+      },
+      { label: "Alle diensten", href: "/diensten" },
       { label: "Locaties", href: "/locaties" },
     ],
   },
@@ -194,20 +222,27 @@ export const mobileNavGroups: MobileNavGroup[] = [
     label: "Opdrachtgevers",
     href: "/opdrachtgevers",
     items: [
-      { label: "Personeel aanvragen", href: "/contact" },
+      {
+        label: "Personeel aanvragen",
+        href: "/contact?type=personeel-aanvragen",
+      },
+      { label: "Personeel inhuren", href: "/personeel-inhuren" },
       { label: "Voor opdrachtgevers", href: "/opdrachtgevers" },
       { label: "Projectervaring", href: "/projecten" },
-      { label: "Diensten bekijken", href: "/diensten" },
     ],
   },
   {
     id: "medewerkers",
-    label: "Medewerkers",
-    href: "/medewerkers",
+    label: "Werken bij",
+    href: "/werken-bij",
     items: [
-      { label: "Werken bij Helping Hands", href: "/medewerkers" },
+      { label: "Werken bij Helping Hands", href: "/werken-bij" },
       { label: "Vacatures bekijken", href: "/vacatures" },
-      { label: "Crew aanmelden", href: employeeApplyMailto },
+      { label: "Crew aanmelden", href: "/contact?type=crew-aanmelden" },
+      {
+        label: "Werken als eventmedewerker",
+        href: "/werken-als/eventmedewerker",
+      },
       { label: "Medewerkersportaal", href: "/portaal/medewerkers" },
     ],
   },

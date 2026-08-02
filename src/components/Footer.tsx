@@ -15,24 +15,29 @@ import {
 import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 
 const serviceLinks = [
-  { href: "/diensten/event-crew", label: "Event crew" },
-  { href: "/diensten/stagehands", label: "Stagehands" },
-  { href: "/diensten/horeca-personeel", label: "Horeca support" },
+  { href: "/personeel-inhuren", label: "Personeel inhuren" },
+  { href: "/personeel-inhuren/event-crew", label: "Event crew" },
+  { href: "/personeel-inhuren/stagehands", label: "Stagehands" },
+  { href: "/personeel-inhuren/horeca-personeel", label: "Horeca support" },
   { href: "/diensten/restaurant-personeel", label: "Restaurant personeel" },
-  { href: "/diensten/keukenpersoneel", label: "Keukenpersoneel" },
-  { href: "/diensten/barpersoneel", label: "Barpersoneel" },
-  { href: "/diensten/productie-assistentie", label: "Productie assistentie" },
-  { href: "/diensten/logistiek", label: "Logistiek" },
-  { href: "/diensten/hospitality", label: "Hospitality" },
+  { href: "/personeel-inhuren/keukenhulp", label: "Keukenhulp" },
+  { href: "/personeel-inhuren/barpersoneel", label: "Barpersoneel" },
+  {
+    href: "/personeel-inhuren/productie-assistenten",
+    label: "Productie-assistenten",
+  },
+  { href: "/personeel-inhuren/logistiek-personeel", label: "Logistiek" },
+  { href: "/personeel-inhuren/hospitality-personeel", label: "Hospitality" },
   { href: "/diensten", label: "Alle diensten" },
 ];
 
 const locationLinks = [
-  { href: "/locaties/event-crew-amsterdam", label: "Amsterdam" },
-  { href: "/locaties/stagehands-utrecht", label: "Utrecht" },
-  { href: "/locaties/horeca-personeel-hilversum", label: "Hilversum" },
-  { href: "/locaties/festival-crew-rotterdam", label: "Rotterdam" },
-  { href: "/locaties/eventpersoneel-den-haag", label: "Den Haag" },
+  { href: "/event-crew-amsterdam", label: "Amsterdam" },
+  { href: "/event-crew-utrecht", label: "Utrecht" },
+  { href: "/horeca-personeel-hilversum", label: "Hilversum" },
+  { href: "/event-crew-rotterdam", label: "Rotterdam" },
+  { href: "/event-crew-den-haag", label: "Den Haag" },
+  { href: "/festival-crew-randstad", label: "Randstad festivals" },
   { href: "/locaties", label: "Alle locaties" },
 ];
 

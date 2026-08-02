@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import CTASection from "@/components/CTASection";
 import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
-import { getAllLocations } from "@/data/locations";
-import { buildPageMetadata, faqJsonLd, locationsItemListJsonLd } from "@/lib/seo";
+import ReviewCta from "@/components/seo/ReviewCta";
+import {
+  buildPageMetadata,
+  faqJsonLd,
+  getAllSeoLocationPages,
+  locationsItemListJsonLd,
+} from "@/lib/seo";
 
 const title = "Locaties en werkgebieden | Helping Hands Agency";
 const description =
@@ -27,29 +31,24 @@ const locationsFaqs = [
       "Nee. Deze pagina's beschrijven onze belangrijkste werkgebieden, maar we zijn landelijk actief vanuit onze vestiging in Hilversum — ook buiten deze steden kun je personeel aanvragen.",
   },
   {
+    question: "Hebben jullie kantoren in elke stad?",
+    answer:
+      "Nee. Ons kantoor zit aan Wandelpad 30 in Hilversum. Elders leveren we personeel op locatie — zonder nepvestigingsclaims.",
+  },
+  {
     question: "Hoe kies ik de juiste locatiepagina voor mijn aanvraag?",
     answer:
-      "Kies de stad die het dichtst bij jouw evenement of locatie ligt. Staat jouw stad er niet tussen? Vraag gewoon aan via het contactformulier — we bezetten landelijk.",
-  },
-  {
-    question: "Verschilt de crew per regio?",
-    answer:
-      "De diensten zijn overal hetzelfde — event crew, stagehands, horeca en meer — maar per regio benoemen we de typische toepassingen en voorbeeldlocaties die daar spelen.",
-  },
-  {
-    question: "Kan ik ook buiten Nederland personeel aanvragen?",
-    answer:
-      "Via productiepartners zetten we soms ook crew in over de grens, bijvoorbeeld in België. Neem contact op om de mogelijkheden te bespreken.",
+      "Kies de stad/dienst die het dichtst bij jouw evenement ligt. Staat jouw stad er niet tussen? Vraag aan via contact — we bezetten landelijk.",
   },
   {
     question: "Hoe vraag ik personeel aan voor een specifieke stad?",
     answer:
-      "Gebruik het contactformulier en vermeld de stad, locatie, datum, tijden, functies en aantal mensen. Wij denken mee over bezetting en planning.",
+      "Gebruik het contactformulier en vermeld de stad, locatie, datum, tijden, functies en aantal mensen.",
   },
 ];
 
 export default function LocatiesOverviewPage() {
-  const locations = getAllLocations();
+  const locations = getAllSeoLocationPages();
 
   return (
     <>
@@ -62,7 +61,7 @@ export default function LocatiesOverviewPage() {
       <JsonLd
         data={locationsItemListJsonLd(
           locations.map((location) => ({
-            name: location.city,
+            name: `${location.serviceLabel} ${location.city}`,
             path: location.path,
           })),
         )}
@@ -76,8 +75,14 @@ export default function LocatiesOverviewPage() {
           description:
             "Vanuit onze vestiging in Hilversum zetten we event crew, stagehands en horecapersoneel in door heel Nederland. Bekijk onze belangrijkste werkgebieden hieronder.",
           theme: "diensten",
-          primaryCta: { label: "Personeel aanvragen", href: "/contact" },
-          secondaryCta: { label: "Bekijk diensten", href: "/diensten" },
+          primaryCta: {
+            label: "Personeel aanvragen",
+            href: "/contact?type=personeel-aanvragen",
+          },
+          secondaryCta: {
+            label: "Personeel inhuren",
+            href: "/personeel-inhuren",
+          },
           highlights: [
             { label: "Landelijk actief" },
             { label: "Regionale kennis" },
@@ -85,7 +90,7 @@ export default function LocatiesOverviewPage() {
             { label: "Snel schakelen" },
           ],
           interactiveCards: locations.slice(0, 4).map((location) => ({
-            title: location.city,
+            title: `${location.serviceLabel} ${location.city}`,
             description: location.heroDescription,
           })),
         }}
@@ -101,17 +106,16 @@ export default function LocatiesOverviewPage() {
           </h2>
           <p className="mt-4 leading-8 text-[#101828]/75">
             Helping Hands Agency is gevestigd in Hilversum en zet crew in door
-            heel Nederland. Op deze pagina&apos;s lichten we per stad toe welke
-            diensten en toepassingen daar veel voorkomen — van beursvloeren in
-            Utrecht tot stadionproducties in Arnhem en kustlocaties bij Den
-            Haag. Staat jouw locatie er niet tussen? Vraag gerust aan via{" "}
+            heel Nederland. Per stad en dienst lichten we toe wat typisch is —
+            zonder te claimen dat we overal een kantoor hebben. Staat jouw
+            locatie er niet tussen? Vraag gerust aan via{" "}
             <Link
-              href="/contact"
+              href="/contact?type=personeel-aanvragen"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               contact
             </Link>
-            , we bezetten landelijk.
+            .
           </p>
         </div>
 
@@ -120,31 +124,20 @@ export default function LocatiesOverviewPage() {
             <Link
               key={location.slug}
               href={location.path}
-              className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-[#F28C28]/45 hover:shadow-md"
+              className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:border-[#F28C28]/45 hover:shadow-md"
             >
-              <div className="relative aspect-[16/9] bg-slate-100">
-                <Image
-                  src={location.image.src}
-                  alt={location.image.alt}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                />
-              </div>
-              <div className="p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
-                  {location.province}
-                </p>
-                <h3 className="mt-2 text-lg font-black text-[#0B1F4D]">
-                  {location.city}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-[#101828]/70">
-                  {location.heroDescription}
-                </p>
-                <span className="mt-4 inline-flex text-sm font-bold text-[#173A8A] transition group-hover:text-[#F28C28]">
-                  Bekijk {location.city} →
-                </span>
-              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
+                {location.province}
+              </p>
+              <h3 className="mt-2 text-lg font-black text-[#0B1F4D]">
+                {location.serviceLabel} {location.city}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[#101828]/70">
+                {location.heroDescription}
+              </p>
+              <span className="mt-4 inline-flex text-sm font-bold text-[#173A8A] transition group-hover:text-[#F28C28]">
+                Bekijk pagina →
+              </span>
             </Link>
           ))}
         </div>
@@ -154,15 +147,15 @@ export default function LocatiesOverviewPage() {
             Op zoek naar een specifieke dienst?
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#101828]/70">
-            Bekijk het volledige aanbod per functie of ga direct naar onze
-            projectervaring op locaties door heel Nederland.
+            Bekijk het volledige aanbod per functie of ga naar personeel
+            inhuren.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/diensten"
+              href="/personeel-inhuren"
               className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] px-6 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-white"
             >
-              Alle diensten
+              Personeel inhuren
             </Link>
             <Link
               href="/projecten"
@@ -171,7 +164,7 @@ export default function LocatiesOverviewPage() {
               Projectervaring
             </Link>
             <Link
-              href="/contact"
+              href="/contact?type=personeel-aanvragen"
               className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#de7c1f]"
             >
               Personeel aanvragen
@@ -190,10 +183,12 @@ export default function LocatiesOverviewPage() {
         title="Personeel nodig in jouw regio?"
         description="Deel datum, locatie, tijden, functies en aantal mensen. Wij denken mee over bezetting en briefing."
         buttonLabel="Personeel aanvragen"
-        buttonHref="/contact"
-        secondaryLabel="Bekijk diensten"
-        secondaryHref="/diensten"
+        buttonHref="/contact?type=personeel-aanvragen"
+        secondaryLabel="Personeel inhuren"
+        secondaryHref="/personeel-inhuren"
       />
+
+      <ReviewCta />
     </>
   );
 }

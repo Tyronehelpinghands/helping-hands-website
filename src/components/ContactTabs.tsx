@@ -616,7 +616,7 @@ export default function ContactTabs() {
                   </Link>{" "}
                   of{" "}
                   <Link
-                    href="/medewerkers"
+                    href="/werken-bij"
                     className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
                   >
                     werken bij

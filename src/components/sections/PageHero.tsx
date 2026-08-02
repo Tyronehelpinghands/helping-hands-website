@@ -285,7 +285,7 @@ export default function PageHero({ content }: PageHeroProps) {
   const showStaffingMedia = content.theme === "staffing";
 
   const mobileServiceChips = [
-    { label: "Event crew", href: "/diensten/event-crew" },
+    { label: "Event crew", href: "/personeel-inhuren/event-crew" },
     { label: "Stagehands", href: "/diensten/stagehands" },
     { label: "Horeca", href: "/diensten/horeca-personeel" },
     { label: "Productie", href: "/diensten/productie-assistentie" },

@@ -9,6 +9,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
+import ReviewCta from "@/components/seo/ReviewCta";
 import {
   contactCrewPhoto,
   contactRequestPhoto,
@@ -69,7 +70,7 @@ export default function ContactPage() {
             </Link>{" "}
             en{" "}
             <Link
-              href="/medewerkers"
+              href="/werken-bij"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               werken bij
@@ -300,6 +301,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <ReviewCta />
     </>
   );
 }

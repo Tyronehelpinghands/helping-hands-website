@@ -10,7 +10,8 @@ export default function FloatingCTA() {
   const { scrolled } = useScrollHeader(320);
   const hideOnContact =
     pathname === "/contact" ||
-    pathname === "/medewerkers" ||
+    pathname === "/werken-bij" ||
+    pathname?.startsWith("/werken-als") ||
     pathname === "/vacatures" ||
     pathname === "/projecten";
 
