@@ -36,13 +36,13 @@ export default function TeamSection() {
               key={member.name}
               className="h-full rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm transition hover:border-[#F28C28]/40 hover:bg-white/10"
             >
-              <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 text-lg font-black tracking-wide">
+              <span className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 text-lg font-black tracking-wide">
                 {member.image ? (
                   <Image
                     src={member.image.src}
                     alt={member.image.alt}
                     fill
-                    sizes="56px"
+                    sizes="80px"
                     className="object-cover object-[center_20%]"
                   />
                 ) : (

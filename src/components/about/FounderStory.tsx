@@ -8,7 +8,7 @@ export default function FounderStory() {
   return (
     <section id="verhaal" className="scroll-mt-28 bg-[#F5F7FA] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-14">
+        <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)] lg:gap-14">
           <RevealOnScroll>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
               {aboutFounder.eyebrow}
@@ -23,48 +23,49 @@ export default function FounderStory() {
                 </p>
               ))}
             </div>
-          </RevealOnScroll>
 
-          <RevealOnScroll delayMs={100} variant="scale">
-            <div className="relative overflow-hidden rounded-3xl bg-[#0B1F4D] p-6 text-white shadow-xl sm:p-8">
+            <div className="relative mt-8 max-w-xl overflow-hidden rounded-3xl bg-[#0B1F4D] p-6 text-white shadow-xl sm:p-8">
               <div
                 className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#F28C28]/20 blur-3xl"
                 aria-hidden="true"
               />
-              <div className="relative flex items-center gap-4">
-                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-white/10">
-                  {badge.image ? (
-                    <Image
-                      src={badge.image.src}
-                      alt={badge.image.alt}
-                      fill
-                      sizes="64px"
-                      className="object-cover object-[center_20%]"
-                    />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-xl font-black tracking-wide">
-                      {badge.initials}
-                    </span>
-                  )}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-base font-black leading-snug">
-                    {badge.name}
-                  </p>
-                  <p className="text-sm text-white/70">{badge.role}</p>
-                  <p className="mt-0.5 text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
-                    {badge.since}
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative mt-6 border-t border-white/10 pt-6">
+              <div className="relative">
                 <div className="mb-3 h-1 w-10 rounded-full bg-[#F28C28]" />
                 <blockquote className="text-xl font-black leading-snug tracking-tight sm:text-2xl">
                   “{aboutFounder.quote}”
                 </blockquote>
               </div>
             </div>
+          </RevealOnScroll>
+
+          <RevealOnScroll delayMs={100} variant="scale">
+            <figure className="mx-auto w-full max-w-xl lg:mx-0 lg:max-w-none">
+              <div className="relative aspect-[4/5] min-h-[22rem] overflow-hidden rounded-2xl bg-[#0B1F4D] shadow-xl sm:min-h-[26rem] lg:min-h-[32rem]">
+                {badge.image ? (
+                  <Image
+                    src={badge.image.src}
+                    alt={badge.image.alt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, min(560px, 48vw)"
+                    className="object-cover object-[center_18%]"
+                    priority
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-5xl font-black tracking-wide text-white">
+                    {badge.initials}
+                  </div>
+                )}
+              </div>
+              <figcaption className="mt-5">
+                <p className="text-lg font-black leading-snug text-[#0B1F4D]">
+                  {badge.name}
+                </p>
+                <p className="mt-0.5 text-sm text-[#101828]/70">{badge.role}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
+                  {badge.since}
+                </p>
+              </figcaption>
+            </figure>
           </RevealOnScroll>
         </div>
       </div>
