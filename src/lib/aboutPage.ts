@@ -33,7 +33,7 @@ export const aboutFounder = {
     role: "Oprichter, Helping Hands Agency",
     since: "Sinds 2022",
     image: {
-      src: "/images/team/tyrone.jpg",
+      src: "/images/team/tyrone.png",
       alt: "Tyrone van der Schagt — oprichter Helping Hands Agency",
     },
   },

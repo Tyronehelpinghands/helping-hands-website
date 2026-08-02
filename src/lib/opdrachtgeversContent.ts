@@ -155,7 +155,7 @@ export const teamMembers: TeamMember[] = [
     role: "Eigenaar en opdrachtgeverrelaties",
     initials: "TS",
     image: {
-      src: "/images/team/tyrone.jpg",
+      src: "/images/team/tyrone.png",
       alt: "Tyrone van der Schagt — oprichter Helping Hands Agency",
     },
   },
