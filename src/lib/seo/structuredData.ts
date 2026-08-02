@@ -1,4 +1,5 @@
 import { absoluteUrl, formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
+import { socialSameAs } from "@/lib/social";
 
 export function organizationSchema() {
   const { address } = siteConfig;
@@ -37,6 +38,7 @@ export function organizationSchema() {
       "@type": "Country",
       name: "Netherlands",
     },
+    sameAs: socialSameAs(),
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -97,6 +99,7 @@ export function localBusinessSchema() {
       },
     ],
     hasMap: siteConfig.googleMapsUrl,
+    sameAs: socialSameAs(),
   };
 }
 
@@ -173,7 +176,7 @@ export function jobPostingSchema(input: {
     hiringOrganization: {
       "@type": "Organization",
       name: siteConfig.name,
-      sameAs: siteConfig.url,
+      sameAs: [siteConfig.url, ...socialSameAs()],
       logo: absoluteUrl(siteConfig.defaultOgImage),
     },
     jobLocation: {

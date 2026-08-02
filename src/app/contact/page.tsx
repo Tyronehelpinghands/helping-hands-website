@@ -10,6 +10,7 @@ import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
 import ReviewCta from "@/components/seo/ReviewCta";
+import SocialLinks from "@/components/SocialLinks";
 import {
   contactCrewPhoto,
   contactRequestPhoto,
@@ -245,6 +246,12 @@ export default function ContactPage() {
             <div>
               <dt className="font-bold text-[#0B1F4D]">BTW</dt>
               <dd>{siteConfig.vat}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="font-bold text-[#0B1F4D]">Social media</dt>
+              <dd className="mt-2">
+                <SocialLinks variant="light" />
+              </dd>
             </div>
           </dl>
         </div>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import SocialLinks from "@/components/SocialLinks";
 import { brandAlt, brandImages } from "@/lib/brand";
 import {
   applicationsEmail,
@@ -90,6 +91,7 @@ export default function Footer() {
                 Vast {contactPhoneLandlineDisplay}
               </a>
             </p>
+            <SocialLinks className="mt-5" variant="footer" />
           </div>
 
           <div>

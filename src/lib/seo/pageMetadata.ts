@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { absoluteUrl, siteConfig } from "@/lib/siteConfig";
+import { socialSameAs } from "@/lib/social";
 
 type BuildPageMetadataInput = {
   title: string;
@@ -105,6 +106,7 @@ export function organizationJsonLd() {
       "@type": "Country",
       name: "Netherlands",
     },
+    sameAs: socialSameAs(),
     knowsAbout: [
       "Event crew",
       "Stagehands",
@@ -139,6 +141,7 @@ export function contactPointsJsonLd() {
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
+    sameAs: socialSameAs(),
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -272,7 +275,7 @@ export function jobPostingJsonLd(input: {
     hiringOrganization: {
       "@type": "Organization",
       name: siteConfig.name,
-      sameAs: siteConfig.url,
+      sameAs: [siteConfig.url, ...socialSameAs()],
       logo: absoluteUrl(siteConfig.defaultOgImage),
     },
     jobLocation: {
