@@ -1,7 +1,6 @@
 import { Resend } from "resend";
 import { getContactFromEmail } from "@/lib/contactEmail";
 import { formatPortalInviteEmail } from "@/lib/email/formatPortalInviteEmail";
-import { absoluteUrl } from "@/lib/siteConfig";
 import {
   createAdminClient,
   isAdminConfigured,
@@ -59,8 +58,25 @@ function checkRateLimit(email: string): boolean {
   return true;
 }
 
+const PRODUCTION_SITE_URL = "https://www.helpinghandsagency.nl";
+
+/**
+ * Invite / recovery links must always land on production — never a Vercel
+ * preview host — otherwise Site URL / redirect mismatches expire OTPs and
+ * dump users on the marketing homepage with a `#error=` hash.
+ */
 function passwordSetupRedirect(): string {
-  return absoluteUrl("/auth/callback?next=/update-password");
+  const configured = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(
+    /\/$/,
+    "",
+  );
+  const looksLikePreviewOrLocal =
+    !configured ||
+    configured.includes("vercel.app") ||
+    configured.includes("localhost") ||
+    configured.includes("127.0.0.1");
+  const base = looksLikePreviewOrLocal ? PRODUCTION_SITE_URL : configured;
+  return `${base}/auth/callback?next=/update-password`;
 }
 
 function translateAuthError(message: string): string {

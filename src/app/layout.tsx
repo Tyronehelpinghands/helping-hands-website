@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
+import AuthHashErrorHandler from "@/components/AuthHashErrorHandler";
 import ConditionalSiteChrome from "@/components/ConditionalSiteChrome";
 import JsonLd from "@/components/seo/JsonLd";
 import { brandImages } from "@/lib/brand";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import {
+  localBusinessSchema,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 import { absoluteUrl, siteConfig } from "@/lib/siteConfig";
 import "./globals.css";
 
@@ -72,7 +77,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[#F5F7FA] pb-20 text-[#101828] lg:pb-0">
-        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
+        <AuthHashErrorHandler />
+        <JsonLd
+          data={[organizationJsonLd(), localBusinessSchema(), websiteJsonLd()]}
+        />
         <ConditionalSiteChrome>
           <main className="flex-1">{children}</main>
         </ConditionalSiteChrome>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import StaggerReveal from "@/components/StaggerReveal";
 import {
@@ -35,8 +36,18 @@ export default function TeamSection() {
               key={member.name}
               className="h-full rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm transition hover:border-[#F28C28]/40 hover:bg-white/10"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-lg font-black tracking-wide">
-                {member.initials}
+              <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 text-lg font-black tracking-wide">
+                {member.image ? (
+                  <Image
+                    src={member.image.src}
+                    alt={member.image.alt}
+                    fill
+                    sizes="56px"
+                    className="object-cover object-[center_20%]"
+                  />
+                ) : (
+                  member.initials
+                )}
               </span>
               <p className="mt-4 text-base font-black leading-snug">
                 {member.name}

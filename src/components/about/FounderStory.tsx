@@ -1,7 +1,10 @@
+import Image from "next/image";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import { aboutFounder } from "@/lib/aboutPage";
 
 export default function FounderStory() {
+  const { badge } = aboutFounder;
+
   return (
     <section id="verhaal" className="scroll-mt-28 bg-[#F5F7FA] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -29,16 +32,28 @@ export default function FounderStory() {
                 aria-hidden="true"
               />
               <div className="relative flex items-center gap-4">
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-xl font-black tracking-wide">
-                  {aboutFounder.badge.initials}
+                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-white/10">
+                  {badge.image ? (
+                    <Image
+                      src={badge.image.src}
+                      alt={badge.image.alt}
+                      fill
+                      sizes="64px"
+                      className="object-cover object-[center_20%]"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-xl font-black tracking-wide">
+                      {badge.initials}
+                    </span>
+                  )}
                 </span>
                 <div className="min-w-0">
                   <p className="text-base font-black leading-snug">
-                    {aboutFounder.badge.name}
+                    {badge.name}
                   </p>
-                  <p className="text-sm text-white/70">{aboutFounder.badge.role}</p>
+                  <p className="text-sm text-white/70">{badge.role}</p>
                   <p className="mt-0.5 text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
-                    {aboutFounder.badge.since}
+                    {badge.since}
                   </p>
                 </div>
               </div>

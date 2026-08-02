@@ -8,31 +8,48 @@ import {
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
-  navLinks,
   plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
 import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 
+/** Curated footer nav — descriptive anchors for pages we want as Google sitelinks. */
+const primaryNavLinks = [
+  { href: "/personeel-inhuren", label: "Personeel inhuren" },
+  { href: "/werken-bij", label: "Werken bij" },
+  { href: "/vacatures", label: "Vacatures" },
+  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+  { href: "/over-ons", label: "Over ons" },
+  { href: "/contact", label: "Contact" },
+  { href: "/diensten", label: "Diensten" },
+  { href: "/projecten", label: "Projecten" },
+  { href: "/locaties", label: "Locaties" },
+];
+
 const serviceLinks = [
-  { href: "/diensten/event-crew", label: "Event crew" },
-  { href: "/diensten/stagehands", label: "Stagehands" },
-  { href: "/diensten/horeca-personeel", label: "Horeca support" },
+  { href: "/personeel-inhuren", label: "Personeel inhuren" },
+  { href: "/personeel-inhuren/event-crew", label: "Event crew" },
+  { href: "/personeel-inhuren/stagehands", label: "Stagehands" },
+  { href: "/personeel-inhuren/horeca-personeel", label: "Horeca support" },
   { href: "/diensten/restaurant-personeel", label: "Restaurant personeel" },
-  { href: "/diensten/keukenpersoneel", label: "Keukenpersoneel" },
-  { href: "/diensten/barpersoneel", label: "Barpersoneel" },
-  { href: "/diensten/productie-assistentie", label: "Productie assistentie" },
-  { href: "/diensten/logistiek", label: "Logistiek" },
-  { href: "/diensten/hospitality", label: "Hospitality" },
+  { href: "/personeel-inhuren/keukenhulp", label: "Keukenhulp" },
+  { href: "/personeel-inhuren/barpersoneel", label: "Barpersoneel" },
+  {
+    href: "/personeel-inhuren/productie-assistenten",
+    label: "Productie-assistenten",
+  },
+  { href: "/personeel-inhuren/logistiek-personeel", label: "Logistiek" },
+  { href: "/personeel-inhuren/hospitality-personeel", label: "Hospitality" },
   { href: "/diensten", label: "Alle diensten" },
 ];
 
 const locationLinks = [
-  { href: "/locaties/event-crew-amsterdam", label: "Amsterdam" },
-  { href: "/locaties/stagehands-utrecht", label: "Utrecht" },
-  { href: "/locaties/horeca-personeel-hilversum", label: "Hilversum" },
-  { href: "/locaties/festival-crew-rotterdam", label: "Rotterdam" },
-  { href: "/locaties/eventpersoneel-den-haag", label: "Den Haag" },
+  { href: "/event-crew-amsterdam", label: "Amsterdam" },
+  { href: "/event-crew-utrecht", label: "Utrecht" },
+  { href: "/horeca-personeel-hilversum", label: "Hilversum" },
+  { href: "/event-crew-rotterdam", label: "Rotterdam" },
+  { href: "/event-crew-den-haag", label: "Den Haag" },
+  { href: "/festival-crew-randstad", label: "Randstad festivals" },
   { href: "/locaties", label: "Alle locaties" },
 ];
 
@@ -80,7 +97,7 @@ export default function Footer() {
               Navigatie
             </p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/70">
-              {navLinks.map((link) => (
+              {primaryNavLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="transition hover:text-white">
                     {link.label}
@@ -171,12 +188,30 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/contact" className="transition hover:text-white">
-                  Personeel aanvragen
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/personeel-inhuren"
+                  className="transition hover:text-white"
+                >
+                  Personeel inhuren
+                </Link>
+              </li>
+              <li>
+                <Link href="/werken-bij" className="transition hover:text-white">
+                  Werken bij
                 </Link>
               </li>
               <li>
                 <Link href="/vacatures" className="transition hover:text-white">
                   Vacatures
+                </Link>
+              </li>
+              <li>
+                <Link href="/over-ons" className="transition hover:text-white">
+                  Over ons
                 </Link>
               </li>
               <li>

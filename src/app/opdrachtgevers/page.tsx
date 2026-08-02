@@ -16,6 +16,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
+import ReviewCta from "@/components/seo/ReviewCta";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import { ServiceIcon } from "@/components/ServiceIconBadge";
 import { services } from "@/lib/content";
@@ -29,7 +30,7 @@ import { opdrachtgeversFaqs } from "@/lib/faq";
 import { buildPageMetadata, faqJsonLd, serviceJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Personeel inhuren voor events en horeca",
+  title: "Opdrachtgevers | Crew inhuren voor events en horeca",
   description:
     "Betrouwbare eventcrew, stagehands en horecamedewerkers met duidelijke briefing, urencontrole en bereikbare planning. Vraag direct personeel aan.",
   path: "/opdrachtgevers",
@@ -274,12 +275,14 @@ export default function OpdrachtgeversPage() {
         title="Crew nodig op korte termijn?"
         description="Stuur je planning door en wij denken mee over de juiste bezetting."
         buttonLabel="Personeel aanvragen"
-        buttonHref="/contact"
-        secondaryLabel="Bekijk projectervaring"
-        secondaryHref="/projecten"
+        buttonHref="/contact?type=personeel-aanvragen"
+        secondaryLabel="Personeel inhuren"
+        secondaryHref="/personeel-inhuren"
         backgroundImage={opdrachtgeversCtaPhoto.src}
         backgroundAlt={opdrachtgeversCtaPhoto.alt}
       />
+
+      <ReviewCta />
     </>
   );
 }

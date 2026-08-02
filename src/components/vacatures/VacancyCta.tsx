@@ -84,7 +84,7 @@ export default function VacancyCta() {
                 </a>
                 . Meer context?{" "}
                 <Link
-                  href="/medewerkers"
+                  href="/werken-bij"
                   className="font-bold text-white underline-offset-4 hover:underline"
                 >
                   Medewerkers

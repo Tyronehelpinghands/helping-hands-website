@@ -16,6 +16,8 @@ const options = {
     ],
     cta: "Personeel aanvragen",
     href: "/contact",
+    secondaryCta: "Personeel inhuren",
+    secondaryHref: "/personeel-inhuren",
   },
   workers: {
     tab: "Ik wil werken",
@@ -29,6 +31,8 @@ const options = {
     ],
     cta: "Bekijk vacatures",
     href: "/vacatures",
+    secondaryCta: "Werken bij",
+    secondaryHref: "/werken-bij",
   },
 } as const;
 
@@ -64,12 +68,20 @@ export default function AudienceToggle() {
           </p>
           <h3 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{active.title}</h3>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-white/75">{active.text}</p>
-          <Link
-            href={active.href}
-            className="mt-8 inline-flex rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-xl shadow-black/20 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0B1F4D]"
-          >
-            {active.cta}
-          </Link>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href={active.href}
+              className="inline-flex rounded-full bg-[#F28C28] px-8 py-4 text-sm font-bold text-white shadow-xl shadow-black/20 transition hover:scale-[1.02] hover:bg-[#de7c1f] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0B1F4D]"
+            >
+              {active.cta}
+            </Link>
+            <Link
+              href={active.secondaryHref}
+              className="inline-flex rounded-full border border-white/25 bg-white/5 px-8 py-4 text-sm font-bold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0B1F4D]"
+            >
+              {active.secondaryCta}
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-3">

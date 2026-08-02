@@ -31,12 +31,15 @@ type LoginSelectorProps = {
   /** Geen default — null betekent: kies bewust een portaal (intern is niet default). */
   initialType: PortalType | null;
   configError?: string | null;
+  /** Extra contact-hulp bij verlopen uitnodigingslink. */
+  showInviteHelp?: boolean;
   redirectTo?: string | null;
 };
 
 export default function LoginSelector({
   initialType,
   configError = null,
+  showInviteHelp = false,
   redirectTo = null,
 }: LoginSelectorProps) {
   const router = useRouter();
@@ -231,7 +234,21 @@ export default function LoginSelector({
             className="relative mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-100"
             role="alert"
           >
-            {error}
+            <p>{error}</p>
+            {showInviteHelp ? (
+              <p className="mt-2 font-normal text-red-100/90">
+                Vraag je contactpersoon om opnieuw uit te nodigen, of mail{" "}
+                <a
+                  href={`mailto:${contactEmail}?subject=${encodeURIComponent(
+                    "Nieuwe uitnodiging opdrachtgeversportaal",
+                  )}`}
+                  className="font-semibold underline underline-offset-4 hover:text-white"
+                >
+                  {contactEmail}
+                </a>
+                .
+              </p>
+            ) : null}
           </div>
         ) : null}
 

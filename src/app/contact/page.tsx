@@ -9,6 +9,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import JsonLd from "@/components/seo/JsonLd";
+import ReviewCta from "@/components/seo/ReviewCta";
 import {
   contactCrewPhoto,
   contactRequestPhoto,
@@ -33,11 +34,10 @@ import {
 } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact | Personeel aanvragen bij Helping Hands Agency",
+  title: "Contact | Personeel aanvragen of crew melden",
   description:
     "Vraag crew of personeel aan voor events, horeca, stagebouw, productie, logistiek en hospitality. Neem contact op met Helping Hands Agency of meld je aan als medewerker.",
   path: "/contact",
-  absoluteTitle: true,
 });
 
 export default function ContactPage() {
@@ -69,7 +69,7 @@ export default function ContactPage() {
             </Link>{" "}
             en{" "}
             <Link
-              href="/medewerkers"
+              href="/werken-bij"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               werken bij
@@ -300,6 +300,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <ReviewCta />
     </>
   );
 }

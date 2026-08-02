@@ -146,6 +146,7 @@ export type TeamMember = {
   role: string;
   initials: string;
   note?: string;
+  image?: { src: string; alt: string };
 };
 
 export const teamMembers: TeamMember[] = [
@@ -153,6 +154,10 @@ export const teamMembers: TeamMember[] = [
     name: "Tyrone van der Schagt",
     role: "Eigenaar en opdrachtgeverrelaties",
     initials: "TS",
+    image: {
+      src: "/images/team/tyrone.png",
+      alt: "Tyrone van der Schagt — oprichter Helping Hands Agency",
+    },
   },
   {
     name: "Mesbah Kashit",
