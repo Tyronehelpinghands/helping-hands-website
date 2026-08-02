@@ -43,6 +43,7 @@ export default function TeamSection() {
                     alt={member.image.alt}
                     fill
                     sizes="80px"
+                    quality={90}
                     className="object-cover object-[center_20%]"
                   />
                 ) : (

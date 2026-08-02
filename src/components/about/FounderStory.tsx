@@ -46,7 +46,8 @@ export default function FounderStory() {
                     src={badge.image.src}
                     alt={badge.image.alt}
                     fill
-                    sizes="(max-width: 1024px) 100vw, min(560px, 48vw)"
+                    sizes="(max-width: 768px) 100vw, min(800px, 48vw)"
+                    quality={95}
                     className="object-cover object-[center_18%]"
                     priority
                   />
