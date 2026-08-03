@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HoursMvpClient } from "@/components/dashboard/mvp/HoursMvpClient";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import {
   getCrewMembers,
   getDashboardStats,
@@ -14,11 +15,12 @@ export const metadata: Metadata = {
 };
 
 export default async function InternUrenregistratiePage() {
-  const [entries, projects, crew, stats] = await Promise.all([
+  const [entries, projects, crew, stats, { profile }] = await Promise.all([
     getTimeEntries(),
     getProjects(),
     getCrewMembers(),
     getDashboardStats(),
+    getCurrentUser(),
   ]);
 
   return (
@@ -27,6 +29,7 @@ export default async function InternUrenregistratiePage() {
       projects={projects}
       crew={crew}
       tablesReady={stats.tablesReady}
+      userRole={profile?.role ?? "planner"}
     />
   );
 }

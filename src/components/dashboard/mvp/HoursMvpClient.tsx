@@ -22,6 +22,7 @@ import {
   approveTimeEntryAction,
   createTimeEntryAction,
   rejectTimeEntryAction,
+  resetInvoicedTimeEntriesToApprovedAction,
   updateTimeEntryAction,
 } from "@/lib/dashboard/mutations";
 import {
@@ -32,15 +33,21 @@ import {
   timeEntryStatusLabel,
 } from "@/lib/dashboard/formatters";
 import type { CrewMember, Project, TimeEntry } from "@/lib/dashboard/types";
+import type { UserRole } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+
+const FINANCE_OVERRIDE_ROLES: UserRole[] = ["owner", "admin", "finance"];
+
+const INVOICED_EDIT_WARNING =
+  "Deze registratie is gefactureerd. Aanpassen zet status terug naar goedgekeurd en ontkoppelt van factuurconcept indien mogelijk.";
 
 function toTimeInputValue(value: string | null | undefined, fallback: string) {
   if (!value) return fallback;
   return value.slice(0, 5);
 }
 
-function canEditTimeEntry(entry: TimeEntry) {
-  return entry.status !== "invoiced";
+function canForceEditInvoiced(role: UserRole | null | undefined) {
+  return !!role && FINANCE_OVERRIDE_ROLES.includes(role);
 }
 
 export function HoursMvpClient({
@@ -48,11 +55,13 @@ export function HoursMvpClient({
   projects,
   crew,
   tablesReady,
+  userRole,
 }: {
   entries: TimeEntry[];
   projects: Project[];
   crew: CrewMember[];
   tablesReady: boolean;
+  userRole: UserRole;
 }) {
   const router = useRouter();
   const { toast, showToast } = useToast();
@@ -71,6 +80,8 @@ export function HoursMvpClient({
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [bulkSyncing, setBulkSyncing] = useState(false);
 
+  const allowInvoicedOverride = canForceEditInvoiced(userRole);
+
   function openCreate() {
     setEdit(null);
     setStartTime("09:00");
@@ -80,9 +91,9 @@ export function HoursMvpClient({
   }
 
   function openEdit(entry: TimeEntry) {
-    if (!canEditTimeEntry(entry)) {
+    if (entry.status === "invoiced" && !allowInvoicedOverride) {
       showToast(
-        "Deze registratie staat al op een factuurconcept en kan niet meer worden aangepast.",
+        "Gefactureerde uren kun je niet aanpassen. Vraag owner/admin/finance, of ontkoppel eerst het factuurconcept.",
       );
       return;
     }
@@ -110,6 +121,7 @@ export function HoursMvpClient({
   }, [entries, statusFilter, crewFilter, dateFrom, dateTo]);
 
   const openCount = entries.filter((e) => e.status === "submitted").length;
+  const editingInvoiced = edit?.status === "invoiced";
 
   async function pushHoursToShiftbase(body: {
     entryIds?: string[];
@@ -315,120 +327,173 @@ export function HoursMvpClient({
               <th className="px-3 py-2">Uren</th>
               <th className="px-3 py-2">Km / reistijd</th>
               <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2" />
+              <th className="sticky right-0 z-10 min-w-[11rem] bg-[#F5F7FA] px-3 py-2 text-right shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.12)]">
+                Acties
+              </th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((e) => (
-              <tr key={e.id} className="border-b last:border-0">
-                <td className="px-3 py-2 font-semibold text-[#0B1F4D]">
-                  {formatDate(e.work_date)}
-                </td>
-                <td className="px-3 py-2">
-                  <div>{e.projects?.project_name || "—"}</div>
-                  <div className="text-xs text-slate-500">
-                    {e.crew_members?.full_name || "—"}
-                    {e.crew_members?.shiftbase_user_id ? (
-                      <span className="ml-1 text-emerald-700">
-                        · SB {e.crew_members.shiftbase_user_id}
-                      </span>
-                    ) : (
-                      <span className="ml-1 text-amber-700">
-                        · geen Shiftbase-ID
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-xs">
-                  {formatTime(e.start_time)}–{formatTime(e.end_time)}
-                  <div>Pauze {e.break_minutes}m</div>
-                </td>
-                <td className="px-3 py-2">{formatHours(e.hours)}</td>
-                <td className="px-3 py-2 text-xs">
-                  {formatNumber(e.kilometers)} km
-                  <div>{formatHours(e.travel_time_hours)}</div>
-                </td>
-                <td className="px-3 py-2">
-                  <MvpBadge
-                    tone={
-                      e.status === "approved"
-                        ? "ok"
-                        : e.status === "rejected"
-                          ? "danger"
-                          : e.status === "submitted"
-                            ? "warn"
-                            : "neutral"
-                    }
-                  >
-                    {timeEntryStatusLabel(e.status)}
-                  </MvpBadge>
-                  {e.correction_reason ? (
-                    <div className="mt-1 text-xs text-red-600">
-                      {e.correction_reason}
-                    </div>
-                  ) : null}
-                </td>
-                <td className="px-3 py-2 text-right space-x-1">
-                  {canEditTimeEntry(e) ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openEdit(e)}
-                    >
-                      Aanpassen
-                    </Button>
-                  ) : null}
-                  {(e.status === "submitted" || e.status === "approved") && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={syncingId === e.id}
-                      onClick={() => {
-                        setSyncingId(e.id);
-                        void pushHoursToShiftbase({ entryIds: [e.id] }).finally(
-                          () => setSyncingId(null),
-                        );
-                      }}
-                    >
-                      {syncingId === e.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            {filtered.map((e) => {
+              const isInvoiced = e.status === "invoiced";
+              const canEdit = !isInvoiced || allowInvoicedOverride;
+
+              return (
+                <tr key={e.id} className="border-b last:border-0">
+                  <td className="px-3 py-2 font-semibold text-[#0B1F4D]">
+                    {formatDate(e.work_date)}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div>{e.projects?.project_name || "—"}</div>
+                    <div className="text-xs text-slate-500">
+                      {e.crew_members?.full_name || "—"}
+                      {e.crew_members?.shiftbase_user_id ? (
+                        <span className="ml-1 text-emerald-700">
+                          · SB {e.crew_members.shiftbase_user_id}
+                        </span>
                       ) : (
-                        <RefreshCw className="h-3.5 w-3.5" />
+                        <span className="ml-1 text-amber-700">
+                          · geen Shiftbase-ID
+                        </span>
                       )}
-                      Sync naar Shiftbase
-                    </Button>
-                  )}
-                  {e.status === "submitted" ? (
-                    <>
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 text-white hover:bg-emerald-700"
-                        disabled={pending}
-                        onClick={() => {
-                          startTransition(async () => {
-                            const res = await approveTimeEntryAction(e.id);
-                            showToast(res.ok ? "Uren goedgekeurd." : res.error);
-                            router.refresh();
-                          });
-                        }}
-                      >
-                        Goedkeuren
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setRejectId(e.id);
-                          setRejectReason("");
-                        }}
-                      >
-                        Afkeuren
-                      </Button>
-                    </>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-xs">
+                    {formatTime(e.start_time)}–{formatTime(e.end_time)}
+                    <div>Pauze {e.break_minutes}m</div>
+                  </td>
+                  <td className="px-3 py-2">{formatHours(e.hours)}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {formatNumber(e.kilometers)} km
+                    <div>{formatHours(e.travel_time_hours)}</div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <MvpBadge
+                      tone={
+                        e.status === "approved"
+                          ? "ok"
+                          : e.status === "rejected"
+                            ? "danger"
+                            : e.status === "submitted"
+                              ? "warn"
+                              : e.status === "invoiced"
+                                ? "neutral"
+                                : "neutral"
+                      }
+                    >
+                      {timeEntryStatusLabel(e.status)}
+                    </MvpBadge>
+                    {e.correction_reason ? (
+                      <div className="mt-1 text-xs text-red-600">
+                        {e.correction_reason}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td className="sticky right-0 z-10 bg-white px-3 py-2 text-right shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.12)]">
+                    <div className="inline-flex flex-wrap items-center justify-end gap-1">
+                      {canEdit ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className={cn(
+                            "border-[#173A8A]/40 font-semibold text-[#173A8A] hover:bg-[#173A8A]/5",
+                            isInvoiced && "border-amber-500/50 text-amber-800",
+                          )}
+                          title={
+                            isInvoiced
+                              ? INVOICED_EDIT_WARNING
+                              : "Urenregistratie aanpassen"
+                          }
+                          onClick={() => openEdit(e)}
+                        >
+                          Aanpassen
+                        </Button>
+                      ) : (
+                        <span
+                          className="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-500"
+                          title="Gefactureerde uren: eerst ontkoppelen via factuurconcept, of laat owner/admin/finance aanpassen."
+                        >
+                          Aanpassen niet beschikbaar
+                        </span>
+                      )}
+                      {isInvoiced && allowInvoicedOverride ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={pending}
+                          title="Zet status terug naar goedgekeurd zodat Facturatie de uren opnieuw kan oppakken."
+                          onClick={() => {
+                            startTransition(async () => {
+                              const res =
+                                await resetInvoicedTimeEntriesToApprovedAction([
+                                  e.id,
+                                ]);
+                              if (res.ok) {
+                                showToast(
+                                  "Status teruggezet naar goedgekeurd.",
+                                );
+                                router.refresh();
+                              } else showToast(res.error);
+                            });
+                          }}
+                        >
+                          Status terugzetten naar goedgekeurd
+                        </Button>
+                      ) : null}
+                      {(e.status === "submitted" || e.status === "approved") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={syncingId === e.id}
+                          onClick={() => {
+                            setSyncingId(e.id);
+                            void pushHoursToShiftbase({
+                              entryIds: [e.id],
+                            }).finally(() => setSyncingId(null));
+                          }}
+                        >
+                          {syncingId === e.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          )}
+                          Sync naar Shiftbase
+                        </Button>
+                      )}
+                      {e.status === "submitted" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 text-white hover:bg-emerald-700"
+                            disabled={pending}
+                            onClick={() => {
+                              startTransition(async () => {
+                                const res = await approveTimeEntryAction(e.id);
+                                showToast(
+                                  res.ok ? "Uren goedgekeurd." : res.error,
+                                );
+                                router.refresh();
+                              });
+                            }}
+                          >
+                            Goedkeuren
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setRejectId(e.id);
+                              setRejectReason("");
+                            }}
+                          >
+                            Afkeuren
+                          </Button>
+                        </>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </MvpTableShell>
       )}
@@ -440,9 +505,13 @@ export function HoursMvpClient({
           if (!v) setEdit(null);
         }}
         title={edit ? "Uren aanpassen" : "Uren invoeren"}
+        description={editingInvoiced ? INVOICED_EDIT_WARNING : undefined}
         pending={pending}
+        submitLabel={editingInvoiced ? "Aanpassen & ontkoppelen" : undefined}
         onSubmit={async (fd) => {
           fd.set("hours", String(previewHours));
+          const wasEdit = !!edit;
+          const wasInvoiced = edit?.status === "invoiced";
           startTransition(async () => {
             if (edit) fd.set("id", edit.id);
             const res = edit
@@ -451,8 +520,18 @@ export function HoursMvpClient({
             if (res.ok) {
               setOpen(false);
               setEdit(null);
+              const unlinked =
+                wasEdit && res.ok && "unlinkedDrafts" in res.data
+                  ? Number(res.data.unlinkedDrafts ?? 0)
+                  : 0;
               showToast(
-                edit ? "Registratie bijgewerkt." : "Urenregel opgeslagen.",
+                wasEdit
+                  ? unlinked > 0
+                    ? `Registratie bijgewerkt. ${unlinked} factuurconcept geannuleerd.`
+                    : wasInvoiced
+                      ? "Registratie bijgewerkt en status teruggezet naar goedgekeurd."
+                      : "Registratie bijgewerkt."
+                  : "Urenregel opgeslagen.",
               );
               router.refresh();
             } else showToast(res.error);
@@ -460,6 +539,11 @@ export function HoursMvpClient({
         }}
       >
         <div key={edit?.id ?? "new-hours"} className="space-y-3">
+          {editingInvoiced ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-950">
+              {INVOICED_EDIT_WARNING}
+            </div>
+          ) : null}
           <Field label="Project" name="project_id">
             <TextSelect
               name="project_id"

@@ -706,8 +706,8 @@ export async function createTimeEntryAction(
 
 export async function updateTimeEntryAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
-  await requireRole(HOURS_ROLES);
+): Promise<ActionResult<{ id: string; unlinkedDrafts?: number }>> {
+  const profile = await requireRole(HOURS_ROLES);
   const id = strOrNull(formData.get("id"));
   if (!id) return fail("Urenregel-id ontbreekt.");
 
@@ -721,16 +721,19 @@ export async function updateTimeEntryAction(
   const supabase = await createClient();
   const { data: existing, error: existingError } = await supabase
     .from("time_entries")
-    .select("id, status")
+    .select("id, status, project_id")
     .eq("id", id)
     .single();
 
   if (existingError || !existing) {
     return fail(existingError?.message ?? "Urenregel niet gevonden.");
   }
-  if (existing.status === "invoiced") {
+
+  const isInvoiced = existing.status === "invoiced";
+  const canOverrideInvoiced = FINANCE_ROLES.includes(profile.role);
+  if (isInvoiced && !canOverrideInvoiced) {
     return fail(
-      "Deze registratie staat al op een factuurconcept en kan niet meer worden aangepast.",
+      "Deze registratie is gefactureerd. Alleen owner/admin/finance kan aanpassen (ontkoppelt van factuurconcept).",
     );
   }
 
@@ -741,28 +744,61 @@ export async function updateTimeEntryAction(
     numOrNull(formData.get("hours")) ??
     calculateWorkedHours(start_time, end_time, break_minutes);
 
+  const updatePayload: Record<string, unknown> = {
+    project_id,
+    crew_member_id,
+    work_date,
+    start_time,
+    end_time,
+    break_minutes,
+    hours,
+    kilometers: numOrNull(formData.get("kilometers")) ?? 0,
+    travel_time_hours: numOrNull(formData.get("travel_time_hours")) ?? 0,
+    internal_notes: strOrNull(formData.get("internal_notes")),
+  };
+
+  let unlinkedDrafts = 0;
+  if (isInvoiced) {
+    // Ops mag corrigeren: status terug naar goedgekeurd + open concepten annuleren.
+    updatePayload.status = "approved" satisfies TimeEntryStatus;
+
+    const draftProjectId = project_id || existing.project_id;
+    if (draftProjectId) {
+      const { data: drafts, error: draftsError } = await supabase
+        .from("invoice_drafts")
+        .select("id, status, moneybird_invoice_id")
+        .eq("project_id", draftProjectId)
+        .in("status", ["draft", "ready"]);
+
+      if (draftsError) return fail(draftsError.message);
+
+      const unlinkable = (drafts ?? []).filter((d) => !d.moneybird_invoice_id);
+      if (unlinkable.length > 0) {
+        const { error: cancelError } = await supabase
+          .from("invoice_drafts")
+          .update({ status: "cancelled" satisfies InvoiceDraftStatus })
+          .in(
+            "id",
+            unlinkable.map((d) => d.id),
+          );
+        if (cancelError) return fail(cancelError.message);
+        unlinkedDrafts = unlinkable.length;
+      }
+    }
+  }
+
   const { error } = await supabase
     .from("time_entries")
-    .update({
-      project_id,
-      crew_member_id,
-      work_date,
-      start_time,
-      end_time,
-      break_minutes,
-      hours,
-      kilometers: numOrNull(formData.get("kilometers")) ?? 0,
-      travel_time_hours: numOrNull(formData.get("travel_time_hours")) ?? 0,
-      internal_notes: strOrNull(formData.get("internal_notes")),
-    })
+    .update(updatePayload)
     .eq("id", id);
 
   if (error) return fail(error.message);
   revalidateDashboard([
     "/dashboard/intern/urenregistratie",
     "/dashboard/intern/facturatie",
+    "/dashboard/intern/financien",
   ]);
-  return ok({ id });
+  return ok({ id, unlinkedDrafts });
 }
 
 export async function approveTimeEntryAction(
@@ -800,8 +836,9 @@ export async function rejectTimeEntryAction(
 
 // ——— Invoices ———
 
-export async function createInvoiceDraftFromApprovedHoursAction(
+async function createInvoiceDraftFromHoursForProject(
   formData: FormData,
+  entryStatus: Extract<TimeEntryStatus, "approved" | "invoiced">,
 ): Promise<ActionResult<{ id: string }>> {
   await requireRole(FINANCE_ROLES);
   const project_id = strOrNull(formData.get("project_id"));
@@ -824,11 +861,15 @@ export async function createInvoiceDraftFromApprovedHoursAction(
     .from("time_entries")
     .select("*")
     .eq("project_id", project_id)
-    .eq("status", "approved");
+    .eq("status", entryStatus);
 
   if (entriesError) return fail(entriesError.message);
   if (!entries || entries.length === 0) {
-    return fail("Geen goedgekeurde uren voor dit project.");
+    return fail(
+      entryStatus === "approved"
+        ? "Geen goedgekeurde uren voor dit project."
+        : "Geen gefactureerde uren zonder concept voor dit project.",
+    );
   }
 
   const hourlyRate =
@@ -910,14 +951,23 @@ export async function createInvoiceDraftFromApprovedHoursAction(
   const { error: linesError } = await supabase
     .from("invoice_draft_lines")
     .insert(lines);
-  if (linesError) return fail(linesError.message);
+  if (linesError) {
+    await supabase.from("invoice_drafts").delete().eq("id", draft.id);
+    return fail(linesError.message);
+  }
 
-  const entryIds = entries.map((e) => e.id);
-  const { error: markError } = await supabase
-    .from("time_entries")
-    .update({ status: "invoiced" })
-    .in("id", entryIds);
-  if (markError) return fail(markError.message);
+  // Alleen markeren als we van goedgekeurd komen; orphans zijn al invoiced.
+  if (entryStatus === "approved") {
+    const entryIds = entries.map((e) => e.id);
+    const { error: markError } = await supabase
+      .from("time_entries")
+      .update({ status: "invoiced" })
+      .in("id", entryIds);
+    if (markError) {
+      await supabase.from("invoice_drafts").delete().eq("id", draft.id);
+      return fail(markError.message);
+    }
+  }
 
   revalidateDashboard([
     "/dashboard/intern/facturatie",
@@ -927,22 +977,104 @@ export async function createInvoiceDraftFromApprovedHoursAction(
   return ok({ id: draft.id });
 }
 
+export async function createInvoiceDraftFromApprovedHoursAction(
+  formData: FormData,
+): Promise<ActionResult<{ id: string }>> {
+  return createInvoiceDraftFromHoursForProject(formData, "approved");
+}
+
+/** Herstel: maak concept van gefactureerde uren zonder actief concept. */
+export async function createInvoiceDraftFromInvoicedHoursAction(
+  formData: FormData,
+): Promise<ActionResult<{ id: string }>> {
+  return createInvoiceDraftFromHoursForProject(formData, "invoiced");
+}
+
+/**
+ * Zet gefactureerde uren terug naar goedgekeurd (owner/admin/finance),
+ * zodat Facturatie ze opnieuw kan oppakken.
+ */
+export async function resetInvoicedTimeEntriesToApprovedAction(
+  entryIds: string[],
+): Promise<ActionResult<{ count: number }>> {
+  await requireRole(FINANCE_ROLES);
+  const ids = entryIds.map((id) => id.trim()).filter(Boolean);
+  if (ids.length === 0) return fail("Geen urenregels geselecteerd.");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("time_entries")
+    .update({ status: "approved" satisfies TimeEntryStatus })
+    .in("id", ids)
+    .eq("status", "invoiced")
+    .select("id");
+
+  if (error) return fail(error.message);
+  const count = data?.length ?? 0;
+  if (count === 0) {
+    return fail("Geen gefactureerde uren gevonden om terug te zetten.");
+  }
+
+  revalidateDashboard([
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/urenregistratie",
+    "/dashboard/intern/financien",
+  ]);
+  return ok({ count });
+}
+
 export async function updateInvoiceDraftStatusAction(
   id: string,
   status: InvoiceDraftStatus,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; resetEntries?: number }>> {
   await requireRole(FINANCE_ROLES);
   const supabase = await createClient();
+
+  const { data: existing, error: existingError } = await supabase
+    .from("invoice_drafts")
+    .select("id, project_id, status")
+    .eq("id", id)
+    .single();
+
+  if (existingError || !existing) {
+    return fail(existingError?.message ?? "Factuurconcept niet gevonden.");
+  }
+
   const { error } = await supabase
     .from("invoice_drafts")
     .update({ status })
     .eq("id", id);
   if (error) return fail(error.message);
+
+  let resetEntries = 0;
+  // Annuleren zonder Moneybird-link: uren weer factureerbaar maken als er
+  // geen ander actief concept meer is voor dit project.
+  if (status === "cancelled" && existing.project_id) {
+    const { data: siblings } = await supabase
+      .from("invoice_drafts")
+      .select("id")
+      .eq("project_id", existing.project_id)
+      .neq("id", id)
+      .in("status", ["draft", "ready", "sent", "paid"]);
+
+    if (!siblings || siblings.length === 0) {
+      const { data: resetRows, error: resetError } = await supabase
+        .from("time_entries")
+        .update({ status: "approved" satisfies TimeEntryStatus })
+        .eq("project_id", existing.project_id)
+        .eq("status", "invoiced")
+        .select("id");
+      if (resetError) return fail(resetError.message);
+      resetEntries = resetRows?.length ?? 0;
+    }
+  }
+
   revalidateDashboard([
     "/dashboard/intern/facturatie",
+    "/dashboard/intern/urenregistratie",
     "/dashboard/intern/financien",
   ]);
-  return ok({ id });
+  return ok({ id, resetEntries });
 }
 
 /**
