@@ -704,6 +704,67 @@ export async function createTimeEntryAction(
   return ok({ id: data.id });
 }
 
+export async function updateTimeEntryAction(
+  formData: FormData,
+): Promise<ActionResult<{ id: string }>> {
+  await requireRole(HOURS_ROLES);
+  const id = strOrNull(formData.get("id"));
+  if (!id) return fail("Urenregel-id ontbreekt.");
+
+  const project_id = strOrNull(formData.get("project_id"));
+  const crew_member_id = strOrNull(formData.get("crew_member_id"));
+  const work_date = strOrNull(formData.get("work_date"));
+  if (!project_id) return fail("Project is verplicht.");
+  if (!crew_member_id) return fail("Crewlid is verplicht.");
+  if (!work_date) return fail("Datum is verplicht.");
+
+  const supabase = await createClient();
+  const { data: existing, error: existingError } = await supabase
+    .from("time_entries")
+    .select("id, status")
+    .eq("id", id)
+    .single();
+
+  if (existingError || !existing) {
+    return fail(existingError?.message ?? "Urenregel niet gevonden.");
+  }
+  if (existing.status === "invoiced") {
+    return fail(
+      "Deze registratie staat al op een factuurconcept en kan niet meer worden aangepast.",
+    );
+  }
+
+  const start_time = strOrNull(formData.get("start_time"));
+  const end_time = strOrNull(formData.get("end_time"));
+  const break_minutes = numOrNull(formData.get("break_minutes")) ?? 0;
+  const hours =
+    numOrNull(formData.get("hours")) ??
+    calculateWorkedHours(start_time, end_time, break_minutes);
+
+  const { error } = await supabase
+    .from("time_entries")
+    .update({
+      project_id,
+      crew_member_id,
+      work_date,
+      start_time,
+      end_time,
+      break_minutes,
+      hours,
+      kilometers: numOrNull(formData.get("kilometers")) ?? 0,
+      travel_time_hours: numOrNull(formData.get("travel_time_hours")) ?? 0,
+      internal_notes: strOrNull(formData.get("internal_notes")),
+    })
+    .eq("id", id);
+
+  if (error) return fail(error.message);
+  revalidateDashboard([
+    "/dashboard/intern/urenregistratie",
+    "/dashboard/intern/facturatie",
+  ]);
+  return ok({ id });
+}
+
 export async function approveTimeEntryAction(
   id: string,
 ): Promise<ActionResult<{ id: string }>> {

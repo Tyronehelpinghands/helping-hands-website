@@ -22,6 +22,7 @@ import {
   approveTimeEntryAction,
   createTimeEntryAction,
   rejectTimeEntryAction,
+  updateTimeEntryAction,
 } from "@/lib/dashboard/mutations";
 import {
   formatDate,
@@ -32,6 +33,15 @@ import {
 } from "@/lib/dashboard/formatters";
 import type { CrewMember, Project, TimeEntry } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
+
+function toTimeInputValue(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
+  return value.slice(0, 5);
+}
+
+function canEditTimeEntry(entry: TimeEntry) {
+  return entry.status !== "invoiced";
+}
 
 export function HoursMvpClient({
   entries,
@@ -48,6 +58,7 @@ export function HoursMvpClient({
   const { toast, showToast } = useToast();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState<TimeEntry | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [crewFilter, setCrewFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -59,6 +70,28 @@ export function HoursMvpClient({
   const [breakMinutes, setBreakMinutes] = useState("30");
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [bulkSyncing, setBulkSyncing] = useState(false);
+
+  function openCreate() {
+    setEdit(null);
+    setStartTime("09:00");
+    setEndTime("17:00");
+    setBreakMinutes("30");
+    setOpen(true);
+  }
+
+  function openEdit(entry: TimeEntry) {
+    if (!canEditTimeEntry(entry)) {
+      showToast(
+        "Deze registratie staat al op een factuurconcept en kan niet meer worden aangepast.",
+      );
+      return;
+    }
+    setEdit(entry);
+    setStartTime(toTimeInputValue(entry.start_time, "09:00"));
+    setEndTime(toTimeInputValue(entry.end_time, "17:00"));
+    setBreakMinutes(String(entry.break_minutes ?? 0));
+    setOpen(true);
+  }
 
   const previewHours = calculateWorkedHours(
     startTime,
@@ -119,7 +152,7 @@ export function HoursMvpClient({
         actions={
           <Button
             className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-            onClick={() => setOpen(true)}
+            onClick={openCreate}
           >
             <Plus className="mr-1 h-4 w-4" /> Uren invoeren
           </Button>
@@ -270,7 +303,7 @@ export function HoursMvpClient({
         <MvpEmptyState
           title="Nog geen urenregels"
           description="Pas filters aan, of voer uren in. Voor Fabrice 28 juni: check of de regel bestaat en filter op naam + datum."
-          action={<Button onClick={() => setOpen(true)}>Uren invoeren</Button>}
+          action={<Button onClick={openCreate}>Uren invoeren</Button>}
         />
       ) : (
         <MvpTableShell>
@@ -336,6 +369,15 @@ export function HoursMvpClient({
                   ) : null}
                 </td>
                 <td className="px-3 py-2 text-right space-x-1">
+                  {canEditTimeEntry(e) ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openEdit(e)}
+                    >
+                      Aanpassen
+                    </Button>
+                  ) : null}
                   {(e.status === "submitted" || e.status === "approved") && (
                     <Button
                       size="sm"
@@ -393,93 +435,125 @@ export function HoursMvpClient({
 
       <MvpFormDialog
         open={open}
-        onOpenChange={setOpen}
-        title="Uren invoeren"
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v) setEdit(null);
+        }}
+        title={edit ? "Uren aanpassen" : "Uren invoeren"}
         pending={pending}
         onSubmit={async (fd) => {
           fd.set("hours", String(previewHours));
           startTransition(async () => {
-            const res = await createTimeEntryAction(fd);
+            if (edit) fd.set("id", edit.id);
+            const res = edit
+              ? await updateTimeEntryAction(fd)
+              : await createTimeEntryAction(fd);
             if (res.ok) {
               setOpen(false);
-              showToast("Urenregel opgeslagen.");
+              setEdit(null);
+              showToast(
+                edit ? "Registratie bijgewerkt." : "Urenregel opgeslagen.",
+              );
               router.refresh();
             } else showToast(res.error);
           });
         }}
       >
-        <Field label="Project" name="project_id">
-          <TextSelect name="project_id" required defaultValue="">
-            <option value="" disabled>
-              Kies project
-            </option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.project_name}
+        <div key={edit?.id ?? "new-hours"} className="space-y-3">
+          <Field label="Project" name="project_id">
+            <TextSelect
+              name="project_id"
+              required
+              defaultValue={edit?.project_id ?? ""}
+            >
+              <option value="" disabled>
+                Kies project
               </option>
-            ))}
-          </TextSelect>
-        </Field>
-        <Field label="Crewlid" name="crew_member_id">
-          <TextSelect name="crew_member_id" required defaultValue="">
-            <option value="" disabled>
-              Kies crewlid
-            </option>
-            {crew.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.full_name}
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.project_name}
+                </option>
+              ))}
+            </TextSelect>
+          </Field>
+          <Field label="Crewlid" name="crew_member_id">
+            <TextSelect
+              name="crew_member_id"
+              required
+              defaultValue={edit?.crew_member_id ?? ""}
+            >
+              <option value="" disabled>
+                Kies crewlid
               </option>
-            ))}
-          </TextSelect>
-        </Field>
-        <Field label="Datum" name="work_date">
-          <TextInput name="work_date" type="date" required />
-        </Field>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Start" name="start_time">
+              {crew.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.full_name}
+                </option>
+              ))}
+            </TextSelect>
+          </Field>
+          <Field label="Datum" name="work_date">
             <TextInput
-              name="start_time"
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              name="work_date"
+              type="date"
+              required
+              defaultValue={edit?.work_date ?? ""}
             />
           </Field>
-          <Field label="Eind" name="end_time">
-            <TextInput
-              name="end_time"
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
-          </Field>
-          <Field label="Pauze (min)" name="break_minutes">
-            <TextInput
-              name="break_minutes"
-              type="number"
-              value={breakMinutes}
-              onChange={(e) => setBreakMinutes(e.target.value)}
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Start" name="start_time">
+              <TextInput
+                name="start_time"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </Field>
+            <Field label="Eind" name="end_time">
+              <TextInput
+                name="end_time"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </Field>
+            <Field label="Pauze (min)" name="break_minutes">
+              <TextInput
+                name="break_minutes"
+                type="number"
+                value={breakMinutes}
+                onChange={(e) => setBreakMinutes(e.target.value)}
+              />
+            </Field>
+          </div>
+          <p className="text-sm font-semibold text-[#173A8A]">
+            Berekend: {formatHours(previewHours)}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Kilometers" name="kilometers">
+              <TextInput
+                name="kilometers"
+                type="number"
+                step="0.1"
+                defaultValue={String(edit?.kilometers ?? 0)}
+              />
+            </Field>
+            <Field label="Reistijd (u)" name="travel_time_hours">
+              <TextInput
+                name="travel_time_hours"
+                type="number"
+                step="0.25"
+                defaultValue={String(edit?.travel_time_hours ?? 0)}
+              />
+            </Field>
+          </div>
+          <Field label="Interne notities" name="internal_notes">
+            <TextTextarea
+              name="internal_notes"
+              defaultValue={edit?.internal_notes ?? ""}
             />
           </Field>
         </div>
-        <p className="text-sm font-semibold text-[#173A8A]">
-          Berekend: {formatHours(previewHours)}
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Kilometers" name="kilometers">
-            <TextInput name="kilometers" type="number" step="0.1" defaultValue="0" />
-          </Field>
-          <Field label="Reistijd (u)" name="travel_time_hours">
-            <TextInput
-              name="travel_time_hours"
-              type="number"
-              step="0.25"
-              defaultValue="0"
-            />
-          </Field>
-        </div>
-        <Field label="Interne notities" name="internal_notes">
-          <TextTextarea name="internal_notes" />
-        </Field>
       </MvpFormDialog>
 
       <MvpFormDialog
