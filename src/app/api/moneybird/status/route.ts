@@ -3,10 +3,9 @@ import { requireInternApiAccess } from "@/lib/api-auth";
 import {
   formatMoneybirdError,
   getMissingMoneybirdEnvVars,
-  getMissingMoneybirdInvoiceEnvVars,
   isMoneybirdConfigured,
-  isMoneybirdInvoiceReady,
   moneybirdFetch,
+  resolveMoneybirdInvoiceDefaults,
 } from "@/lib/server/moneybird";
 
 export const dynamic = "force-dynamic";
@@ -32,21 +31,8 @@ export async function GET() {
     });
   }
 
-  const invoiceMissing = getMissingMoneybirdInvoiceEnvVars().filter(
-    (v) => v.includes("TAX") || v.includes("LEDGER"),
-  );
-
   try {
     await moneybirdFetch<unknown>("/contacts.json?per_page=1");
-    return NextResponse.json({
-      ok: true,
-      configured: true,
-      invoiceReady: isMoneybirdInvoiceReady(),
-      message: isMoneybirdInvoiceReady()
-        ? "Moneybird API bereikbaar — conceptfacturen kunnen worden aangemaakt."
-        : `Moneybird API bereikbaar, maar factuurregels missen: ${invoiceMissing.join(", ")}.`,
-      missing: invoiceMissing,
-    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -54,9 +40,42 @@ export async function GET() {
         configured: isMoneybirdConfigured(),
         invoiceReady: false,
         message: formatMoneybirdError(error),
-        missing: invoiceMissing,
+        missing: [],
       },
       { status: 502 },
     );
+  }
+
+  try {
+    const defaults = await resolveMoneybirdInvoiceDefaults();
+    if (defaults) {
+      return NextResponse.json({
+        ok: true,
+        configured: true,
+        invoiceReady: true,
+        defaultsSource: defaults.source,
+        message:
+          defaults.source === "env"
+            ? "Klaar voor facturen (tax/ledger via env)."
+            : "Klaar voor facturen (tax/ledger automatisch uit Moneybird).",
+        missing: [],
+      });
+    }
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      invoiceReady: false,
+      message:
+        "Token OK (contacts). Geen standaard BTW-tarief of omzetrekening gevonden. Optioneel: MONEYBIRD_DEFAULT_TAX_RATE_ID / MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID. Zie docs/moneybird-integration.md.",
+      missing: [],
+    });
+  } catch (error) {
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      invoiceReady: false,
+      message: `Token OK (contacts). Tax/ledger niet opgehaald: ${formatMoneybirdError(error)}. Zie docs/moneybird-integration.md.`,
+      missing: [],
+    });
   }
 }

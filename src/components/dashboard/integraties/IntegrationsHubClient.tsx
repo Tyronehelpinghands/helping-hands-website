@@ -608,7 +608,11 @@ export default function IntegrationsHubClient({
                 Moneybird
               </CardTitle>
               <SettingsStatusBadge
-                status={configBadge(moneybirdInvoiceReady || moneybirdConfigured)}
+                status={
+                  moneybirdInvoiceReady
+                    ? "Actief"
+                    : configBadge(moneybirdConfigured)
+                }
               />
             </div>
             <CardDescription>
@@ -618,14 +622,16 @@ export default function IntegrationsHubClient({
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
             {moneybirdInvoiceReady ? (
               <p>
-                Gekoppeld (token + tax/ledger). Test API, maak concepten in
-                Facturatie → Moneybird.
+                Klaar voor facturen (token + tax/ledger via env of automatisch).
+                Test API, maak concepten in Facturatie → Moneybird.
               </p>
             ) : moneybirdConfigured ? (
               <p>
-                Token aanwezig, maar{" "}
+                Token OK (contacts). BTW-tarief/omzetrekening kon niet
+                automatisch worden bepaald — zet optioneel{" "}
                 <code>MONEYBIRD_DEFAULT_TAX_RATE_ID</code> /{" "}
-                <code>MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID</code> ontbreken nog.
+                <code>MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID</code>. Zie
+                docs/moneybird-integration.md.
               </p>
             ) : (
               <div className="space-y-1.5">
@@ -643,7 +649,7 @@ export default function IntegrationsHubClient({
                     <code>MONEYBIRD_ADMINISTRATION_ID</code>
                   </li>
                   <li>
-                    Plus tax/ledger IDs voor factuurregels
+                    Optioneel: tax/ledger IDs; anders auto uit Moneybird
                   </li>
                   <li>Redeploy → Test API</li>
                 </ol>

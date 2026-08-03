@@ -7,8 +7,8 @@ import {
   getProjects,
 } from "@/lib/dashboard/queries";
 import {
+  ensureMoneybirdInvoiceReady,
   isMoneybirdConfigured,
-  isMoneybirdInvoiceReady,
 } from "@/lib/server/moneybird";
 
 export const metadata: Metadata = {
@@ -18,12 +18,14 @@ export const metadata: Metadata = {
 };
 
 export default async function InternFacturatiePage() {
-  const [drafts, projects, approvedEntries, stats] = await Promise.all([
-    getInvoiceDrafts(),
-    getProjects(),
-    getApprovedUninvoicedTimeEntries(),
-    getDashboardStats(),
-  ]);
+  const [drafts, projects, approvedEntries, stats, moneybirdInvoiceReady] =
+    await Promise.all([
+      getInvoiceDrafts(),
+      getProjects(),
+      getApprovedUninvoicedTimeEntries(),
+      getDashboardStats(),
+      ensureMoneybirdInvoiceReady(),
+    ]);
 
   return (
     <InvoiceMvpClient
@@ -32,7 +34,7 @@ export default async function InternFacturatiePage() {
       approvedEntries={approvedEntries}
       tablesReady={stats.tablesReady}
       moneybirdConfigured={isMoneybirdConfigured()}
-      moneybirdInvoiceReady={isMoneybirdInvoiceReady()}
+      moneybirdInvoiceReady={moneybirdInvoiceReady}
     />
   );
 }

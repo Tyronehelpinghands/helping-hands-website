@@ -2,8 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import {
   createMoneybirdSalesInvoice,
   formatMoneybirdError,
-  getMissingMoneybirdInvoiceEnvVars,
+  getMissingMoneybirdEnvVars,
   isMoneybirdConfigured,
+  MONEYBIRD_DEFAULTS_RESOLVE_ERROR,
+  resolveMoneybirdInvoiceDefaults,
   sendMoneybirdSalesInvoice,
 } from "@/lib/server/moneybird";
 import type {
@@ -48,7 +50,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
   send?: boolean;
 }): Promise<PushInvoiceDraftResult> {
   if (!isMoneybirdConfigured()) {
-    const missing = getMissingMoneybirdInvoiceEnvVars();
+    const missing = getMissingMoneybirdEnvVars();
     return {
       ok: false,
       error:
@@ -58,11 +60,11 @@ export async function pushInvoiceDraftToMoneybird(options: {
     };
   }
 
-  const invoiceMissing = getMissingMoneybirdInvoiceEnvVars();
-  if (invoiceMissing.length > 0) {
+  const defaults = await resolveMoneybirdInvoiceDefaults();
+  if (!defaults) {
     return {
       ok: false,
-      error: `Moneybird factuur-env incompleet: ${invoiceMissing.join(", ")}.`,
+      error: MONEYBIRD_DEFAULTS_RESOLVE_ERROR,
     };
   }
 

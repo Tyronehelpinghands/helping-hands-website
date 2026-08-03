@@ -10,6 +10,7 @@ import {
   formatMoneybirdError,
   isMoneybirdConfigured,
   moneybirdFetch,
+  resolveMoneybirdInvoiceDefaults,
 } from "@/lib/server/moneybird";
 import {
   formatShiftbaseError,
@@ -216,16 +217,37 @@ async function checkMoneybird(): Promise<Omit<IntegrationHealthResult, "provider
 
   try {
     await moneybirdFetch<unknown>("/contacts.json?per_page=1");
-    return {
-      ok: true,
-      status: "Actief",
-      message: "Moneybird API bereikbaar (contacts).",
-    };
   } catch (error) {
     return {
       ok: false,
       status: "Fout",
       message: formatMoneybirdError(error),
+    };
+  }
+
+  try {
+    const defaults = await resolveMoneybirdInvoiceDefaults();
+    if (defaults) {
+      return {
+        ok: true,
+        status: "Actief",
+        message:
+          defaults.source === "env"
+            ? "Klaar voor facturen (tax/ledger via env)."
+            : "Klaar voor facturen (tax/ledger automatisch uit Moneybird).",
+      };
+    }
+    return {
+      ok: true,
+      status: "Voorbereid",
+      message:
+        "Token OK (contacts). Nog geen BTW-tarief/omzetrekening gevonden — zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID / MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID. Zie docs/moneybird-integration.md.",
+    };
+  } catch (error) {
+    return {
+      ok: true,
+      status: "Voorbereid",
+      message: `Token OK (contacts). Tax/ledger niet opgehaald: ${formatMoneybirdError(error)}. Zie docs/moneybird-integration.md.`,
     };
   }
 }

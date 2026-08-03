@@ -82,7 +82,7 @@ export function InvoiceMvpClient({
     : moneybirdConfigured
       ? moneybirdInvoiceReady
         ? "Moneybird is gekoppeld — concepten kunnen als draft naar Moneybird."
-        : "Moneybird token aanwezig, maar TAX/LEDGER IDs ontbreken nog voor factuurregels."
+        : "Token werkt, maar BTW-tarief/omzetrekening kon niet automatisch worden bepaald. Zie docs/moneybird-integration.md of zet optioneel TAX/LEDGER IDs."
       : "Moneybird nog niet gekoppeld — concepten blijven in Supabase tot je Vercel-env zet.";
 
   return (
@@ -244,13 +244,26 @@ export function InvoiceMvpClient({
         {moneybirdConfigured ? (
           <>
             <MvpBadge tone={moneybirdInvoiceReady ? "ok" : "warn"}>
-              Moneybird — {moneybirdInvoiceReady ? "klaar" : "deels gekoppeld"}
+              Moneybird —{" "}
+              {moneybirdInvoiceReady ? "klaar voor facturen" : "token OK"}
             </MvpBadge>
             <p className="mt-2">
               {moneybirdInvoiceReady
                 ? "Gebruik “Moneybird” per concept om een draft in Moneybird aan te maken. Verzenden is optioneel (standaard uit)."
-                : "Zet MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID in Vercel, daarna redeploy."}
+                : "Token werkt (contacts), maar er is geen standaard BTW-tarief of omzetrekening gevonden. Controleer actieve sales-tarieven/omzetrekeningen in Moneybird, of zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID."}
             </p>
+            {!moneybirdInvoiceReady ? (
+              <p className="mt-2">
+                Uitleg:{" "}
+                <Link
+                  href="/dashboard/intern/integraties"
+                  className="font-semibold text-[#173A8A] underline-offset-2 hover:underline"
+                >
+                  Integraties
+                </Link>{" "}
+                · docs/moneybird-integration.md
+              </p>
+            ) : null}
           </>
         ) : (
           <>
@@ -267,13 +280,8 @@ export function InvoiceMvpClient({
                 <code className="text-xs">MONEYBIRD_ADMINISTRATION_ID</code>.
               </li>
               <li>
-                Voor factuurregels ook{" "}
-                <code className="text-xs">MONEYBIRD_DEFAULT_TAX_RATE_ID</code>{" "}
-                en{" "}
-                <code className="text-xs">
-                  MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID
-                </code>
-                .
+                Optioneel: TAX/LEDGER IDs als overrides; anders worden die
+                automatisch uit Moneybird gehaald.
               </li>
               <li>Redeploy, daarna testen via Integraties → Moneybird.</li>
             </ol>

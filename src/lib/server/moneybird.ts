@@ -1,6 +1,7 @@
 // Server-only Moneybird helper. Niet importeren in client components.
 
 const DEFAULT_BASE_URL = "https://moneybird.com/api/v2";
+const DEFAULTS_CACHE_TTL_MS = 15 * 60 * 1000;
 
 export type MoneybirdConfig = {
   accessToken: string;
@@ -9,6 +10,36 @@ export type MoneybirdConfig = {
   defaultTaxRateId?: string;
   defaultLedgerAccountId?: string;
 };
+
+export type MoneybirdInvoiceDefaults = {
+  taxRateId: string;
+  ledgerAccountId: string;
+  /** env = expliciete overrides; auto = opgehaald uit Moneybird API */
+  source: "env" | "auto";
+};
+
+type MoneybirdTaxRate = {
+  id?: string | number;
+  name?: string | null;
+  percentage?: string | number | null;
+  tax_rate_type?: string | null;
+  active?: boolean | null;
+};
+
+type MoneybirdLedgerAccount = {
+  id?: string | number;
+  name?: string | null;
+  account_type?: string | null;
+  active?: boolean | null;
+  allowed_document_types?: string[] | null;
+};
+
+type CachedInvoiceDefaults = MoneybirdInvoiceDefaults & {
+  administrationId: string;
+  fetchedAt: number;
+};
+
+let invoiceDefaultsCache: CachedInvoiceDefaults | null = null;
 
 export type SafeMoneybirdContact = {
   id: string;
@@ -72,15 +103,12 @@ export function getMissingMoneybirdEnvVars(): string[] {
   return missing;
 }
 
+/**
+ * Verplichte env voor facturen = zelfde als API (token + administration).
+ * TAX/LEDGER zijn optionele overrides; anders auto-resolve via API.
+ */
 export function getMissingMoneybirdInvoiceEnvVars(): string[] {
-  const missing = getMissingMoneybirdEnvVars();
-  if (!envTrim("MONEYBIRD_DEFAULT_TAX_RATE_ID")) {
-    missing.push("MONEYBIRD_DEFAULT_TAX_RATE_ID");
-  }
-  if (!envTrim("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID")) {
-    missing.push("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID");
-  }
-  return missing;
+  return getMissingMoneybirdEnvVars();
 }
 
 export function getMoneybirdConfig(): MoneybirdConfig | null {
@@ -105,10 +133,38 @@ export function isMoneybirdConfigured(): boolean {
   return getMoneybirdConfig() !== null;
 }
 
-/** True when create-invoice env (tax + ledger) is complete. */
+/**
+ * Sync hint: env overrides aanwezig, of recente auto-cache in dit proces.
+ * Voor UI/health: gebruik `ensureMoneybirdInvoiceReady()`.
+ */
 export function isMoneybirdInvoiceReady(): boolean {
-  return getMissingMoneybirdInvoiceEnvVars().length === 0;
+  if (!isMoneybirdConfigured()) return false;
+  const config = getMoneybirdConfig();
+  if (config?.defaultTaxRateId && config.defaultLedgerAccountId) return true;
+  if (
+    invoiceDefaultsCache &&
+    invoiceDefaultsCache.administrationId === config?.administrationId &&
+    Date.now() - invoiceDefaultsCache.fetchedAt < DEFAULTS_CACHE_TTL_MS
+  ) {
+    return true;
+  }
+  return false;
 }
+
+/** Probeert tax/ledger te resolven (env of API) en retourneert of facturen klaar zijn. */
+export async function ensureMoneybirdInvoiceReady(): Promise<boolean> {
+  try {
+    const defaults = await resolveMoneybirdInvoiceDefaults();
+    return defaults !== null;
+  } catch {
+    return false;
+  }
+}
+
+export const MONEYBIRD_DEFAULTS_RESOLVE_ERROR =
+  "Token werkt, maar er is geen standaard BTW-tarief of omzetrekening gevonden in Moneybird. " +
+  "Zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID in Vercel, " +
+  "of controleer actieve sales BTW-tarieven en omzetrekeningen. Zie docs/moneybird-integration.md.";
 
 export function assertMoneybirdConfigured(): MoneybirdConfig {
   const config = getMoneybirdConfig();
@@ -167,6 +223,160 @@ export async function moneybirdFetch<T>(
   return res.json() as Promise<T>;
 }
 
+function parsePercentage(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return Number.NaN;
+  const n = typeof value === "number" ? value : Number.parseFloat(String(value));
+  return Number.isFinite(n) ? n : Number.NaN;
+}
+
+function pickDefaultTaxRateId(rates: MoneybirdTaxRate[]): string | undefined {
+  const sales = rates.filter(
+    (r) =>
+      r.id &&
+      r.active !== false &&
+      (r.tax_rate_type === "sales_invoice" || !r.tax_rate_type),
+  );
+  if (sales.length === 0) return undefined;
+
+  const scored = sales.map((r) => {
+    const pct = parsePercentage(r.percentage);
+    const name = String(r.name ?? "").toLowerCase();
+    let score = 0;
+    if (Math.abs(pct - 21) < 0.05) score += 100;
+    else if (pct === 21) score += 100;
+    if (name.includes("21")) score += 40;
+    if (name.includes("btw") || name.includes("btw hoog") || name.includes("hoog"))
+      score += 10;
+    if (r.tax_rate_type === "sales_invoice") score += 20;
+    if (r.active === true) score += 5;
+    return { id: String(r.id), score, pct };
+  });
+
+  scored.sort((a, b) => b.score - a.score || Math.abs(a.pct - 21) - Math.abs(b.pct - 21));
+  return scored[0]?.id;
+}
+
+function pickDefaultLedgerAccountId(
+  accounts: MoneybirdLedgerAccount[],
+): string | undefined {
+  const candidates = accounts.filter((a) => a.id && a.active !== false);
+  if (candidates.length === 0) return undefined;
+
+  const scored = candidates.map((a) => {
+    const name = String(a.name ?? "").toLowerCase();
+    const type = String(a.account_type ?? "").toLowerCase();
+    const allowed = Array.isArray(a.allowed_document_types)
+      ? a.allowed_document_types
+      : [];
+    let score = 0;
+    if (type === "revenue") score += 100;
+    if (allowed.includes("sales_invoice")) score += 40;
+    if (
+      name.includes("omzet") ||
+      name.includes("revenue") ||
+      name.includes("verkoop") ||
+      name.includes("sales")
+    ) {
+      score += 30;
+    }
+    if (name.includes("dienst") || name.includes("service")) score += 10;
+    if (a.active === true) score += 5;
+    // Vermijd typische niet-omzet rekeningen
+    if (
+      type === "expenses" ||
+      type === "direct_costs" ||
+      type === "current_assets" ||
+      type === "current_liabilities"
+    ) {
+      score -= 80;
+    }
+    return { id: String(a.id), score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const best = scored[0];
+  if (!best || best.score < 40) return undefined;
+  return best.id;
+}
+
+/**
+ * Bepaalt tax_rate_id + ledger_account_id:
+ * 1) optionele env-overrides
+ * 2) anders Moneybird API (in-memory cache, TTL 15 min)
+ */
+export async function resolveMoneybirdInvoiceDefaults(): Promise<MoneybirdInvoiceDefaults | null> {
+  const config = getMoneybirdConfig();
+  if (!config) return null;
+
+  const envTax = config.defaultTaxRateId;
+  const envLedger = config.defaultLedgerAccountId;
+  if (envTax && envLedger) {
+    const resolved: MoneybirdInvoiceDefaults = {
+      taxRateId: envTax,
+      ledgerAccountId: envLedger,
+      source: "env",
+    };
+    invoiceDefaultsCache = {
+      ...resolved,
+      administrationId: config.administrationId,
+      fetchedAt: Date.now(),
+    };
+    return resolved;
+  }
+
+  if (
+    invoiceDefaultsCache &&
+    invoiceDefaultsCache.administrationId === config.administrationId &&
+    Date.now() - invoiceDefaultsCache.fetchedAt < DEFAULTS_CACHE_TTL_MS &&
+    (!envTax || invoiceDefaultsCache.taxRateId === envTax) &&
+    (!envLedger || invoiceDefaultsCache.ledgerAccountId === envLedger)
+  ) {
+    return {
+      taxRateId: envTax || invoiceDefaultsCache.taxRateId,
+      ledgerAccountId: envLedger || invoiceDefaultsCache.ledgerAccountId,
+      source: envTax && envLedger ? "env" : invoiceDefaultsCache.source,
+    };
+  }
+
+  let taxRateId = envTax;
+  let ledgerAccountId = envLedger;
+
+  if (!taxRateId) {
+    let rates: MoneybirdTaxRate[] = [];
+    try {
+      rates = await moneybirdFetch<MoneybirdTaxRate[]>(
+        "/tax_rates.json?filter=tax_rate_type:sales_invoice",
+      );
+    } catch {
+      rates = await moneybirdFetch<MoneybirdTaxRate[]>("/tax_rates.json");
+    }
+    taxRateId = pickDefaultTaxRateId(Array.isArray(rates) ? rates : []);
+  }
+
+  if (!ledgerAccountId) {
+    const accounts = await moneybirdFetch<MoneybirdLedgerAccount[]>(
+      "/ledger_accounts.json",
+    );
+    ledgerAccountId = pickDefaultLedgerAccountId(
+      Array.isArray(accounts) ? accounts : [],
+    );
+  }
+
+  if (!taxRateId || !ledgerAccountId) return null;
+
+  const resolved: MoneybirdInvoiceDefaults = {
+    taxRateId,
+    ledgerAccountId,
+    source: envTax && envLedger ? "env" : "auto",
+  };
+  invoiceDefaultsCache = {
+    ...resolved,
+    administrationId: config.administrationId,
+    fetchedAt: Date.now(),
+  };
+  return resolved;
+}
+
 export function sanitizeMoneybirdContact(
   raw: Record<string, unknown>,
 ): SafeMoneybirdContact {
@@ -209,14 +419,10 @@ export function sanitizeMoneybirdInvoice(
 export async function createMoneybirdSalesInvoice(
   input: CreateMoneybirdSalesInvoiceInput,
 ): Promise<SafeMoneybirdInvoice> {
-  const config = assertMoneybirdConfigured();
-  const taxRateId = config.defaultTaxRateId;
-  const ledgerAccountId = config.defaultLedgerAccountId;
-
-  if (!taxRateId || !ledgerAccountId) {
-    throw new Error(
-      "MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID zijn verplicht voor factuurregels.",
-    );
+  assertMoneybirdConfigured();
+  const defaults = await resolveMoneybirdInvoiceDefaults();
+  if (!defaults) {
+    throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
   }
 
   if (!input.contactId.trim()) {
@@ -240,8 +446,8 @@ export async function createMoneybirdSalesInvoice(
         description: line.description.trim(),
         price: Number(line.price).toFixed(2),
         amount: String(line.amount),
-        tax_rate_id: line.taxRateId || taxRateId,
-        ledger_account_id: line.ledgerAccountId || ledgerAccountId,
+        tax_rate_id: line.taxRateId || defaults.taxRateId,
+        ledger_account_id: line.ledgerAccountId || defaults.ledgerAccountId,
       })),
     },
   };

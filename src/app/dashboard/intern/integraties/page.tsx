@@ -16,8 +16,8 @@ import {
   WHATSAPP_MESSAGE_TEMPLATES,
 } from "@/lib/integrations/whatsapp";
 import {
+  ensureMoneybirdInvoiceReady,
   isMoneybirdConfigured,
-  isMoneybirdInvoiceReady,
 } from "@/lib/server/moneybird";
 import {
   isShiftbaseConfigured,
@@ -55,7 +55,7 @@ export default async function InternIntegratiesPage({
   const supabaseConfigured = isSupabaseConfigured();
   const resendActive = Boolean(process.env.RESEND_API_KEY?.trim());
   const moneybirdPrepared = isMoneybirdConfigured();
-  const moneybirdInvoiceReady = isMoneybirdInvoiceReady();
+  const moneybirdInvoiceReady = await ensureMoneybirdInvoiceReady();
   const shiftbasePrepared = isShiftbaseConfigured();
   const shiftbaseDisabled = isShiftbaseExplicitlyDisabled();
   const shiftbaseEnabled = !shiftbaseDisabled;
@@ -118,9 +118,9 @@ export default async function InternIntegratiesPage({
           ? "Voorbereid"
           : "Ontbreekt",
       note: moneybirdInvoiceReady
-        ? "API + tax/ledger — concepten naar Moneybird mogelijk"
+        ? "Klaar voor facturen (tax/ledger via env of auto)"
         : moneybirdPrepared
-          ? "Token aanwezig — zet TAX/LEDGER IDs voor facturen"
+          ? "Token OK (contacts) — tax/ledger nog niet opgelost"
           : "Zet MONEYBIRD_ACCESS_TOKEN + ADMINISTRATION_ID in Vercel",
     },
     {
