@@ -4,8 +4,9 @@ import CTASection from "@/components/CTASection";
 import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import GoogleBusinessCta from "@/components/seo/GoogleBusinessCta";
 import JsonLd from "@/components/seo/JsonLd";
-import ReviewCta from "@/components/seo/ReviewCta";
+import { getAllLocations } from "@/data/locations";
 import {
   buildPageMetadata,
   faqJsonLd,
@@ -15,7 +16,7 @@ import {
 
 const title = "Locaties en werkgebieden | Helping Hands Agency";
 const description =
-  "Helping Hands Agency levert event crew, stagehands en horecapersoneel door heel Nederland. Bekijk onze werkgebieden per stad en regio.";
+  "Helping Hands Agency levert event crew, stagehands en horecapersoneel door heel Nederland. Vestiging Hilversum — bekijk werkgebieden per stad.";
 
 export const metadata: Metadata = buildPageMetadata({
   title,
@@ -23,6 +24,23 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/locaties",
   absoluteTitle: true,
 });
+
+/** /locaties/* slugs that 301 to root SEO URLs — omit from overview + sitemap. */
+const redirectedLocatieSlugs = new Set([
+  "event-crew-amsterdam",
+  "event-crew-utrecht",
+  "event-crew-rotterdam",
+  "event-crew-den-haag",
+  "event-crew-hilversum",
+  "stagehands-amsterdam",
+  "stagehands-utrecht",
+  "stagehands-arnhem",
+  "horeca-personeel-hilversum",
+  "horeca-personeel-amsterdam",
+  "horeca-personeel-utrecht",
+  "festival-crew-rotterdam",
+  "eventpersoneel-den-haag",
+]);
 
 const locationsFaqs = [
   {
@@ -43,12 +61,47 @@ const locationsFaqs = [
   {
     question: "Hoe vraag ik personeel aan voor een specifieke stad?",
     answer:
-      "Gebruik het contactformulier en vermeld de stad, locatie, datum, tijden, functies en aantal mensen.",
+      "Gebruik het contactformulier en vermeld de stad, locatie, datum, tijden, functies en aantal mensen. Tarief op aanvraag.",
   },
 ];
 
+type OverviewLink = {
+  key: string;
+  href: string;
+  province: string;
+  title: string;
+  description: string;
+};
+
 export default function LocatiesOverviewPage() {
-  const locations = getAllSeoLocationPages();
+  const seoLocations = getAllSeoLocationPages();
+  const cityLocations = getAllLocations().filter(
+    (location) => !redirectedLocatieSlugs.has(location.slug),
+  );
+
+  const overviewLinks: OverviewLink[] = [
+    ...cityLocations.map((location) => ({
+      key: `city-${location.slug}`,
+      href: location.path,
+      province: location.province,
+      title: location.h1.replace(" inhuren", "").replace("Helping Hands Agency in ", ""),
+      description: location.heroDescription,
+    })),
+    ...seoLocations.map((location) => ({
+      key: `seo-${location.slug}`,
+      href: location.path,
+      province: location.province,
+      title: `${location.serviceLabel} ${location.city}`,
+      description: location.heroDescription,
+    })),
+  ];
+
+  // Prefer Hilversum hub first
+  overviewLinks.sort((a, b) => {
+    if (a.href.includes("/locaties/hilversum")) return -1;
+    if (b.href.includes("/locaties/hilversum")) return 1;
+    return a.title.localeCompare(b.title, "nl");
+  });
 
   return (
     <>
@@ -60,9 +113,9 @@ export default function LocatiesOverviewPage() {
       />
       <JsonLd
         data={locationsItemListJsonLd(
-          locations.map((location) => ({
-            name: `${location.serviceLabel} ${location.city}`,
-            path: location.path,
+          overviewLinks.map((location) => ({
+            name: location.title,
+            path: location.href,
           })),
         )}
       />
@@ -84,14 +137,14 @@ export default function LocatiesOverviewPage() {
             href: "/personeel-inhuren",
           },
           highlights: [
+            { label: "Vestiging Hilversum" },
             { label: "Landelijk actief" },
-            { label: "Regionale kennis" },
             { label: "Eén aanspreekpunt" },
-            { label: "Snel schakelen" },
+            { label: "Tarief op aanvraag" },
           ],
-          interactiveCards: locations.slice(0, 4).map((location) => ({
-            title: `${location.serviceLabel} ${location.city}`,
-            description: location.heroDescription,
+          interactiveCards: overviewLinks.slice(0, 4).map((location) => ({
+            title: location.title,
+            description: location.description,
           })),
         }}
       />
@@ -105,10 +158,10 @@ export default function LocatiesOverviewPage() {
             Regionale kennis, landelijke inzet
           </h2>
           <p className="mt-4 leading-8 text-[#101828]/75">
-            Helping Hands Agency is gevestigd in Hilversum en zet crew in door
-            heel Nederland. Per stad en dienst lichten we toe wat typisch is —
-            zonder te claimen dat we overal een kantoor hebben. Staat jouw
-            locatie er niet tussen? Vraag gerust aan via{" "}
+            Helping Hands Agency is een event staffing- en crewbedrijf,
+            gevestigd aan Wandelpad 30 in Hilversum. Per stad en dienst lichten
+            we toe wat typisch is — zonder te claimen dat we overal een kantoor
+            hebben. Staat jouw locatie er niet tussen? Vraag gerust aan via{" "}
             <Link
               href="/contact?type=personeel-aanvragen"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
@@ -120,20 +173,20 @@ export default function LocatiesOverviewPage() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {locations.map((location) => (
+          {overviewLinks.map((location) => (
             <Link
-              key={location.slug}
-              href={location.path}
+              key={location.key}
+              href={location.href}
               className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:border-[#F28C28]/45 hover:shadow-md"
             >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#F28C28]">
                 {location.province}
               </p>
               <h3 className="mt-2 text-lg font-black text-[#0B1F4D]">
-                {location.serviceLabel} {location.city}
+                {location.title}
               </h3>
               <p className="mt-2 text-sm leading-6 text-[#101828]/70">
-                {location.heroDescription}
+                {location.description}
               </p>
               <span className="mt-4 inline-flex text-sm font-bold text-[#173A8A] transition group-hover:text-[#F28C28]">
                 Bekijk pagina →
@@ -158,10 +211,10 @@ export default function LocatiesOverviewPage() {
               Personeel inhuren
             </Link>
             <Link
-              href="/projecten"
+              href="/locaties/hilversum"
               className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#173A8A] px-6 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-white"
             >
-              Projectervaring
+              Vestiging Hilversum
             </Link>
             <Link
               href="/contact?type=personeel-aanvragen"
@@ -181,14 +234,14 @@ export default function LocatiesOverviewPage() {
 
       <CTASection
         title="Personeel nodig in jouw regio?"
-        description="Deel datum, locatie, tijden, functies en aantal mensen. Wij denken mee over bezetting en briefing."
+        description="Deel datum, locatie, tijden, functies en aantal mensen. Wij denken mee over bezetting en briefing. Tarief op aanvraag."
         buttonLabel="Personeel aanvragen"
         buttonHref="/contact?type=personeel-aanvragen"
         secondaryLabel="Personeel inhuren"
         secondaryHref="/personeel-inhuren"
       />
 
-      <ReviewCta />
+      <GoogleBusinessCta />
     </>
   );
 }

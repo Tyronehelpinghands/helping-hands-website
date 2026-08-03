@@ -38,7 +38,7 @@ export const siteConfig = {
   locale: "nl_NL",
   defaultOgImage: "/images/brand/helping-hands-logo.png",
   description:
-    "Huur event crew, stagehands en horecapersoneel in voor festivals, stadions, beurzen, concerten en restaurants. Helping Hands Agency: snelle planning, heldere briefing, één aanspreekpunt.",
+    "Helping Hands Agency: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, één aanspreekpunt vanuit Hilversum.",
   /** Google Maps search URL for NAP / GBP support (no fake reviews). */
   googleMapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Helping%20Hands%20Agency%20Wandelpad%2030%20Hilversum" as string,

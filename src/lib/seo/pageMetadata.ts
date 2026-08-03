@@ -106,16 +106,20 @@ export function organizationJsonLd() {
       "@type": "Country",
       name: "Netherlands",
     },
-    sameAs: socialSameAs(),
     knowsAbout: [
       "Event crew",
+      "Eventpersoneel",
+      "Festival crew",
       "Stagehands",
       "Horeca personeel",
+      "Catering personeel",
       "Restaurant personeel",
       "Productie assistentie",
       "Logistiek",
       "Hospitality",
+      "Load-in en load-out",
     ],
+    sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };
 }
 

@@ -6,6 +6,7 @@ import RegionalCTA from "@/components/sections/RegionalCTA";
 import FaqSection from "@/components/sections/FaqSection";
 import PageHero from "@/components/sections/PageHero";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import GoogleBusinessCta from "@/components/seo/GoogleBusinessCta";
 import JsonLd from "@/components/seo/JsonLd";
 import { getAllLocations, getLocationBySlug } from "@/data/locations";
 import { getAllProjectCases } from "@/data/projectCases";
@@ -20,8 +21,27 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Slugs that permanently redirect to root SEO URLs — do not pre-render. */
+const redirectedLocatieSlugs = new Set([
+  "event-crew-amsterdam",
+  "event-crew-utrecht",
+  "event-crew-rotterdam",
+  "event-crew-den-haag",
+  "event-crew-hilversum",
+  "stagehands-amsterdam",
+  "stagehands-utrecht",
+  "stagehands-arnhem",
+  "horeca-personeel-hilversum",
+  "horeca-personeel-amsterdam",
+  "horeca-personeel-utrecht",
+  "festival-crew-rotterdam",
+  "eventpersoneel-den-haag",
+]);
+
 export function generateStaticParams() {
-  return getAllLocations().map((location) => ({ slug: location.slug }));
+  return getAllLocations()
+    .filter((location) => !redirectedLocatieSlugs.has(location.slug))
+    .map((location) => ({ slug: location.slug }));
 }
 
 export async function generateMetadata({
@@ -279,6 +299,8 @@ export default async function LocationPage({ params }: PageProps) {
       />
 
       <RegionalCTA city={location.city} serviceLabel={location.eyebrow.split(" ·")[0].toLowerCase()} />
+
+      <GoogleBusinessCta />
     </>
   );
 }

@@ -38,7 +38,19 @@ export function organizationSchema() {
       "@type": "Country",
       name: "Netherlands",
     },
-    sameAs: socialSameAs(),
+    knowsAbout: [
+      "Event crew",
+      "Eventpersoneel",
+      "Festival crew",
+      "Stagehands",
+      "Load-in en load-out",
+      "Horeca personeel",
+      "Catering personeel",
+      "Hospitality",
+      "Productie-assistentie",
+      "Logistiek evenementen",
+    ],
+    sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -99,7 +111,14 @@ export function localBusinessSchema() {
       },
     ],
     hasMap: siteConfig.googleMapsUrl,
-    sameAs: socialSameAs(),
+    knowsAbout: [
+      "Event staffing",
+      "Event crew Hilversum",
+      "Horecapersoneel",
+      "Stagehands",
+      "Festival crew",
+    ],
+    sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };
 }
 

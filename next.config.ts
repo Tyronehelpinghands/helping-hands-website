@@ -49,10 +49,35 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
 
-      // Old /locaties/* → root SEO location URLs (overlapping slugs)
+      // Overlapping /locaties/* → canonical root SEO URLs (avoid thin duplicates)
       {
         source: "/locaties/event-crew-amsterdam",
         destination: "/event-crew-amsterdam",
+        permanent: true,
+      },
+      {
+        source: "/locaties/event-crew-utrecht",
+        destination: "/event-crew-utrecht",
+        permanent: true,
+      },
+      {
+        source: "/locaties/event-crew-rotterdam",
+        destination: "/event-crew-rotterdam",
+        permanent: true,
+      },
+      {
+        source: "/locaties/event-crew-den-haag",
+        destination: "/event-crew-den-haag",
+        permanent: true,
+      },
+      {
+        source: "/locaties/event-crew-hilversum",
+        destination: "/event-crew-hilversum",
+        permanent: true,
+      },
+      {
+        source: "/locaties/stagehands-amsterdam",
+        destination: "/stagehands-amsterdam",
         permanent: true,
       },
       {
@@ -61,13 +86,23 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/locaties/stagehands-arnhem",
+        destination: "/stagehands-arnhem",
+        permanent: true,
+      },
+      {
         source: "/locaties/horeca-personeel-hilversum",
         destination: "/horeca-personeel-hilversum",
         permanent: true,
       },
       {
-        source: "/locaties/stagehands-arnhem",
-        destination: "/stagehands-arnhem",
+        source: "/locaties/horeca-personeel-amsterdam",
+        destination: "/horeca-personeel-amsterdam",
+        permanent: true,
+      },
+      {
+        source: "/locaties/horeca-personeel-utrecht",
+        destination: "/horeca-personeel-utrecht",
         permanent: true,
       },
       {

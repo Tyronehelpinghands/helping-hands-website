@@ -45,9 +45,10 @@ const serviceLinks = [
 ];
 
 const locationLinks = [
+  { href: "/locaties/hilversum", label: "Hilversum (vestiging)" },
   { href: "/event-crew-amsterdam", label: "Amsterdam" },
   { href: "/event-crew-utrecht", label: "Utrecht" },
-  { href: "/horeca-personeel-hilversum", label: "Hilversum" },
+  { href: "/horeca-personeel-hilversum", label: "Horeca Hilversum" },
   { href: "/event-crew-rotterdam", label: "Rotterdam" },
   { href: "/event-crew-den-haag", label: "Den Haag" },
   { href: "/festival-crew-randstad", label: "Randstad festivals" },
@@ -71,8 +72,9 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
-              Crew voor evenementen, horeca, stagebouw, productie en logistiek.
-              Snel inzetbaar op locatie.
+              Helping Hands Agency is een event staffing- en crewbedrijf voor
+              evenementen, horeca, stagebouw, productie en logistiek. Snel
+              inzetbaar op locatie.
             </p>
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">
               {formatAddressSingleLine()}
@@ -260,7 +262,10 @@ export default function Footer() {
         <div className="mt-12 space-y-3 border-t border-white/10 pt-6 text-xs leading-5 text-white/45">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; 2026 {siteConfig.name}</p>
-            <p>Event staffing &amp; crew voor de live branche</p>
+            <p>
+              Event staffing &amp; crew — evenementen, horeca, stagebouw &amp;
+              productie
+            </p>
           </div>
           <p>
             {siteConfig.name} · {formatAddressSingleLine()} · KvK{" "}

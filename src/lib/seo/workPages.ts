@@ -4,7 +4,7 @@ export const workPages: WorkPage[] = [
   {
     "slug": "eventmedewerker",
     "title": "Werken als eventmedewerker",
-    "metaTitle": "Werken als eventmedewerker | Helping Hands",
+    "metaTitle": "Werken als eventmedewerker | Helping Hands Agency",
     "metaDescription": "Werken als eventmedewerker bij Helping Hands Agency. Floor support, runners en events — meld je aan en bouw ervaring op.",
     "h1": "Werken als eventmedewerker",
     "intro": "Wil je werken op festivals, beurzen en producties? Als eventmedewerker bij Helping Hands Agency help je op de vloer: publieksstromen, check-in, runners en algemene support. Je krijgt duidelijke planning, briefing en begeleiding — ideaal als je ervaring wilt opbouwen in de evenementen. Meld je aan via aanmeldingen@helpinghandsagency.nl of bekijk vacatures.",
@@ -48,7 +48,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -118,7 +118,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -144,7 +144,7 @@ export const workPages: WorkPage[] = [
   {
     "slug": "horecamedewerker",
     "title": "Werken als horecamedewerker",
-    "metaTitle": "Werken als horecamedewerker | Helping Hands",
+    "metaTitle": "Werken als horecamedewerker | Helping Hands Agency",
     "metaDescription": "Werken als horecamedewerker bij events en locaties. Bijbaan of flexibele shifts via Helping Hands Agency. Meld je aan.",
     "h1": "Werken als horecamedewerker",
     "intro": "Horeca bij Helping Hands betekent werken op events, banqueting en locaties: bediening, afruimen, bijvullen en barsupport. Ideaal als horeca bijbaan of om ervaring op te bouwen. Je krijgt heldere shifts en briefing. Meld je aan via aanmeldingen@helpinghandsagency.nl.",
@@ -188,7 +188,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -215,7 +215,7 @@ export const workPages: WorkPage[] = [
     "slug": "barback",
     "title": "Werken als barback",
     "metaTitle": "Werken als barback | Helping Hands Agency",
-    "metaDescription": "Werken als barback op events en in de horeca. Tempo achter de bar, bevoorrading en support. Meld je aan bij Helping Hands.",
+    "metaDescription": "Werken als barback op events en in de horeca. Tempo achter de bar, bevoorrading en support. Meld je aan bij Helping Hands Agency.",
     "h1": "Werken als barback",
     "intro": "Als barback houd je de bar draaiende: ijs, glazen, voorraad en opruimen. Bij Helping Hands Agency werk je op festivals, events en drukke horecalocaties. Hard werken, korte lijnen, echte shifts. Aanmelden via vacatures of aanmeldingen@helpinghandsagency.nl.",
     "duties": [
@@ -258,7 +258,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -285,7 +285,7 @@ export const workPages: WorkPage[] = [
     "slug": "runner",
     "title": "Werken als runner",
     "metaTitle": "Werken als runner | Helping Hands Agency",
-    "metaDescription": "Werken als runner op events, horeca of productie. Snelle support met duidelijke briefing. Meld je aan bij Helping Hands.",
+    "metaDescription": "Werken als runner op events, horeca of productie. Snelle support met duidelijke briefing. Meld je aan bij Helping Hands Agency.",
     "h1": "Werken als runner",
     "intro": "Runners zijn overal tegelijk nodig. Bij Helping Hands Agency werk je als runner op events, in de horeca of bij productie: materiaal, boodschappen en support tussen zones. Perfect als je actief wilt werken en snel leert. Meld je aan via aanmeldingen@helpinghandsagency.nl.",
     "duties": [
@@ -328,7 +328,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -398,7 +398,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -424,7 +424,7 @@ export const workPages: WorkPage[] = [
   {
     "slug": "zelfstandig-kok",
     "title": "Werken als zelfstandig kok",
-    "metaTitle": "Werken als zelfstandig kok | Helping Hands",
+    "metaTitle": "Werken als zelfstandig kok | Helping Hands Agency",
     "metaDescription": "Werken als zelfstandig kok via Helping Hands Agency. Flexibele keukenklussen in restaurants, catering en events.",
     "h1": "Werken als zelfstandig kok",
     "intro": "Heb je keukenervaring en wil je flexibel werken? Helping Hands Agency zoekt zelfstandig koks voor restaurants, catering en eventkeukens. We stemmen niveau en verwachtingen vooraf af. Meld je aan via aanmeldingen@helpinghandsagency.nl met je ervaring.",
@@ -468,7 +468,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -494,7 +494,7 @@ export const workPages: WorkPage[] = [
   {
     "slug": "productie-assistent",
     "title": "Werken als productie-assistent",
-    "metaTitle": "Werken als productie-assistent | Helping Hands",
+    "metaTitle": "Werken als productie-assistent | Helping Hands Agency",
     "metaDescription": "Werken als productie-assistent op events. Ondersteun productieteams met runners en floor support. Meld je aan.",
     "h1": "Werken als productie-assistent",
     "intro": "Als productie-assistent help je het productieteam met praktische taken, runners en floor support. Bij Helping Hands Agency leer je hoe producties echt lopen — met briefing, call-times en korte lijnen. Aanmelden via vacatures of aanmeldingen@helpinghandsagency.nl.",
@@ -538,7 +538,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -564,7 +564,7 @@ export const workPages: WorkPage[] = [
   {
     "slug": "logistiek-medewerker",
     "title": "Werken als logistiek medewerker",
-    "metaTitle": "Werken als logistiek medewerker | Helping Hands",
+    "metaTitle": "Werken als logistiek medewerker | Helping Hands Agency",
     "metaDescription": "Werken als logistiek medewerker op events: laden, lossen en materiaalstromen. Meld je aan bij Helping Hands Agency.",
     "h1": "Werken als logistiek medewerker",
     "intro": "Logistiek werk op events is fysiek, duidelijk en belangrijk. Bij Helping Hands Agency help je met laden, lossen en materiaalstromen. Je krijgt briefing over veiligheid en taken. Meld je aan via aanmeldingen@helpinghandsagency.nl.",
@@ -608,7 +608,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {
@@ -678,7 +678,7 @@ export const workPages: WorkPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
         "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
       },
       {

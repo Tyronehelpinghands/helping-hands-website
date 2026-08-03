@@ -37,11 +37,13 @@ Placeholders (`info@eventcrew.nl`, nepnummers/adressen) horen niet in de codebas
 
 ## Nieuwe SEO-structuur
 
-- `/personeel-inhuren` + 14 dienstlandings  
-- `/werken-bij` + `/werken-als/*` (10)  
-- 12 lokale root-URL’s (o.a. `/event-crew-amsterdam`, `/festival-crew-randstad`)  
-- Data: `src/lib/seo/*`  
-- UI: `src/components/seo/*`
+- `/personeel-inhuren` + dienstlandings (core + o.a. eventpersoneel, horeca-uitzendbureau, festival-medewerkers, spoed, catering, bediening, load-in/out)  
+- `/werken-bij` + `/werken-als/*`  
+- Lokale root-URL’s (o.a. `/event-crew-amsterdam`, `/festival-crew-randstad`)  
+- Extra `/locaties/*` (hilversum-hub, festival-crew-*, eventpersoneel-*, stagehands-hilversum) — overlapping `/locaties/*` → root 301  
+- Data: `src/lib/seo/*`, `src/data/locations.ts`, `src/data/additionalLocations.ts`  
+- UI: `src/components/seo/*` (+ `GoogleBusinessCta`)  
+- GSC-plan: `docs/google-search-console-plan.md`
 
 ## Sitemap & robots
 

@@ -13,14 +13,15 @@ import FounderStory from "@/components/about/FounderStory";
 import OverOnsTimeline from "@/components/over-ons/OverOnsTimeline";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import GoogleBusinessCta from "@/components/seo/GoogleBusinessCta";
 import JsonLd from "@/components/seo/JsonLd";
 import { aboutFaqs } from "@/lib/aboutFaq";
 import { aboutPageJsonLd, buildPageMetadata, faqJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Over ons | Crewbedrijf met maatschappelijke missie",
+  title: "Over ons | Event staffing & crewbedrijf",
   description:
-    "Helping Hands Agency is in 2022 opgericht door Tyrone van der Schagt: een crewbedrijf met een maatschappelijke missie. Ontdek onze aanpak voor medewerkers en opdrachtgevers binnen events, horeca, stagebouw, productie en logistiek.",
+    "Helping Hands Agency is een event staffing- en crewbedrijf voor evenementen, horeca, stagebouw, productie en logistiek. Opgericht in 2022 door Tyrone van der Schagt — met maatschappelijke missie én professionele uitvoering.",
   path: "/over-ons",
 });
 
@@ -55,6 +56,26 @@ export default function OverOnsPage() {
       />
 
       <AboutHero />
+
+      <section className="border-b border-slate-200/80 bg-white py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
+              Wat wij doen
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-[#0B1F4D] sm:text-3xl">
+              Event staffing &amp; crew voor de live branche
+            </h2>
+            <p className="mt-4 text-base leading-8 text-[#101828]/75">
+              Helping Hands Agency levert event crew, stagehands, horecapersoneel
+              en productiesupport voor festivals, stadions, beurzen, concerten,
+              catering en horecalocaties. Wij zijn gevestigd in Hilversum en
+              actief door heel Nederland — met duidelijke briefing, één
+              aanspreekpunt en tarief op aanvraag.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <nav
         aria-label="Op deze pagina"
@@ -120,6 +141,8 @@ export default function OverOnsPage() {
       <AboutFaq />
 
       <AboutCta />
+
+      <GoogleBusinessCta />
     </>
   );
 }

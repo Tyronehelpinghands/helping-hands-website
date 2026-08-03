@@ -5,6 +5,7 @@
  * swap). Safe claim language only: "projectervaring", "via productiepartner",
  * "op locatie" — no exclusivity or "beste van Nederland" claims.
  */
+import { additionalLocationPages } from "@/data/additionalLocations";
 import type { ServiceLandingSlug } from "@/lib/services";
 
 export type LocationFaq = {
@@ -48,7 +49,7 @@ export type LocationPage = {
   image: { src: string; alt: string };
 };
 
-export const locationPages: LocationPage[] = [
+const coreLocationPages: LocationPage[] = [
   {
     slug: "event-crew-amsterdam",
     city: "Amsterdam",
@@ -893,6 +894,11 @@ export const locationPages: LocationPage[] = [
       alt: "Productiecrew van Helping Hands tijdens een productie in Eindhoven",
     },
   },
+];
+
+export const locationPages: LocationPage[] = [
+  ...coreLocationPages,
+  ...(additionalLocationPages as LocationPage[]),
 ];
 
 export function getAllLocations(): LocationPage[] {

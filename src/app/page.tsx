@@ -13,6 +13,7 @@ import PageHero from "@/components/sections/PageHero";
 import ServicesSection from "@/components/sections/ServicesSection";
 import TrustBar from "@/components/sections/TrustBar";
 import WhyHelpingHands from "@/components/sections/WhyHelpingHands";
+import GoogleBusinessCta from "@/components/seo/GoogleBusinessCta";
 import JsonLd from "@/components/seo/JsonLd";
 import { ctaBackgroundPhoto, homeCrewBento } from "@/lib/crewPhotos";
 import { homeFaqs } from "@/lib/faq";
@@ -257,7 +258,7 @@ export default function Home() {
       <RevealOnScroll variant="fade">
         <CTASection
           title="Personeel nodig voor je volgende productie?"
-          description="Stuur je datum, locatie, tijden, functies en aantal mensen door. Wij denken mee over de planning en bezetting."
+          description="Stuur je datum, locatie, tijden, functies en aantal mensen door. Wij denken mee over de planning en bezetting. Tarief op aanvraag."
           buttonLabel="Contact — personeel aanvragen"
           buttonHref="/contact"
           secondaryLabel="Personeel inhuren"
@@ -266,6 +267,8 @@ export default function Home() {
           backgroundAlt={ctaBackgroundPhoto.alt}
         />
       </RevealOnScroll>
+
+      <GoogleBusinessCta />
     </>
   );
 }
