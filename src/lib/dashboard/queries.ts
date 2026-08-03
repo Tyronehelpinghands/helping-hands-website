@@ -130,9 +130,30 @@ export async function getApprovedUninvoicedTimeEntries(): Promise<TimeEntry[]> {
   return entries.filter((e) => e.status === "approved");
 }
 
+const ACTIVE_INVOICE_DRAFT_STATUSES = new Set([
+  "draft",
+  "ready",
+  "sent",
+  "paid",
+]);
+
+/**
+ * Factuurconcepten voor finance/owner/admin (RLS: is_internal_role).
+ * Meerdere fallbacks: Moneybird-kolommen of geneste joins mogen ontbreken
+ * zonder dat de lijst stil leeg blijft.
+ */
 export async function getInvoiceDrafts(): Promise<InvoiceDraft[]> {
+  const result = await getInvoiceDraftsResult();
+  return result.data;
+}
+
+export async function getInvoiceDraftsResult(): Promise<{
+  data: InvoiceDraft[];
+  error: string | null;
+}> {
   const supabase = await createClient();
-  const result = await safeSelect<InvoiceDraft>(() =>
+
+  const primary = await safeSelect<InvoiceDraft>(() =>
     supabase
       .from("invoice_drafts")
       .select(
@@ -140,11 +161,15 @@ export async function getInvoiceDrafts(): Promise<InvoiceDraft[]> {
       )
       .order("created_at", { ascending: false }),
   );
-  if (
-    result.error &&
-    /moneybird_/i.test(result.error) &&
-    (/column/i.test(result.error) || /schema cache/i.test(result.error))
-  ) {
+  if (!primary.error) {
+    return { data: primary.data, error: null };
+  }
+
+  const needsMoneybirdFallback =
+    /moneybird_/i.test(primary.error) &&
+    (/column/i.test(primary.error) || /schema cache/i.test(primary.error));
+
+  if (needsMoneybirdFallback) {
     const fallback = await safeSelect<InvoiceDraft>(() =>
       supabase
         .from("invoice_drafts")
@@ -153,9 +178,60 @@ export async function getInvoiceDrafts(): Promise<InvoiceDraft[]> {
         )
         .order("created_at", { ascending: false }),
     );
-    return fallback.data;
+    if (!fallback.error) {
+      return { data: fallback.data, error: null };
+    }
   }
-  return result.data;
+
+  // Laatste fallback: platte drafts zonder embeds (RLS/join-fouten).
+  const bare = await safeSelect<InvoiceDraft>(() =>
+    supabase
+      .from("invoice_drafts")
+      .select("*")
+      .order("created_at", { ascending: false }),
+  );
+  if (!bare.error) {
+    return {
+      data: bare.data.map((d) => ({
+        ...d,
+        invoice_draft_lines: d.invoice_draft_lines ?? [],
+      })),
+      error: null,
+    };
+  }
+
+  return {
+    data: [],
+    error:
+      primary.error ||
+      bare.error ||
+      "Factuurconcepten konden niet worden geladen (controleer RLS / is_internal_role).",
+  };
+}
+
+/**
+ * Gefactureerde uren zonder actief factuurconcept op hetzelfde project.
+ * Ontstaat o.a. als concept is verwijderd/geannuleerd terwijl status `invoiced` bleef,
+ * of als de drafts-query faalt terwijl uren wél als gefactureerd staan.
+ */
+export async function getInvoicedOrphanTimeEntries(
+  drafts?: InvoiceDraft[],
+): Promise<TimeEntry[]> {
+  const [entries, draftRows] = await Promise.all([
+    getTimeEntries(),
+    drafts ? Promise.resolve(drafts) : getInvoiceDrafts(),
+  ]);
+  const projectsWithActiveDraft = new Set(
+    draftRows
+      .filter((d) => ACTIVE_INVOICE_DRAFT_STATUSES.has(d.status))
+      .map((d) => d.project_id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  return entries.filter(
+    (e) =>
+      e.status === "invoiced" &&
+      (!e.project_id || !projectsWithActiveDraft.has(e.project_id)),
+  );
 }
 
 export async function getTasks(): Promise<Task[]> {

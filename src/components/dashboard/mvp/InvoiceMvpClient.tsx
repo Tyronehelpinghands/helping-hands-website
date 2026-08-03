@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Download, FilePlus, Send } from "lucide-react";
+import { Download, FilePlus, RotateCcw, Send } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,9 @@ import {
 } from "@/components/dashboard/mvp/MvpShared";
 import {
   createInvoiceDraftFromApprovedHoursAction,
+  createInvoiceDraftFromInvoicedHoursAction,
   pushInvoiceDraftToMoneybirdAction,
+  resetInvoicedTimeEntriesToApprovedAction,
   updateInvoiceDraftStatusAction,
 } from "@/lib/dashboard/mutations";
 import {
@@ -37,15 +39,19 @@ import type {
 
 export function InvoiceMvpClient({
   drafts,
+  draftsError,
   projects,
   approvedEntries,
+  orphanInvoicedEntries,
   tablesReady,
   moneybirdConfigured,
   moneybirdInvoiceReady,
 }: {
   drafts: InvoiceDraft[];
+  draftsError: string | null;
   projects: Project[];
   approvedEntries: TimeEntry[];
+  orphanInvoicedEntries: TimeEntry[];
   tablesReady: boolean;
   moneybirdConfigured: boolean;
   moneybirdInvoiceReady: boolean;
@@ -54,6 +60,7 @@ export function InvoiceMvpClient({
   const { toast, showToast } = useToast();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [recoverOpen, setRecoverOpen] = useState(false);
   const [moneybirdDraft, setMoneybirdDraft] = useState<InvoiceDraft | null>(
     null,
   );
@@ -64,6 +71,15 @@ export function InvoiceMvpClient({
     );
     return projects.filter((p) => ids.has(p.id));
   }, [projects, approvedEntries]);
+
+  const projectsWithOrphans = useMemo(() => {
+    const ids = new Set(
+      orphanInvoicedEntries
+        .map((e) => e.project_id)
+        .filter(Boolean) as string[],
+    );
+    return projects.filter((p) => ids.has(p.id));
+  }, [projects, orphanInvoicedEntries]);
 
   function downloadCsv(draft: InvoiceDraft) {
     const csv = invoiceDraftToCsv(draft);
@@ -79,11 +95,18 @@ export function InvoiceMvpClient({
 
   const notice = !tablesReady
     ? "Voer docs/internal-dashboard-database.md uit in Supabase."
-    : moneybirdConfigured
-      ? moneybirdInvoiceReady
-        ? "Moneybird is gekoppeld — concepten kunnen als draft naar Moneybird."
-        : "Token werkt, maar BTW-tarief/omzetrekening kon niet automatisch worden bepaald. Zie docs/moneybird-integration.md of zet optioneel TAX/LEDGER IDs."
-      : "Moneybird nog niet gekoppeld — concepten blijven in Supabase tot je Vercel-env zet.";
+    : draftsError
+      ? `Concepten laden mislukt: ${draftsError}`
+      : moneybirdConfigured
+        ? moneybirdInvoiceReady
+          ? "Moneybird is gekoppeld — concepten kunnen als draft naar Moneybird."
+          : "Token werkt, maar BTW-tarief/omzetrekening kon niet automatisch worden bepaald. Zie docs/moneybird-integration.md of zet optioneel TAX/LEDGER IDs."
+        : "Moneybird nog niet gekoppeld — concepten blijven in Supabase tot je Vercel-env zet.";
+
+  const showOrphanBanner =
+    orphanInvoicedEntries.length > 0 &&
+    approvedEntries.length === 0 &&
+    drafts.length === 0;
 
   return (
     <div className="space-y-6">
@@ -111,13 +134,89 @@ export function InvoiceMvpClient({
         </p>
       </div>
 
+      {orphanInvoicedEntries.length > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-950">
+            {orphanInvoicedEntries.length} gefactureerde urenregel
+            {orphanInvoicedEntries.length === 1 ? "" : "s"} zonder actief
+            factuurconcept
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-900/80">
+            {showOrphanBanner
+              ? "Daarom zie je 0 goedgekeurde uren en geen concepten: de status staat op Gefactureerd, maar er is geen concept meer gekoppeld (verwijderd/geannuleerd of query-fout)."
+              : "Deze uren staan op Gefactureerd zonder draft/ready/sent/paid-concept op hetzelfde project."}{" "}
+            Herstel een concept, of zet de status terug naar goedgekeurd om
+            opnieuw te factureren.
+          </p>
+          <ul className="mt-2 max-h-28 space-y-1 overflow-y-auto text-xs text-amber-950/90">
+            {orphanInvoicedEntries.slice(0, 8).map((e) => (
+              <li key={e.id}>
+                {e.work_date} · {e.crew_members?.full_name || "—"} ·{" "}
+                {e.projects?.project_name || "—"} · {formatHours(e.hours)}
+              </li>
+            ))}
+            {orphanInvoicedEntries.length > 8 ? (
+              <li>…en {orphanInvoicedEntries.length - 8} meer</li>
+            ) : null}
+          </ul>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              disabled={projectsWithOrphans.length === 0 || pending}
+              onClick={() => setRecoverOpen(true)}
+            >
+              <FilePlus className="mr-1 h-3.5 w-3.5" />
+              Herstel / maak concept
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                startTransition(async () => {
+                  const res = await resetInvoicedTimeEntriesToApprovedAction(
+                    orphanInvoicedEntries.map((e) => e.id),
+                  );
+                  if (res.ok) {
+                    showToast(
+                      `${res.data.count} urenregel(s) teruggezet naar goedgekeurd.`,
+                    );
+                    router.refresh();
+                  } else showToast(res.error);
+                });
+              }}
+            >
+              <RotateCcw className="mr-1 h-3.5 w-3.5" />
+              Status terugzetten naar goedgekeurd
+            </Button>
+            <Link
+              href="/dashboard/intern/urenregistratie"
+              className="inline-flex h-8 items-center rounded-md px-3 text-xs font-semibold text-[#173A8A] underline-offset-2 hover:underline"
+            >
+              Naar urenregistratie
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       {drafts.length === 0 ? (
         <MvpEmptyState
           title="Nog geen factuurconcepten"
-          description="Keur eerst uren goed en maak daarna een concept per project."
+          description={
+            draftsError
+              ? "Concepten konden niet worden geladen. Controleer of je interne rol (owner/admin/finance/planner/sales) hebt en of RLS (`is_internal_role`) actief is."
+              : orphanInvoicedEntries.length > 0
+                ? "Er zijn wel gefactureerde uren zonder concept. Gebruik hierboven Herstel of Status terugzetten."
+                : "Keur eerst uren goed en maak daarna een concept per project."
+          }
           action={
             projectsWithApproved.length > 0 ? (
               <Button onClick={() => setOpen(true)}>Concept maken</Button>
+            ) : orphanInvoicedEntries.length > 0 ? (
+              <Button onClick={() => setRecoverOpen(true)}>
+                Herstel concept
+              </Button>
             ) : undefined
           }
         />
@@ -165,7 +264,14 @@ export function InvoiceMvpClient({
                           d.id,
                           e.target.value as InvoiceDraftStatus,
                         );
-                        showToast(res.ok ? "Status bijgewerkt." : res.error);
+                        if (res.ok) {
+                          const reset = res.data.resetEntries ?? 0;
+                          showToast(
+                            reset > 0
+                              ? `Status bijgewerkt. ${reset} uren teruggezet naar goedgekeurd.`
+                              : "Status bijgewerkt.",
+                          );
+                        } else showToast(res.error);
                         router.refresh();
                       });
                     }}
@@ -188,7 +294,10 @@ export function InvoiceMvpClient({
                       · {d.moneybird_invoice_id.slice(0, 8)}…
                     </span>
                   ) : d.moneybird_sync_status === "fout" ? (
-                    <span className="text-red-600" title={d.moneybird_sync_error ?? ""}>
+                    <span
+                      className="text-red-600"
+                      title={d.moneybird_sync_error ?? ""}
+                    >
                       Fout
                     </span>
                   ) : (
@@ -331,6 +440,38 @@ export function InvoiceMvpClient({
       </MvpFormDialog>
 
       <MvpFormDialog
+        open={recoverOpen}
+        onOpenChange={setRecoverOpen}
+        title="Herstel concept uit gefactureerde uren"
+        description="Maakt een nieuw factuurconcept voor uren die al op Gefactureerd staan maar geen actief concept hebben."
+        pending={pending}
+        submitLabel="Concept herstellen"
+        onSubmit={async (fd) => {
+          startTransition(async () => {
+            const res = await createInvoiceDraftFromInvoicedHoursAction(fd);
+            if (res.ok) {
+              setRecoverOpen(false);
+              showToast("Factuurconcept hersteld.");
+              router.refresh();
+            } else showToast(res.error);
+          });
+        }}
+      >
+        <Field label="Project" name="project_id">
+          <TextSelect name="project_id" required defaultValue="">
+            <option value="" disabled>
+              Kies project
+            </option>
+            {projectsWithOrphans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.project_name}
+              </option>
+            ))}
+          </TextSelect>
+        </Field>
+      </MvpFormDialog>
+
+      <MvpFormDialog
         open={Boolean(moneybirdDraft)}
         onOpenChange={(next) => {
           if (!next) setMoneybirdDraft(null);
@@ -374,11 +515,7 @@ export function InvoiceMvpClient({
               />
             </Field>
             <label className="flex items-start gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                name="send"
-                className="mt-1"
-              />
+              <input type="checkbox" name="send" className="mt-1" />
               <span>
                 Ook direct versturen via Moneybird (default: alleen concept /
                 draft).
