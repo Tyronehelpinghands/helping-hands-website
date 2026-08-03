@@ -794,3 +794,10 @@ create unique index if not exists invoice_drafts_moneybird_invoice_id_uidx
 - App mutations also call `requireRole` server-side.
 - Do **not** store BSN, IBAN, or other sensitive payroll documents in these tables.
 - Never expose the service role key to the client.
+
+### Facturatie / invoice drafts (finance)
+
+- `invoice_drafts` + `invoice_draft_lines`: SELECT/INSERT/UPDATE voor alle interne rollen via `is_internal_role()` (zie policies hierboven). Mutaties in de app eisen `owner` / `admin` / `finance`.
+- `time_entries.status = 'invoiced'` heeft **geen** FK naar `invoice_drafts`. Als een concept wordt verwijderd of geannuleerd terwijl uren op `invoiced` blijven, zie je op Facturatie “0 goedgekeurde uren” en “geen concepten”.
+- Herstel in de UI: **Herstel / maak concept** (concept uit orphan-uren) of **Status terugzetten naar goedgekeurd** (owner/admin/finance). Annuleren van een concept zonder ander actief concept op hetzelfde project zet gekoppelde `invoiced`-uren automatisch terug naar `approved`.
+- Als de conceptenlijst leeg blijft terwijl er rijen in Supabase staan: controleer `get_my_role()` / `profiles.role` en of de Moneybird-migratie (kolommen hierboven) is gedraaid. De app valt terug op een platte `invoice_drafts`-select zonder embeds.

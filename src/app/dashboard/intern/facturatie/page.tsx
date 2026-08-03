@@ -3,7 +3,8 @@ import { InvoiceMvpClient } from "@/components/dashboard/mvp/InvoiceMvpClient";
 import {
   getApprovedUninvoicedTimeEntries,
   getDashboardStats,
-  getInvoiceDrafts,
+  getInvoiceDraftsResult,
+  getInvoicedOrphanTimeEntries,
   getProjects,
 } from "@/lib/dashboard/queries";
 import {
@@ -18,20 +19,26 @@ export const metadata: Metadata = {
 };
 
 export default async function InternFacturatiePage() {
-  const [drafts, projects, approvedEntries, stats, moneybirdInvoiceReady] =
+  const [draftsResult, projects, approvedEntries, stats, moneybirdInvoiceReady] =
     await Promise.all([
-      getInvoiceDrafts(),
+      getInvoiceDraftsResult(),
       getProjects(),
       getApprovedUninvoicedTimeEntries(),
       getDashboardStats(),
       ensureMoneybirdInvoiceReady(),
     ]);
 
+  const orphanInvoicedEntries = await getInvoicedOrphanTimeEntries(
+    draftsResult.data,
+  );
+
   return (
     <InvoiceMvpClient
-      drafts={drafts}
+      drafts={draftsResult.data}
+      draftsError={draftsResult.error}
       projects={projects}
       approvedEntries={approvedEntries}
+      orphanInvoicedEntries={orphanInvoicedEntries}
       tablesReady={stats.tablesReady}
       moneybirdConfigured={isMoneybirdConfigured()}
       moneybirdInvoiceReady={moneybirdInvoiceReady}
