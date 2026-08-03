@@ -62,6 +62,7 @@ create table if not exists public.clients (
   notes text,
   status text not null default 'active'
     check (status in ('active', 'prospect', 'inactive')),
+  moneybird_contact_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -403,6 +404,11 @@ create table if not exists public.invoice_drafts (
   vat_amount numeric not null default 0,
   total_amount numeric not null default 0,
   notes text,
+  moneybird_invoice_id text,
+  moneybird_sync_status text not null default 'niet_gesynct'
+    check (moneybird_sync_status in ('niet_gesynct', 'concept', 'verzonden', 'fout')),
+  moneybird_synced_at timestamptz,
+  moneybird_sync_error text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -719,6 +725,65 @@ create unique index if not exists crew_members_shiftbase_user_id_uidx
 ```
 
 **Sync gedrag:** `POST /api/shiftbase/sync-employees` (owner/admin/planner) haalt `GET /users` op (niet `/employees`), matched op e-mail (upsert) of `shiftbase_user_id`, en schrijft naar `crew_members`. Zonder e-mail → overgeslagen. Lokale-only crew wordt niet verwijderd. Zie `docs/shiftbase-integration.md`.
+
+---
+
+## Migration: Moneybird sync columns
+
+Run this in the Supabase SQL editor if `clients` / `invoice_drafts` already exist without Moneybird fields (idempotent). Required before **Facturatie → Moneybird**.
+
+```sql
+-- -----------------------------------------------------------------------------
+-- Moneybird contact id on public.clients
+-- -----------------------------------------------------------------------------
+alter table public.clients
+  add column if not exists moneybird_contact_id text;
+
+create unique index if not exists clients_moneybird_contact_id_uidx
+  on public.clients (moneybird_contact_id)
+  where moneybird_contact_id is not null;
+
+-- -----------------------------------------------------------------------------
+-- Moneybird sync metadata on public.invoice_drafts
+-- -----------------------------------------------------------------------------
+alter table public.invoice_drafts
+  add column if not exists moneybird_invoice_id text;
+
+alter table public.invoice_drafts
+  add column if not exists moneybird_sync_status text not null default 'niet_gesynct';
+
+alter table public.invoice_drafts
+  add column if not exists moneybird_synced_at timestamptz;
+
+alter table public.invoice_drafts
+  add column if not exists moneybird_sync_error text;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'invoice_drafts_moneybird_sync_status_check'
+  ) then
+    alter table public.invoice_drafts
+      add constraint invoice_drafts_moneybird_sync_status_check
+      check (
+        moneybird_sync_status in (
+          'niet_gesynct',
+          'concept',
+          'verzonden',
+          'fout'
+        )
+      );
+  end if;
+end $$;
+
+create unique index if not exists invoice_drafts_moneybird_invoice_id_uidx
+  on public.invoice_drafts (moneybird_invoice_id)
+  where moneybird_invoice_id is not null;
+```
+
+**Sync gedrag:** Facturatie-MVP → knop Moneybird (finance/owner/admin) maakt een draft sales invoice via API. Optioneel verzenden. Zie `docs/moneybird-integration.md`.
 
 ---
 

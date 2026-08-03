@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Download, FilePlus } from "lucide-react";
+import { Download, FilePlus, Send } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +13,13 @@ import {
   MvpPageHeader,
   MvpTableShell,
   MvpToast,
+  TextInput,
   TextSelect,
   useToast,
 } from "@/components/dashboard/mvp/MvpShared";
 import {
   createInvoiceDraftFromApprovedHoursAction,
+  pushInvoiceDraftToMoneybirdAction,
   updateInvoiceDraftStatusAction,
 } from "@/lib/dashboard/mutations";
 import {
@@ -37,16 +40,23 @@ export function InvoiceMvpClient({
   projects,
   approvedEntries,
   tablesReady,
+  moneybirdConfigured,
+  moneybirdInvoiceReady,
 }: {
   drafts: InvoiceDraft[];
   projects: Project[];
   approvedEntries: TimeEntry[];
   tablesReady: boolean;
+  moneybirdConfigured: boolean;
+  moneybirdInvoiceReady: boolean;
 }) {
   const router = useRouter();
   const { toast, showToast } = useToast();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [moneybirdDraft, setMoneybirdDraft] = useState<InvoiceDraft | null>(
+    null,
+  );
 
   const projectsWithApproved = useMemo(() => {
     const ids = new Set(
@@ -67,16 +77,20 @@ export function InvoiceMvpClient({
     showToast("CSV gedownload.");
   }
 
+  const notice = !tablesReady
+    ? "Voer docs/internal-dashboard-database.md uit in Supabase."
+    : moneybirdConfigured
+      ? moneybirdInvoiceReady
+        ? "Moneybird is gekoppeld — concepten kunnen als draft naar Moneybird."
+        : "Token werkt, maar BTW-tarief/omzetrekening kon niet automatisch worden bepaald. Zie docs/moneybird-integration.md of zet optioneel TAX/LEDGER IDs."
+      : "Moneybird nog niet gekoppeld — concepten blijven in Supabase tot je Vercel-env zet.";
+
   return (
     <div className="space-y-6">
       <MvpPageHeader
         title="Facturatie"
-        description="Factuurconcepten uit goedgekeurde uren, met CSV-export."
-        notice={
-          tablesReady
-            ? "Moneybird-verzending is nog niet gekoppeld — concepten blijven in Supabase."
-            : "Voer docs/internal-dashboard-database.md uit in Supabase."
-        }
+        description="Factuurconcepten uit goedgekeurde uren, met CSV-export en optionele Moneybird-sync."
+        notice={notice}
         actions={
           <Button
             className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
@@ -116,6 +130,7 @@ export function InvoiceMvpClient({
               <th className="px-3 py-2">Uren</th>
               <th className="px-3 py-2">Totaal</th>
               <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Moneybird</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -155,23 +170,51 @@ export function InvoiceMvpClient({
                       });
                     }}
                   >
-                    {(["draft", "ready", "sent", "paid", "cancelled"] as const).map(
-                      (s) => (
-                        <option key={s} value={s}>
-                          {invoiceStatusLabel(s)}
-                        </option>
-                      ),
-                    )}
+                    {(
+                      ["draft", "ready", "sent", "paid", "cancelled"] as const
+                    ).map((s) => (
+                      <option key={s} value={s}>
+                        {invoiceStatusLabel(s)}
+                      </option>
+                    ))}
                   </TextSelect>
                 </td>
+                <td className="px-3 py-2 text-xs text-slate-600">
+                  {d.moneybird_invoice_id ? (
+                    <span className="font-medium text-violet-700">
+                      {d.moneybird_sync_status === "verzonden"
+                        ? "Verzonden"
+                        : "Concept"}{" "}
+                      · {d.moneybird_invoice_id.slice(0, 8)}…
+                    </span>
+                  ) : d.moneybird_sync_status === "fout" ? (
+                    <span className="text-red-600" title={d.moneybird_sync_error ?? ""}>
+                      Fout
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td className="px-3 py-2 text-right">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => downloadCsv(d)}
-                  >
-                    <Download className="mr-1 h-3.5 w-3.5" /> CSV
-                  </Button>
+                  <div className="flex flex-wrap justify-end gap-1">
+                    {moneybirdInvoiceReady && !d.moneybird_invoice_id ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setMoneybirdDraft(d)}
+                        disabled={pending}
+                      >
+                        <Send className="mr-1 h-3.5 w-3.5" /> Moneybird
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => downloadCsv(d)}
+                    >
+                      <Download className="mr-1 h-3.5 w-3.5" /> CSV
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -198,11 +241,62 @@ export function InvoiceMvpClient({
       ) : null}
 
       <div className="rounded-xl border border-dashed border-slate-300 bg-[#F5F7FA]/50 p-4 text-sm text-slate-600">
-        <MvpBadge tone="warn">Moneybird — handmatig</MvpBadge>
-        <p className="mt-2">
-          Concepten worden in Supabase bewaard. Exporteer als CSV of verwerk
-          handmatig in Moneybird; automatische verzending volgt later.
-        </p>
+        {moneybirdConfigured ? (
+          <>
+            <MvpBadge tone={moneybirdInvoiceReady ? "ok" : "warn"}>
+              Moneybird —{" "}
+              {moneybirdInvoiceReady ? "klaar voor facturen" : "token OK"}
+            </MvpBadge>
+            <p className="mt-2">
+              {moneybirdInvoiceReady
+                ? "Gebruik “Moneybird” per concept om een draft in Moneybird aan te maken. Verzenden is optioneel (standaard uit)."
+                : "Token werkt (contacts), maar er is geen standaard BTW-tarief of omzetrekening gevonden. Controleer actieve sales-tarieven/omzetrekeningen in Moneybird, of zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID."}
+            </p>
+            {!moneybirdInvoiceReady ? (
+              <p className="mt-2">
+                Uitleg:{" "}
+                <Link
+                  href="/dashboard/intern/integraties"
+                  className="font-semibold text-[#173A8A] underline-offset-2 hover:underline"
+                >
+                  Integraties
+                </Link>{" "}
+                · docs/moneybird-integration.md
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <MvpBadge tone="warn">Moneybird — niet gekoppeld</MvpBadge>
+            <ol className="mt-2 list-decimal space-y-1 pl-5">
+              <li>
+                Maak een Personal Access Token in Moneybird (scopes: sales
+                invoices + contacts).
+              </li>
+              <li>
+                Zet in Vercel:{" "}
+                <code className="text-xs">MONEYBIRD_ACCESS_TOKEN</code> (of{" "}
+                <code className="text-xs">MONEYBIRD_API_TOKEN</code>) en{" "}
+                <code className="text-xs">MONEYBIRD_ADMINISTRATION_ID</code>.
+              </li>
+              <li>
+                Optioneel: TAX/LEDGER IDs als overrides; anders worden die
+                automatisch uit Moneybird gehaald.
+              </li>
+              <li>Redeploy, daarna testen via Integraties → Moneybird.</li>
+            </ol>
+            <p className="mt-2">
+              Details:{" "}
+              <Link
+                href="/dashboard/intern/integraties"
+                className="font-semibold text-[#173A8A] underline-offset-2 hover:underline"
+              >
+                Integraties
+              </Link>{" "}
+              · docs/moneybird-integration.md
+            </p>
+          </>
+        )}
       </div>
 
       <MvpFormDialog
@@ -234,6 +328,64 @@ export function InvoiceMvpClient({
             ))}
           </TextSelect>
         </Field>
+      </MvpFormDialog>
+
+      <MvpFormDialog
+        open={Boolean(moneybirdDraft)}
+        onOpenChange={(next) => {
+          if (!next) setMoneybirdDraft(null);
+        }}
+        title="Naar Moneybird"
+        pending={pending}
+        submitLabel="Concept in Moneybird"
+        onSubmit={async (fd) => {
+          if (!moneybirdDraft) return;
+          startTransition(async () => {
+            const contactId = String(fd.get("contact_id") ?? "");
+            const send = fd.get("send") === "on";
+            const res = await pushInvoiceDraftToMoneybirdAction(
+              moneybirdDraft.id,
+              contactId,
+              send,
+            );
+            if (res.ok) {
+              setMoneybirdDraft(null);
+              showToast(res.data.message);
+              router.refresh();
+            } else showToast(res.error);
+          });
+        }}
+      >
+        {moneybirdDraft ? (
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">
+              {moneybirdDraft.invoice_number} ·{" "}
+              {moneybirdDraft.clients?.company_name || "Geen klant"} ·{" "}
+              {formatCurrency(moneybirdDraft.total_amount)}
+            </p>
+            <Field label="Moneybird contact-id" name="contact_id">
+              <TextInput
+                name="contact_id"
+                required
+                defaultValue={
+                  moneybirdDraft.clients?.moneybird_contact_id ?? ""
+                }
+                placeholder="Bijv. 123456789012345678"
+              />
+            </Field>
+            <label className="flex items-start gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                name="send"
+                className="mt-1"
+              />
+              <span>
+                Ook direct versturen via Moneybird (default: alleen concept /
+                draft).
+              </span>
+            </label>
+          </div>
+        ) : null}
       </MvpFormDialog>
 
       <MvpToast message={toast} />

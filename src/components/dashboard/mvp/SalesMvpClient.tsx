@@ -383,6 +383,13 @@ export function SalesMvpClient({
         <Field label="Notities" name="notes">
           <TextTextarea name="notes" defaultValue={editClient?.notes ?? ""} />
         </Field>
+        <Field label="Moneybird contact-id (optioneel)" name="moneybird_contact_id">
+          <TextInput
+            name="moneybird_contact_id"
+            defaultValue={editClient?.moneybird_contact_id ?? ""}
+            placeholder="Voor facturatie-sync"
+          />
+        </Field>
         <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-2.5 text-sm text-[#0B1F4D]">
           <input
             type="checkbox"

@@ -13,6 +13,7 @@ import {
   calculateWorkedHours,
 } from "@/lib/dashboard/calculations";
 import { getRateSettings } from "@/lib/dashboard/queries";
+import { pushInvoiceDraftToMoneybird } from "@/lib/dashboard/moneybirdSync";
 import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 import { shouldAutoSyncShiftbase } from "@/lib/shiftbase";
 import type {
@@ -100,22 +101,44 @@ export async function createClientAction(
   const sendInvite = wantsPortalInvite(formData);
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const insertPayload: Record<string, unknown> = {
+    company_name,
+    contact_name,
+    email,
+    phone: strOrNull(formData.get("phone")),
+    address: strOrNull(formData.get("address")),
+    city: strOrNull(formData.get("city")),
+    notes: strOrNull(formData.get("notes")),
+    status: (strOrNull(formData.get("status")) as ClientStatus) || "active",
+  };
+  const moneybirdContactId = strOrNull(formData.get("moneybird_contact_id"));
+  if (moneybirdContactId) {
+    insertPayload.moneybird_contact_id = moneybirdContactId;
+  }
+
+  let { data, error } = await supabase
     .from("clients")
-    .insert({
-      company_name,
-      contact_name,
-      email,
-      phone: strOrNull(formData.get("phone")),
-      address: strOrNull(formData.get("address")),
-      city: strOrNull(formData.get("city")),
-      notes: strOrNull(formData.get("notes")),
-      status: (strOrNull(formData.get("status")) as ClientStatus) || "active",
-    })
+    .insert(insertPayload)
     .select("id")
     .single();
 
-  if (error) return fail(error.message);
+  if (
+    error &&
+    insertPayload.moneybird_contact_id &&
+    /moneybird_contact_id/i.test(error.message) &&
+    (/column/i.test(error.message) || /schema cache/i.test(error.message))
+  ) {
+    delete insertPayload.moneybird_contact_id;
+    const retry = await supabase
+      .from("clients")
+      .insert(insertPayload)
+      .select("id")
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
+
+  if (error || !data) return fail(error?.message ?? "Aanmaken mislukt.");
 
   let message = "Opdrachtgever aangemaakt.";
   if (sendInvite) {
@@ -149,21 +172,42 @@ export async function updateClientAction(
   const sendInvite = wantsPortalInvite(formData);
 
   const supabase = await createClient();
+  const updatePayload: Record<string, unknown> = {
+    company_name,
+    contact_name,
+    email,
+    phone: strOrNull(formData.get("phone")),
+    address: strOrNull(formData.get("address")),
+    city: strOrNull(formData.get("city")),
+    notes: strOrNull(formData.get("notes")),
+    status: strOrNull(formData.get("status")) as ClientStatus,
+  };
+  if (formData.has("moneybird_contact_id")) {
+    updatePayload.moneybird_contact_id = strOrNull(
+      formData.get("moneybird_contact_id"),
+    );
+  }
+
   const { error } = await supabase
     .from("clients")
-    .update({
-      company_name,
-      contact_name,
-      email,
-      phone: strOrNull(formData.get("phone")),
-      address: strOrNull(formData.get("address")),
-      city: strOrNull(formData.get("city")),
-      notes: strOrNull(formData.get("notes")),
-      status: strOrNull(formData.get("status")) as ClientStatus,
-    })
+    .update(updatePayload)
     .eq("id", id);
 
-  if (error) return fail(error.message);
+  if (error) {
+    if (
+      /moneybird_contact_id/i.test(error.message) &&
+      (/column/i.test(error.message) || /schema cache/i.test(error.message))
+    ) {
+      delete updatePayload.moneybird_contact_id;
+      const retry = await supabase
+        .from("clients")
+        .update(updatePayload)
+        .eq("id", id);
+      if (retry.error) return fail(retry.error.message);
+    } else {
+      return fail(error.message);
+    }
+  }
 
   let message = "Opdrachtgever bijgewerkt.";
   if (sendInvite) {
@@ -838,6 +882,45 @@ export async function updateInvoiceDraftStatusAction(
     "/dashboard/intern/financien",
   ]);
   return ok({ id });
+}
+
+/**
+ * Maakt een Moneybird-concept (of optioneel verzendt) vanuit een Supabase-concept.
+ * Vereist finance/owner/admin + Moneybird env.
+ */
+export async function pushInvoiceDraftToMoneybirdAction(
+  draftId: string,
+  contactId: string,
+  send = false,
+): Promise<
+  ActionResult<{
+    moneybirdInvoiceId: string;
+    sent: boolean;
+    message: string;
+  }>
+> {
+  await requireRole(FINANCE_ROLES);
+  if (!draftId.trim()) return fail("Factuurconcept-id ontbreekt.");
+
+  const result = await pushInvoiceDraftToMoneybird({
+    draftId: draftId.trim(),
+    contactId,
+    send,
+  });
+
+  if (!result.ok) return fail(result.error);
+
+  revalidateDashboard([
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/financien",
+    "/dashboard/intern/integraties",
+  ]);
+
+  return ok({
+    moneybirdInvoiceId: result.moneybirdInvoiceId,
+    sent: result.sent,
+    message: result.message,
+  });
 }
 
 // ——— Tasks ———

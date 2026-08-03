@@ -73,7 +73,7 @@ Code: `src/lib/dashboard/*` + `src/components/dashboard/mvp/*`.
 - Regels: arbeidsuren, km (km_rate), reistijd
 - BTW uit `company_settings.rates.vat_percent` (default 21%)
 - Uren worden daarna `invoiced`
-- **Geen** automatische Moneybird-verzending
+- Moneybird: optioneel concept aanmaken; verzenden alleen als expliciet aangevinkt
 
 ## Rollen
 
@@ -104,7 +104,7 @@ Layout blijft `requireRole(internalRoles)`. Mutaties checken opnieuw server-side
 | Supabase Database | Actief na SQL |
 | Resend / contact | Actief indien key + route |
 | Shiftbase | Actief (shifts + medewerkers-sync via `/api/shiftbase/sync-employees`) |
-| Moneybird | Voorbereid (geen auto-send) |
+| Moneybird | Optioneel — conceptfactuur vanuit Facturatie (`docs/moneybird-integration.md`) |
 | WhatsApp | Voorbereid (+ wa.me) |
 | Gmail | Voorbereid (+ mailto) |
 

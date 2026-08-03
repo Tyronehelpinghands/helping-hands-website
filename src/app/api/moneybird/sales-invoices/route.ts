@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { requireInternApiAccess } from "@/lib/api-auth";
 import {
-  assertMoneybirdConfigured,
+  requireFinanceApiAccess,
+  requireInternApiAccess,
+} from "@/lib/api-auth";
+import {
+  createMoneybirdSalesInvoice,
   formatMoneybirdError,
   isMoneybirdConfigured,
   moneybirdFetch,
   sanitizeMoneybirdInvoice,
+  sendMoneybirdSalesInvoice,
 } from "@/lib/server/moneybird";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +28,8 @@ type CreateInvoiceBody = {
   invoiceDate?: string;
   dueDate?: string;
   lines?: InvoiceLineInput[];
+  /** Optioneel: verstuur na aanmaken (default: alleen concept). */
+  send?: boolean;
 };
 
 export async function GET() {
@@ -59,7 +65,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireInternApiAccess();
+  const auth = await requireFinanceApiAccess();
   if ("error" in auth && auth.error) return auth.error;
 
   if (!isMoneybirdConfigured()) {
@@ -75,7 +81,6 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as CreateInvoiceBody;
-    const config = assertMoneybirdConfigured();
 
     if (!body.contactId?.trim()) {
       return NextResponse.json(
@@ -112,51 +117,29 @@ export async function POST(request: Request) {
       }
     }
 
-    // tax_rate_id en ledger_account_id komen uit Moneybird instellingen (env vars).
-    const taxRateId = config.defaultTaxRateId;
-    const ledgerAccountId = config.defaultLedgerAccountId;
+    let invoice = await createMoneybirdSalesInvoice({
+      contactId: body.contactId,
+      reference: body.reference,
+      invoiceDate: body.invoiceDate,
+      dueDate: body.dueDate,
+      lines: body.lines.map((line) => ({
+        description: line.description!.trim(),
+        amount: line.amount!,
+        price: line.price!,
+        taxRateId: line.taxRateId,
+        ledgerAccountId: line.ledgerAccountId,
+      })),
+    });
 
-    if (!taxRateId || !ledgerAccountId) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            "MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID zijn verplicht voor factuurregels.",
-        },
-        { status: 503 },
-      );
+    let sent = false;
+    if (body.send) {
+      invoice = await sendMoneybirdSalesInvoice(invoice.id);
+      sent = true;
     }
 
-    const payload = {
-      sales_invoice: {
-        contact_id: body.contactId.trim(),
-        reference: body.reference?.trim() || "Helping Hands factuur",
-        invoice_date: body.invoiceDate || new Date().toISOString().slice(0, 10),
-        due_date:
-          body.dueDate ||
-          new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-        currency: "EUR",
-        details_attributes: body.lines.map((line) => ({
-          description: line.description!.trim(),
-          price: line.price!.toFixed(2),
-          amount: String(line.amount),
-          tax_rate_id: line.taxRateId || taxRateId,
-          ledger_account_id: line.ledgerAccountId || ledgerAccountId,
-        })),
-      },
-    };
-
-    const raw = await moneybirdFetch<Record<string, unknown>>(
-      "/sales_invoices.json",
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-      },
-    );
-
-    const invoice = sanitizeMoneybirdInvoice(raw);
     return NextResponse.json({
       ok: true,
+      sent,
       invoice: {
         id: invoice.id,
         invoice_id: invoice.invoice_id,

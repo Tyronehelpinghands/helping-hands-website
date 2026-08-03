@@ -59,6 +59,12 @@ export type InvoiceDraftStatus =
   | "paid"
   | "cancelled";
 
+export type MoneybirdSyncStatus =
+  | "niet_gesynct"
+  | "concept"
+  | "verzonden"
+  | "fout";
+
 export type TaskPriority = "low" | "normal" | "high" | "critical";
 
 export type TaskStatus = "open" | "in_progress" | "done" | "cancelled";
@@ -83,6 +89,8 @@ export type Client = {
   city: string | null;
   notes: string | null;
   status: ClientStatus;
+  /** Moneybird contact id (optional until migration). */
+  moneybird_contact_id?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -206,9 +214,16 @@ export type InvoiceDraft = {
   vat_amount: number;
   total_amount: number;
   notes: string | null;
+  moneybird_invoice_id?: string | null;
+  moneybird_sync_status?: MoneybirdSyncStatus | null;
+  moneybird_synced_at?: string | null;
+  moneybird_sync_error?: string | null;
   created_at: string;
   updated_at: string;
-  clients?: Pick<Client, "id" | "company_name"> | null;
+  clients?: Pick<
+    Client,
+    "id" | "company_name" | "moneybird_contact_id"
+  > | null;
   projects?: Pick<Project, "id" | "project_name"> | null;
   invoice_draft_lines?: InvoiceDraftLine[];
 };

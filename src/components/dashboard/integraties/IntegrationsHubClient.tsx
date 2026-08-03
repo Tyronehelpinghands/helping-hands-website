@@ -46,6 +46,7 @@ export type IntegrationHubProps = {
   /** When false, Shiftbase sync is explicitly disabled (SHIFTBASE_ENABLED=false). */
   shiftbaseEnabled?: boolean;
   moneybirdConfigured?: boolean;
+  moneybirdInvoiceReady?: boolean;
   mailboxes: SharedMailbox[];
   whatsappTemplates: Array<{ id: string; label: string; body: string }>;
   gmailFlash?: GmailFlash | null;
@@ -78,6 +79,7 @@ export default function IntegrationsHubClient({
   shiftbaseConfigured = false,
   shiftbaseEnabled = true,
   moneybirdConfigured = false,
+  moneybirdInvoiceReady = false,
   mailboxes,
   whatsappTemplates,
   gmailFlash = null,
@@ -605,28 +607,64 @@ export default function IntegrationsHubClient({
               <CardTitle className="text-base font-black text-[#0B1F4D]">
                 Moneybird
               </CardTitle>
-              <SettingsStatusBadge status={configBadge(moneybirdConfigured)} />
+              <SettingsStatusBadge
+                status={
+                  moneybirdInvoiceReady
+                    ? "Actief"
+                    : configBadge(moneybirdConfigured)
+                }
+              />
             </div>
             <CardDescription>
-              Facturatie API — concepten lokaal; geen auto-send.
+              Facturatie API — concepten naar Moneybird; verzenden optioneel.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">
-            <p>
-              {moneybirdConfigured
-                ? "Env aanwezig. Klik Test API om te controleren."
-                : "MONEYBIRD_ACCESS_TOKEN / ADMINISTRATION_ID ontbreken."}
-            </p>
+            {moneybirdInvoiceReady ? (
+              <p>
+                Klaar voor facturen (token + tax/ledger via env of automatisch).
+                Test API, maak concepten in Facturatie → Moneybird.
+              </p>
+            ) : moneybirdConfigured ? (
+              <p>
+                Token OK (contacts). BTW-tarief/omzetrekening kon niet
+                automatisch worden bepaald — zet optioneel{" "}
+                <code>MONEYBIRD_DEFAULT_TAX_RATE_ID</code> /{" "}
+                <code>MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID</code>. Zie
+                docs/moneybird-integration.md.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="font-semibold text-[#0B1F4D]">
+                  Niet gekoppeld — zo koppel je Moneybird:
+                </p>
+                <ol className="list-decimal space-y-1 pl-4">
+                  <li>
+                    Moneybird → Personal Access Token (sales_invoices +
+                    contacts)
+                  </li>
+                  <li>
+                    Vercel env: <code>MONEYBIRD_ACCESS_TOKEN</code> (of{" "}
+                    <code>MONEYBIRD_API_TOKEN</code>) +{" "}
+                    <code>MONEYBIRD_ADMINISTRATION_ID</code>
+                  </li>
+                  <li>
+                    Optioneel: tax/ledger IDs; anders auto uit Moneybird
+                  </li>
+                  <li>Redeploy → Test API</li>
+                </ol>
+              </div>
+            )}
             <div className="flex flex-wrap items-start gap-2">
               <LiveTestButton provider="moneybird" />
               <Link
-                href="/dashboard/intern/instellingen"
+                href="/dashboard/intern/facturatie"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "sm" }),
                   "w-fit",
                 )}
               >
-                Instellingen
+                Naar facturatie
               </Link>
             </div>
           </CardContent>
