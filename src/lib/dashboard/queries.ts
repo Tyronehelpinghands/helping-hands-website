@@ -136,10 +136,25 @@ export async function getInvoiceDrafts(): Promise<InvoiceDraft[]> {
     supabase
       .from("invoice_drafts")
       .select(
-        "*, clients(id, company_name), projects(id, project_name), invoice_draft_lines(*)",
+        "*, clients(id, company_name, moneybird_contact_id), projects(id, project_name), invoice_draft_lines(*)",
       )
       .order("created_at", { ascending: false }),
   );
+  if (
+    result.error &&
+    /moneybird_/i.test(result.error) &&
+    (/column/i.test(result.error) || /schema cache/i.test(result.error))
+  ) {
+    const fallback = await safeSelect<InvoiceDraft>(() =>
+      supabase
+        .from("invoice_drafts")
+        .select(
+          "*, clients(id, company_name), projects(id, project_name), invoice_draft_lines(*)",
+        )
+        .order("created_at", { ascending: false }),
+    );
+    return fallback.data;
+  }
   return result.data;
 }
 

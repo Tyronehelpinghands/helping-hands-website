@@ -10,9 +10,11 @@ import type { FinanceSummary } from "@/lib/dashboard/queries";
 export function FinanceMvpClient({
   summary,
   tablesReady,
+  moneybirdConfigured = false,
 }: {
   summary: FinanceSummary;
   tablesReady: boolean;
+  moneybirdConfigured?: boolean;
 }) {
   const hasData =
     summary.openDraftCount > 0 ||
@@ -27,9 +29,11 @@ export function FinanceMvpClient({
         title="Financiën"
         description="Omzet, uren, reiskosten en marge op basis van factuurconcepten en goedgekeurde uren."
         notice={
-          tablesReady
-            ? "Moneybird-verzending is nog niet gekoppeld — cijfers komen uit Supabase."
-            : "Voer docs/internal-dashboard-database.md uit in Supabase."
+          !tablesReady
+            ? "Voer docs/internal-dashboard-database.md uit in Supabase."
+            : moneybirdConfigured
+              ? "Cijfers uit Supabase-concepten; Moneybird-sync via Facturatie."
+              : "Moneybird nog niet gekoppeld — cijfers komen uit Supabase."
         }
       />
 

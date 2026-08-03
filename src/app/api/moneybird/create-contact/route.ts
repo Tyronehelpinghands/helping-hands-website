@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireInternApiAccess } from "@/lib/api-auth";
+import { requireFinanceApiAccess } from "@/lib/api-auth";
 import {
   formatMoneybirdError,
   isMoneybirdConfigured,
@@ -22,7 +22,7 @@ type CreateContactBody = {
 };
 
 export async function POST(request: Request) {
-  const auth = await requireInternApiAccess();
+  const auth = await requireFinanceApiAccess();
   if ("error" in auth && auth.error) return auth.error;
 
   if (!isMoneybirdConfigured()) {

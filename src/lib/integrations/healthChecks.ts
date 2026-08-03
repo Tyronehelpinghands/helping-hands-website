@@ -210,7 +210,7 @@ async function checkMoneybird(): Promise<Omit<IntegrationHealthResult, "provider
       ok: false,
       status: "Ontbreekt",
       message:
-        "MONEYBIRD_ACCESS_TOKEN of MONEYBIRD_ADMINISTRATION_ID ontbreekt.",
+        "MONEYBIRD_ACCESS_TOKEN (of MONEYBIRD_API_TOKEN) / MONEYBIRD_ADMINISTRATION_ID ontbreekt. Zie docs/moneybird-integration.md.",
     };
   }
 

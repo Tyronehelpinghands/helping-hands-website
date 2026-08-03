@@ -34,27 +34,80 @@ export type SafeMoneybirdInvoice = {
   paid_at: string | null;
 };
 
+export type MoneybirdInvoiceLineInput = {
+  description: string;
+  amount: number;
+  price: number;
+  taxRateId?: string;
+  ledgerAccountId?: string;
+};
+
+export type CreateMoneybirdSalesInvoiceInput = {
+  contactId: string;
+  reference?: string;
+  invoiceDate?: string;
+  dueDate?: string;
+  currency?: string;
+  lines: MoneybirdInvoiceLineInput[];
+};
+
+function envTrim(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value || undefined;
+}
+
+/** Token: MONEYBIRD_ACCESS_TOKEN (primair) of alias MONEYBIRD_API_TOKEN. */
+export function getMoneybirdAccessToken(): string | undefined {
+  return envTrim("MONEYBIRD_ACCESS_TOKEN") || envTrim("MONEYBIRD_API_TOKEN");
+}
+
+export function getMissingMoneybirdEnvVars(): string[] {
+  const missing: string[] = [];
+  if (!getMoneybirdAccessToken()) {
+    missing.push("MONEYBIRD_ACCESS_TOKEN (of MONEYBIRD_API_TOKEN)");
+  }
+  if (!envTrim("MONEYBIRD_ADMINISTRATION_ID")) {
+    missing.push("MONEYBIRD_ADMINISTRATION_ID");
+  }
+  return missing;
+}
+
+export function getMissingMoneybirdInvoiceEnvVars(): string[] {
+  const missing = getMissingMoneybirdEnvVars();
+  if (!envTrim("MONEYBIRD_DEFAULT_TAX_RATE_ID")) {
+    missing.push("MONEYBIRD_DEFAULT_TAX_RATE_ID");
+  }
+  if (!envTrim("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID")) {
+    missing.push("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID");
+  }
+  return missing;
+}
+
 export function getMoneybirdConfig(): MoneybirdConfig | null {
-  const accessToken = process.env.MONEYBIRD_ACCESS_TOKEN?.trim();
-  const administrationId = process.env.MONEYBIRD_ADMINISTRATION_ID?.trim();
+  const accessToken = getMoneybirdAccessToken();
+  const administrationId = envTrim("MONEYBIRD_ADMINISTRATION_ID");
   if (!accessToken || !administrationId) return null;
 
   const baseUrl = (
-    process.env.MONEYBIRD_BASE_URL?.trim() || DEFAULT_BASE_URL
+    envTrim("MONEYBIRD_BASE_URL") || DEFAULT_BASE_URL
   ).replace(/\/$/, "");
 
   return {
     accessToken,
     administrationId,
     baseUrl,
-    defaultTaxRateId: process.env.MONEYBIRD_DEFAULT_TAX_RATE_ID?.trim(),
-    defaultLedgerAccountId:
-      process.env.MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID?.trim(),
+    defaultTaxRateId: envTrim("MONEYBIRD_DEFAULT_TAX_RATE_ID"),
+    defaultLedgerAccountId: envTrim("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID"),
   };
 }
 
 export function isMoneybirdConfigured(): boolean {
   return getMoneybirdConfig() !== null;
+}
+
+/** True when create-invoice env (tax + ledger) is complete. */
+export function isMoneybirdInvoiceReady(): boolean {
+  return getMissingMoneybirdInvoiceEnvVars().length === 0;
 }
 
 export function assertMoneybirdConfigured(): MoneybirdConfig {
@@ -94,11 +147,15 @@ export async function moneybirdFetch<T>(
     try {
       const body = (await res.json()) as {
         error?: string;
-        errors?: string[];
+        errors?: string[] | Record<string, string[]>;
       };
       if (body.error) message = body.error;
       else if (Array.isArray(body.errors) && body.errors.length > 0) {
         message = body.errors.join(", ");
+      } else if (body.errors && typeof body.errors === "object") {
+        message = Object.entries(body.errors)
+          .map(([key, vals]) => `${key}: ${vals.join(", ")}`)
+          .join("; ");
       }
     } catch {
       // ignore parse errors
@@ -146,4 +203,92 @@ export function sanitizeMoneybirdInvoice(
     sent_at: raw.sent_at ? String(raw.sent_at) : null,
     paid_at: raw.paid_at ? String(raw.paid_at) : null,
   };
+}
+
+/** Maakt een conceptfactuur (draft) in Moneybird. Verzendt niet. */
+export async function createMoneybirdSalesInvoice(
+  input: CreateMoneybirdSalesInvoiceInput,
+): Promise<SafeMoneybirdInvoice> {
+  const config = assertMoneybirdConfigured();
+  const taxRateId = config.defaultTaxRateId;
+  const ledgerAccountId = config.defaultLedgerAccountId;
+
+  if (!taxRateId || !ledgerAccountId) {
+    throw new Error(
+      "MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID zijn verplicht voor factuurregels.",
+    );
+  }
+
+  if (!input.contactId.trim()) {
+    throw new Error("contactId is verplicht.");
+  }
+  if (!input.lines.length) {
+    throw new Error("Minimaal één factuurregel is verplicht.");
+  }
+
+  const payload = {
+    sales_invoice: {
+      contact_id: input.contactId.trim(),
+      reference: input.reference?.trim() || "Helping Hands factuur",
+      invoice_date:
+        input.invoiceDate || new Date().toISOString().slice(0, 10),
+      due_date:
+        input.dueDate ||
+        new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+      currency: input.currency || "EUR",
+      details_attributes: input.lines.map((line) => ({
+        description: line.description.trim(),
+        price: Number(line.price).toFixed(2),
+        amount: String(line.amount),
+        tax_rate_id: line.taxRateId || taxRateId,
+        ledger_account_id: line.ledgerAccountId || ledgerAccountId,
+      })),
+    },
+  };
+
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    "/sales_invoices.json",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+
+  return sanitizeMoneybirdInvoice(raw);
+}
+
+/**
+ * Verstuurt een bestaande Moneybird-factuur (draft → open).
+ * Zonder body gebruikt Moneybird de defaults van het contact/workflow.
+ */
+export async function sendMoneybirdSalesInvoice(
+  moneybirdInvoiceId: string,
+  options?: {
+    deliveryMethod?: "Email" | "Manual" | "Peppol" | "Simplerinvoicing" | "Post";
+    emailAddress?: string;
+    emailMessage?: string;
+  },
+): Promise<SafeMoneybirdInvoice> {
+  if (!moneybirdInvoiceId.trim()) {
+    throw new Error("moneybirdInvoiceId is verplicht.");
+  }
+
+  const sending: Record<string, string | boolean> = {};
+  if (options?.deliveryMethod) sending.delivery_method = options.deliveryMethod;
+  if (options?.emailAddress) sending.email_address = options.emailAddress;
+  if (options?.emailMessage) sending.email_message = options.emailMessage;
+
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    `/sales_invoices/${encodeURIComponent(moneybirdInvoiceId.trim())}/send_invoice.json`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(
+        Object.keys(sending).length > 0
+          ? { sales_invoice_sending: sending }
+          : { sales_invoice_sending: {} },
+      ),
+    },
+  );
+
+  return sanitizeMoneybirdInvoice(raw);
 }

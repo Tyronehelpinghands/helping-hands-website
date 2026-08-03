@@ -6,11 +6,15 @@ import {
   getInvoiceDrafts,
   getProjects,
 } from "@/lib/dashboard/queries";
+import {
+  isMoneybirdConfigured,
+  isMoneybirdInvoiceReady,
+} from "@/lib/server/moneybird";
 
 export const metadata: Metadata = {
   title: "Facturatie | Intern dashboard",
   description:
-    "Maak factuurconcepten op basis van goedgekeurde uren. Moneybird blijft voorbereid.",
+    "Maak factuurconcepten op basis van goedgekeurde uren en sync optioneel naar Moneybird.",
 };
 
 export default async function InternFacturatiePage() {
@@ -27,6 +31,8 @@ export default async function InternFacturatiePage() {
       projects={projects}
       approvedEntries={approvedEntries}
       tablesReady={stats.tablesReady}
+      moneybirdConfigured={isMoneybirdConfigured()}
+      moneybirdInvoiceReady={isMoneybirdInvoiceReady()}
     />
   );
 }

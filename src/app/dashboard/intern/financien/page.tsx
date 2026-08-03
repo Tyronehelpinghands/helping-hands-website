@@ -4,6 +4,7 @@ import {
   getDashboardStats,
   getFinanceSummary,
 } from "@/lib/dashboard/queries";
+import { isMoneybirdConfigured } from "@/lib/server/moneybird";
 
 export const metadata: Metadata = {
   title: "Financiën | Intern dashboard",
@@ -18,6 +19,10 @@ export default async function InternFinancienPage() {
   ]);
 
   return (
-    <FinanceMvpClient summary={summary} tablesReady={stats.tablesReady} />
+    <FinanceMvpClient
+      summary={summary}
+      tablesReady={stats.tablesReady}
+      moneybirdConfigured={isMoneybirdConfigured()}
+    />
   );
 }

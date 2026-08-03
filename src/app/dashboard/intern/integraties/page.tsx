@@ -15,7 +15,10 @@ import {
   getWhatsAppConfigStatus,
   WHATSAPP_MESSAGE_TEMPLATES,
 } from "@/lib/integrations/whatsapp";
-import { isMoneybirdConfigured } from "@/lib/server/moneybird";
+import {
+  isMoneybirdConfigured,
+  isMoneybirdInvoiceReady,
+} from "@/lib/server/moneybird";
 import {
   isShiftbaseConfigured,
   isShiftbaseExplicitlyDisabled,
@@ -52,6 +55,7 @@ export default async function InternIntegratiesPage({
   const supabaseConfigured = isSupabaseConfigured();
   const resendActive = Boolean(process.env.RESEND_API_KEY?.trim());
   const moneybirdPrepared = isMoneybirdConfigured();
+  const moneybirdInvoiceReady = isMoneybirdInvoiceReady();
   const shiftbasePrepared = isShiftbaseConfigured();
   const shiftbaseDisabled = isShiftbaseExplicitlyDisabled();
   const shiftbaseEnabled = !shiftbaseDisabled;
@@ -108,10 +112,16 @@ export default async function InternIntegratiesPage({
     {
       provider: "moneybird",
       name: "Moneybird",
-      status: moneybirdPrepared ? "Voorbereid" : "Ontbreekt",
-      note: moneybirdPrepared
-        ? "Env aanwezig — klik Test (geen auto-send)"
-        : "Moneybird env ontbreekt",
+      status: moneybirdInvoiceReady
+        ? "Actief"
+        : moneybirdPrepared
+          ? "Voorbereid"
+          : "Ontbreekt",
+      note: moneybirdInvoiceReady
+        ? "API + tax/ledger — concepten naar Moneybird mogelijk"
+        : moneybirdPrepared
+          ? "Token aanwezig — zet TAX/LEDGER IDs voor facturen"
+          : "Zet MONEYBIRD_ACCESS_TOKEN + ADMINISTRATION_ID in Vercel",
     },
     {
       provider: "whatsapp",
@@ -152,6 +162,7 @@ export default async function InternIntegratiesPage({
         shiftbaseConfigured={shiftbasePrepared}
         shiftbaseEnabled={shiftbaseEnabled}
         moneybirdConfigured={moneybirdPrepared}
+        moneybirdInvoiceReady={moneybirdInvoiceReady}
         mailboxes={gmail.mailboxes}
         whatsappTemplates={[...WHATSAPP_MESSAGE_TEMPLATES]}
         gmailFlash={
