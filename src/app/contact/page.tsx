@@ -288,7 +288,7 @@ export default function ContactPage() {
             </h2>
             <p className="mt-4 text-base leading-8 text-white/75">
               Vul het formulier in of mail direct naar planning. Voor werken bij
-              Helping Hands: aanmeldingen of vacatures.
+              Helping Hands Agency: aanmeldingen of vacatures.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">

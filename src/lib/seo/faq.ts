@@ -27,6 +27,11 @@ export const personeelInhurenFaqs: SeoFaq[] = [
     answer:
       "Dat hangt af van beschikbaarheid. Deel je planning zo vroeg mogelijk; bij spoed kijken we wat nog haalbaar is.",
   },
+  {
+    question: "Wat kosten jullie diensten?",
+    answer:
+      "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie.",
+  },
 ];
 
 export const werkenBijFaqs: SeoFaq[] = [

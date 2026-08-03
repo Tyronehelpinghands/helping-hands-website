@@ -22,7 +22,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Personeel inhuren | Event crew, horeca & productie",
   description:
-    "Personeel inhuren voor events, festivals, horeca, stagebouw en productie. Helping Hands Agency: snelle planning, duidelijke briefing, landelijk inzetbaar.",
+    "Personeel inhuren voor events, festivals, horeca, stagebouw en productie. Helping Hands Agency: snelle planning, duidelijke briefing, landelijk inzetbaar. Tarief op aanvraag.",
   path: "/personeel-inhuren",
 });
 
@@ -52,7 +52,7 @@ export default function PersoneelInhurenHubPage() {
       <SeoHero
         eyebrow="Opdrachtgevers"
         h1="Personeel inhuren voor events, horeca en producties"
-        description="Helping Hands Agency levert event crew, stagehands, horeca personeel, runners, keukenhulp en meer. Gevestigd in Hilversum, actief door heel Nederland. Deel je planning — wij bezetten met duidelijke briefing en één aanspreekpunt."
+        description="Helping Hands Agency is een event staffing- en crewbedrijf: event crew, stagehands, horeca personeel, runners, keukenhulp en meer. Gevestigd in Hilversum, actief door heel Nederland. Duidelijke briefing, één aanspreekpunt, tarief op aanvraag."
         primaryCta={{
           label: "Personeel aanvragen",
           href: "/contact?type=personeel-aanvragen",

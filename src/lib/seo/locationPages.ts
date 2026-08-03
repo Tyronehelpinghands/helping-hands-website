@@ -71,8 +71,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Amsterdam?",
@@ -158,8 +162,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Utrecht?",
@@ -245,8 +253,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Rotterdam?",
@@ -332,8 +344,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Den Haag?",
@@ -419,8 +435,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Hilversum?",
@@ -506,8 +526,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Amsterdam?",
@@ -593,8 +617,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Utrecht?",
@@ -680,8 +708,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Arnhem?",
@@ -767,8 +799,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Hilversum?",
@@ -854,8 +890,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Amsterdam?",
@@ -941,8 +981,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Utrecht?",
@@ -1028,8 +1072,12 @@ export const seoLocationPages: SeoLocationPage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       },
       {
         "question": "Hebben jullie een kantoor in Randstad?",

@@ -34,12 +34,19 @@ const redirectedDienstenSlugs = new Set([
   "hospitality",
 ]);
 
-/** Old /locaties slugs that redirect to root SEO URLs — omit duplicates. */
+/** /locaties slugs that redirect to root SEO URLs — omit duplicates. */
 const redirectedLocatieSlugs = new Set([
   "event-crew-amsterdam",
+  "event-crew-utrecht",
+  "event-crew-rotterdam",
+  "event-crew-den-haag",
+  "event-crew-hilversum",
+  "stagehands-amsterdam",
   "stagehands-utrecht",
-  "horeca-personeel-hilversum",
   "stagehands-arnhem",
+  "horeca-personeel-hilversum",
+  "horeca-personeel-amsterdam",
+  "horeca-personeel-utrecht",
   "festival-crew-rotterdam",
   "eventpersoneel-den-haag",
 ]);

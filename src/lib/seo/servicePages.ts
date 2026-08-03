@@ -1,6 +1,7 @@
+import { additionalServicePages } from "@/lib/seo/additionalServicePages";
 import type { ServicePage } from "./types";
 
-export const servicePages: ServicePage[] = [
+const coreServicePages: ServicePage[] = [
   {
     "slug": "event-crew",
     "title": "Event crew inhuren",
@@ -87,8 +88,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -204,8 +209,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -321,8 +330,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -438,8 +451,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -472,7 +489,7 @@ export const servicePages: ServicePage[] = [
   {
     "slug": "productie-assistenten",
     "title": "Productie-assistenten inhuren",
-    "metaTitle": "Productie-assistenten inhuren | Helping Hands",
+    "metaTitle": "Productie-assistenten inhuren | Helping Hands Agency",
     "metaDescription": "Productie-assistenten inhuren voor planningshulp, runners en floor support. Ontlast je productieteam met betrouwbare crew.",
     "h1": "Productie-assistenten inhuren voor events en producties",
     "intro": "Productie-assistenten ontlasten je team bij drukke callsheets, ombouwen en parallelle taken. Helping Hands Agency levert productieondersteuning die instructies oppakt, meedenkt en op de vloer blijft. Geschikt voor events, beurzen, corporate producties en podiumshows. Wij briefen taken en escalatielijnen vooraf, zodat niemand gokt wat er moet gebeuren. Gevestigd in Hilversum, inzetbaar landelijk. Vraag productie-assistenten aan via contact — wij matchen op beschikbaarheid en ervaring.",
@@ -555,8 +572,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -589,7 +610,7 @@ export const servicePages: ServicePage[] = [
   {
     "slug": "logistiek-personeel",
     "title": "Logistiek personeel inhuren",
-    "metaTitle": "Logistiek personeel inhuren | Helping Hands",
+    "metaTitle": "Logistiek personeel inhuren | Helping Hands Agency",
     "metaDescription": "Logistiek personeel inhuren voor laden, lossen en materiaalstromen op events. Betrouwbare logistieke crew met briefing.",
     "h1": "Logistiek personeel inhuren voor events en producties",
     "intro": "Zonder logistiek staat een productie stil. Helping Hands Agency levert logistiek personeel voor laden, lossen, bevoorrading en materiaalstromen op evenementen en locaties. Onze crew werkt praktisch, veilig en volgens briefing. Geschikt voor festivals, beurzen, stadions en horeca-events met veel beweging achter de schermen. Wij opereren vanuit Hilversum en leveren door heel Nederland. Deel je logistieke planning — wij bezetten de juiste handen. Aanvragen via contact of planning@helpinghandsagency.nl.",
@@ -672,8 +693,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -789,8 +814,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -906,8 +935,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -941,7 +974,7 @@ export const servicePages: ServicePage[] = [
     "slug": "barbacks",
     "title": "Barbacks inhuren",
     "metaTitle": "Barbacks inhuren | Helping Hands Agency",
-    "metaDescription": "Barbacks inhuren voor events en horeca. Bevoorrading, glazen en tempo achter de bar. Vraag barbacks aan bij Helping Hands.",
+    "metaDescription": "Barbacks inhuren voor events en horeca. Bevoorrading, glazen en tempo achter de bar. Vraag barbacks aan bij Helping Hands Agency.",
     "h1": "Barbacks inhuren voor events, bars en festivals",
     "intro": "Barbacks houden de bar draaiende: ijs, glazen, voorraad en opruimen zodat bartenders kunnen blijven schenken. Helping Hands Agency levert barbacks die hard werken, instructies volgen en rust houden tijdens piek. Ideaal voor festivals, clubnights, banqueting en drukke horecalocaties. Wij briefen taken en kleding vooraf. Gevestigd in Hilversum, actief landelijk. Vraag barbacks aan via contact — wij checken beschikbaarheid snel.",
     "targetKeywords": [
@@ -1023,8 +1056,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1140,8 +1177,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1257,8 +1298,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1374,8 +1419,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1408,7 +1457,7 @@ export const servicePages: ServicePage[] = [
   {
     "slug": "hospitality-personeel",
     "title": "Hospitality personeel inhuren",
-    "metaTitle": "Hospitality personeel inhuren | Helping Hands",
+    "metaTitle": "Hospitality personeel inhuren | Helping Hands Agency",
     "metaDescription": "Hospitality personeel inhuren voor VIP, ontvangst en begeleiding op events. Representatieve crew met duidelijke briefing.",
     "h1": "Hospitality personeel inhuren voor events en locaties",
     "intro": "Hospitality draait om eerste indruk, begeleiding en rust voor gasten. Helping Hands Agency levert hospitality personeel voor VIP-zones, ontvangst, hostessen/hosts en gastbegeleiding op events en locaties. Wij briefen tone-of-voice, kleding en routes vooraf. Gevestigd in Hilversum, actief door heel Nederland. Vraag hospitality crew aan via contact — wij matchen op uitstraling én praktische inzet.",
@@ -1491,8 +1540,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1608,8 +1661,12 @@ export const servicePages: ServicePage[] = [
         "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
       },
       {
-        "question": "Voor wie is Helping Hands bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties."
+        "question": "Wat kosten jullie diensten?",
+        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
+      },
+      {
+        "question": "Voor wie is Helping Hands Agency bedoeld?",
+        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
       }
     ],
     "ctaPrimary": {
@@ -1639,6 +1696,11 @@ export const servicePages: ServicePage[] = [
       }
     ]
   }
+];
+
+export const servicePages: ServicePage[] = [
+  ...coreServicePages,
+  ...additionalServicePages,
 ];
 
 export function getAllServicePages(): ServicePage[] {

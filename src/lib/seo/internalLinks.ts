@@ -25,7 +25,7 @@ export function relatedForService(slug: string): SeoRelatedLink[] {
     ...fromPage,
     ...locations,
     ...work,
-    { href: "/werken-bij", label: "Werken bij Helping Hands" },
+    { href: "/werken-bij", label: "Werken bij Helping Hands Agency" },
     { href: "/vacatures", label: "Open vacatures" },
   ].slice(0, 8);
 }
@@ -45,7 +45,7 @@ export function relatedForWork(slug: string): SeoRelatedLink[] {
       ? [{ href: service.path, label: service.title }]
       : []),
     ...otherWork,
-    { href: "/werken-bij", label: "Werken bij Helping Hands" },
+    { href: "/werken-bij", label: "Werken bij Helping Hands Agency" },
     { href: "/vacatures", label: "Bekijk vacatures" },
     { href: "/personeel-inhuren", label: "Personeel inhuren (opdrachtgevers)" },
   ].slice(0, 8);

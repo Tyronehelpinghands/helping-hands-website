@@ -97,7 +97,7 @@ export default async function PersoneelInhurenServicePage({
       <RelatedLinks links={relatedForService(page.slug)} />
       <SeoCta
         title={`${page.title} nodig?`}
-        description="Deel datum, locatie, tijden, functies en aantal mensen. Wij denken mee over bezetting."
+        description="Deel datum, locatie, tijden, functies en aantal mensen. Wij denken mee over bezetting. Tarief op aanvraag."
         primaryCta={page.ctaPrimary}
         secondaryCta={page.ctaSecondary}
       />
