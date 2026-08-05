@@ -732,6 +732,8 @@ create unique index if not exists crew_members_shiftbase_user_id_uidx
 
 Run this in the Supabase SQL editor if `clients` / `invoice_drafts` already exist without Moneybird fields (idempotent). Required before **Facturatie → Moneybird**.
 
+**Standalone paste file:** [`supabase/moneybird-columns.sql`](../supabase/moneybird-columns.sql)
+
 ```sql
 -- -----------------------------------------------------------------------------
 -- Moneybird contact id on public.clients

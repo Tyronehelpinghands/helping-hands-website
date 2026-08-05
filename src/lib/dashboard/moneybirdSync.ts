@@ -23,7 +23,8 @@ export type PushInvoiceDraftResult =
     }
   | { ok: false; error: string };
 
-function isMissingColumnError(message: string): boolean {
+/** True when PostgREST/Postgres reports a missing moneybird_* column. */
+export function isMissingMoneybirdColumnError(message: string): boolean {
   return (
     /moneybird_/i.test(message) &&
     (/column/i.test(message) ||
@@ -31,6 +32,9 @@ function isMissingColumnError(message: string): boolean {
       /does not exist/i.test(message))
   );
 }
+
+export const MONEYBIRD_COLUMNS_SQL_HINT =
+  "Draai SQL voor moneybird kolommen (supabase/moneybird-columns.sql in Supabase SQL Editor).";
 
 type LoadedDraft = {
   id: string;
@@ -90,7 +94,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
     .eq("id", options.draftId)
     .maybeSingle();
 
-  if (full.error && isMissingColumnError(full.error.message)) {
+  if (full.error && isMissingMoneybirdColumnError(full.error.message)) {
     persistMoneybirdColumns = false;
     const basic = await supabase
       .from("invoice_drafts")
@@ -101,7 +105,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
       return {
         ok: false,
         error:
-          "Moneybird-kolommen ontbreken. Voer de SQL-migratie uit (docs/moneybird-integration.md).",
+          MONEYBIRD_COLUMNS_SQL_HINT,
       };
     }
     draft = basic.data as LoadedDraft;
@@ -164,7 +168,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
         .eq("id", draft.id);
 
       if (updateError) {
-        if (isMissingColumnError(updateError.message)) {
+        if (isMissingMoneybirdColumnError(updateError.message)) {
           await supabase
             .from("invoice_drafts")
             .update({ status: sent ? "sent" : "ready" })
@@ -197,7 +201,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
         .from("clients")
         .update({ moneybird_contact_id: contactId })
         .eq("id", draft.client_id);
-      if (clientError && !isMissingColumnError(clientError.message)) {
+      if (clientError && !isMissingMoneybirdColumnError(clientError.message)) {
         // Niet-blokkerend: factuur is al aangemaakt
         console.warn(
           "[Moneybird] Kon moneybird_contact_id niet opslaan:",

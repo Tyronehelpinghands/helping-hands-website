@@ -84,7 +84,7 @@ Server action (Facturatie-MVP):
 
 ## SQL (bestaande databases)
 
-Voer de migratie uit in [`internal-dashboard-database.md`](./internal-dashboard-database.md) onder **Migration: Moneybird sync columns**:
+Voer de migratie uit via [`supabase/moneybird-columns.sql`](../supabase/moneybird-columns.sql) (of dezelfde SQL in [`internal-dashboard-database.md`](./internal-dashboard-database.md) onder **Migration: Moneybird sync columns**):
 
 - `clients.moneybird_contact_id`
 - `invoice_drafts.moneybird_invoice_id`

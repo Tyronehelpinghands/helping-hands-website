@@ -167,7 +167,9 @@ export async function getInvoiceDraftsResult(): Promise<{
 
   const needsMoneybirdFallback =
     /moneybird_/i.test(primary.error) &&
-    (/column/i.test(primary.error) || /schema cache/i.test(primary.error));
+    (/column/i.test(primary.error) ||
+      /schema cache/i.test(primary.error) ||
+      /does not exist/i.test(primary.error));
 
   if (needsMoneybirdFallback) {
     const fallback = await safeSelect<InvoiceDraft>(() =>
