@@ -13,7 +13,11 @@ import {
   calculateWorkedHours,
 } from "@/lib/dashboard/calculations";
 import { getRateSettings } from "@/lib/dashboard/queries";
-import { pushInvoiceDraftToMoneybird } from "@/lib/dashboard/moneybirdSync";
+import {
+  isMissingMoneybirdColumnError,
+  MONEYBIRD_COLUMNS_SQL_HINT,
+  pushInvoiceDraftToMoneybird,
+} from "@/lib/dashboard/moneybirdSync";
 import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 import { shouldAutoSyncShiftbase } from "@/lib/shiftbase";
 import type {
@@ -125,8 +129,7 @@ export async function createClientAction(
   if (
     error &&
     insertPayload.moneybird_contact_id &&
-    /moneybird_contact_id/i.test(error.message) &&
-    (/column/i.test(error.message) || /schema cache/i.test(error.message))
+    isMissingMoneybirdColumnError(error.message)
   ) {
     delete insertPayload.moneybird_contact_id;
     const retry = await supabase
@@ -194,10 +197,7 @@ export async function updateClientAction(
     .eq("id", id);
 
   if (error) {
-    if (
-      /moneybird_contact_id/i.test(error.message) &&
-      (/column/i.test(error.message) || /schema cache/i.test(error.message))
-    ) {
+    if (isMissingMoneybirdColumnError(error.message)) {
       delete updatePayload.moneybird_contact_id;
       const retry = await supabase
         .from("clients")
@@ -764,13 +764,39 @@ export async function updateTimeEntryAction(
 
     const draftProjectId = project_id || existing.project_id;
     if (draftProjectId) {
-      const { data: drafts, error: draftsError } = await supabase
+      type DraftRow = {
+        id: string;
+        status: string;
+        moneybird_invoice_id?: string | null;
+      };
+
+      let drafts: DraftRow[] | null = null;
+      const withMoneybird = await supabase
         .from("invoice_drafts")
         .select("id, status, moneybird_invoice_id")
         .eq("project_id", draftProjectId)
         .in("status", ["draft", "ready"]);
 
-      if (draftsError) return fail(draftsError.message);
+      if (withMoneybird.error) {
+        if (isMissingMoneybirdColumnError(withMoneybird.error.message)) {
+          // Zonder moneybird_* kolommen: behandel open concepten als ontkoppelbaar.
+          const fallback = await supabase
+            .from("invoice_drafts")
+            .select("id, status")
+            .eq("project_id", draftProjectId)
+            .in("status", ["draft", "ready"]);
+          if (fallback.error) {
+            return fail(
+              `${MONEYBIRD_COLUMNS_SQL_HINT} (${fallback.error.message})`,
+            );
+          }
+          drafts = fallback.data;
+        } else {
+          return fail(withMoneybird.error.message);
+        }
+      } else {
+        drafts = withMoneybird.data;
+      }
 
       const unlinkable = (drafts ?? []).filter((d) => !d.moneybird_invoice_id);
       if (unlinkable.length > 0) {
