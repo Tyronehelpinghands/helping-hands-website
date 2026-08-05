@@ -520,14 +520,14 @@ export function HoursMvpClient({
             if (res.ok) {
               setOpen(false);
               setEdit(null);
-              const unlinked =
-                wasEdit && res.ok && "unlinkedDrafts" in res.data
-                  ? Number(res.data.unlinkedDrafts ?? 0)
+              const draftRefreshed =
+                wasEdit && res.ok && "draftRefreshed" in res.data
+                  ? Number(res.data.draftRefreshed ?? 0)
                   : 0;
               showToast(
                 wasEdit
-                  ? unlinked > 0
-                    ? `Registratie bijgewerkt. ${unlinked} factuurconcept geannuleerd.`
+                  ? draftRefreshed > 0
+                    ? "Registratie bijgewerkt. Factuurconcept is mee bijgewerkt."
                     : wasInvoiced
                       ? "Registratie bijgewerkt en status teruggezet naar goedgekeurd."
                       : "Registratie bijgewerkt."

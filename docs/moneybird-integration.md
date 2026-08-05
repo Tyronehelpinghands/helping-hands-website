@@ -7,7 +7,7 @@ Server-side koppeling met de [Moneybird API v2](https://developer.moneybird.com/
 | Laag | Rol |
 |---|---|
 | **Supabase** | Bron van waarheid voor factuurconcepten (`invoice_drafts` + regels) |
-| **Moneybird** | Optioneel — conceptfactuur aanmaken (draft); verzenden optioneel |
+| **Moneybird** | Optioneel — conceptfactuur aanmaken (draft); verzenden alleen via expliciete **Bevestig factuur** |
 
 Zonder env-variabelen blijven concepten in Supabase; CSV-export blijft beschikbaar. De UI toont dan duidelijke setup-stappen (geen valse “connected”-status).
 
@@ -64,21 +64,29 @@ Broncode: `src/lib/server/moneybird.ts`.
 | `GET /api/moneybird/contacts` | intern | Contacten ophalen |
 | `POST /api/moneybird/create-contact` | finance/admin/owner | Contact aanmaken |
 | `GET /api/moneybird/sales-invoices` | intern | Facturen ophalen |
-| `POST /api/moneybird/sales-invoices` | finance/admin/owner | Conceptfactuur aanmaken (`send: true` = ook versturen) |
+| `POST /api/moneybird/sales-invoices` | finance/admin/owner | Conceptfactuur aanmaken (`send: true` blijft API-optie; UI gebruikt dit niet) |
 
-Server action (Facturatie-MVP):
+Server actions (Facturatie-MVP):
 
 | Action | Rol | Doel |
 |---|---|---|
-| `pushInvoiceDraftToMoneybirdAction` | finance/admin/owner | Supabase-concept → Moneybird draft (+ optioneel send) |
+| `pushInvoiceDraftToMoneybirdAction` | finance/admin/owner | Supabase-concept → Moneybird **alleen concept** (aanmaken of bijwerken) |
+| `confirmInvoiceDraftInMoneybirdAction` | finance/admin/owner | Expliciet bevestigen/verzenden in Moneybird |
 
-## Sync-gedrag
+## Sync-gedrag (twee stappen)
 
 1. Maak een factuurconcept in **Facturatie** (uit goedgekeurde uren).
 2. Vul bij de opdrachtgever (Sales) of in het Moneybird-dialog een **Moneybird contact-id** in.
-3. Klik **Moneybird** → standaard alleen **concept/draft** in Moneybird.
-4. Optioneel checkbox: ook direct versturen (`PATCH .../send_invoice.json`).
-5. Bij succes: `moneybird_invoice_id` + sync-status op `invoice_drafts`; lokale status → `ready` of `sent`.
+3. **Naar Moneybird als concept** → alleen draft in Moneybird (`POST` of `PATCH` sales invoice). Nooit automatisch verzenden.
+4. **Bevestig factuur** (aparte knop + bevestigingsdialog) → `PATCH .../send_invoice.json`. Lokale status → `sent`, `moneybird_sync_status` → `verzonden`.
+
+### Uren aanpassen ↔ factuurconcept
+
+Als je in **Urenregistratie** een goedgekeurde of gefactureerde regel aanpast (`updateTimeEntryAction`):
+
+- Open lokale concepten (`draft` / `ready`, niet verzonden) voor hetzelfde project worden herberekend uit goedgekeurde + gekoppelde uren.
+- Er is **geen** auto-send naar Moneybird.
+- Bestond er al een Moneybird-concept (nog niet verzonden): sync-status → `niet_gesynct` met melding *Concept verouderd — vernieuw vanuit uren*; vernieuw daarna via “Naar Moneybird als concept” / “Vernieuw Moneybird”.
 
 **Let op:** “Token OK (contacts)” betekent alleen dat de API bereikbaar is — nog niet dat tax/ledger klaar zijn. “Klaar voor facturen” volgt als tax + ledger via env of auto-resolve beschikbaar zijn.
 
@@ -118,4 +126,5 @@ Facturatie toont setup-stappen zolang env ontbreekt — geen nep-“connected”
 2. Redeploy
 3. Dashboard → **Integraties** → Moneybird **Test API** → verwacht “Klaar voor facturen”
 4. Supabase: Moneybird SQL-migratie
-5. **Facturatie** → concept → **Moneybird** → concept verschijnt in Moneybird (niet auto-send tenzij aangevinkt)
+5. **Facturatie** → concept → **Naar Moneybird als concept** → daarna optioneel **Bevestig factuur** (nooit casual/auto-send)
+6. Uren wijzigen op een project met open concept → lokaal concept vernieuwt; Moneybird pas na expliciete vernieuw-sync
