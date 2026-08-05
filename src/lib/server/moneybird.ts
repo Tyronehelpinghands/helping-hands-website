@@ -549,6 +549,47 @@ export async function updateMoneybirdSalesInvoice(
 }
 
 /**
+ * Verwijdert een Moneybird-factuur (alleen concept/draft; verzonden facturen
+ * moeten via creditnota). Verzendt niets.
+ */
+export async function deleteMoneybirdSalesInvoice(
+  moneybirdInvoiceId: string,
+): Promise<void> {
+  const id = moneybirdInvoiceId.trim();
+  if (!id) {
+    throw new Error("moneybirdInvoiceId is verplicht.");
+  }
+
+  await moneybirdFetch<Record<string, unknown>>(
+    `/sales_invoices/${encodeURIComponent(id)}.json`,
+    { method: "DELETE" },
+  );
+}
+
+/**
+ * Maakt een creditnota-concept in Moneybird op basis van een bestaande factuur.
+ * Verzendt nooit — credit blijft draft tot handmatige bevestiging in Moneybird.
+ */
+export async function createMoneybirdCreditInvoice(
+  moneybirdInvoiceId: string,
+): Promise<SafeMoneybirdInvoice> {
+  const id = moneybirdInvoiceId.trim();
+  if (!id) {
+    throw new Error("moneybirdInvoiceId is verplicht.");
+  }
+
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    `/sales_invoices/${encodeURIComponent(id)}/duplicate_creditinvoice.json`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    },
+  );
+
+  return sanitizeMoneybirdInvoice(raw);
+}
+
+/**
  * Verstuurt een bestaande Moneybird-factuur (draft → open).
  * Zonder body gebruikt Moneybird de defaults van het contact/workflow.
  */

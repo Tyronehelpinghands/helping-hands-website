@@ -401,7 +401,7 @@ create table if not exists public.invoice_drafts (
   project_id uuid references public.projects (id) on delete set null,
   invoice_number text,
   status text not null default 'draft'
-    check (status in ('draft', 'ready', 'sent', 'paid', 'cancelled')),
+    check (status in ('draft', 'ready', 'sent', 'paid', 'cancelled', 'gecrediteerd')),
   total_hours numeric not null default 0,
   hourly_rate numeric,
   travel_costs numeric not null default 0,
@@ -821,6 +821,23 @@ create unique index if not exists invoice_drafts_moneybird_invoice_id_uidx
 
 ---
 
+## Migration: invoice status `gecrediteerd`
+
+Run in Supabase SQL Editor if `invoice_drafts.status` check nog geen `gecrediteerd` heeft (idempotent). Required before **Facturatie → Crediteren**.
+
+**Standalone paste file:** [`supabase/invoice-draft-status-gecrediteerd.sql`](../supabase/invoice-draft-status-gecrediteerd.sql)
+
+```sql
+-- Zie supabase/invoice-draft-status-gecrediteerd.sql
+```
+
+**Gedrag:**
+
+- **Verwijderen** (concept, niet Moneybird-verzonden): concept verwijderen; uren → `approved` (opnieuw factureerbaar). Optioneel Moneybird-concept deleten.
+- **Crediteren** (verzonden / Moneybird `verzonden`): origineel → `gecrediteerd`; lokaal creditconcept (negatieve bedragen); Moneybird `duplicate_creditinvoice` als gekoppeld (alleen concept, nooit auto-send). Uren blijven `invoiced` (geen dubbele factuur).
+
+---
+
 ## Security notes
 
 - RLS: internal roles via `is_internal_role()` → `get_my_role()`.
@@ -832,6 +849,6 @@ create unique index if not exists invoice_drafts_moneybird_invoice_id_uidx
 ### Facturatie / invoice drafts (finance)
 
 - `invoice_drafts` + `invoice_draft_lines`: SELECT/INSERT/UPDATE voor alle interne rollen via `is_internal_role()` (zie policies hierboven). Mutaties in de app eisen `owner` / `admin` / `finance`.
-- `time_entries.status = 'invoiced'` heeft **geen** FK naar `invoice_drafts`. Als een concept wordt verwijderd of geannuleerd terwijl uren op `invoiced` blijven, zie je op Facturatie “0 goedgekeurde uren” en “geen concepten”.
-- Herstel in de UI: **Herstel / maak concept** (concept uit orphan-uren) of **Status terugzetten naar goedgekeurd** (owner/admin/finance). Annuleren van een concept zonder ander actief concept op hetzelfde project zet gekoppelde `invoiced`-uren automatisch terug naar `approved`.
+- `time_entries.status = 'invoiced'` heeft **geen** FK naar `invoice_drafts`. Als een concept is verwijderd of geannuleerd terwijl uren op `invoiced` blijven, zie je op Facturatie “0 goedgekeurde uren” en “geen concepten”.
+- Herstel in de UI: **Herstel / maak concept** (concept uit orphan-uren) of **Status terugzetten naar goedgekeurd** (owner/admin/finance). **Verwijderen** van een concept (of annuleren zonder ander actief concept) zet gekoppelde `invoiced`-uren automatisch terug naar `approved`. **Crediteren** laat uren op `invoiced` (voorkomt dubbele facturatie).
 - Als de conceptenlijst leeg blijft terwijl er rijen in Supabase staan: controleer `get_my_role()` / `profiles.role` en of de Moneybird-migratie (kolommen hierboven) is gedraaid. De app valt terug op een platte `invoice_drafts`-select zonder embeds.

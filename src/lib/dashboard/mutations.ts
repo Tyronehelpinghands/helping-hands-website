@@ -15,6 +15,12 @@ import {
 import { getRateSettings } from "@/lib/dashboard/queries";
 import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import {
+  createMoneybirdCreditInvoice,
+  deleteMoneybirdSalesInvoice,
+  formatMoneybirdError,
+  isMoneybirdConfigured,
+} from "@/lib/server/moneybird";
+import {
   confirmInvoiceDraftInMoneybird,
   isMissingMoneybirdColumnError,
   MONEYBIRD_COLUMNS_SQL_HINT,
@@ -1441,6 +1447,386 @@ export async function updateInvoiceDraftStatusAction(
     "/dashboard/intern/financien",
   ]);
   return ok({ id, resetEntries });
+}
+
+const GECREDITEERD_SQL_HINT =
+  "Voer supabase/invoice-draft-status-gecrediteerd.sql uit in Supabase (SQL Editor) om status ‘gecrediteerd’ toe te voegen.";
+
+function isMissingGecrediteerdStatusError(message: string): boolean {
+  return (
+    /gecrediteerd/i.test(message) ||
+    (/check constraint|violates check/i.test(message) &&
+      /invoice_drafts/i.test(message) &&
+      /status/i.test(message))
+  );
+}
+
+function isDeletableInvoiceDraft(draft: {
+  status: string;
+  moneybird_sync_status?: string | null;
+}): boolean {
+  if (
+    draft.status === "sent" ||
+    draft.status === "paid" ||
+    draft.status === "cancelled" ||
+    draft.status === "gecrediteerd"
+  ) {
+    return false;
+  }
+  if (draft.moneybird_sync_status === "verzonden") return false;
+  return draft.status === "draft" || draft.status === "ready";
+}
+
+function isCreditableInvoiceDraft(draft: {
+  status: string;
+  moneybird_sync_status?: string | null;
+}): boolean {
+  if (draft.status === "cancelled" || draft.status === "gecrediteerd") {
+    return false;
+  }
+  return (
+    draft.status === "sent" ||
+    draft.status === "paid" ||
+    draft.moneybird_sync_status === "verzonden"
+  );
+}
+
+/**
+ * Verwijdert een lokaal factuurconcept (niet verzonden / niet Moneybird-verzonden).
+ * Zet gekoppelde uren terug naar goedgekeurd zodat ze opnieuw gefactureerd kunnen worden.
+ * Finance/owner/admin only. Verzendt nooit.
+ */
+export async function deleteInvoiceDraftAction(
+  draftId: string,
+): Promise<
+  ActionResult<{ id: string; resetEntries: number; message: string }>
+> {
+  await requireRole(FINANCE_ROLES);
+  const id = draftId.trim();
+  if (!id) return fail("Factuurconcept-id ontbreekt.");
+
+  const supabase = await createClient();
+
+  let draft: {
+    id: string;
+    project_id: string | null;
+    status: string;
+    moneybird_invoice_id?: string | null;
+    moneybird_sync_status?: string | null;
+  } | null = null;
+  let persistMoneybirdColumns = true;
+
+  const withMoneybird = await supabase
+    .from("invoice_drafts")
+    .select("id, project_id, status, moneybird_invoice_id, moneybird_sync_status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (withMoneybird.error) {
+    if (isMissingMoneybirdColumnError(withMoneybird.error.message)) {
+      persistMoneybirdColumns = false;
+      const fallback = await supabase
+        .from("invoice_drafts")
+        .select("id, project_id, status")
+        .eq("id", id)
+        .maybeSingle();
+      if (fallback.error || !fallback.data) {
+        return fail(
+          fallback.error?.message ?? "Factuurconcept niet gevonden.",
+        );
+      }
+      draft = fallback.data;
+    } else {
+      return fail(withMoneybird.error.message);
+    }
+  } else {
+    draft = withMoneybird.data;
+  }
+
+  if (!draft) return fail("Factuurconcept niet gevonden.");
+
+  if (!isDeletableInvoiceDraft(draft)) {
+    return fail(
+      "Alleen niet-verzonden concepten kunnen worden verwijderd. Gebruik Crediteren voor verzonden facturen.",
+    );
+  }
+
+  // Optioneel Moneybird-concept verwijderen (nooit verzonden facturen).
+  const moneybirdId = draft.moneybird_invoice_id?.trim();
+  if (
+    persistMoneybirdColumns &&
+    moneybirdId &&
+    isMoneybirdConfigured() &&
+    draft.moneybird_sync_status !== "verzonden"
+  ) {
+    try {
+      await deleteMoneybirdSalesInvoice(moneybirdId);
+    } catch (error) {
+      // Lokaal toch doorzetten: concept mag verdwijnen; Moneybird-fout melden.
+      const mbError = formatMoneybirdError(error);
+      // Soft-fail alleen als Moneybird het concept niet meer heeft / al weg is.
+      if (!/not found|404|bestaat niet/i.test(mbError)) {
+        return fail(
+          `Moneybird-concept kon niet worden verwijderd: ${mbError}. Concept blijft staan.`,
+        );
+      }
+    }
+  }
+
+  const projectId = draft.project_id;
+
+  const { error: deleteError } = await supabase
+    .from("invoice_drafts")
+    .delete()
+    .eq("id", id);
+  if (deleteError) return fail(deleteError.message);
+
+  let resetEntries = 0;
+  if (projectId) {
+    const { data: siblings } = await supabase
+      .from("invoice_drafts")
+      .select("id")
+      .eq("project_id", projectId)
+      .in("status", ["draft", "ready", "sent", "paid"]);
+
+    if (!siblings || siblings.length === 0) {
+      const { data: resetRows, error: resetError } = await supabase
+        .from("time_entries")
+        .update({ status: "approved" satisfies TimeEntryStatus })
+        .eq("project_id", projectId)
+        .eq("status", "invoiced")
+        .select("id");
+      if (resetError) return fail(resetError.message);
+      resetEntries = resetRows?.length ?? 0;
+    }
+  }
+
+  revalidateDashboard([
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/urenregistratie",
+    "/dashboard/intern/financien",
+  ]);
+
+  return ok({
+    id,
+    resetEntries,
+    message:
+      resetEntries > 0
+        ? `Concept verwijderd. ${resetEntries} urenregel(s) weer goedgekeurd.`
+        : "Concept verwijderd.",
+  });
+}
+
+/**
+ * Crediteert een verzonden/bevestigde factuur.
+ * Prefer Moneybird duplicate_creditinvoice (alleen concept, nooit auto-send).
+ * Markeert origineel als gecrediteerd; uren blijven gefactureerd (geen dubbele factuur).
+ * Finance/owner/admin only.
+ */
+export async function creditInvoiceDraftAction(
+  draftId: string,
+): Promise<
+  ActionResult<{
+    id: string;
+    creditDraftId?: string;
+    moneybirdCreditId?: string;
+    message: string;
+  }>
+> {
+  await requireRole(FINANCE_ROLES);
+  const id = draftId.trim();
+  if (!id) return fail("Factuurconcept-id ontbreekt.");
+
+  const supabase = await createClient();
+
+  let draft: {
+    id: string;
+    client_id: string | null;
+    project_id: string | null;
+    invoice_number: string | null;
+    status: string;
+    total_hours: number;
+    hourly_rate: number | null;
+    travel_costs: number;
+    subtotal: number;
+    vat_amount: number;
+    total_amount: number;
+    notes: string | null;
+    moneybird_invoice_id?: string | null;
+    moneybird_sync_status?: string | null;
+  } | null = null;
+  let persistMoneybirdColumns = true;
+
+  const withMoneybird = await supabase
+    .from("invoice_drafts")
+    .select(
+      "id, client_id, project_id, invoice_number, status, total_hours, hourly_rate, travel_costs, subtotal, vat_amount, total_amount, notes, moneybird_invoice_id, moneybird_sync_status",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (withMoneybird.error) {
+    if (isMissingMoneybirdColumnError(withMoneybird.error.message)) {
+      persistMoneybirdColumns = false;
+      const fallback = await supabase
+        .from("invoice_drafts")
+        .select(
+          "id, client_id, project_id, invoice_number, status, total_hours, hourly_rate, travel_costs, subtotal, vat_amount, total_amount, notes",
+        )
+        .eq("id", id)
+        .maybeSingle();
+      if (fallback.error || !fallback.data) {
+        return fail(
+          fallback.error?.message ?? "Factuurconcept niet gevonden.",
+        );
+      }
+      draft = fallback.data;
+    } else {
+      return fail(withMoneybird.error.message);
+    }
+  } else {
+    draft = withMoneybird.data;
+  }
+
+  if (!draft) return fail("Factuurconcept niet gevonden.");
+
+  if (!isCreditableInvoiceDraft(draft)) {
+    return fail(
+      "Alleen verzonden of Moneybird-bevestigde facturen kunnen worden gecrediteerd. Gebruik Verwijderen voor concepten.",
+    );
+  }
+
+  let moneybirdCreditId: string | undefined;
+  let moneybirdNote: string | null = null;
+
+  const moneybirdId = draft.moneybird_invoice_id?.trim();
+  if (persistMoneybirdColumns && moneybirdId && isMoneybirdConfigured()) {
+    try {
+      const credit = await createMoneybirdCreditInvoice(moneybirdId);
+      moneybirdCreditId = credit.id;
+      moneybirdNote = `Moneybird-creditconcept aangemaakt (${credit.invoice_id || credit.id}). Nog niet verzonden — rond af in Moneybird indien nodig.`;
+    } catch (error) {
+      moneybirdNote = `Moneybird-credit mislukt (${formatMoneybirdError(error)}). Rond de creditnota af in Moneybird.`;
+    }
+  } else if (moneybirdId && !isMoneybirdConfigured()) {
+    moneybirdNote =
+      "Moneybird niet gekoppeld. Factuur lokaal als gecrediteerd gemarkeerd — maak de creditnota af in Moneybird.";
+  } else if (!moneybirdId) {
+    moneybirdNote =
+      "Geen Moneybird-koppeling op deze factuur. Lokaal als gecrediteerd gemarkeerd.";
+  }
+
+  const { error: markError } = await supabase
+    .from("invoice_drafts")
+    .update({ status: "gecrediteerd" satisfies InvoiceDraftStatus })
+    .eq("id", id);
+
+  if (markError) {
+    if (isMissingGecrediteerdStatusError(markError.message)) {
+      return fail(GECREDITEERD_SQL_HINT);
+    }
+    return fail(markError.message);
+  }
+
+  // Lokaal credit-concept (negatieve bedragen) — uren blijven `invoiced` (geen dubbele factuur).
+  const creditNumber = `CN-${draft.invoice_number || id.slice(0, 8)}`;
+  const creditInsert: Record<string, unknown> = {
+    client_id: draft.client_id,
+    project_id: draft.project_id,
+    invoice_number: creditNumber,
+    status: "draft" satisfies InvoiceDraftStatus,
+    total_hours: -Math.abs(Number(draft.total_hours || 0)),
+    hourly_rate: draft.hourly_rate,
+    travel_costs: -Math.abs(Number(draft.travel_costs || 0)),
+    subtotal: -Math.abs(Number(draft.subtotal || 0)),
+    vat_amount: -Math.abs(Number(draft.vat_amount || 0)),
+    total_amount: -Math.abs(Number(draft.total_amount || 0)),
+    notes: [
+      `Creditnota voor ${draft.invoice_number || draft.id}`,
+      moneybirdNote,
+    ]
+      .filter(Boolean)
+      .join(" — "),
+  };
+
+  if (persistMoneybirdColumns && moneybirdCreditId) {
+    creditInsert.moneybird_invoice_id = moneybirdCreditId;
+    creditInsert.moneybird_sync_status = "concept" satisfies MoneybirdSyncStatus;
+    creditInsert.moneybird_synced_at = new Date().toISOString();
+    creditInsert.moneybird_sync_error = null;
+  }
+
+  const { data: creditDraft, error: creditError } = await supabase
+    .from("invoice_drafts")
+    .insert(creditInsert)
+    .select("id")
+    .single();
+
+  if (creditError || !creditDraft) {
+    // Origineel is al gecrediteerd; credit-rij mislukt — toch bruikbare melding.
+    revalidateDashboard([
+      "/dashboard/intern/facturatie",
+      "/dashboard/intern/financien",
+    ]);
+    return ok({
+      id,
+      moneybirdCreditId,
+      message: [
+        "Factuur gemarkeerd als gecrediteerd.",
+        moneybirdNote,
+        creditError
+          ? `Lokaal creditconcept aanmaken mislukt: ${creditError.message}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    });
+  }
+
+  const { data: originalLines } = await supabase
+    .from("invoice_draft_lines")
+    .select("description, quantity, unit_price, vat_rate, line_total")
+    .eq("invoice_draft_id", id);
+
+  if (originalLines && originalLines.length > 0) {
+    await supabase.from("invoice_draft_lines").insert(
+      originalLines.map((line) => ({
+        invoice_draft_id: creditDraft.id,
+        description: `Credit: ${line.description}`,
+        quantity:
+          line.quantity != null ? -Math.abs(Number(line.quantity)) : null,
+        unit_price: line.unit_price,
+        vat_rate: line.vat_rate,
+        line_total:
+          line.line_total != null ? -Math.abs(Number(line.line_total)) : null,
+      })),
+    );
+  } else {
+    await supabase.from("invoice_draft_lines").insert({
+      invoice_draft_id: creditDraft.id,
+      description: `Creditnota voor ${draft.invoice_number || draft.id}`,
+      quantity: 1,
+      unit_price: -Math.abs(Number(draft.subtotal || 0)),
+      vat_rate: 21,
+      line_total: -Math.abs(Number(draft.subtotal || 0)),
+    });
+  }
+
+  revalidateDashboard([
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/urenregistratie",
+    "/dashboard/intern/financien",
+    "/dashboard/intern/integraties",
+  ]);
+
+  return ok({
+    id,
+    creditDraftId: creditDraft.id,
+    moneybirdCreditId,
+    message: moneybirdCreditId
+      ? `Creditnota aangemaakt (Moneybird-concept ${moneybirdCreditId.slice(0, 8)}…). Niet automatisch verzonden. Uren blijven gefactureerd.`
+      : `${moneybirdNote ?? "Factuur gecrediteerd."} Uren blijven gefactureerd (geen dubbele factuur).`,
+  });
 }
 
 /**

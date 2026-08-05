@@ -420,7 +420,9 @@ export async function getFinanceSummary(): Promise<FinanceSummary> {
     getRateSettings(),
   ]);
 
-  const activeDrafts = drafts.filter((d) => d.status !== "cancelled");
+  const activeDrafts = drafts.filter(
+    (d) => d.status !== "cancelled" && d.status !== "gecrediteerd",
+  );
   const draftRevenue = activeDrafts
     .filter((d) => d.status === "draft")
     .reduce((sum, d) => sum + Number(d.total_amount || 0), 0);

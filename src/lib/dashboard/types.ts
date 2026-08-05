@@ -65,7 +65,8 @@ export type InvoiceDraftStatus =
   | "ready"
   | "sent"
   | "paid"
-  | "cancelled";
+  | "cancelled"
+  | "gecrediteerd";
 
 export type MoneybirdSyncStatus =
   | "niet_gesynct"

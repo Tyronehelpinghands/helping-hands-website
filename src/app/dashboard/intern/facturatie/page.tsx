@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { InvoiceMvpClient } from "@/components/dashboard/mvp/InvoiceMvpClient";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import {
   getApprovedUninvoicedTimeEntries,
   getDashboardStats,
@@ -19,14 +20,21 @@ export const metadata: Metadata = {
 };
 
 export default async function InternFacturatiePage() {
-  const [draftsResult, projects, approvedEntries, stats, moneybirdInvoiceReady] =
-    await Promise.all([
-      getInvoiceDraftsResult(),
-      getProjects(),
-      getApprovedUninvoicedTimeEntries(),
-      getDashboardStats(),
-      ensureMoneybirdInvoiceReady(),
-    ]);
+  const [
+    draftsResult,
+    projects,
+    approvedEntries,
+    stats,
+    moneybirdInvoiceReady,
+    { profile },
+  ] = await Promise.all([
+    getInvoiceDraftsResult(),
+    getProjects(),
+    getApprovedUninvoicedTimeEntries(),
+    getDashboardStats(),
+    ensureMoneybirdInvoiceReady(),
+    getCurrentUser(),
+  ]);
 
   const orphanInvoicedEntries = await getInvoicedOrphanTimeEntries(
     draftsResult.data,
@@ -42,6 +50,7 @@ export default async function InternFacturatiePage() {
       tablesReady={stats.tablesReady}
       moneybirdConfigured={isMoneybirdConfigured()}
       moneybirdInvoiceReady={moneybirdInvoiceReady}
+      userRole={profile?.role ?? "planner"}
     />
   );
 }

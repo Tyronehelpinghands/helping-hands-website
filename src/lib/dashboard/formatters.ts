@@ -195,6 +195,8 @@ export function invoiceStatusLabel(status: InvoiceDraftStatus): string {
       return "Betaald";
     case "cancelled":
       return "Geannuleerd";
+    case "gecrediteerd":
+      return "Gecrediteerd";
   }
 }
 
