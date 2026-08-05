@@ -5,11 +5,12 @@ import {
   isMoneybirdConfigured,
   moneybirdFetch,
   sanitizeMoneybirdContact,
+  searchMoneybirdContacts,
 } from "@/lib/server/moneybird";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireInternApiAccess();
   if ("error" in auth && auth.error) return auth.error;
 
@@ -25,10 +26,19 @@ export async function GET() {
   }
 
   try {
-    const raw = await moneybirdFetch<Record<string, unknown>[]>("/contacts.json");
-    const contacts = (Array.isArray(raw) ? raw : []).map((c) =>
-      sanitizeMoneybirdContact(c),
-    );
+    const query = new URL(request.url).searchParams.get("query")?.trim();
+    let contacts;
+    if (query) {
+      contacts = await searchMoneybirdContacts(query);
+    } else {
+      const raw = await moneybirdFetch<Record<string, unknown>[]>(
+        "/contacts.json",
+      );
+      contacts = (Array.isArray(raw) ? raw : []).map((c) =>
+        sanitizeMoneybirdContact(c),
+      );
+    }
+
     return NextResponse.json({ ok: true, contacts });
   } catch (error) {
     console.error("[Moneybird] Contacten ophalen mislukt");

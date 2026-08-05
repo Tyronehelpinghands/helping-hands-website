@@ -82,6 +82,19 @@ export type CreateMoneybirdSalesInvoiceInput = {
   lines: MoneybirdInvoiceLineInput[];
 };
 
+export type CreateMoneybirdContactInput = {
+  companyName?: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  address1?: string;
+  zipcode?: string;
+  city?: string;
+  country?: string;
+  customerId?: string;
+};
+
 function envTrim(name: string): string | undefined {
   const value = process.env[name]?.trim();
   return value || undefined;
@@ -389,6 +402,63 @@ export function sanitizeMoneybirdContact(
     city: String(raw.city ?? ""),
     customer_id: String(raw.customer_id ?? ""),
   };
+}
+
+/** Zoekt contacten via Moneybird `query` (naam, e-mail, enz.). */
+export async function searchMoneybirdContacts(
+  query: string,
+): Promise<SafeMoneybirdContact[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  const path = `/contacts.json?query=${encodeURIComponent(q)}&per_page=50`;
+  const raw = await moneybirdFetch<Record<string, unknown>[]>(path);
+  return (Array.isArray(raw) ? raw : []).map((c) => sanitizeMoneybirdContact(c));
+}
+
+/** Maakt een contact/relatie in Moneybird. */
+export async function createMoneybirdContact(
+  input: CreateMoneybirdContactInput,
+): Promise<SafeMoneybirdContact> {
+  assertMoneybirdConfigured();
+
+  const companyName = input.companyName?.trim() ?? "";
+  const firstname = input.firstname?.trim() ?? "";
+  const lastname = input.lastname?.trim() ?? "";
+  const email = input.email?.trim() ?? "";
+
+  if (!companyName && !firstname && !lastname) {
+    throw new Error(
+      "Moneybird-contact vereist een bedrijfsnaam of voor-/achternaam.",
+    );
+  }
+  if (!email) {
+    throw new Error(
+      "E-mailadres ontbreekt bij de opdrachtgever. Vul een e-mail in om een Moneybird-contact aan te maken.",
+    );
+  }
+
+  const payload = {
+    contact: {
+      company_name: companyName,
+      firstname,
+      lastname,
+      email,
+      phone: input.phone?.trim() ?? "",
+      address1: input.address1?.trim() ?? "",
+      zipcode: input.zipcode?.trim() ?? "",
+      city: input.city?.trim() ?? "",
+      country: input.country?.trim() || "NL",
+      customer_id: input.customerId?.trim() ?? "",
+    },
+  };
+
+  const raw = await moneybirdFetch<Record<string, unknown>>("/contacts.json", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return sanitizeMoneybirdContact(raw);
 }
 
 export function sanitizeMoneybirdInvoice(

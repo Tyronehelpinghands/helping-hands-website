@@ -497,7 +497,7 @@ export function InvoiceMvpClient({
             </MvpBadge>
             <p className="mt-2">
               {moneybirdInvoiceReady
-                ? "Stap 1: “Naar Moneybird als concept”. Stap 2: “Bevestig factuur” om te verzenden — nooit automatisch. Verwijderen/Crediteren zijn aparte, expliciete acties."
+                ? "Stap 1: “Naar Moneybird als concept” (contact wordt automatisch gekoppeld/aangemaakt). Stap 2: “Bevestig factuur” om te verzenden — nooit automatisch. Verwijderen/Crediteren zijn aparte, expliciete acties."
                 : "Token werkt (contacts), maar er is geen standaard BTW-tarief of omzetrekening gevonden. Controleer actieve sales-tarieven/omzetrekeningen in Moneybird, of zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID."}
             </p>
             {!moneybirdInvoiceReady ? (
@@ -616,17 +616,14 @@ export function InvoiceMvpClient({
           if (!next) setMoneybirdDraft(null);
         }}
         title="Naar Moneybird als concept"
-        description="Maakt of vernieuwt alleen een concept in Moneybird. Verzenden gebeurt apart via “Bevestig factuur”."
+        description="Maakt of vernieuwt alleen een concept in Moneybird. Het Moneybird-contact wordt automatisch gekoppeld of aangemaakt. Verzenden gebeurt apart via “Bevestig factuur”."
         pending={pending}
         submitLabel="Naar Moneybird als concept"
-        onSubmit={async (fd) => {
+        onSubmit={async () => {
           if (!moneybirdDraft) return;
           startTransition(async () => {
-            const contactId = String(fd.get("contact_id") ?? "");
             const res = await pushInvoiceDraftToMoneybirdAction(
               moneybirdDraft.id,
-              contactId,
-              false,
             );
             if (res.ok) {
               setMoneybirdDraft(null);
@@ -643,22 +640,26 @@ export function InvoiceMvpClient({
               {moneybirdDraft.clients?.company_name || "Geen klant"} ·{" "}
               {formatCurrency(moneybirdDraft.total_amount)}
             </p>
+            {moneybirdDraft.clients?.moneybird_contact_id ? (
+              <p className="rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-2 text-xs text-slate-700">
+                Gekoppeld Moneybird-contact:{" "}
+                <span className="font-mono">
+                  {moneybirdDraft.clients.moneybird_contact_id}
+                </span>
+              </p>
+            ) : (
+              <p className="rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-2 text-xs text-slate-700">
+                Nog geen Moneybird-koppeling. We zoeken op e-mail of
+                bedrijfsnaam, of maken een nieuw contact aan (e-mail bij de
+                opdrachtgever is verplicht om aan te maken).
+              </p>
+            )}
             {isOutdatedMoneybirdDraft(moneybirdDraft) ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
                 {OUTDATED_MONEYBIRD_DRAFT_MSG}. Dit werkt het Moneybird-concept
                 bij met de huidige uren.
               </p>
             ) : null}
-            <Field label="Moneybird contact-id" name="contact_id">
-              <TextInput
-                name="contact_id"
-                required
-                defaultValue={
-                  moneybirdDraft.clients?.moneybird_contact_id ?? ""
-                }
-                placeholder="Bijv. 123456789012345678"
-              />
-            </Field>
           </div>
         ) : null}
       </MvpFormDialog>
