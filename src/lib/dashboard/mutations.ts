@@ -13,7 +13,9 @@ import {
   calculateWorkedHours,
 } from "@/lib/dashboard/calculations";
 import { getRateSettings } from "@/lib/dashboard/queries";
+import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import {
+  confirmInvoiceDraftInMoneybird,
   isMissingMoneybirdColumnError,
   MONEYBIRD_COLUMNS_SQL_HINT,
   pushInvoiceDraftToMoneybird,
@@ -32,6 +34,7 @@ import type {
   EmploymentType,
   InvoiceDraftStatus,
   LeadStatus,
+  MoneybirdSyncStatus,
   ProjectStatus,
   ProjectType,
   ShiftStatus,
@@ -808,9 +811,256 @@ export async function createTimeEntryAction(
   return ok({ id: data.id });
 }
 
+/**
+ * Herberekent open factuurconcepten (draft/ready, niet verzonden) voor een project
+ * op basis van goedgekeurde + gekoppelde (invoiced) uren. Nooit auto-send naar Moneybird.
+ */
+async function refreshOpenInvoiceDraftsForProject(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  projectId: string,
+): Promise<{ refreshedDrafts: number; markedDirty: number; error?: string }> {
+  type DraftRow = {
+    id: string;
+    status: string;
+    moneybird_invoice_id?: string | null;
+    moneybird_sync_status?: string | null;
+  };
+
+  let drafts: DraftRow[] | null = null;
+  let persistMoneybirdColumns = true;
+
+  const withMoneybird = await supabase
+    .from("invoice_drafts")
+    .select("id, status, moneybird_invoice_id, moneybird_sync_status")
+    .eq("project_id", projectId)
+    .in("status", ["draft", "ready"]);
+
+  if (withMoneybird.error) {
+    if (isMissingMoneybirdColumnError(withMoneybird.error.message)) {
+      persistMoneybirdColumns = false;
+      const fallback = await supabase
+        .from("invoice_drafts")
+        .select("id, status")
+        .eq("project_id", projectId)
+        .in("status", ["draft", "ready"]);
+      if (fallback.error) {
+        return {
+          refreshedDrafts: 0,
+          markedDirty: 0,
+          error: `${MONEYBIRD_COLUMNS_SQL_HINT} (${fallback.error.message})`,
+        };
+      }
+      drafts = fallback.data;
+    } else {
+      return {
+        refreshedDrafts: 0,
+        markedDirty: 0,
+        error: withMoneybird.error.message,
+      };
+    }
+  } else {
+    drafts = withMoneybird.data;
+  }
+
+  const openDrafts = (drafts ?? []).filter(
+    (d) => d.moneybird_sync_status !== "verzonden",
+  );
+  if (openDrafts.length === 0) {
+    return { refreshedDrafts: 0, markedDirty: 0 };
+  }
+
+  const rates = await getRateSettings();
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id, project_name, default_hourly_rate")
+    .eq("id", projectId)
+    .single();
+
+  if (projectError || !project) {
+    return {
+      refreshedDrafts: 0,
+      markedDirty: 0,
+      error: projectError?.message ?? "Project niet gevonden voor factuurvernieuwing.",
+    };
+  }
+
+  const { data: entries, error: entriesError } = await supabase
+    .from("time_entries")
+    .select("*")
+    .eq("project_id", projectId)
+    .in("status", ["approved", "invoiced"]);
+
+  if (entriesError) {
+    return {
+      refreshedDrafts: 0,
+      markedDirty: 0,
+      error: entriesError.message,
+    };
+  }
+
+  if (!entries || entries.length === 0) {
+    // Geen factureerbare uren meer: open concepten annuleren (niet Moneybird-verzonden).
+    const cancelIds = openDrafts.map((d) => d.id);
+    const { error: cancelError } = await supabase
+      .from("invoice_drafts")
+      .update({ status: "cancelled" satisfies InvoiceDraftStatus })
+      .in("id", cancelIds);
+    if (cancelError) {
+      return { refreshedDrafts: 0, markedDirty: 0, error: cancelError.message };
+    }
+    return { refreshedDrafts: cancelIds.length, markedDirty: 0 };
+  }
+
+  const hourlyRate =
+    Number(project.default_hourly_rate) || rates.site_crew || 31.5;
+  const totalHours = entries.reduce((s, e) => s + Number(e.hours || 0), 0);
+  const totalKm = entries.reduce((s, e) => s + Number(e.kilometers || 0), 0);
+  const totalTravelTime = entries.reduce(
+    (s, e) => s + Number(e.travel_time_hours || 0),
+    0,
+  );
+
+  const totals = calculateInvoiceTotals({
+    hours: totalHours,
+    hourlyRate,
+    kilometers: totalKm,
+    kmRate: rates.km_rate,
+    travelTimeHours: totalTravelTime,
+    travelTimeRate: hourlyRate,
+    vatPercent: rates.vat_percent,
+  });
+
+  let refreshedDrafts = 0;
+  let markedDirty = 0;
+
+  for (const draft of openDrafts) {
+    const { error: deleteLinesError } = await supabase
+      .from("invoice_draft_lines")
+      .delete()
+      .eq("invoice_draft_id", draft.id);
+    if (deleteLinesError) {
+      return {
+        refreshedDrafts,
+        markedDirty,
+        error: deleteLinesError.message,
+      };
+    }
+
+    const lines = [
+      {
+        invoice_draft_id: draft.id,
+        description: `Arbeidsuren — ${project.project_name}`,
+        quantity: totalHours,
+        unit_price: hourlyRate,
+        vat_rate: rates.vat_percent,
+        line_total: totals.laborAmount,
+      },
+    ];
+
+    if (totals.travelCosts > 0) {
+      lines.push({
+        invoice_draft_id: draft.id,
+        description: `Kilometervergoeding (${totalKm} km × €${rates.km_rate})`,
+        quantity: totalKm,
+        unit_price: rates.km_rate,
+        vat_rate: rates.vat_percent,
+        line_total: totals.travelCosts,
+      });
+    }
+
+    if (totals.travelTimeAmount > 0) {
+      lines.push({
+        invoice_draft_id: draft.id,
+        description: `Reistijd (${totalTravelTime} u)`,
+        quantity: totalTravelTime,
+        unit_price: hourlyRate,
+        vat_rate: rates.vat_percent,
+        line_total: totals.travelTimeAmount,
+      });
+    }
+
+    const { error: linesError } = await supabase
+      .from("invoice_draft_lines")
+      .insert(lines);
+    if (linesError) {
+      return { refreshedDrafts, markedDirty, error: linesError.message };
+    }
+
+    const hasMoneybirdDraft = Boolean(draft.moneybird_invoice_id?.trim());
+    const draftUpdate: Record<string, unknown> = {
+      total_hours: totalHours,
+      hourly_rate: hourlyRate,
+      travel_costs: totals.travelCosts,
+      subtotal: totals.subtotal,
+      vat_amount: totals.vatAmount,
+      total_amount: totals.totalAmount,
+      status: "draft" satisfies InvoiceDraftStatus,
+    };
+
+    if (persistMoneybirdColumns && hasMoneybirdDraft) {
+      draftUpdate.moneybird_sync_status =
+        "niet_gesynct" satisfies MoneybirdSyncStatus;
+      draftUpdate.moneybird_sync_error = OUTDATED_MONEYBIRD_DRAFT_MSG;
+      markedDirty += 1;
+    }
+
+    const { error: draftError } = await supabase
+      .from("invoice_drafts")
+      .update(draftUpdate)
+      .eq("id", draft.id);
+    if (draftError) {
+      if (
+        persistMoneybirdColumns &&
+        isMissingMoneybirdColumnError(draftError.message)
+      ) {
+        const { error: fallbackError } = await supabase
+          .from("invoice_drafts")
+          .update({
+            total_hours: totalHours,
+            hourly_rate: hourlyRate,
+            travel_costs: totals.travelCosts,
+            subtotal: totals.subtotal,
+            vat_amount: totals.vatAmount,
+            total_amount: totals.totalAmount,
+            status: "draft" satisfies InvoiceDraftStatus,
+          })
+          .eq("id", draft.id);
+        if (fallbackError) {
+          return {
+            refreshedDrafts,
+            markedDirty,
+            error: fallbackError.message,
+          };
+        }
+      } else {
+        return { refreshedDrafts, markedDirty, error: draftError.message };
+      }
+    }
+
+    refreshedDrafts += 1;
+  }
+
+  const entryIds = entries.map((e) => e.id);
+  const { error: markError } = await supabase
+    .from("time_entries")
+    .update({ status: "invoiced" satisfies TimeEntryStatus })
+    .in("id", entryIds);
+  if (markError) {
+    return { refreshedDrafts, markedDirty, error: markError.message };
+  }
+
+  return { refreshedDrafts, markedDirty };
+}
+
 export async function updateTimeEntryAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string; unlinkedDrafts?: number }>> {
+): Promise<
+  ActionResult<{
+    id: string;
+    draftRefreshed?: number;
+    markedDirty?: number;
+  }>
+> {
   const profile = await requireRole(HOURS_ROLES);
   const id = strOrNull(formData.get("id"));
   if (!id) return fail("Urenregel-id ontbreekt.");
@@ -834,6 +1084,7 @@ export async function updateTimeEntryAction(
   }
 
   const isInvoiced = existing.status === "invoiced";
+  const wasApproved = existing.status === "approved";
   const canOverrideInvoiced = FINANCE_ROLES.includes(profile.role);
   if (isInvoiced && !canOverrideInvoiced) {
     return fail(
@@ -861,60 +1112,9 @@ export async function updateTimeEntryAction(
     internal_notes: strOrNull(formData.get("internal_notes")),
   };
 
-  let unlinkedDrafts = 0;
   if (isInvoiced) {
-    // Ops mag corrigeren: status terug naar goedgekeurd + open concepten annuleren.
+    // Terug naar goedgekeurd; open concepten worden hierna herberekend (geen auto-send).
     updatePayload.status = "approved" satisfies TimeEntryStatus;
-
-    const draftProjectId = project_id || existing.project_id;
-    if (draftProjectId) {
-      type DraftRow = {
-        id: string;
-        status: string;
-        moneybird_invoice_id?: string | null;
-      };
-
-      let drafts: DraftRow[] | null = null;
-      const withMoneybird = await supabase
-        .from("invoice_drafts")
-        .select("id, status, moneybird_invoice_id")
-        .eq("project_id", draftProjectId)
-        .in("status", ["draft", "ready"]);
-
-      if (withMoneybird.error) {
-        if (isMissingMoneybirdColumnError(withMoneybird.error.message)) {
-          // Zonder moneybird_* kolommen: behandel open concepten als ontkoppelbaar.
-          const fallback = await supabase
-            .from("invoice_drafts")
-            .select("id, status")
-            .eq("project_id", draftProjectId)
-            .in("status", ["draft", "ready"]);
-          if (fallback.error) {
-            return fail(
-              `${MONEYBIRD_COLUMNS_SQL_HINT} (${fallback.error.message})`,
-            );
-          }
-          drafts = fallback.data;
-        } else {
-          return fail(withMoneybird.error.message);
-        }
-      } else {
-        drafts = withMoneybird.data;
-      }
-
-      const unlinkable = (drafts ?? []).filter((d) => !d.moneybird_invoice_id);
-      if (unlinkable.length > 0) {
-        const { error: cancelError } = await supabase
-          .from("invoice_drafts")
-          .update({ status: "cancelled" satisfies InvoiceDraftStatus })
-          .in(
-            "id",
-            unlinkable.map((d) => d.id),
-          );
-        if (cancelError) return fail(cancelError.message);
-        unlinkedDrafts = unlinkable.length;
-      }
-    }
   }
 
   const { error } = await supabase
@@ -923,12 +1123,33 @@ export async function updateTimeEntryAction(
     .eq("id", id);
 
   if (error) return fail(error.message);
+
+  let draftRefreshed = 0;
+  let markedDirty = 0;
+  const shouldRefreshDrafts = isInvoiced || wasApproved;
+  if (shouldRefreshDrafts) {
+    // Vernieuw voor nieuw project én oud project bij verplaatsing.
+    const projectIds = Array.from(
+      new Set(
+        [project_id, existing.project_id].filter(
+          (value): value is string => Boolean(value),
+        ),
+      ),
+    );
+    for (const pid of projectIds) {
+      const refresh = await refreshOpenInvoiceDraftsForProject(supabase, pid);
+      if (refresh.error) return fail(refresh.error);
+      draftRefreshed += refresh.refreshedDrafts;
+      markedDirty += refresh.markedDirty;
+    }
+  }
+
   revalidateDashboard([
     "/dashboard/intern/urenregistratie",
     "/dashboard/intern/facturatie",
     "/dashboard/intern/financien",
   ]);
-  return ok({ id, unlinkedDrafts });
+  return ok({ id, draftRefreshed, markedDirty });
 }
 
 export async function approveTimeEntryAction(
@@ -1208,7 +1429,8 @@ export async function updateInvoiceDraftStatusAction(
 }
 
 /**
- * Maakt een Moneybird-concept (of optioneel verzendt) vanuit een Supabase-concept.
+ * Maakt/werkt een Moneybird-concept bij vanuit een Supabase-concept.
+ * Verzendt nooit — gebruik confirmInvoiceDraftInMoneybirdAction.
  * Vereist finance/owner/admin + Moneybird env.
  */
 export async function pushInvoiceDraftToMoneybirdAction(
@@ -1224,11 +1446,50 @@ export async function pushInvoiceDraftToMoneybirdAction(
 > {
   await requireRole(FINANCE_ROLES);
   if (!draftId.trim()) return fail("Factuurconcept-id ontbreekt.");
+  if (send) {
+    return fail(
+      "Verzenden kan niet via sync. Gebruik “Bevestig factuur” na het Moneybird-concept.",
+    );
+  }
 
   const result = await pushInvoiceDraftToMoneybird({
     draftId: draftId.trim(),
     contactId,
-    send,
+    send: false,
+  });
+
+  if (!result.ok) return fail(result.error);
+
+  revalidateDashboard([
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/financien",
+    "/dashboard/intern/integraties",
+  ]);
+
+  return ok({
+    moneybirdInvoiceId: result.moneybirdInvoiceId,
+    sent: result.sent,
+    message: result.message,
+  });
+}
+
+/**
+ * Bevestigt/verzendt een factuur in Moneybird (expliciete stap, finance/owner/admin).
+ */
+export async function confirmInvoiceDraftInMoneybirdAction(
+  draftId: string,
+): Promise<
+  ActionResult<{
+    moneybirdInvoiceId: string;
+    sent: boolean;
+    message: string;
+  }>
+> {
+  await requireRole(FINANCE_ROLES);
+  if (!draftId.trim()) return fail("Factuurconcept-id ontbreekt.");
+
+  const result = await confirmInvoiceDraftInMoneybird({
+    draftId: draftId.trim(),
   });
 
   if (!result.ok) return fail(result.error);

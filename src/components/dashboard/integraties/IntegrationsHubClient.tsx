@@ -616,7 +616,7 @@ export default function IntegrationsHubClient({
               />
             </div>
             <CardDescription>
-              Facturatie API — concepten naar Moneybird; verzenden optioneel.
+              Facturatie API — concepten naar Moneybird; verzenden alleen via Bevestig factuur.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-[#101828]/65">

@@ -464,6 +464,91 @@ export async function createMoneybirdSalesInvoice(
 }
 
 /**
+ * Werkt een bestaand Moneybird-concept bij (vervangt factuurregels).
+ * Verzendt niet — alleen voor draft/open concepten.
+ */
+export async function updateMoneybirdSalesInvoice(
+  moneybirdInvoiceId: string,
+  input: CreateMoneybirdSalesInvoiceInput,
+): Promise<SafeMoneybirdInvoice> {
+  assertMoneybirdConfigured();
+  const id = moneybirdInvoiceId.trim();
+  if (!id) {
+    throw new Error("moneybirdInvoiceId is verplicht.");
+  }
+
+  const defaults = await resolveMoneybirdInvoiceDefaults();
+  if (!defaults) {
+    throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
+  }
+
+  if (!input.contactId.trim()) {
+    throw new Error("contactId is verplicht.");
+  }
+  if (!input.lines.length) {
+    throw new Error("Minimaal één factuurregel is verplicht.");
+  }
+
+  const existing = await moneybirdFetch<Record<string, unknown>>(
+    `/sales_invoices/${encodeURIComponent(id)}.json`,
+  );
+  const state = String(existing.state ?? "");
+  if (state && state !== "draft" && state !== "new") {
+    throw new Error(
+      `Moneybird-factuur staat op “${state}” en kan niet meer als concept worden bijgewerkt.`,
+    );
+  }
+
+  const existingDetails = Array.isArray(existing.details)
+    ? (existing.details as Array<Record<string, unknown>>)
+    : [];
+
+  const details_attributes = [
+    ...existingDetails
+      .filter((detail) => detail.id != null)
+      .map((detail) => ({
+        id: String(detail.id),
+        _destroy: true,
+      })),
+    ...input.lines.map((line) => ({
+      description: line.description.trim(),
+      price: Number(line.price).toFixed(2),
+      amount: String(line.amount),
+      tax_rate_id: line.taxRateId || defaults.taxRateId,
+      ledger_account_id: line.ledgerAccountId || defaults.ledgerAccountId,
+    })),
+  ];
+
+  const payload = {
+    sales_invoice: {
+      contact_id: input.contactId.trim(),
+      reference: input.reference?.trim() || "Helping Hands factuur",
+      invoice_date:
+        input.invoiceDate ||
+        String(existing.invoice_date ?? new Date().toISOString().slice(0, 10)),
+      due_date:
+        input.dueDate ||
+        String(
+          existing.due_date ??
+            new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+        ),
+      currency: input.currency || String(existing.currency ?? "EUR"),
+      details_attributes,
+    },
+  };
+
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    `/sales_invoices/${encodeURIComponent(id)}.json`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+
+  return sanitizeMoneybirdInvoice(raw);
+}
+
+/**
  * Verstuurt een bestaande Moneybird-factuur (draft → open).
  * Zonder body gebruikt Moneybird de defaults van het contact/workflow.
  */

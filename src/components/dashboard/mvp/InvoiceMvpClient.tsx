@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Download, FilePlus, RotateCcw, Send } from "lucide-react";
+import {
+  BadgeCheck,
+  Download,
+  FilePlus,
+  RotateCcw,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,6 +24,7 @@ import {
   useToast,
 } from "@/components/dashboard/mvp/MvpShared";
 import {
+  confirmInvoiceDraftInMoneybirdAction,
   createInvoiceDraftFromApprovedHoursAction,
   createInvoiceDraftFromInvoicedHoursAction,
   pushInvoiceDraftToMoneybirdAction,
@@ -30,12 +37,22 @@ import {
   invoiceDraftToCsv,
   invoiceStatusLabel,
 } from "@/lib/dashboard/formatters";
+import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import type {
   InvoiceDraft,
   InvoiceDraftStatus,
   Project,
   TimeEntry,
 } from "@/lib/dashboard/types";
+
+function isOutdatedMoneybirdDraft(d: InvoiceDraft): boolean {
+  return Boolean(
+    d.moneybird_invoice_id &&
+      d.moneybird_sync_status !== "verzonden" &&
+      (d.moneybird_sync_status === "niet_gesynct" ||
+        d.moneybird_sync_error === OUTDATED_MONEYBIRD_DRAFT_MSG),
+  );
+}
 
 export function InvoiceMvpClient({
   drafts,
@@ -64,6 +81,7 @@ export function InvoiceMvpClient({
   const [moneybirdDraft, setMoneybirdDraft] = useState<InvoiceDraft | null>(
     null,
   );
+  const [confirmDraft, setConfirmDraft] = useState<InvoiceDraft | null>(null);
 
   const projectsWithApproved = useMemo(() => {
     const ids = new Set(
@@ -99,7 +117,7 @@ export function InvoiceMvpClient({
       ? `Concepten laden mislukt: ${draftsError}`
       : moneybirdConfigured
         ? moneybirdInvoiceReady
-          ? "Moneybird is gekoppeld — concepten kunnen als draft naar Moneybird."
+          ? "Moneybird is gekoppeld — sync als concept, bevestig/verzenden is een aparte stap."
           : "Token werkt, maar BTW-tarief/omzetrekening kon niet automatisch worden bepaald. Zie docs/moneybird-integration.md of zet optioneel TAX/LEDGER IDs."
         : "Moneybird nog niet gekoppeld — concepten blijven in Supabase tot je Vercel-env zet.";
 
@@ -286,7 +304,14 @@ export function InvoiceMvpClient({
                   </TextSelect>
                 </td>
                 <td className="px-3 py-2 text-xs text-slate-600">
-                  {d.moneybird_invoice_id ? (
+                  {isOutdatedMoneybirdDraft(d) ? (
+                    <span
+                      className="font-medium text-amber-700"
+                      title={OUTDATED_MONEYBIRD_DRAFT_MSG}
+                    >
+                      {OUTDATED_MONEYBIRD_DRAFT_MSG}
+                    </span>
+                  ) : d.moneybird_invoice_id ? (
                     <span className="font-medium text-violet-700">
                       {d.moneybird_sync_status === "verzonden"
                         ? "Verzonden"
@@ -306,14 +331,43 @@ export function InvoiceMvpClient({
                 </td>
                 <td className="px-3 py-2 text-right">
                   <div className="flex flex-wrap justify-end gap-1">
-                    {moneybirdInvoiceReady && !d.moneybird_invoice_id ? (
+                    {moneybirdInvoiceReady &&
+                    d.moneybird_sync_status !== "verzonden" &&
+                    d.status !== "sent" &&
+                    d.status !== "paid" &&
+                    d.status !== "cancelled" ? (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setMoneybirdDraft(d)}
                         disabled={pending}
+                        title={
+                          d.moneybird_invoice_id
+                            ? "Moneybird-concept bijwerken"
+                            : "Als concept naar Moneybird"
+                        }
                       >
-                        <Send className="mr-1 h-3.5 w-3.5" /> Moneybird
+                        <Send className="mr-1 h-3.5 w-3.5" />
+                        {d.moneybird_invoice_id
+                          ? "Vernieuw Moneybird"
+                          : "Naar Moneybird als concept"}
+                      </Button>
+                    ) : null}
+                    {moneybirdInvoiceReady &&
+                    d.moneybird_invoice_id &&
+                    d.moneybird_sync_status !== "verzonden" &&
+                    d.status !== "sent" &&
+                    d.status !== "paid" &&
+                    d.status !== "cancelled" &&
+                    !isOutdatedMoneybirdDraft(d) ? (
+                      <Button
+                        size="sm"
+                        className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+                        onClick={() => setConfirmDraft(d)}
+                        disabled={pending}
+                      >
+                        <BadgeCheck className="mr-1 h-3.5 w-3.5" />
+                        Bevestig factuur
                       </Button>
                     ) : null}
                     <Button
@@ -358,7 +412,7 @@ export function InvoiceMvpClient({
             </MvpBadge>
             <p className="mt-2">
               {moneybirdInvoiceReady
-                ? "Gebruik “Moneybird” per concept om een draft in Moneybird aan te maken. Verzenden is optioneel (standaard uit)."
+                ? "Stap 1: “Naar Moneybird als concept”. Stap 2: “Bevestig factuur” om te verzenden — nooit automatisch."
                 : "Token werkt (contacts), maar er is geen standaard BTW-tarief of omzetrekening gevonden. Controleer actieve sales-tarieven/omzetrekeningen in Moneybird, of zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID."}
             </p>
             {!moneybirdInvoiceReady ? (
@@ -476,18 +530,18 @@ export function InvoiceMvpClient({
         onOpenChange={(next) => {
           if (!next) setMoneybirdDraft(null);
         }}
-        title="Naar Moneybird"
+        title="Naar Moneybird als concept"
+        description="Maakt of vernieuwt alleen een concept in Moneybird. Verzenden gebeurt apart via “Bevestig factuur”."
         pending={pending}
-        submitLabel="Concept in Moneybird"
+        submitLabel="Naar Moneybird als concept"
         onSubmit={async (fd) => {
           if (!moneybirdDraft) return;
           startTransition(async () => {
             const contactId = String(fd.get("contact_id") ?? "");
-            const send = fd.get("send") === "on";
             const res = await pushInvoiceDraftToMoneybirdAction(
               moneybirdDraft.id,
               contactId,
-              send,
+              false,
             );
             if (res.ok) {
               setMoneybirdDraft(null);
@@ -504,6 +558,12 @@ export function InvoiceMvpClient({
               {moneybirdDraft.clients?.company_name || "Geen klant"} ·{" "}
               {formatCurrency(moneybirdDraft.total_amount)}
             </p>
+            {isOutdatedMoneybirdDraft(moneybirdDraft) ? (
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                {OUTDATED_MONEYBIRD_DRAFT_MSG}. Dit werkt het Moneybird-concept
+                bij met de huidige uren.
+              </p>
+            ) : null}
             <Field label="Moneybird contact-id" name="contact_id">
               <TextInput
                 name="contact_id"
@@ -514,14 +574,39 @@ export function InvoiceMvpClient({
                 placeholder="Bijv. 123456789012345678"
               />
             </Field>
-            <label className="flex items-start gap-2 text-sm text-slate-700">
-              <input type="checkbox" name="send" className="mt-1" />
-              <span>
-                Ook direct versturen via Moneybird (default: alleen concept /
-                draft).
-              </span>
-            </label>
           </div>
+        ) : null}
+      </MvpFormDialog>
+
+      <MvpFormDialog
+        open={Boolean(confirmDraft)}
+        onOpenChange={(next) => {
+          if (!next) setConfirmDraft(null);
+        }}
+        title="Bevestig factuur"
+        description="Weet je zeker dat je deze factuur wilt bevestigen/verzenden naar de klant?"
+        pending={pending}
+        submitLabel="Ja, bevestig en verzend"
+        onSubmit={async () => {
+          if (!confirmDraft) return;
+          startTransition(async () => {
+            const res = await confirmInvoiceDraftInMoneybirdAction(
+              confirmDraft.id,
+            );
+            if (res.ok) {
+              setConfirmDraft(null);
+              showToast(res.data.message);
+              router.refresh();
+            } else showToast(res.error);
+          });
+        }}
+      >
+        {confirmDraft ? (
+          <p className="text-sm text-slate-600">
+            {confirmDraft.invoice_number} ·{" "}
+            {confirmDraft.clients?.company_name || "Geen klant"} ·{" "}
+            {formatCurrency(confirmDraft.total_amount)}
+          </p>
         ) : null}
       </MvpFormDialog>
 
