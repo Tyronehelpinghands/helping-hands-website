@@ -72,6 +72,8 @@ Server actions (Facturatie-MVP):
 |---|---|---|
 | `pushInvoiceDraftToMoneybirdAction` | finance/admin/owner | Supabase-concept → Moneybird **alleen concept** (aanmaken of bijwerken) |
 | `confirmInvoiceDraftInMoneybirdAction` | finance/admin/owner | Expliciet bevestigen/verzenden in Moneybird |
+| `deleteInvoiceDraftAction` | finance/admin/owner | Concept verwijderen (niet verzonden); uren → approved; optioneel Moneybird-concept DELETE |
+| `creditInvoiceDraftAction` | finance/admin/owner | Creditnota: lokaal `gecrediteerd` + creditconcept; Moneybird `duplicate_creditinvoice` indien gekoppeld (**nooit** auto-send) |
 
 ## Sync-gedrag (twee stappen)
 
@@ -79,6 +81,17 @@ Server actions (Facturatie-MVP):
 2. Vul bij de opdrachtgever (Sales) of in het Moneybird-dialog een **Moneybird contact-id** in.
 3. **Naar Moneybird als concept** → alleen draft in Moneybird (`POST` of `PATCH` sales invoice). Nooit automatisch verzenden.
 4. **Bevestig factuur** (aparte knop + bevestigingsdialog) → `PATCH .../send_invoice.json`. Lokale status → `sent`, `moneybird_sync_status` → `verzonden`.
+
+### Verwijderen / Crediteren
+
+| Actie | Wanneer | Lokaal | Moneybird | Uren |
+|---|---|---|---|---|
+| **Verwijderen** | Concept (`draft`/`ready`), niet `verzonden` | Concept verwijderen | Optioneel `DELETE` concept | → `approved` (opnieuw factureerbaar) |
+| **Crediteren** | `sent`/`paid` of Moneybird `verzonden` | Origineel → `gecrediteerd` + lokaal creditconcept | `PATCH .../duplicate_creditinvoice.json` (alleen concept) | Blijven `invoiced` |
+
+Beide acties vereisen een expliciete Nederlandse bevestiging; nooit stilzwijgend verzenden.
+
+SQL voor status `gecrediteerd`: [`supabase/invoice-draft-status-gecrediteerd.sql`](../supabase/invoice-draft-status-gecrediteerd.sql).
 
 ### Uren aanpassen ↔ factuurconcept
 

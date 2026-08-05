@@ -7,6 +7,8 @@ import {
   FilePlus,
   RotateCcw,
   Send,
+  Trash2,
+  Undo2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +29,8 @@ import {
   confirmInvoiceDraftInMoneybirdAction,
   createInvoiceDraftFromApprovedHoursAction,
   createInvoiceDraftFromInvoicedHoursAction,
+  creditInvoiceDraftAction,
+  deleteInvoiceDraftAction,
   pushInvoiceDraftToMoneybirdAction,
   resetInvoicedTimeEntriesToApprovedAction,
   updateInvoiceDraftStatusAction,
@@ -38,6 +42,7 @@ import {
   invoiceStatusLabel,
 } from "@/lib/dashboard/formatters";
 import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
+import type { UserRole } from "@/lib/supabase/types";
 import type {
   InvoiceDraft,
   InvoiceDraftStatus,
@@ -45,12 +50,40 @@ import type {
   TimeEntry,
 } from "@/lib/dashboard/types";
 
+const FINANCE_ROLES: UserRole[] = ["owner", "admin", "finance"];
+
+function canManageFinance(role: UserRole): boolean {
+  return FINANCE_ROLES.includes(role);
+}
+
 function isOutdatedMoneybirdDraft(d: InvoiceDraft): boolean {
   return Boolean(
     d.moneybird_invoice_id &&
       d.moneybird_sync_status !== "verzonden" &&
       (d.moneybird_sync_status === "niet_gesynct" ||
         d.moneybird_sync_error === OUTDATED_MONEYBIRD_DRAFT_MSG),
+  );
+}
+
+function canDeleteDraft(d: InvoiceDraft): boolean {
+  if (
+    d.status === "sent" ||
+    d.status === "paid" ||
+    d.status === "cancelled" ||
+    d.status === "gecrediteerd"
+  ) {
+    return false;
+  }
+  if (d.moneybird_sync_status === "verzonden") return false;
+  return d.status === "draft" || d.status === "ready";
+}
+
+function canCreditDraft(d: InvoiceDraft): boolean {
+  if (d.status === "cancelled" || d.status === "gecrediteerd") return false;
+  return (
+    d.status === "sent" ||
+    d.status === "paid" ||
+    d.moneybird_sync_status === "verzonden"
   );
 }
 
@@ -63,6 +96,7 @@ export function InvoiceMvpClient({
   tablesReady,
   moneybirdConfigured,
   moneybirdInvoiceReady,
+  userRole,
 }: {
   drafts: InvoiceDraft[];
   draftsError: string | null;
@@ -72,6 +106,7 @@ export function InvoiceMvpClient({
   tablesReady: boolean;
   moneybirdConfigured: boolean;
   moneybirdInvoiceReady: boolean;
+  userRole: UserRole;
 }) {
   const router = useRouter();
   const { toast, showToast } = useToast();
@@ -82,6 +117,10 @@ export function InvoiceMvpClient({
     null,
   );
   const [confirmDraft, setConfirmDraft] = useState<InvoiceDraft | null>(null);
+  const [deleteDraft, setDeleteDraft] = useState<InvoiceDraft | null>(null);
+  const [creditDraft, setCreditDraft] = useState<InvoiceDraft | null>(null);
+
+  const canFinance = canManageFinance(userRole);
 
   const projectsWithApproved = useMemo(() => {
     const ids = new Set(
@@ -133,13 +172,15 @@ export function InvoiceMvpClient({
         description="Factuurconcepten uit goedgekeurde uren, met CSV-export en optionele Moneybird-sync."
         notice={notice}
         actions={
-          <Button
-            className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-            onClick={() => setOpen(true)}
-            disabled={projectsWithApproved.length === 0}
-          >
-            <FilePlus className="mr-1 h-4 w-4" /> Concept uit uren
-          </Button>
+          canFinance ? (
+            <Button
+              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              onClick={() => setOpen(true)}
+              disabled={projectsWithApproved.length === 0}
+            >
+              <FilePlus className="mr-1 h-4 w-4" /> Concept uit uren
+            </Button>
+          ) : undefined
         }
       />
 
@@ -178,36 +219,40 @@ export function InvoiceMvpClient({
             ) : null}
           </ul>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-              disabled={projectsWithOrphans.length === 0 || pending}
-              onClick={() => setRecoverOpen(true)}
-            >
-              <FilePlus className="mr-1 h-3.5 w-3.5" />
-              Herstel / maak concept
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={pending}
-              onClick={() => {
-                startTransition(async () => {
-                  const res = await resetInvoicedTimeEntriesToApprovedAction(
-                    orphanInvoicedEntries.map((e) => e.id),
-                  );
-                  if (res.ok) {
-                    showToast(
-                      `${res.data.count} urenregel(s) teruggezet naar goedgekeurd.`,
-                    );
-                    router.refresh();
-                  } else showToast(res.error);
-                });
-              }}
-            >
-              <RotateCcw className="mr-1 h-3.5 w-3.5" />
-              Status terugzetten naar goedgekeurd
-            </Button>
+            {canFinance ? (
+              <>
+                <Button
+                  size="sm"
+                  className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+                  disabled={projectsWithOrphans.length === 0 || pending}
+                  onClick={() => setRecoverOpen(true)}
+                >
+                  <FilePlus className="mr-1 h-3.5 w-3.5" />
+                  Herstel / maak concept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => {
+                    startTransition(async () => {
+                      const res = await resetInvoicedTimeEntriesToApprovedAction(
+                        orphanInvoicedEntries.map((e) => e.id),
+                      );
+                      if (res.ok) {
+                        showToast(
+                          `${res.data.count} urenregel(s) teruggezet naar goedgekeurd.`,
+                        );
+                        router.refresh();
+                      } else showToast(res.error);
+                    });
+                  }}
+                >
+                  <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                  Status terugzetten naar goedgekeurd
+                </Button>
+              </>
+            ) : null}
             <Link
               href="/dashboard/intern/urenregistratie"
               className="inline-flex h-8 items-center rounded-md px-3 text-xs font-semibold text-[#173A8A] underline-offset-2 hover:underline"
@@ -229,9 +274,9 @@ export function InvoiceMvpClient({
                 : "Keur eerst uren goed en maak daarna een concept per project."
           }
           action={
-            projectsWithApproved.length > 0 ? (
+            canFinance && projectsWithApproved.length > 0 ? (
               <Button onClick={() => setOpen(true)}>Concept maken</Button>
-            ) : orphanInvoicedEntries.length > 0 ? (
+            ) : canFinance && orphanInvoicedEntries.length > 0 ? (
               <Button onClick={() => setRecoverOpen(true)}>
                 Herstel concept
               </Button>
@@ -274,34 +319,47 @@ export function InvoiceMvpClient({
                   </div>
                 </td>
                 <td className="px-3 py-2">
-                  <TextSelect
-                    value={d.status}
-                    onChange={(e) => {
-                      startTransition(async () => {
-                        const res = await updateInvoiceDraftStatusAction(
-                          d.id,
-                          e.target.value as InvoiceDraftStatus,
-                        );
-                        if (res.ok) {
-                          const reset = res.data.resetEntries ?? 0;
-                          showToast(
-                            reset > 0
-                              ? `Status bijgewerkt. ${reset} uren teruggezet naar goedgekeurd.`
-                              : "Status bijgewerkt.",
+                  {canFinance ? (
+                    <TextSelect
+                      value={d.status}
+                      onChange={(e) => {
+                        startTransition(async () => {
+                          const res = await updateInvoiceDraftStatusAction(
+                            d.id,
+                            e.target.value as InvoiceDraftStatus,
                           );
-                        } else showToast(res.error);
-                        router.refresh();
-                      });
-                    }}
-                  >
-                    {(
-                      ["draft", "ready", "sent", "paid", "cancelled"] as const
-                    ).map((s) => (
-                      <option key={s} value={s}>
-                        {invoiceStatusLabel(s)}
-                      </option>
-                    ))}
-                  </TextSelect>
+                          if (res.ok) {
+                            const reset = res.data.resetEntries ?? 0;
+                            showToast(
+                              reset > 0
+                                ? `Status bijgewerkt. ${reset} uren teruggezet naar goedgekeurd.`
+                                : "Status bijgewerkt.",
+                            );
+                          } else showToast(res.error);
+                          router.refresh();
+                        });
+                      }}
+                    >
+                      {(
+                        [
+                          "draft",
+                          "ready",
+                          "sent",
+                          "paid",
+                          "cancelled",
+                          "gecrediteerd",
+                        ] as const
+                      ).map((s) => (
+                        <option key={s} value={s}>
+                          {invoiceStatusLabel(s)}
+                        </option>
+                      ))}
+                    </TextSelect>
+                  ) : (
+                    <span className="text-sm font-medium text-slate-700">
+                      {invoiceStatusLabel(d.status)}
+                    </span>
+                  )}
                 </td>
                 <td className="px-3 py-2 text-xs text-slate-600">
                   {isOutdatedMoneybirdDraft(d) ? (
@@ -331,11 +389,13 @@ export function InvoiceMvpClient({
                 </td>
                 <td className="px-3 py-2 text-right">
                   <div className="flex flex-wrap justify-end gap-1">
-                    {moneybirdInvoiceReady &&
+                    {canFinance &&
+                    moneybirdInvoiceReady &&
                     d.moneybird_sync_status !== "verzonden" &&
                     d.status !== "sent" &&
                     d.status !== "paid" &&
-                    d.status !== "cancelled" ? (
+                    d.status !== "cancelled" &&
+                    d.status !== "gecrediteerd" ? (
                       <Button
                         size="sm"
                         variant="outline"
@@ -353,12 +413,14 @@ export function InvoiceMvpClient({
                           : "Naar Moneybird als concept"}
                       </Button>
                     ) : null}
-                    {moneybirdInvoiceReady &&
+                    {canFinance &&
+                    moneybirdInvoiceReady &&
                     d.moneybird_invoice_id &&
                     d.moneybird_sync_status !== "verzonden" &&
                     d.status !== "sent" &&
                     d.status !== "paid" &&
                     d.status !== "cancelled" &&
+                    d.status !== "gecrediteerd" &&
                     !isOutdatedMoneybirdDraft(d) ? (
                       <Button
                         size="sm"
@@ -368,6 +430,29 @@ export function InvoiceMvpClient({
                       >
                         <BadgeCheck className="mr-1 h-3.5 w-3.5" />
                         Bevestig factuur
+                      </Button>
+                    ) : null}
+                    {canFinance && canDeleteDraft(d) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-200 text-red-700 hover:bg-red-50"
+                        onClick={() => setDeleteDraft(d)}
+                        disabled={pending}
+                      >
+                        <Trash2 className="mr-1 h-3.5 w-3.5" />
+                        Verwijderen
+                      </Button>
+                    ) : null}
+                    {canFinance && canCreditDraft(d) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setCreditDraft(d)}
+                        disabled={pending}
+                      >
+                        <Undo2 className="mr-1 h-3.5 w-3.5" />
+                        Crediteren
                       </Button>
                     ) : null}
                     <Button
@@ -412,7 +497,7 @@ export function InvoiceMvpClient({
             </MvpBadge>
             <p className="mt-2">
               {moneybirdInvoiceReady
-                ? "Stap 1: “Naar Moneybird als concept”. Stap 2: “Bevestig factuur” om te verzenden — nooit automatisch."
+                ? "Stap 1: “Naar Moneybird als concept”. Stap 2: “Bevestig factuur” om te verzenden — nooit automatisch. Verwijderen/Crediteren zijn aparte, expliciete acties."
                 : "Token werkt (contacts), maar er is geen standaard BTW-tarief of omzetrekening gevonden. Controleer actieve sales-tarieven/omzetrekeningen in Moneybird, of zet optioneel MONEYBIRD_DEFAULT_TAX_RATE_ID en MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID."}
             </p>
             {!moneybirdInvoiceReady ? (
@@ -607,6 +692,72 @@ export function InvoiceMvpClient({
             {confirmDraft.clients?.company_name || "Geen klant"} ·{" "}
             {formatCurrency(confirmDraft.total_amount)}
           </p>
+        ) : null}
+      </MvpFormDialog>
+
+      <MvpFormDialog
+        open={Boolean(deleteDraft)}
+        onOpenChange={(next) => {
+          if (!next) setDeleteDraft(null);
+        }}
+        title="Concept verwijderen"
+        description="Concept verwijderen? Uren worden weer goedgekeurd en kunnen opnieuw gefactureerd worden."
+        pending={pending}
+        submitLabel="Ja, verwijderen"
+        onSubmit={async () => {
+          if (!deleteDraft) return;
+          startTransition(async () => {
+            const res = await deleteInvoiceDraftAction(deleteDraft.id);
+            if (res.ok) {
+              setDeleteDraft(null);
+              showToast(res.data.message);
+              router.refresh();
+            } else showToast(res.error);
+          });
+        }}
+      >
+        {deleteDraft ? (
+          <p className="text-sm text-slate-600">
+            {deleteDraft.invoice_number} ·{" "}
+            {deleteDraft.clients?.company_name || "Geen klant"} ·{" "}
+            {formatCurrency(deleteDraft.total_amount)}
+          </p>
+        ) : null}
+      </MvpFormDialog>
+
+      <MvpFormDialog
+        open={Boolean(creditDraft)}
+        onOpenChange={(next) => {
+          if (!next) setCreditDraft(null);
+        }}
+        title="Creditnota aanmaken"
+        description="Creditnota aanmaken? Dit maakt de factuur ongedaan (Moneybird credit indien gekoppeld)."
+        pending={pending}
+        submitLabel="Ja, crediteren"
+        onSubmit={async () => {
+          if (!creditDraft) return;
+          startTransition(async () => {
+            const res = await creditInvoiceDraftAction(creditDraft.id);
+            if (res.ok) {
+              setCreditDraft(null);
+              showToast(res.data.message);
+              router.refresh();
+            } else showToast(res.error);
+          });
+        }}
+      >
+        {creditDraft ? (
+          <div className="space-y-2 text-sm text-slate-600">
+            <p>
+              {creditDraft.invoice_number} ·{" "}
+              {creditDraft.clients?.company_name || "Geen klant"} ·{" "}
+              {formatCurrency(creditDraft.total_amount)}
+            </p>
+            <p className="text-xs text-slate-500">
+              Er wordt geen factuur automatisch verzonden. Uren blijven
+              gefactureerd (geen dubbele factuur).
+            </p>
+          </div>
         ) : null}
       </MvpFormDialog>
 
