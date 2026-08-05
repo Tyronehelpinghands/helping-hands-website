@@ -83,6 +83,8 @@ export function employmentTypeLabel(type: EmploymentType): string {
   switch (type) {
     case "payroll":
       return "Payroll";
+    case "vast":
+      return "Vast (loondienst)";
     case "zzp":
       return "ZZP";
     case "freelance":

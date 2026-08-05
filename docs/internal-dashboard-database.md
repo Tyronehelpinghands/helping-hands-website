@@ -159,13 +159,18 @@ create table if not exists public.crew_members (
   phone text,
   city text,
   employment_type text not null default 'payroll'
-    check (employment_type in ('payroll', 'zzp', 'freelance', 'other')),
+    check (employment_type in ('payroll', 'vast', 'zzp', 'freelance', 'other')),
   role_type text,
   skills text[] default '{}',
   certificates text[] default '{}',
   has_drivers_license boolean not null default false,
   has_car boolean not null default false,
   hourly_cost numeric,
+  -- Bruto uurloon; Fooks factor → hourly_cost for payroll/vast
+  gross_hourly_wage numeric,
+  -- Fooks WW: 'laag' (1,580) | 'hoog' (1,635)
+  fooks_ww_tariff text
+    check (fooks_ww_tariff is null or fooks_ww_tariff in ('laag', 'hoog')),
   status text not null default 'active'
     check (status in ('active', 'inactive', 'onboarding')),
   notes text,
@@ -705,6 +710,23 @@ begin
   end if;
 end $$;
 ```
+
+---
+
+## Migration: Fooks bruto / WW-tarief on `crew_members`
+
+Run if `crew_members` already exists without Fooks fields or without `employment_type = 'vast'` (idempotent).
+
+**Standalone paste file:** [`supabase/crew-fooks-columns.sql`](../supabase/crew-fooks-columns.sql)
+
+Factors from Fooks sales voorstel (R.E.R Productions): **WW Laag 1,580** · **WW Hoog 1,635** (incl. vakantiegeld, vakantiedagen, sociale lasten, verzuim).  
+`hourly_cost = round(bruto × factor, 2)` — server herberekenen bij payroll/vast.
+
+```sql
+-- See supabase/crew-fooks-columns.sql
+```
+
+UI: Crew toevoegen/bewerken → Bruto uurloon + Fooks-tarief bij Payroll / Vast; ZZP/Freelance/Overig blijft handmatige uurkost.
 
 ---
 

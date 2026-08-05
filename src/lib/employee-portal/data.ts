@@ -133,6 +133,8 @@ function mapEmploymentType(
       return "ZZP";
     case "payroll":
       return "Payroll";
+    case "vast":
+      return "Loondienst";
     default:
       return "Onbekend";
   }

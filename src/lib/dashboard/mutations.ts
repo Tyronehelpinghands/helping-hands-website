@@ -18,6 +18,11 @@ import {
   MONEYBIRD_COLUMNS_SQL_HINT,
   pushInvoiceDraftToMoneybird,
 } from "@/lib/dashboard/moneybirdSync";
+import {
+  calculateFooksHourlyCost,
+  isFooksEmploymentType,
+  parseFooksWwTariff,
+} from "@/lib/dashboard/fooksRates";
 import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 import { shouldAutoSyncShiftbase } from "@/lib/shiftbase";
 import type {
@@ -35,6 +40,61 @@ import type {
   TimeEntryStatus,
   InternalMessageStatus,
 } from "@/lib/dashboard/types";
+
+/** Hint when Fooks columns / vast employment_type are missing in Supabase. */
+const FOOKS_COLUMNS_SQL_HINT =
+  "Voer supabase/crew-fooks-columns.sql uit in Supabase (SQL Editor).";
+
+function isMissingFooksColumnError(message: string): boolean {
+  return (
+    (/gross_hourly_wage|fooks_ww_tariff/i.test(message) ||
+      (/employment_type/i.test(message) && /vast/i.test(message))) &&
+    (/column/i.test(message) ||
+      /schema cache/i.test(message) ||
+      /check constraint/i.test(message) ||
+      /violates check/i.test(message) ||
+      /does not exist/i.test(message))
+  );
+}
+
+function resolveCrewCostFields(formData: FormData): {
+  employment_type: EmploymentType;
+  hourly_cost: number | null;
+  gross_hourly_wage: number | null;
+  fooks_ww_tariff: "laag" | "hoog" | null;
+} {
+  const employment_type =
+    (strOrNull(formData.get("employment_type")) as EmploymentType) || "payroll";
+  const manualOverride = formData.get("manual_hourly_cost") === "on";
+  const clientHourly = numOrNull(formData.get("hourly_cost"));
+  const bruto = numOrNull(formData.get("gross_hourly_wage"));
+  const tariff = parseFooksWwTariff(strOrNull(formData.get("fooks_ww_tariff")));
+
+  if (isFooksEmploymentType(employment_type) && !manualOverride && bruto != null) {
+    return {
+      employment_type,
+      hourly_cost: calculateFooksHourlyCost(bruto, tariff),
+      gross_hourly_wage: bruto,
+      fooks_ww_tariff: tariff,
+    };
+  }
+
+  if (isFooksEmploymentType(employment_type)) {
+    return {
+      employment_type,
+      hourly_cost: clientHourly,
+      gross_hourly_wage: bruto,
+      fooks_ww_tariff: tariff,
+    };
+  }
+
+  return {
+    employment_type,
+    hourly_cost: clientHourly,
+    gross_hourly_wage: null,
+    fooks_ww_tariff: null,
+  };
+}
 
 const ALL_INTERNAL: UserRole[] = [
   "owner",
@@ -442,32 +502,55 @@ export async function createCrewMemberAction(
   const full_name = strOrNull(formData.get("full_name"));
   if (!full_name) return fail("Naam is verplicht.");
 
+  const cost = resolveCrewCostFields(formData);
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const insertPayload: Record<string, unknown> = {
+    full_name,
+    email: strOrNull(formData.get("email")),
+    phone: strOrNull(formData.get("phone")),
+    city: strOrNull(formData.get("city")),
+    employment_type: cost.employment_type,
+    role_type: strOrNull(formData.get("role_type")),
+    skills: parseSkills(formData.get("skills")),
+    certificates: parseSkills(formData.get("certificates")),
+    has_drivers_license: formData.get("has_drivers_license") === "on",
+    has_car: formData.get("has_car") === "on",
+    hourly_cost: cost.hourly_cost,
+    gross_hourly_wage: cost.gross_hourly_wage,
+    fooks_ww_tariff: cost.fooks_ww_tariff,
+    status: (strOrNull(formData.get("status")) as CrewMemberStatus) || "active",
+    notes: strOrNull(formData.get("notes")),
+  };
+
+  let { data, error } = await supabase
     .from("crew_members")
-    .insert({
-      full_name,
-      email: strOrNull(formData.get("email")),
-      phone: strOrNull(formData.get("phone")),
-      city: strOrNull(formData.get("city")),
-      employment_type:
-        (strOrNull(formData.get("employment_type")) as EmploymentType) ||
-        "payroll",
-      role_type: strOrNull(formData.get("role_type")),
-      skills: parseSkills(formData.get("skills")),
-      certificates: parseSkills(formData.get("certificates")),
-      has_drivers_license: formData.get("has_drivers_license") === "on",
-      has_car: formData.get("has_car") === "on",
-      hourly_cost: numOrNull(formData.get("hourly_cost")),
-      status: (strOrNull(formData.get("status")) as CrewMemberStatus) || "active",
-      notes: strOrNull(formData.get("notes")),
-    })
+    .insert(insertPayload)
     .select("id")
     .single();
 
-  if (error) return fail(error.message);
+  if (error && isMissingFooksColumnError(error.message)) {
+    delete insertPayload.gross_hourly_wage;
+    delete insertPayload.fooks_ww_tariff;
+    if (cost.employment_type === "vast") {
+      insertPayload.employment_type = "payroll";
+    }
+    const retry = await supabase
+      .from("crew_members")
+      .insert(insertPayload)
+      .select("id")
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
+
+  if (error) {
+    if (isMissingFooksColumnError(error.message)) {
+      return fail(`${error.message} — ${FOOKS_COLUMNS_SQL_HINT}`);
+    }
+    return fail(error.message);
+  }
   revalidateDashboard(["/dashboard/intern/crew", "/dashboard/intern/planning"]);
-  return ok({ id: data.id });
+  return ok({ id: data!.id });
 }
 
 export async function updateCrewMemberAction(
@@ -477,29 +560,50 @@ export async function updateCrewMemberAction(
   const id = strOrNull(formData.get("id"));
   if (!id) return fail("Crew-id ontbreekt.");
 
+  const cost = resolveCrewCostFields(formData);
   const supabase = await createClient();
-  const { error } = await supabase
+  const updatePayload: Record<string, unknown> = {
+    full_name: strOrNull(formData.get("full_name")),
+    email: strOrNull(formData.get("email")),
+    phone: strOrNull(formData.get("phone")),
+    city: strOrNull(formData.get("city")),
+    employment_type: cost.employment_type,
+    role_type: strOrNull(formData.get("role_type")),
+    skills: parseSkills(formData.get("skills")),
+    certificates: parseSkills(formData.get("certificates")),
+    has_drivers_license: formData.get("has_drivers_license") === "on",
+    has_car: formData.get("has_car") === "on",
+    hourly_cost: cost.hourly_cost,
+    gross_hourly_wage: cost.gross_hourly_wage,
+    fooks_ww_tariff: cost.fooks_ww_tariff,
+    status: strOrNull(formData.get("status")) as CrewMemberStatus,
+    notes: strOrNull(formData.get("notes")),
+  };
+
+  let { error } = await supabase
     .from("crew_members")
-    .update({
-      full_name: strOrNull(formData.get("full_name")),
-      email: strOrNull(formData.get("email")),
-      phone: strOrNull(formData.get("phone")),
-      city: strOrNull(formData.get("city")),
-      employment_type: strOrNull(
-        formData.get("employment_type"),
-      ) as EmploymentType,
-      role_type: strOrNull(formData.get("role_type")),
-      skills: parseSkills(formData.get("skills")),
-      certificates: parseSkills(formData.get("certificates")),
-      has_drivers_license: formData.get("has_drivers_license") === "on",
-      has_car: formData.get("has_car") === "on",
-      hourly_cost: numOrNull(formData.get("hourly_cost")),
-      status: strOrNull(formData.get("status")) as CrewMemberStatus,
-      notes: strOrNull(formData.get("notes")),
-    })
+    .update(updatePayload)
     .eq("id", id);
 
-  if (error) return fail(error.message);
+  if (error && isMissingFooksColumnError(error.message)) {
+    delete updatePayload.gross_hourly_wage;
+    delete updatePayload.fooks_ww_tariff;
+    if (cost.employment_type === "vast") {
+      updatePayload.employment_type = "payroll";
+    }
+    const retry = await supabase
+      .from("crew_members")
+      .update(updatePayload)
+      .eq("id", id);
+    error = retry.error;
+  }
+
+  if (error) {
+    if (isMissingFooksColumnError(error.message)) {
+      return fail(`${error.message} — ${FOOKS_COLUMNS_SQL_HINT}`);
+    }
+    return fail(error.message);
+  }
   revalidateDashboard(["/dashboard/intern/crew", "/dashboard/intern/planning"]);
   return ok({ id });
 }
