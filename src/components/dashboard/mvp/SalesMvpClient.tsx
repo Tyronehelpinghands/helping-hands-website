@@ -21,6 +21,7 @@ import {
   createClientAction,
   createLeadAction,
   inviteClientPortalAction,
+  syncClientToMoneybirdAction,
   updateClientAction,
   updateLeadAction,
   updateLeadStatusAction,
@@ -194,6 +195,28 @@ export function SalesMvpClient({
                           {c.profile_id ? "Opnieuw uitnodigen" : "Uitnodigen"}
                         </Button>
                       ) : null}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={pending}
+                        title={
+                          c.moneybird_contact_id
+                            ? `Gekoppeld: ${c.moneybird_contact_id}`
+                            : "Zoek of maak Moneybird-contact"
+                        }
+                        onClick={() => {
+                          startTransition(async () => {
+                            const res = await syncClientToMoneybirdAction(c.id);
+                            refresh(
+                              res.ok ? res.data.message : res.error,
+                            );
+                          });
+                        }}
+                      >
+                        {c.moneybird_contact_id
+                          ? "Moneybird gekoppeld"
+                          : "Koppel Moneybird"}
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -383,12 +406,19 @@ export function SalesMvpClient({
         <Field label="Notities" name="notes">
           <TextTextarea name="notes" defaultValue={editClient?.notes ?? ""} />
         </Field>
-        <Field label="Moneybird contact-id (optioneel)" name="moneybird_contact_id">
+        <Field
+          label="Moneybird contact-id (optioneel override)"
+          name="moneybird_contact_id"
+        >
           <TextInput
             name="moneybird_contact_id"
             defaultValue={editClient?.moneybird_contact_id ?? ""}
-            placeholder="Voor facturatie-sync"
+            placeholder="Wordt automatisch gezet bij sync"
           />
+          <p className="mt-1 text-xs text-slate-500">
+            Normaal niet nodig: gebruik “Koppel Moneybird” of sync vanuit
+            Facturatie (zoek/maak op e-mail of bedrijfsnaam).
+          </p>
         </Field>
         <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-2.5 text-sm text-[#0B1F4D]">
           <input

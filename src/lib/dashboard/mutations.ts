@@ -25,6 +25,7 @@ import {
   isMissingMoneybirdColumnError,
   MONEYBIRD_COLUMNS_SQL_HINT,
   pushInvoiceDraftToMoneybird,
+  resolveOrCreateMoneybirdContactForClient,
 } from "@/lib/dashboard/moneybirdSync";
 import {
   calculateCrewHourlyCost,
@@ -1832,11 +1833,12 @@ export async function creditInvoiceDraftAction(
 /**
  * Maakt/werkt een Moneybird-concept bij vanuit een Supabase-concept.
  * Verzendt nooit — gebruik confirmInvoiceDraftInMoneybirdAction.
+ * Contact-id is optioneel: zonder override wordt automatisch gezocht/aangemaakt.
  * Vereist finance/owner/admin + Moneybird env.
  */
 export async function pushInvoiceDraftToMoneybirdAction(
   draftId: string,
-  contactId: string,
+  contactId?: string | null,
   send = false,
 ): Promise<
   ActionResult<{
@@ -1855,7 +1857,7 @@ export async function pushInvoiceDraftToMoneybirdAction(
 
   const result = await pushInvoiceDraftToMoneybird({
     draftId: draftId.trim(),
-    contactId,
+    contactId: contactId?.trim() || null,
     send: false,
   });
 
@@ -1865,11 +1867,47 @@ export async function pushInvoiceDraftToMoneybirdAction(
     "/dashboard/intern/facturatie",
     "/dashboard/intern/financien",
     "/dashboard/intern/integraties",
+    "/dashboard/intern/sales",
   ]);
 
   return ok({
     moneybirdInvoiceId: result.moneybirdInvoiceId,
     sent: result.sent,
+    message: result.message,
+  });
+}
+
+/**
+ * Koppelt een opdrachtgever aan Moneybird (zoek of maak contact, sla id op).
+ * Vereist sales/finance/owner/admin + Moneybird env.
+ */
+export async function syncClientToMoneybirdAction(
+  clientId: string,
+): Promise<
+  ActionResult<{
+    contactId: string;
+    created: boolean;
+    message: string;
+  }>
+> {
+  await requireRole(["owner", "admin", "sales", "finance"]);
+  if (!clientId.trim()) return fail("Opdrachtgever-id ontbreekt.");
+
+  const result = await resolveOrCreateMoneybirdContactForClient({
+    clientId: clientId.trim(),
+  });
+
+  if (!result.ok) return fail(result.error);
+
+  revalidateDashboard([
+    "/dashboard/intern/sales",
+    "/dashboard/intern/facturatie",
+    "/dashboard/intern/integraties",
+  ]);
+
+  return ok({
+    contactId: result.contactId,
+    created: result.created,
     message: result.message,
   });
 }

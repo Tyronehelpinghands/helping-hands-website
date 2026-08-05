@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import {
+  createMoneybirdContact,
   createMoneybirdSalesInvoice,
   formatMoneybirdError,
   getMissingMoneybirdEnvVars,
   isMoneybirdConfigured,
   MONEYBIRD_DEFAULTS_RESOLVE_ERROR,
   resolveMoneybirdInvoiceDefaults,
+  searchMoneybirdContacts,
   sendMoneybirdSalesInvoice,
   updateMoneybirdSalesInvoice,
 } from "@/lib/server/moneybird";
@@ -21,6 +23,16 @@ export type PushInvoiceDraftResult =
       moneybirdInvoiceId: string;
       moneybirdState: string;
       sent: boolean;
+      message: string;
+    }
+  | { ok: false; error: string };
+
+export type SyncClientContactResult =
+  | {
+      ok: true;
+      contactId: string;
+      created: boolean;
+      matchedBy: "stored" | "email" | "company_name" | "created";
       message: string;
     }
   | { ok: false; error: string };
@@ -50,6 +62,254 @@ type LoadedDraft = {
   moneybird_sync_error?: string | null;
   invoice_draft_lines?: InvoiceDraftLine[] | null;
 };
+
+type ClientForMoneybird = {
+  id: string;
+  company_name: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  moneybird_contact_id?: string | null;
+};
+
+function normalizeEmail(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function normalizeCompany(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function splitContactName(contactName: string | null | undefined): {
+  firstname: string;
+  lastname: string;
+} {
+  const parts = (contactName ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstname: "", lastname: "" };
+  if (parts.length === 1) return { firstname: parts[0], lastname: "" };
+  return {
+    firstname: parts[0],
+    lastname: parts.slice(1).join(" "),
+  };
+}
+
+async function loadClientForMoneybird(
+  clientId: string,
+): Promise<
+  | { ok: true; client: ClientForMoneybird; persistContactColumn: boolean }
+  | { ok: false; error: string }
+> {
+  const supabase = await createClient();
+  let persistContactColumn = true;
+
+  const full = await supabase
+    .from("clients")
+    .select(
+      "id, company_name, contact_name, email, phone, address, city, moneybird_contact_id",
+    )
+    .eq("id", clientId)
+    .maybeSingle();
+
+  if (full.error && isMissingMoneybirdColumnError(full.error.message)) {
+    persistContactColumn = false;
+    const basic = await supabase
+      .from("clients")
+      .select("id, company_name, contact_name, email, phone, address, city")
+      .eq("id", clientId)
+      .maybeSingle();
+    if (basic.error || !basic.data) {
+      return { ok: false, error: MONEYBIRD_COLUMNS_SQL_HINT };
+    }
+    return {
+      ok: true,
+      client: basic.data as ClientForMoneybird,
+      persistContactColumn,
+    };
+  }
+
+  if (full.error) {
+    return { ok: false, error: full.error.message };
+  }
+  if (!full.data) {
+    return { ok: false, error: "Opdrachtgever niet gevonden." };
+  }
+
+  return {
+    ok: true,
+    client: full.data as ClientForMoneybird,
+    persistContactColumn,
+  };
+}
+
+async function persistClientMoneybirdContactId(
+  clientId: string,
+  contactId: string,
+  persistContactColumn: boolean,
+): Promise<void> {
+  if (!persistContactColumn) return;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("clients")
+    .update({ moneybird_contact_id: contactId })
+    .eq("id", clientId);
+  if (error && !isMissingMoneybirdColumnError(error.message)) {
+    console.warn(
+      "[Moneybird] Kon moneybird_contact_id niet opslaan:",
+      error.message,
+    );
+  }
+}
+
+/**
+ * Lost Moneybird contact-id op voor een opdrachtgever:
+ * 1) bestaande clients.moneybird_contact_id
+ * 2) zoek op e-mail
+ * 3) zoek op bedrijfsnaam
+ * 4) maak contact aan (vereist e-mail)
+ * Slaat het gevonden/aangemaakte id terug op clients.
+ */
+export async function resolveOrCreateMoneybirdContactForClient(options: {
+  clientId: string;
+  /** Optionele override (bijv. handmatig); wordt opgeslagen op de klant. */
+  contactIdOverride?: string | null;
+}): Promise<SyncClientContactResult> {
+  if (!isMoneybirdConfigured()) {
+    const missing = getMissingMoneybirdEnvVars();
+    return {
+      ok: false,
+      error:
+        missing.length > 0
+          ? `Moneybird niet gekoppeld. Zet in Vercel: ${missing.join(", ")} en redeploy.`
+          : "Moneybird configuratie ontbreekt.",
+    };
+  }
+
+  const override = options.contactIdOverride?.trim();
+  if (override) {
+    const loaded = await loadClientForMoneybird(options.clientId);
+    if (!loaded.ok) return loaded;
+    await persistClientMoneybirdContactId(
+      options.clientId,
+      override,
+      loaded.persistContactColumn,
+    );
+    return {
+      ok: true,
+      contactId: override,
+      created: false,
+      matchedBy: "stored",
+      message: `Moneybird-contact gekoppeld (${override}).`,
+    };
+  }
+
+  const loaded = await loadClientForMoneybird(options.clientId);
+  if (!loaded.ok) return loaded;
+
+  const { client, persistContactColumn } = loaded;
+  const stored = client.moneybird_contact_id?.trim();
+  if (stored) {
+    return {
+      ok: true,
+      contactId: stored,
+      created: false,
+      matchedBy: "stored",
+      message: `Bestaande Moneybird-koppeling gebruikt (${stored}).`,
+    };
+  }
+
+  const email = normalizeEmail(client.email);
+  const company = (client.company_name ?? "").trim();
+  const companyNorm = normalizeCompany(company);
+
+  try {
+    if (email) {
+      const byEmail = await searchMoneybirdContacts(email);
+      const exactEmail = byEmail.find(
+        (c) => normalizeEmail(c.email) === email,
+      );
+      if (exactEmail?.id) {
+        await persistClientMoneybirdContactId(
+          client.id,
+          exactEmail.id,
+          persistContactColumn,
+        );
+        return {
+          ok: true,
+          contactId: exactEmail.id,
+          created: false,
+          matchedBy: "email",
+          message: `Moneybird-contact gevonden op e-mail en gekoppeld (${exactEmail.id}).`,
+        };
+      }
+    }
+
+    if (companyNorm) {
+      const byCompany = await searchMoneybirdContacts(company);
+      const exactCompany = byCompany.find(
+        (c) => normalizeCompany(c.company_name) === companyNorm,
+      );
+      if (exactCompany?.id) {
+        await persistClientMoneybirdContactId(
+          client.id,
+          exactCompany.id,
+          persistContactColumn,
+        );
+        return {
+          ok: true,
+          contactId: exactCompany.id,
+          created: false,
+          matchedBy: "company_name",
+          message: `Moneybird-contact gevonden op bedrijfsnaam en gekoppeld (${exactCompany.id}).`,
+        };
+      }
+    }
+
+    if (!email) {
+      return {
+        ok: false,
+        error:
+          "Geen Moneybird-contact gevonden en e-mail ontbreekt bij de opdrachtgever. Vul een e-mailadres in bij Sales → Opdrachtgevers, daarna opnieuw synchroniseren.",
+      };
+    }
+
+    const { firstname, lastname } = splitContactName(client.contact_name);
+    const created = await createMoneybirdContact({
+      companyName: company || undefined,
+      firstname: firstname || undefined,
+      lastname: lastname || undefined,
+      email,
+      phone: client.phone ?? undefined,
+      address1: client.address ?? undefined,
+      city: client.city ?? undefined,
+      country: "NL",
+    });
+
+    if (!created.id) {
+      return {
+        ok: false,
+        error: "Moneybird-contact aangemaakt, maar er kwam geen id terug.",
+      };
+    }
+
+    await persistClientMoneybirdContactId(
+      client.id,
+      created.id,
+      persistContactColumn,
+    );
+
+    return {
+      ok: true,
+      contactId: created.id,
+      created: true,
+      matchedBy: "created",
+      message: `Nieuw Moneybird-contact aangemaakt en gekoppeld (${created.id}).`,
+    };
+  } catch (error) {
+    return { ok: false, error: formatMoneybirdError(error) };
+  }
+}
 
 async function loadInvoiceDraft(
   draftId: string,
@@ -102,10 +362,12 @@ async function loadInvoiceDraft(
 /**
  * Push een Supabase invoice_draft naar Moneybird als concept (nooit verzenden).
  * Bij bestaand moneybird_invoice_id (nog niet verzonden): concept bijwerken.
+ * Contact-id: optionele override, anders auto-resolve/create via opdrachtgever.
  */
 export async function pushInvoiceDraftToMoneybird(options: {
   draftId: string;
-  contactId: string;
+  /** Optioneel; leeg = automatisch zoeken/aanmaken vanuit opdrachtgever. */
+  contactId?: string | null;
   /** @deprecated Verzenden gebeurt via confirmInvoiceDraftInMoneybird. */
   send?: boolean;
 }): Promise<PushInvoiceDraftResult> {
@@ -136,15 +398,6 @@ export async function pushInvoiceDraftToMoneybird(options: {
     };
   }
 
-  const contactId = options.contactId.trim();
-  if (!contactId) {
-    return {
-      ok: false,
-      error:
-        "Moneybird contact-id ontbreekt. Vul moneybird_contact_id bij de klant in of geef een contact-id op.",
-    };
-  }
-
   const loaded = await loadInvoiceDraft(options.draftId);
   if (!loaded.ok) return loaded;
 
@@ -157,6 +410,22 @@ export async function pushInvoiceDraftToMoneybird(options: {
       error: "Deze factuur is al verzonden en kan niet opnieuw als concept worden gesynct.",
     };
   }
+
+  if (!draft.client_id) {
+    return {
+      ok: false,
+      error:
+        "Factuurconcept heeft geen opdrachtgever. Koppel eerst een klant aan het project.",
+    };
+  }
+
+  const contactResolved = await resolveOrCreateMoneybirdContactForClient({
+    clientId: draft.client_id,
+    contactIdOverride: options.contactId,
+  });
+  if (!contactResolved.ok) return contactResolved;
+
+  const contactId = contactResolved.contactId;
 
   const lines = Array.isArray(draft.invoice_draft_lines)
     ? draft.invoice_draft_lines
@@ -213,8 +482,8 @@ export async function pushInvoiceDraftToMoneybird(options: {
             moneybirdState: invoice.state,
             sent: false,
             message: existingId
-              ? `Concept bijgewerkt in Moneybird (${invoice.invoice_id || invoice.id}). Voer SQL-migratie uit om sync-status lokaal te bewaren.`
-              : `Concept aangemaakt in Moneybird (${invoice.invoice_id || invoice.id}). Voer SQL-migratie uit om sync-status lokaal te bewaren.`,
+              ? `Concept bijgewerkt in Moneybird (${invoice.invoice_id || invoice.id}). ${contactResolved.message} Voer SQL-migratie uit om sync-status lokaal te bewaren.`
+              : `Concept aangemaakt in Moneybird (${invoice.invoice_id || invoice.id}). ${contactResolved.message} Voer SQL-migratie uit om sync-status lokaal te bewaren.`,
           };
         }
         return {
@@ -229,27 +498,14 @@ export async function pushInvoiceDraftToMoneybird(options: {
         .eq("id", draft.id);
     }
 
-    if (draft.client_id) {
-      const { error: clientError } = await supabase
-        .from("clients")
-        .update({ moneybird_contact_id: contactId })
-        .eq("id", draft.client_id);
-      if (clientError && !isMissingMoneybirdColumnError(clientError.message)) {
-        console.warn(
-          "[Moneybird] Kon moneybird_contact_id niet opslaan:",
-          clientError.message,
-        );
-      }
-    }
-
     return {
       ok: true,
       moneybirdInvoiceId: invoice.id,
       moneybirdState: invoice.state,
       sent: false,
       message: existingId
-        ? `Conceptfactuur bijgewerkt in Moneybird (${invoice.invoice_id || invoice.id}). Nog niet verzonden.`
-        : `Conceptfactuur aangemaakt in Moneybird (${invoice.invoice_id || invoice.id}). Nog niet verzonden — gebruik “Bevestig factuur” om te verzenden.`,
+        ? `Conceptfactuur bijgewerkt in Moneybird (${invoice.invoice_id || invoice.id}). ${contactResolved.message} Nog niet verzonden.`
+        : `Conceptfactuur aangemaakt in Moneybird (${invoice.invoice_id || invoice.id}). ${contactResolved.message} Nog niet verzonden — gebruik “Bevestig factuur” om te verzenden.`,
     };
   } catch (error) {
     const message = formatMoneybirdError(error);

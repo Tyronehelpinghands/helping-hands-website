@@ -29,7 +29,7 @@ Zonder env-variabelen blijven concepten in Supabase; CSV-export blijft beschikba
 ### Token & IDs ophalen
 
 1. Moneybird → **Instellingen → Externe toepassingen / API** → Personal Access Token  
-   Scopes: `sales_invoices`, `contacts` (minimaal).
+   Scopes: **`sales_invoices`** én **`contacts`** (beide verplicht voor facturatie + auto-koppeling).
 2. Administration ID: zichtbaar in de Moneybird-URL of via `GET /administrations.json`.
 3. (Optioneel) Tax rate / ledger account IDs: via API  
    `GET /{administration_id}/tax_rates.json` en  
@@ -47,6 +47,22 @@ Bij elke factuursync (en bij health/status):
 
 Als auto-resolve faalt: duidelijke Nederlandse fout + link naar deze docs — niet “niet gekoppeld”.
 
+## Contacten / relaties (auto-koppeling)
+
+Je hoeft **geen** Moneybird contact-id handmatig te plakken voor de normale factuurflow.
+
+Bij **Naar Moneybird als concept** (en bij Sales → **Koppel Moneybird**):
+
+1. Als `clients.moneybird_contact_id` al gezet is → gebruik die.
+2. Anders: zoek in Moneybird op **e-mail** (exacte match).
+3. Anders: zoek op **bedrijfsnaam** (exacte match, case-insensitive).
+4. Anders: **maak** een Moneybird-contact aan uit de opdrachtgever (`company_name`, `contact_name`, `email`, `phone`, `address`, `city`).
+5. Sla het teruggekomen id op in `clients.moneybird_contact_id`.
+
+**E-mail is verplicht** om een nieuw contact aan te maken. Zonder e-mail én zonder bestaande match krijg je een duidelijke Nederlandse fout: vul e-mail in bij Sales → Opdrachtgevers.
+
+Broncode: `resolveOrCreateMoneybirdContactForClient` in `src/lib/dashboard/moneybirdSync.ts`, helpers in `src/lib/server/moneybird.ts`.
+
 ## Authenticatie
 
 ```http
@@ -61,26 +77,28 @@ Broncode: `src/lib/server/moneybird.ts`.
 | Route | Rol | Doel |
 |---|---|---|
 | `GET /api/moneybird/status` | intern | Env + contacts-probe + tax/ledger resolve |
-| `GET /api/moneybird/contacts` | intern | Contacten ophalen |
-| `POST /api/moneybird/create-contact` | finance/admin/owner | Contact aanmaken |
+| `GET /api/moneybird/contacts` | intern | Contacten ophalen (`?query=` optioneel) |
+| `POST /api/moneybird/create-contact` | finance/admin/owner | Contact aanmaken (e-mail verplicht) |
 | `GET /api/moneybird/sales-invoices` | intern | Facturen ophalen |
 | `POST /api/moneybird/sales-invoices` | finance/admin/owner | Conceptfactuur aanmaken (`send: true` blijft API-optie; UI gebruikt dit niet) |
 
-Server actions (Facturatie-MVP):
+Server actions (Facturatie / Sales MVP):
 
 | Action | Rol | Doel |
 |---|---|---|
-| `pushInvoiceDraftToMoneybirdAction` | finance/admin/owner | Supabase-concept → Moneybird **alleen concept** (aanmaken of bijwerken) |
+| `pushInvoiceDraftToMoneybirdAction` | finance/admin/owner | Supabase-concept → Moneybird **alleen concept** (+ auto contact resolve) |
+| `syncClientToMoneybirdAction` | finance/admin/owner | Opdrachtgever → zoek/maak Moneybird-contact, sla id op |
 | `confirmInvoiceDraftInMoneybirdAction` | finance/admin/owner | Expliciet bevestigen/verzenden in Moneybird |
 | `deleteInvoiceDraftAction` | finance/admin/owner | Concept verwijderen (niet verzonden); uren → approved; optioneel Moneybird-concept DELETE |
 | `creditInvoiceDraftAction` | finance/admin/owner | Creditnota: lokaal `gecrediteerd` + creditconcept; Moneybird `duplicate_creditinvoice` indien gekoppeld (**nooit** auto-send) |
 
 ## Sync-gedrag (twee stappen)
 
-1. Maak een factuurconcept in **Facturatie** (uit goedgekeurde uren).
-2. Vul bij de opdrachtgever (Sales) of in het Moneybird-dialog een **Moneybird contact-id** in.
-3. **Naar Moneybird als concept** → alleen draft in Moneybird (`POST` of `PATCH` sales invoice). Nooit automatisch verzenden.
-4. **Bevestig factuur** (aparte knop + bevestigingsdialog) → `PATCH .../send_invoice.json`. Lokale status → `sent`, `moneybird_sync_status` → `verzonden`.
+1. Maak een factuurconcept in **Facturatie** (uit goedgekeurde uren). Zorg dat de opdrachtgever een **e-mail** heeft (voor nieuwe Moneybird-contacten).
+2. **Naar Moneybird als concept** → contact auto-resolven/aanmaken → alleen draft in Moneybird (`POST` of `PATCH` sales invoice). Nooit automatisch verzenden.
+3. **Bevestig factuur** (aparte knop + bevestigingsdialog) → `PATCH .../send_invoice.json`. Lokale status → `sent`, `moneybird_sync_status` → `verzonden`.
+
+Optioneel: in **Sales** per opdrachtgever **Koppel Moneybird** om de relatie vooraf te koppelen (zonder factuur).
 
 ### Verwijderen / Crediteren
 
@@ -107,11 +125,26 @@ Als je in **Urenregistratie** een goedgekeurde of gefactureerde regel aanpast (`
 
 Voer de migratie uit via [`supabase/moneybird-columns.sql`](../supabase/moneybird-columns.sql) (of dezelfde SQL in [`internal-dashboard-database.md`](./internal-dashboard-database.md) onder **Migration: Moneybird sync columns**):
 
-- `clients.moneybird_contact_id`
+- `clients.moneybird_contact_id` — Moneybird relatie-id (auto gezet bij sync)
 - `invoice_drafts.moneybird_invoice_id`
 - `invoice_drafts.moneybird_sync_status` (`niet_gesynct` \| `concept` \| `verzonden` \| `fout`)
 - `invoice_drafts.moneybird_synced_at`
 - `invoice_drafts.moneybird_sync_error`
+
+Zonder deze kolommen kan de sync-status niet lokaal worden bewaard; de UI toont dan een SQL-hint.
+
+### Snelle SQL (alleen contact-kolom)
+
+```sql
+alter table public.clients
+  add column if not exists moneybird_contact_id text;
+
+create unique index if not exists clients_moneybird_contact_id_uidx
+  on public.clients (moneybird_contact_id)
+  where moneybird_contact_id is not null;
+```
+
+Gebruik bij voorkeur het volledige bestand `supabase/moneybird-columns.sql`.
 
 ## Integraties-UI / health check
 
@@ -127,17 +160,20 @@ Facturatie toont setup-stappen zolang env ontbreekt — geen nep-“connected”
 
 | Situatie | Richting |
 |---|---|
-| 401 / 403 | Token of scopes controleren |
-| 422 / validatiefout | Contact-id, tax rate of ledger account controleren |
+| 401 / 403 | Token of scopes controleren (`sales_invoices` + `contacts`) |
+| Geen e-mail bij nieuwe contact | E-mail invullen bij Sales → Opdrachtgevers |
+| Geen match + geen e-mail | Zelfde: e-mail nodig om aan te maken |
+| 422 / validatiefout | Tax rate of ledger account controleren |
 | Env ontbreekt (token/admin) | Vercel: `MONEYBIRD_ACCESS_TOKEN` + `MONEYBIRD_ADMINISTRATION_ID` + redeploy |
 | Tax/ledger niet gevonden | Optionele overrides of Moneybird-administratie (actieve sales BTW + omzet) |
 | Kolom ontbreekt | SQL-migratie hierboven |
 
 ## Verifiëren na deploy
 
-1. Vercel: token + administration ID (tax/ledger optioneel)
+1. Vercel: token + administration ID (tax/ledger optioneel); token-scopes inclusief **contacts**
 2. Redeploy
 3. Dashboard → **Integraties** → Moneybird **Test API** → verwacht “Klaar voor facturen”
-4. Supabase: Moneybird SQL-migratie
-5. **Facturatie** → concept → **Naar Moneybird als concept** → daarna optioneel **Bevestig factuur** (nooit casual/auto-send)
-6. Uren wijzigen op een project met open concept → lokaal concept vernieuwt; Moneybird pas na expliciete vernieuw-sync
+4. Supabase: Moneybird SQL-migratie (`supabase/moneybird-columns.sql`)
+5. **Sales** → opdrachtgever met e-mail → **Koppel Moneybird** (of direct via Facturatie)
+6. **Facturatie** → concept → **Naar Moneybird als concept** (geen contact-id plakken) → daarna optioneel **Bevestig factuur**
+7. Uren wijzigen op een project met open concept → lokaal concept vernieuwt; Moneybird pas na expliciete vernieuw-sync
