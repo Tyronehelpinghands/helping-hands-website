@@ -6,6 +6,13 @@
 -- Factors (Fooks sales voorstel R.E.R Productions):
 --   WW Laag 1,580 · WW Hoog 1,635
 --   uurkost = round(bruto * factor, 2)
+--
+-- Derived from employment_type (UI has no WW select):
+--   vast / payroll → WW Laag 1,580  (fooks_ww_tariff = 'laag')
+--   freelance      → WW Hoog 1,635  (fooks_ww_tariff = 'hoog')
+--   zzp            → fixed €25 excl. btw (fooks_ww_tariff = null)
+--   other          → manual hourly_cost (fooks_ww_tariff = null)
+-- fooks_ww_tariff remains as stored derived value for audit.
 -- =============================================================================
 
 -- Allow Vast (loondienst) alongside payroll / zzp / freelance / other
@@ -22,7 +29,7 @@ alter table public.crew_members
 alter table public.crew_members
   add column if not exists gross_hourly_wage numeric;
 
--- Fooks WW tariff: 'laag' | 'hoog'
+-- Derived Fooks WW tariff for audit: 'laag' | 'hoog' | null
 alter table public.crew_members
   add column if not exists fooks_ww_tariff text;
 

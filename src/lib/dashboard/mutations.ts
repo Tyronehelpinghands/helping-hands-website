@@ -21,9 +21,10 @@ import {
   pushInvoiceDraftToMoneybird,
 } from "@/lib/dashboard/moneybirdSync";
 import {
-  calculateFooksHourlyCost,
-  isFooksEmploymentType,
-  parseFooksWwTariff,
+  calculateCrewHourlyCost,
+  getWwTariffForEmploymentType,
+  isZzpEmploymentType,
+  usesBrutoFactor,
 } from "@/lib/dashboard/fooksRates";
 import { syncMvpShiftToShiftbase } from "@/lib/dashboard/shiftbaseSync";
 import { shouldAutoSyncShiftbase } from "@/lib/shiftbase";
@@ -32,6 +33,7 @@ import type {
   ClientStatus,
   CrewMemberStatus,
   EmploymentType,
+  FooksWwTariff,
   InvoiceDraftStatus,
   LeadStatus,
   MoneybirdSyncStatus,
@@ -64,33 +66,46 @@ function resolveCrewCostFields(formData: FormData): {
   employment_type: EmploymentType;
   hourly_cost: number | null;
   gross_hourly_wage: number | null;
-  fooks_ww_tariff: "laag" | "hoog" | null;
+  fooks_ww_tariff: FooksWwTariff | null;
 } {
   const employment_type =
-    (strOrNull(formData.get("employment_type")) as EmploymentType) || "payroll";
+    (strOrNull(formData.get("employment_type")) as EmploymentType) || "vast";
   const manualOverride = formData.get("manual_hourly_cost") === "on";
   const clientHourly = numOrNull(formData.get("hourly_cost"));
   const bruto = numOrNull(formData.get("gross_hourly_wage"));
-  const tariff = parseFooksWwTariff(strOrNull(formData.get("fooks_ww_tariff")));
+  const derivedTariff = getWwTariffForEmploymentType(employment_type);
 
-  if (isFooksEmploymentType(employment_type) && !manualOverride && bruto != null) {
+  if (isZzpEmploymentType(employment_type)) {
+    const zzpCost = calculateCrewHourlyCost({ employmentType: employment_type });
     return {
       employment_type,
-      hourly_cost: calculateFooksHourlyCost(bruto, tariff),
-      gross_hourly_wage: bruto,
-      fooks_ww_tariff: tariff,
+      hourly_cost: manualOverride && clientHourly != null ? clientHourly : zzpCost,
+      gross_hourly_wage: null,
+      fooks_ww_tariff: null,
     };
   }
 
-  if (isFooksEmploymentType(employment_type)) {
+  if (usesBrutoFactor(employment_type)) {
+    if (!manualOverride && bruto != null) {
+      return {
+        employment_type,
+        hourly_cost: calculateCrewHourlyCost({
+          employmentType: employment_type,
+          bruto,
+        }),
+        gross_hourly_wage: bruto,
+        fooks_ww_tariff: derivedTariff,
+      };
+    }
     return {
       employment_type,
       hourly_cost: clientHourly,
       gross_hourly_wage: bruto,
-      fooks_ww_tariff: tariff,
+      fooks_ww_tariff: derivedTariff,
     };
   }
 
+  // other — manual hourly_cost
   return {
     employment_type,
     hourly_cost: clientHourly,

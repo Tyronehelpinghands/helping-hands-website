@@ -166,9 +166,9 @@ create table if not exists public.crew_members (
   has_drivers_license boolean not null default false,
   has_car boolean not null default false,
   hourly_cost numeric,
-  -- Bruto uurloon; Fooks factor → hourly_cost for payroll/vast
+  -- Bruto uurloon; Fooks factor → hourly_cost for vast/payroll/freelance
   gross_hourly_wage numeric,
-  -- Fooks WW: 'laag' (1,580) | 'hoog' (1,635)
+  -- Derived from employment_type for audit: vast/payroll → 'laag', freelance → 'hoog', zzp/other → null
   fooks_ww_tariff text
     check (fooks_ww_tariff is null or fooks_ww_tariff in ('laag', 'hoog')),
   status text not null default 'active'
@@ -720,13 +720,23 @@ Run if `crew_members` already exists without Fooks fields or without `employment
 **Standalone paste file:** [`supabase/crew-fooks-columns.sql`](../supabase/crew-fooks-columns.sql)
 
 Factors from Fooks sales voorstel (R.E.R Productions): **WW Laag 1,580** · **WW Hoog 1,635** (incl. vakantiegeld, vakantiedagen, sociale lasten, verzuim).  
-`hourly_cost = round(bruto × factor, 2)` — server herberekenen bij payroll/vast.
+Factor volgt uit `employment_type` (geen aparte WW-select in de UI):
+
+| employment_type | Factor / kost | `fooks_ww_tariff` (audit) |
+| --- | --- | --- |
+| `vast` | bruto × 1,580 (WW Laag) | `laag` |
+| `payroll` | bruto × 1,580 (WW Laag, Fooks payroll) | `laag` |
+| `freelance` | bruto × 1,635 (WW Hoog) | `hoog` |
+| `zzp` | vast €25 excl. btw | `null` |
+| `other` | handmatige `hourly_cost` | `null` |
+
+`hourly_cost = round(bruto × factor, 2)` — server herberekenen bij vast/payroll/freelance.
 
 ```sql
 -- See supabase/crew-fooks-columns.sql
 ```
 
-UI: Crew toevoegen/bewerken → Bruto uurloon + Fooks-tarief bij Payroll / Vast; ZZP/Freelance/Overig blijft handmatige uurkost.
+UI: Crew toevoegen/bewerken → bruto alleen bij Vast / Payroll (Fooks) / Freelance; ZZP toont vast €25 excl. btw; Overig blijft handmatige uurkost. `fooks_ww_tariff` wordt afgeleid opgeslagen.
 
 ---
 
