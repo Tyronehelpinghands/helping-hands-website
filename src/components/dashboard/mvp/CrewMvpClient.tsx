@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,163 @@ import {
   updateCrewMemberAction,
 } from "@/lib/dashboard/mutations";
 import {
+  calculateFooksHourlyCost,
+  formatFooksFactor,
+  isFooksEmploymentType,
+  parseFooksWwTariff,
+  type FooksWwTariff,
+} from "@/lib/dashboard/fooksRates";
+import {
   crewStatusLabel,
   employmentTypeLabel,
   formatCurrency,
 } from "@/lib/dashboard/formatters";
-import type { CrewMember } from "@/lib/dashboard/types";
+import type { CrewMember, EmploymentType } from "@/lib/dashboard/types";
+
+function formatEuroPreview(value: number): string {
+  return value.toFixed(2).replace(".", ",");
+}
+
+function CrewCostFields({ edit }: { edit: CrewMember | null }) {
+  const [employmentType, setEmploymentType] = useState<EmploymentType>(
+    edit?.employment_type ?? "payroll",
+  );
+  const [bruto, setBruto] = useState(
+    edit?.gross_hourly_wage != null ? String(edit.gross_hourly_wage) : "",
+  );
+  const [tariff, setTariff] = useState<FooksWwTariff>(
+    parseFooksWwTariff(edit?.fooks_ww_tariff),
+  );
+  const [manualOverride, setManualOverride] = useState(false);
+  const [hourlyCost, setHourlyCost] = useState(
+    edit?.hourly_cost != null ? String(edit.hourly_cost) : "",
+  );
+
+  useEffect(() => {
+    setEmploymentType(edit?.employment_type ?? "payroll");
+    setBruto(
+      edit?.gross_hourly_wage != null ? String(edit.gross_hourly_wage) : "",
+    );
+    setTariff(parseFooksWwTariff(edit?.fooks_ww_tariff));
+    setManualOverride(false);
+    setHourlyCost(edit?.hourly_cost != null ? String(edit.hourly_cost) : "");
+  }, [edit]);
+
+  const usesFooks = isFooksEmploymentType(employmentType);
+  const brutoNum = Number(bruto);
+  const calculated =
+    usesFooks && Number.isFinite(brutoNum) && bruto !== ""
+      ? calculateFooksHourlyCost(brutoNum, tariff)
+      : null;
+
+  useEffect(() => {
+    if (usesFooks && !manualOverride && calculated != null) {
+      setHourlyCost(String(calculated));
+    }
+  }, [usesFooks, manualOverride, calculated]);
+
+  return (
+    <>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Contract" name="employment_type">
+          <TextSelect
+            name="employment_type"
+            value={employmentType}
+            onChange={(e) =>
+              setEmploymentType(e.target.value as EmploymentType)
+            }
+          >
+            <option value="payroll">Payroll</option>
+            <option value="vast">Vast (loondienst)</option>
+            <option value="zzp">ZZP</option>
+            <option value="freelance">Freelance</option>
+            <option value="other">Overig</option>
+          </TextSelect>
+        </Field>
+        <Field label="Status" name="status">
+          <TextSelect name="status" defaultValue={edit?.status ?? "active"}>
+            <option value="active">Actief</option>
+            <option value="onboarding">Onboarding</option>
+            <option value="inactive">Inactief</option>
+          </TextSelect>
+        </Field>
+      </div>
+
+      {usesFooks ? (
+        <div className="space-y-3 rounded-md border border-slate-200 bg-[#F5F7FA]/px-3 py-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Bruto uurloon (€)" name="gross_hourly_wage">
+              <TextInput
+                name="gross_hourly_wage"
+                type="number"
+                step="0.01"
+                min="0"
+                value={bruto}
+                onChange={(e) => setBruto(e.target.value)}
+                placeholder="bijv. 16.50"
+              />
+            </Field>
+            <Field label="Fooks-tarief" name="fooks_ww_tariff">
+              <TextSelect
+                name="fooks_ww_tariff"
+                value={tariff}
+                onChange={(e) =>
+                  setTariff(parseFooksWwTariff(e.target.value))
+                }
+              >
+                <option value="laag">WW Laag (1,580)</option>
+                <option value="hoog">WW Hoog (1,635)</option>
+              </TextSelect>
+            </Field>
+          </div>
+          {calculated != null ? (
+            <p className="text-sm text-slate-600">
+              Uurkost (werkgever): € {formatEuroPreview(calculated)} = bruto ×{" "}
+              {formatFooksFactor(tariff)}
+            </p>
+          ) : (
+            <p className="text-sm text-slate-500">
+              Vul bruto uurloon in voor automatische uurkost (Fooks-factor).
+            </p>
+          )}
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="manual_hourly_cost"
+              checked={manualOverride}
+              onChange={(e) => setManualOverride(e.target.checked)}
+            />
+            Handmatig uurkost
+          </label>
+          <Field label="Uurkost (€)" name="hourly_cost">
+            <TextInput
+              name="hourly_cost"
+              type="number"
+              step="0.01"
+              min="0"
+              value={hourlyCost}
+              onChange={(e) => setHourlyCost(e.target.value)}
+              readOnly={!manualOverride}
+              className={manualOverride ? undefined : "bg-slate-100"}
+            />
+          </Field>
+        </div>
+      ) : (
+        <Field label="Uurkost (€)" name="hourly_cost">
+          <TextInput
+            name="hourly_cost"
+            type="number"
+            step="0.01"
+            min="0"
+            value={hourlyCost}
+            onChange={(e) => setHourlyCost(e.target.value)}
+            placeholder="Tarief / kostprijs per uur"
+          />
+        </Field>
+      )}
+    </>
+  );
+}
 
 export function CrewMvpClient({
   crew,
@@ -205,34 +357,9 @@ export function CrewMvpClient({
             <TextInput name="role_type" defaultValue={edit?.role_type ?? ""} />
           </Field>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Contract" name="employment_type">
-            <TextSelect
-              name="employment_type"
-              defaultValue={edit?.employment_type ?? "payroll"}
-            >
-              <option value="payroll">Payroll</option>
-              <option value="zzp">ZZP</option>
-              <option value="freelance">Freelance</option>
-              <option value="other">Overig</option>
-            </TextSelect>
-          </Field>
-          <Field label="Status" name="status">
-            <TextSelect name="status" defaultValue={edit?.status ?? "active"}>
-              <option value="active">Actief</option>
-              <option value="onboarding">Onboarding</option>
-              <option value="inactive">Inactief</option>
-            </TextSelect>
-          </Field>
-          <Field label="Uurkost (€)" name="hourly_cost">
-            <TextInput
-              name="hourly_cost"
-              type="number"
-              step="0.01"
-              defaultValue={edit?.hourly_cost ?? ""}
-            />
-          </Field>
-        </div>
+
+        <CrewCostFields key={edit?.id ?? "new"} edit={edit} />
+
         <Field label="Skills (komma)" name="skills">
           <TextInput
             name="skills"

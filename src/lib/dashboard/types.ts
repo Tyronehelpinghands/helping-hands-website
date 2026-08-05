@@ -9,7 +9,15 @@ export type LeadStatus =
   | "won"
   | "lost";
 
-export type EmploymentType = "payroll" | "zzp" | "freelance" | "other";
+export type EmploymentType =
+  | "payroll"
+  | "vast"
+  | "zzp"
+  | "freelance"
+  | "other";
+
+/** Fooks WW tariff for payroll/vast uurkost calculation. */
+export type FooksWwTariff = "laag" | "hoog";
 
 export type CrewMemberStatus = "active" | "inactive" | "onboarding";
 
@@ -124,6 +132,10 @@ export type CrewMember = {
   has_drivers_license: boolean;
   has_car: boolean;
   hourly_cost: number | null;
+  /** Bruto uurloon before Fooks factor (payroll/vast). Optional until migration. */
+  gross_hourly_wage?: number | null;
+  /** Fooks WW tariff used for uurkost: laag | hoog. Optional until migration. */
+  fooks_ww_tariff?: FooksWwTariff | null;
   status: CrewMemberStatus;
   notes: string | null;
   /** Shiftbase user/employee id for sync (optional until migration). */
