@@ -22,11 +22,12 @@ import {
   updateCrewMemberAction,
 } from "@/lib/dashboard/mutations";
 import {
-  calculateFooksHourlyCost,
+  FOOKS_ZZP_HOURLY_COST,
+  calculateCrewHourlyCost,
   formatFooksFactor,
-  isFooksEmploymentType,
-  parseFooksWwTariff,
-  type FooksWwTariff,
+  getWwTariffForEmploymentType,
+  isZzpEmploymentType,
+  usesBrutoFactor,
 } from "@/lib/dashboard/fooksRates";
 import {
   crewStatusLabel,
@@ -39,15 +40,25 @@ function formatEuroPreview(value: number): string {
   return value.toFixed(2).replace(".", ",");
 }
 
+function brutoFactorPreviewLabel(employmentType: EmploymentType): string {
+  const tariff = getWwTariffForEmploymentType(employmentType);
+  if (tariff == null) return "";
+  const factor = formatFooksFactor(tariff);
+  if (employmentType === "freelance") {
+    return `WW Hoog (${factor})`;
+  }
+  if (employmentType === "payroll") {
+    return `WW Laag (${factor}) — Fooks payroll`;
+  }
+  return `WW Laag (${factor})`;
+}
+
 function CrewCostFields({ edit }: { edit: CrewMember | null }) {
   const [employmentType, setEmploymentType] = useState<EmploymentType>(
-    edit?.employment_type ?? "payroll",
+    edit?.employment_type ?? "vast",
   );
   const [bruto, setBruto] = useState(
     edit?.gross_hourly_wage != null ? String(edit.gross_hourly_wage) : "",
-  );
-  const [tariff, setTariff] = useState<FooksWwTariff>(
-    parseFooksWwTariff(edit?.fooks_ww_tariff),
   );
   const [manualOverride, setManualOverride] = useState(false);
   const [hourlyCost, setHourlyCost] = useState(
@@ -55,27 +66,33 @@ function CrewCostFields({ edit }: { edit: CrewMember | null }) {
   );
 
   useEffect(() => {
-    setEmploymentType(edit?.employment_type ?? "payroll");
+    setEmploymentType(edit?.employment_type ?? "vast");
     setBruto(
       edit?.gross_hourly_wage != null ? String(edit.gross_hourly_wage) : "",
     );
-    setTariff(parseFooksWwTariff(edit?.fooks_ww_tariff));
     setManualOverride(false);
     setHourlyCost(edit?.hourly_cost != null ? String(edit.hourly_cost) : "");
   }, [edit]);
 
-  const usesFooks = isFooksEmploymentType(employmentType);
+  const usesFactor = usesBrutoFactor(employmentType);
+  const isZzp = isZzpEmploymentType(employmentType);
   const brutoNum = Number(bruto);
-  const calculated =
-    usesFooks && Number.isFinite(brutoNum) && bruto !== ""
-      ? calculateFooksHourlyCost(brutoNum, tariff)
+  const calculated = usesFactor
+    ? bruto !== "" && Number.isFinite(brutoNum)
+      ? calculateCrewHourlyCost({
+          employmentType,
+          bruto: brutoNum,
+        })
+      : null
+    : isZzp
+      ? FOOKS_ZZP_HOURLY_COST
       : null;
 
   useEffect(() => {
-    if (usesFooks && !manualOverride && calculated != null) {
+    if ((usesFactor || isZzp) && !manualOverride && calculated != null) {
       setHourlyCost(String(calculated));
     }
-  }, [usesFooks, manualOverride, calculated]);
+  }, [usesFactor, isZzp, manualOverride, calculated]);
 
   return (
     <>
@@ -88,10 +105,10 @@ function CrewCostFields({ edit }: { edit: CrewMember | null }) {
               setEmploymentType(e.target.value as EmploymentType)
             }
           >
-            <option value="payroll">Payroll</option>
             <option value="vast">Vast (loondienst)</option>
-            <option value="zzp">ZZP</option>
             <option value="freelance">Freelance</option>
+            <option value="zzp">ZZP</option>
+            <option value="payroll">Payroll (Fooks)</option>
             <option value="other">Overig</option>
           </TextSelect>
         </Field>
@@ -104,41 +121,28 @@ function CrewCostFields({ edit }: { edit: CrewMember | null }) {
         </Field>
       </div>
 
-      {usesFooks ? (
+      {usesFactor ? (
         <div className="space-y-3 rounded-md border border-slate-200 bg-[#F5F7FA]/px-3 py-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Bruto uurloon (€)" name="gross_hourly_wage">
-              <TextInput
-                name="gross_hourly_wage"
-                type="number"
-                step="0.01"
-                min="0"
-                value={bruto}
-                onChange={(e) => setBruto(e.target.value)}
-                placeholder="bijv. 16.50"
-              />
-            </Field>
-            <Field label="Fooks-tarief" name="fooks_ww_tariff">
-              <TextSelect
-                name="fooks_ww_tariff"
-                value={tariff}
-                onChange={(e) =>
-                  setTariff(parseFooksWwTariff(e.target.value))
-                }
-              >
-                <option value="laag">WW Laag (1,580)</option>
-                <option value="hoog">WW Hoog (1,635)</option>
-              </TextSelect>
-            </Field>
-          </div>
+          <Field label="Bruto uurloon (€)" name="gross_hourly_wage">
+            <TextInput
+              name="gross_hourly_wage"
+              type="number"
+              step="0.01"
+              min="0"
+              value={bruto}
+              onChange={(e) => setBruto(e.target.value)}
+              placeholder="bijv. 16.50"
+            />
+          </Field>
           {calculated != null ? (
             <p className="text-sm text-slate-600">
               Uurkost (werkgever): € {formatEuroPreview(calculated)} = bruto ×{" "}
-              {formatFooksFactor(tariff)}
+              {brutoFactorPreviewLabel(employmentType)}
             </p>
           ) : (
             <p className="text-sm text-slate-500">
-              Vul bruto uurloon in voor automatische uurkost (Fooks-factor).
+              Vul bruto uurloon in — factor volgt uit contracttype (
+              {brutoFactorPreviewLabel(employmentType)}).
             </p>
           )}
           <label className="flex items-center gap-2 text-sm text-slate-700">
@@ -151,6 +155,34 @@ function CrewCostFields({ edit }: { edit: CrewMember | null }) {
             Handmatig uurkost
           </label>
           <Field label="Uurkost (€)" name="hourly_cost">
+            <TextInput
+              name="hourly_cost"
+              type="number"
+              step="0.01"
+              min="0"
+              value={hourlyCost}
+              onChange={(e) => setHourlyCost(e.target.value)}
+              readOnly={!manualOverride}
+              className={manualOverride ? undefined : "bg-slate-100"}
+            />
+          </Field>
+        </div>
+      ) : isZzp ? (
+        <div className="space-y-3 rounded-md border border-slate-200 bg-[#F5F7FA]/px-3 py-3">
+          <p className="text-sm text-slate-600">
+            Uurkost: € {formatEuroPreview(FOOKS_ZZP_HOURLY_COST)} excl. btw
+            (vast ZZP-tarief)
+          </p>
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="manual_hourly_cost"
+              checked={manualOverride}
+              onChange={(e) => setManualOverride(e.target.checked)}
+            />
+            Handmatig uurkost
+          </label>
+          <Field label="Uurkost (€ excl. btw)" name="hourly_cost">
             <TextInput
               name="hourly_cost"
               type="number"

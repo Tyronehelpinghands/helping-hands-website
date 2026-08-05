@@ -132,9 +132,12 @@ export type CrewMember = {
   has_drivers_license: boolean;
   has_car: boolean;
   hourly_cost: number | null;
-  /** Bruto uurloon before Fooks factor (payroll/vast). Optional until migration. */
+  /** Bruto uurloon before Fooks factor (vast/payroll/freelance). Optional until migration. */
   gross_hourly_wage?: number | null;
-  /** Fooks WW tariff used for uurkost: laag | hoog. Optional until migration. */
+  /**
+   * Derived Fooks WW tariff from employment_type for audit: laag | hoog | null.
+   * vast/payroll → laag, freelance → hoog, zzp/other → null.
+   */
   fooks_ww_tariff?: FooksWwTariff | null;
   status: CrewMemberStatus;
   notes: string | null;

@@ -82,7 +82,7 @@ export function leadStatusLabel(status: LeadStatus): string {
 export function employmentTypeLabel(type: EmploymentType): string {
   switch (type) {
     case "payroll":
-      return "Payroll";
+      return "Payroll (Fooks)";
     case "vast":
       return "Vast (loondienst)";
     case "zzp":
