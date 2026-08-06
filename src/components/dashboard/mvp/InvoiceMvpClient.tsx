@@ -661,8 +661,8 @@ export function InvoiceMvpClient({
             )}
             {isOutdatedMoneybirdDraft(moneybirdDraft) ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-                {OUTDATED_MONEYBIRD_DRAFT_MSG}. Dit werkt het Moneybird-concept
-                bij met de huidige uren.
+                {OUTDATED_MONEYBIRD_DRAFT_MSG}. Regels (week/datum) worden
+                herberekend uit uren en het Moneybird-concept wordt bijgewerkt.
               </p>
             ) : null}
           </div>
