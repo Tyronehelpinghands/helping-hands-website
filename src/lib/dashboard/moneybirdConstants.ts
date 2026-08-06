@@ -1,6 +1,6 @@
 /** UI + sync: lokaal concept wijkt af van Moneybird na urenwijziging. */
 export const OUTDATED_MONEYBIRD_DRAFT_MSG =
-  "Concept verouderd — vernieuw vanuit uren";
+  "Concept verouderd — klik Vernieuw Moneybird";
 
 /** Grootboekcategorieën voor Moneybird factuurregels. */
 export type MoneybirdLedgerCategory = "sitecrew" | "horeca" | "km" | "default";

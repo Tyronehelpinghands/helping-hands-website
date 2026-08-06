@@ -18,6 +18,7 @@ import {
   updateMoneybirdSalesInvoice,
   type SafeMoneybirdContact,
 } from "@/lib/server/moneybird";
+import { regenerateInvoiceDraftLinesFromHours } from "@/lib/dashboard/invoiceDraftLineRefresh";
 import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import type {
   InvoiceDraftLine,
@@ -633,6 +634,9 @@ async function loadInvoiceDraft(
  * Push een Supabase invoice_draft naar Moneybird als concept (nooit verzenden).
  * Bij bestaand moneybird_invoice_id (nog niet verzonden): concept bijwerken.
  * Contact-id: optionele override, anders auto-resolve/create via opdrachtgever.
+ *
+ * Voor sync: herbouw lokale regels uit uren (week + datum in omschrijving),
+ * zodat “Vernieuw Moneybird” ook oude concepten bijwerkt.
  */
 export async function pushInvoiceDraftToMoneybird(options: {
   draftId: string;
@@ -668,11 +672,28 @@ export async function pushInvoiceDraftToMoneybird(options: {
     };
   }
 
+  const supabase = await createClient();
+
+  // Altijd eerst lokale omschrijvingen herberekenen uit uren (week + datum),
+  // anders blijven oude conceptregels zonder week/datum naar Moneybird gaan.
+  const regenerated = await regenerateInvoiceDraftLinesFromHours(
+    supabase,
+    options.draftId,
+  );
+  if (!regenerated.ok) {
+    return { ok: false, error: regenerated.error };
+  }
+  if (regenerated.regenerated) {
+    logMoneybirdSafe("Factuurregels herberekend vóór Moneybird-sync", {
+      draftId: options.draftId,
+      lineCount: regenerated.lines.length,
+    });
+  }
+
   const loaded = await loadInvoiceDraft(options.draftId);
   if (!loaded.ok) return loaded;
 
   const { draft, persistMoneybirdColumns } = loaded;
-  const supabase = await createClient();
 
   if (draft.moneybird_sync_status === "verzonden" || draft.status === "sent") {
     return {

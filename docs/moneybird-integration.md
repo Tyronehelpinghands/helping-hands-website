@@ -75,7 +75,11 @@ Conceptregels worden per ISO-week opgebouwd uit `time_entries.work_date`, met Ne
 
 Rol-label komt uit `projects.project_type` (o.a. Site crew, Stagehands, Event crew, Horeca, Productie, Logistiek).
 
-Broncode: `src/lib/dashboard/invoiceLineBuilder.ts`.
+**Aanmaken / urenwijziging:** `buildInvoiceDraftLinesFromEntries` schrijft deze omschrijvingen naar `invoice_draft_lines`.
+
+**Moneybird-sync:** vóór elke push (`Vernieuw Moneybird` / `Naar Moneybird als concept`) herbouwt `regenerateInvoiceDraftLinesFromHours` de lokale regels opnieuw uit uren, zodat ook oude concepten week/datum krijgen — daarna gaan die omschrijvingen naar Moneybird `details_attributes`.
+
+Broncode: `src/lib/dashboard/invoiceLineBuilder.ts`, `src/lib/dashboard/invoiceDraftLineRefresh.ts`.
 
 ## Contacten / relaties (auto-koppeling)
 
@@ -153,7 +157,7 @@ Als je in **Urenregistratie** een goedgekeurde of gefactureerde regel aanpast (`
 
 - Open lokale concepten (`draft` / `ready`, niet verzonden) voor hetzelfde project worden herberekend uit goedgekeurde + gekoppelde uren.
 - Er is **geen** auto-send naar Moneybird.
-- Bestond er al een Moneybird-concept (nog niet verzonden): sync-status → `niet_gesynct` met melding *Concept verouderd — vernieuw vanuit uren*; vernieuw daarna via “Naar Moneybird als concept” / “Vernieuw Moneybird”.
+- Bestond er al een Moneybird-concept (nog niet verzonden): sync-status → `niet_gesynct` met melding *Concept verouderd — klik Vernieuw Moneybird*; die knop herbouwt lokale regels (week/datum) én pusht naar Moneybird.
 
 **Let op:** “Token OK (contacts)” betekent alleen dat de API bereikbaar is — nog niet dat tax/ledger klaar zijn. “Klaar voor facturen” volgt als tax + ledger via env of auto-resolve beschikbaar zijn.
 
