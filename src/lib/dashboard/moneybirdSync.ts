@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   createMoneybirdContact,
   createMoneybirdSalesInvoice,
+  findMoneybirdContactByCustomerId,
   formatMoneybirdError,
   getMissingMoneybirdEnvVars,
   getMoneybirdContact,
@@ -13,6 +14,7 @@ import {
   searchMoneybirdContacts,
   sendMoneybirdSalesInvoice,
   updateMoneybirdSalesInvoice,
+  type SafeMoneybirdContact,
 } from "@/lib/server/moneybird";
 import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import type {
@@ -35,7 +37,12 @@ export type SyncClientContactResult =
       ok: true;
       contactId: string;
       created: boolean;
-      matchedBy: "stored" | "email" | "company_name" | "created";
+      matchedBy:
+        | "stored"
+        | "email"
+        | "company_name"
+        | "external_customer_id"
+        | "created";
       message: string;
     }
   | { ok: false; error: string };
@@ -85,6 +92,36 @@ function normalizeCompany(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+/** Strip rechtsvormen zodat "Crewstars" ≈ "Crewstars B.V." matcht. */
+function normalizeCompanyLoose(value: string | null | undefined): string {
+  return normalizeCompany(value)
+    .replace(/\b(b\.?\s*v\.?|n\.?\s*v\.?|v\.?\s*o\.?\s*f\.?|ltd\.?|inc\.?|gmbh)\b/g, "")
+    .replace(/[.,/#'"()`]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function companyNamesMatch(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): boolean {
+  const a = normalizeCompanyLoose(left);
+  const b = normalizeCompanyLoose(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.length >= 3 && b.length >= 3 && (a.includes(b) || b.includes(a))) {
+    return true;
+  }
+  return false;
+}
+
+function contactEmails(contact: SafeMoneybirdContact): string[] {
+  return [
+    normalizeEmail(contact.email),
+    normalizeEmail(contact.send_invoices_to_email),
+  ].filter(Boolean);
+}
+
 function splitContactName(contactName: string | null | undefined): {
   firstname: string;
   lastname: string;
@@ -96,6 +133,11 @@ function splitContactName(contactName: string | null | undefined): {
     firstname: parts[0],
     lastname: parts.slice(1).join(" "),
   };
+}
+
+/** Stabiel Moneybird-klantnummer per Supabase-opdrachtgever (voor herhaalde lookup). */
+export function moneybirdExternalCustomerId(clientId: string): string {
+  return `hh-${clientId.trim()}`;
 }
 
 async function loadClientForMoneybird(
@@ -272,13 +314,32 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
 
   const email = normalizeEmail(client.email);
   const company = (client.company_name ?? "").trim();
-  const companyNorm = normalizeCompany(company);
+  const externalCustomerId = moneybirdExternalCustomerId(client.id);
 
   try {
+    // 1) Stabiele externe customer_id (hh-<supabase-client-id>)
+    const byExternal =
+      await findMoneybirdContactByCustomerId(externalCustomerId);
+    if (byExternal?.id) {
+      await persistClientMoneybirdContactId(
+        client.id,
+        byExternal.id,
+        persistContactColumn,
+      );
+      return {
+        ok: true,
+        contactId: byExternal.id,
+        created: false,
+        matchedBy: "external_customer_id",
+        message: `Moneybird-contact gevonden via externe customer_id en gekoppeld (${byExternal.id}).`,
+      };
+    }
+
+    // 2) E-mail (ook send_invoices_to_email)
     if (email) {
       const byEmail = await searchMoneybirdContacts(email);
-      const exactEmail = byEmail.find(
-        (c) => normalizeEmail(c.email) === email,
+      const exactEmail = byEmail.find((c) =>
+        contactEmails(c).includes(email),
       );
       if (exactEmail?.id) {
         await persistClientMoneybirdContactId(
@@ -296,24 +357,48 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
       }
     }
 
-    if (companyNorm) {
+    // 3) Bedrijfsnaam (losse match: Crewstars ≈ Crewstars B.V.)
+    if (company) {
       const byCompany = await searchMoneybirdContacts(company);
-      const exactCompany = byCompany.find(
-        (c) => normalizeCompany(c.company_name) === companyNorm,
+      const companyMatch = byCompany.find((c) =>
+        companyNamesMatch(c.company_name, company),
       );
-      if (exactCompany?.id) {
+      if (companyMatch?.id) {
         await persistClientMoneybirdContactId(
           client.id,
-          exactCompany.id,
+          companyMatch.id,
           persistContactColumn,
         );
         return {
           ok: true,
-          contactId: exactCompany.id,
+          contactId: companyMatch.id,
           created: false,
           matchedBy: "company_name",
-          message: `Moneybird-contact gevonden op bedrijfsnaam en gekoppeld (${exactCompany.id}).`,
+          message: `Moneybird-contact gevonden op bedrijfsnaam (“${companyMatch.company_name || company}”) en gekoppeld (${companyMatch.id}).`,
         };
+      }
+
+      // Extra zoekterm zonder spaties / lowercase query
+      const looseQuery = normalizeCompanyLoose(company);
+      if (looseQuery && looseQuery !== normalizeCompany(company)) {
+        const byLoose = await searchMoneybirdContacts(looseQuery);
+        const looseMatch = byLoose.find((c) =>
+          companyNamesMatch(c.company_name, company),
+        );
+        if (looseMatch?.id) {
+          await persistClientMoneybirdContactId(
+            client.id,
+            looseMatch.id,
+            persistContactColumn,
+          );
+          return {
+            ok: true,
+            contactId: looseMatch.id,
+            created: false,
+            matchedBy: "company_name",
+            message: `Moneybird-contact gevonden op bedrijfsnaam (“${looseMatch.company_name || company}”) en gekoppeld (${looseMatch.id}).`,
+          };
+        }
       }
     }
 
@@ -326,16 +411,49 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
     }
 
     const { firstname, lastname } = splitContactName(client.contact_name);
-    const created = await createMoneybirdContact({
-      companyName: company || undefined,
-      firstname: firstname || undefined,
-      lastname: lastname || undefined,
-      email,
-      phone: client.phone ?? undefined,
-      address1: client.address ?? undefined,
-      city: client.city ?? undefined,
-      country: "NL",
-    });
+    let created: SafeMoneybirdContact;
+    try {
+      created = await createMoneybirdContact({
+        companyName: company || undefined,
+        firstname: firstname || undefined,
+        lastname: lastname || undefined,
+        email,
+        phone: client.phone ?? undefined,
+        address1: client.address ?? undefined,
+        city: client.city ?? undefined,
+        country: "NL",
+        customerId: externalCustomerId,
+      });
+    } catch (createError) {
+      // Unieke customer_id-conflict: probeer opnieuw zonder customer_id, of lookup.
+      const msg = formatMoneybirdError(createError);
+      const existingAfterConflict =
+        await findMoneybirdContactByCustomerId(externalCustomerId);
+      if (existingAfterConflict?.id) {
+        await persistClientMoneybirdContactId(
+          client.id,
+          existingAfterConflict.id,
+          persistContactColumn,
+        );
+        return {
+          ok: true,
+          contactId: existingAfterConflict.id,
+          created: false,
+          matchedBy: "external_customer_id",
+          message: `Moneybird-contact bestond al (customer_id) en is gekoppeld (${existingAfterConflict.id}).`,
+        };
+      }
+      logMoneybirdSafe("Contact aanmaken mislukt voor opdrachtgever", {
+        clientId: client.id,
+        company,
+        hasEmail: Boolean(email),
+        error: msg.slice(0, 240),
+      });
+      return {
+        ok: false,
+        error: `Moneybird-contact aanmaken voor “${company || client.id}” mislukt: ${msg}`,
+      };
+    }
 
     if (!created.id) {
       return {

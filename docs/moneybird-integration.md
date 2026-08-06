@@ -54,12 +54,15 @@ Je hoeft **geen** Moneybird contact-id handmatig te plakken voor de normale fact
 Bij **Naar Moneybird als concept** (en bij Sales → **Koppel Moneybird**):
 
 1. Als `clients.moneybird_contact_id` al gezet is → gebruik die.
-2. Anders: zoek in Moneybird op **e-mail** (exacte match).
-3. Anders: zoek op **bedrijfsnaam** (exacte match, case-insensitive).
-4. Anders: **maak** een Moneybird-contact aan uit de opdrachtgever (`company_name`, `contact_name`, `email`, `phone`, `address`, `city`).
-5. Sla het teruggekomen id op in `clients.moneybird_contact_id`.
+2. Anders: zoek op stabiele externe `customer_id` = `hh-<supabase-client-id>`.
+3. Anders: zoek in Moneybird op **e-mail** (match op `email` of `send_invoices_to_email`).
+4. Anders: zoek op **bedrijfsnaam** (case-insensitive; “Crewstars” ≈ “Crewstars B.V.”).
+5. Anders: **maak** een Moneybird-contact aan uit de opdrachtgever (`company_name`, `contact_name`, `email`, …) met `customer_id` = `hh-<client-id>` (lege `customer_id` wordt **niet** meegestuurd — dat gaf 422).
+6. Sla het teruggekomen id op in `clients.moneybird_contact_id`.
 
 **E-mail is verplicht** om een nieuw contact aan te maken. Zonder e-mail én zonder bestaande match krijg je een duidelijke Nederlandse fout: vul e-mail in bij Sales → Opdrachtgevers.
+
+Factuur-create stuurt `contact_id` + `customer_id` (zelfde Moneybird-contact-id). Bij 422 “blank” worden payload-varianten (`contact_id` only / `customer_id` only) geprobeerd; logs tonen alleen keys/lengtes (geen tokens).
 
 Broncode: `resolveOrCreateMoneybirdContactForClient` in `src/lib/dashboard/moneybirdSync.ts`, helpers in `src/lib/server/moneybird.ts`.
 

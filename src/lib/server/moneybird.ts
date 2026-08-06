@@ -47,7 +47,10 @@ export type SafeMoneybirdContact = {
   firstname: string;
   lastname: string;
   email: string;
+  /** Factuur-e-mail (kan afwijken van `email`). */
+  send_invoices_to_email: string;
   city: string;
+  /** Moneybird klantnummer (extern); niet hetzelfde als contact `id`. */
   customer_id: string;
 };
 
@@ -234,7 +237,7 @@ function mapMoneybirdFieldError(field: string, message: string): string {
     (fieldKey === "customer_id" || fieldKey === "contact_id") &&
     blank
   ) {
-    return "Klant ontbreekt (customer_id/contact_id). Koppel of maak eerst een Moneybird-contact.";
+    return "Klant ontbreekt (customer_id/contact_id). Koppel of maak eerst een Moneybird-contact (of controleer of contact_id in de factuurpayload staat).";
   }
   if (fieldKey === "tax_rate_id" && blank) {
     return "BTW-tarief ontbreekt (tax_rate_id).";
@@ -601,6 +604,7 @@ export function sanitizeMoneybirdContact(
     firstname: String(raw.firstname ?? ""),
     lastname: String(raw.lastname ?? ""),
     email: String(raw.email ?? ""),
+    send_invoices_to_email: String(raw.send_invoices_to_email ?? ""),
     city: String(raw.city ?? ""),
     customer_id: String(raw.customer_id ?? ""),
   };
@@ -636,6 +640,27 @@ export async function getMoneybirdContact(
   return contact;
 }
 
+/**
+ * Zoekt contact via Moneybird klantnummer (`customer_id` op het contact),
+ * niet via het interne contact-id. 404 → null.
+ */
+export async function findMoneybirdContactByCustomerId(
+  customerId: string,
+): Promise<SafeMoneybirdContact | null> {
+  const id = customerId.trim();
+  if (!id) return null;
+  try {
+    const raw = await moneybirdFetch<Record<string, unknown>>(
+      `/contacts/customer_id/${encodeURIComponent(id)}.json`,
+    );
+    const contact = sanitizeMoneybirdContact(raw);
+    return contact.id ? contact : null;
+  } catch (error) {
+    if (isMoneybirdNotFoundError(error)) return null;
+    throw error;
+  }
+}
+
 function buildSalesInvoiceDetailsAttributes(
   lines: MoneybirdInvoiceLineInput[],
   defaults: MoneybirdInvoiceDefaults,
@@ -657,16 +682,15 @@ function buildSalesInvoiceDetailsAttributes(
   });
 }
 
-/** Maakt een contact/relatie in Moneybird. */
-export async function createMoneybirdContact(
+/** Bouwt een contact-payload; lege strings worden weggelaten (Moneybird auto-vult customer_id). */
+function buildMoneybirdContactPayload(
   input: CreateMoneybirdContactInput,
-): Promise<SafeMoneybirdContact> {
-  assertMoneybirdConfigured();
-
+): Record<string, string> {
   const companyName = input.companyName?.trim() ?? "";
   const firstname = input.firstname?.trim() ?? "";
   const lastname = input.lastname?.trim() ?? "";
   const email = input.email?.trim() ?? "";
+  const customerId = input.customerId?.trim() ?? "";
 
   if (!companyName && !firstname && !lastname) {
     throw new Error(
@@ -679,27 +703,67 @@ export async function createMoneybirdContact(
     );
   }
 
-  const payload = {
-    contact: {
-      company_name: companyName,
-      firstname,
-      lastname,
-      email,
-      phone: input.phone?.trim() ?? "",
-      address1: input.address1?.trim() ?? "",
-      zipcode: input.zipcode?.trim() ?? "",
-      city: input.city?.trim() ?? "",
-      country: input.country?.trim() || "NL",
-      customer_id: input.customerId?.trim() ?? "",
-    },
+  const contact: Record<string, string> = {
+    email,
+    country: input.country?.trim() || "NL",
   };
+  if (companyName) contact.company_name = companyName;
+  if (firstname) contact.firstname = firstname;
+  if (lastname) contact.lastname = lastname;
+  const phone = input.phone?.trim() ?? "";
+  if (phone) contact.phone = phone;
+  const address1 = input.address1?.trim() ?? "";
+  if (address1) contact.address1 = address1;
+  const zipcode = input.zipcode?.trim() ?? "";
+  if (zipcode) contact.zipcode = zipcode;
+  const city = input.city?.trim() ?? "";
+  if (city) contact.city = city;
+  // Alleen zetten als we een echte waarde hebben — `""` triggert 422 "can't be blank".
+  if (customerId) contact.customer_id = customerId;
 
-  const raw = await moneybirdFetch<Record<string, unknown>>("/contacts.json", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return contact;
+}
 
-  return sanitizeMoneybirdContact(raw);
+/** Maakt een contact/relatie in Moneybird. */
+export async function createMoneybirdContact(
+  input: CreateMoneybirdContactInput,
+): Promise<SafeMoneybirdContact> {
+  assertMoneybirdConfigured();
+
+  const contact = buildMoneybirdContactPayload(input);
+  const payload = { contact };
+
+  logMoneybirdSafe(
+    "POST /contacts.json",
+    {
+      keys: Object.keys(contact),
+      hasCompany: Boolean(contact.company_name),
+      hasEmail: Boolean(contact.email),
+      hasCustomerId: Boolean(contact.customer_id),
+    },
+    "info",
+  );
+
+  try {
+    const raw = await moneybirdFetch<Record<string, unknown>>("/contacts.json", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    const created = sanitizeMoneybirdContact(raw);
+    if (!created.id) {
+      throw new Error(
+        "Moneybird-contact aangemaakt, maar er kwam geen id terug.",
+      );
+    }
+    return created;
+  } catch (error) {
+    const apiMessage = formatMoneybirdError(error);
+    logMoneybirdSafe("POST /contacts.json mislukt", {
+      keys: Object.keys(contact),
+      error: apiMessage.slice(0, 240),
+    });
+    throw error;
+  }
 }
 
 export function sanitizeMoneybirdInvoice(
@@ -726,15 +790,79 @@ export function sanitizeMoneybirdInvoice(
   };
 }
 
-/** Moneybird contact-id = klant-id op sales invoices (customer_id + contact_id). */
-function resolveSalesInvoiceCustomerId(contactId: string): string {
+/** Moneybird intern contact-id voor sales invoices (`contact_id`). */
+function resolveSalesInvoiceContactId(contactId: string): string {
   const id = contactId.trim();
   if (!id) {
     throw new Error(
-      "Moneybird customer_id/contact_id ontbreekt. Los eerst een geldig contact op voordat je een factuur aanmaakt.",
+      "Moneybird contact_id ontbreekt. Los eerst een geldig contact op voordat je een factuur aanmaakt.",
     );
   }
   return id;
+}
+
+function isBlankCustomerOrContactError(error: unknown): boolean {
+  if (!(error instanceof MoneybirdApiError) || error.status !== 422) {
+    return false;
+  }
+  const hay = `${error.message} ${error.bodySnippet}`.toLowerCase();
+  return (
+    /customer_id|contact_id/.test(hay) &&
+    /blank|ontbreekt|verplicht|can't be empty/.test(hay)
+  );
+}
+
+type SalesInvoiceBody = {
+  sales_invoice: Record<string, unknown>;
+};
+
+/** Officiële API: contact_id. Sommige administraties eisen ook customer_id (= zelfde contact-id). */
+function buildSalesInvoiceBodies(
+  contactId: string,
+  base: Omit<Record<string, unknown>, "contact_id" | "customer_id">,
+): SalesInvoiceBody[] {
+  return [
+    {
+      sales_invoice: {
+        contact_id: contactId,
+        customer_id: contactId,
+        ...base,
+      },
+    },
+    {
+      sales_invoice: {
+        contact_id: contactId,
+        ...base,
+      },
+    },
+    {
+      sales_invoice: {
+        customer_id: contactId,
+        ...base,
+      },
+    },
+  ];
+}
+
+function logSalesInvoicePayloadKeys(
+  label: string,
+  body: SalesInvoiceBody,
+  extra?: Record<string, unknown>,
+): void {
+  const inv = body.sales_invoice;
+  logMoneybirdSafe(
+    label,
+    {
+      salesInvoiceKeys: Object.keys(inv),
+      hasContactId: inv.contact_id != null && String(inv.contact_id).trim() !== "",
+      hasCustomerId:
+        inv.customer_id != null && String(inv.customer_id).trim() !== "",
+      contactIdLen: String(inv.contact_id ?? "").trim().length,
+      customerIdLen: String(inv.customer_id ?? "").trim().length,
+      ...extra,
+    },
+    "info",
+  );
 }
 
 /** Maakt een conceptfactuur (draft) in Moneybird. Verzendt niet. */
@@ -747,7 +875,7 @@ export async function createMoneybirdSalesInvoice(
     throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
   }
 
-  const customerId = resolveSalesInvoiceCustomerId(input.contactId);
+  const contactId = resolveSalesInvoiceContactId(input.contactId);
   if (!input.lines.length) {
     throw new Error("Minimaal één factuurregel is verplicht.");
   }
@@ -757,78 +885,108 @@ export async function createMoneybirdSalesInvoice(
     defaults,
   );
 
-  // Moneybird vereist customer_id; contact_id blijft voor compatibiliteit.
-  const payload = {
-    sales_invoice: {
-      customer_id: customerId,
-      contact_id: customerId,
-      reference: input.reference?.trim() || "Helping Hands factuur",
-      invoice_date:
-        input.invoiceDate || new Date().toISOString().slice(0, 10),
-      due_date:
-        input.dueDate ||
-        new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-      currency: input.currency || "EUR",
-      prices_are_incl_tax: false,
-      details_attributes,
-    },
+  const baseFields = {
+    reference: input.reference?.trim() || "Helping Hands factuur",
+    invoice_date:
+      input.invoiceDate || new Date().toISOString().slice(0, 10),
+    due_date:
+      input.dueDate ||
+      new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+    currency: input.currency || "EUR",
+    prices_are_incl_tax: false,
+    details_attributes,
   };
 
-  logMoneybirdSafe(
-    "POST /sales_invoices.json",
-    {
-      customerId,
-      contactId: customerId,
-      lineCount: details_attributes.length,
-      taxRateId: defaults.taxRateId,
-      ledgerAccountId: defaults.ledgerAccountId,
-      defaultsSource: defaults.source,
-    },
-    "info",
-  );
+  const bodies = buildSalesInvoiceBodies(contactId, baseFields);
+  const primary = bodies[0]!;
 
-  const postInvoice = async (body: typeof payload) =>
+  logSalesInvoicePayloadKeys("POST /sales_invoices.json", primary, {
+    lineCount: details_attributes.length,
+    taxRateId: defaults.taxRateId,
+    ledgerAccountId: defaults.ledgerAccountId,
+    defaultsSource: defaults.source,
+  });
+
+  const postInvoice = async (body: SalesInvoiceBody) =>
     moneybirdFetch<Record<string, unknown>>("/sales_invoices.json", {
       method: "POST",
       body: JSON.stringify(body),
     });
 
-  let raw: Record<string, unknown>;
-  try {
-    raw = await postInvoice(payload);
-  } catch (error) {
-    // Ongeldige env TAX/LEDGER IDs: één retry met auto-resolve uit de API.
-    if (
-      defaults.source === "env" &&
-      error instanceof MoneybirdApiError &&
-      (error.status === 422 || error.status === 404)
-    ) {
-      clearMoneybirdInvoiceDefaultsCache();
-      const autoDefaults = await resolveMoneybirdInvoiceDefaults({
-        ignoreEnv: true,
-      });
-      if (!autoDefaults) throw error;
-      logMoneybirdSafe(
-        "POST /sales_invoices.json retry met auto tax/ledger",
-        {
-          taxRateId: autoDefaults.taxRateId,
-          ledgerAccountId: autoDefaults.ledgerAccountId,
-        },
-        "warn",
-      );
-      const retryPayload = {
-        sales_invoice: {
-          ...payload.sales_invoice,
-          details_attributes: buildSalesInvoiceDetailsAttributes(
-            input.lines,
-            autoDefaults,
-          ),
-        },
-      };
-      raw = await postInvoice(retryPayload);
-    } else {
+  let raw: Record<string, unknown> | undefined;
+  let lastError: unknown;
+
+  for (let i = 0; i < bodies.length; i += 1) {
+    const body = bodies[i]!;
+    try {
+      raw = await postInvoice(body);
+      if (i > 0) {
+        logMoneybirdSafe(
+          "POST /sales_invoices.json geslaagd na payload-variant",
+          { variant: i, salesInvoiceKeys: Object.keys(body.sales_invoice) },
+          "warn",
+        );
+      }
+      break;
+    } catch (error) {
+      lastError = error;
+      if (isBlankCustomerOrContactError(error) && i < bodies.length - 1) {
+        logSalesInvoicePayloadKeys(
+          "POST /sales_invoices.json 422 klant-veld — probeer andere payload",
+          body,
+          { variant: i, nextVariant: i + 1 },
+        );
+        continue;
+      }
+
+      // Ongeldige env TAX/LEDGER IDs: één retry met auto-resolve uit de API.
+      if (
+        defaults.source === "env" &&
+        error instanceof MoneybirdApiError &&
+        (error.status === 422 || error.status === 404) &&
+        !isBlankCustomerOrContactError(error)
+      ) {
+        clearMoneybirdInvoiceDefaultsCache();
+        const autoDefaults = await resolveMoneybirdInvoiceDefaults({
+          ignoreEnv: true,
+        });
+        if (!autoDefaults) throw error;
+        logMoneybirdSafe(
+          "POST /sales_invoices.json retry met auto tax/ledger",
+          {
+            taxRateId: autoDefaults.taxRateId,
+            ledgerAccountId: autoDefaults.ledgerAccountId,
+          },
+          "warn",
+        );
+        const retryBody: SalesInvoiceBody = {
+          sales_invoice: {
+            ...body.sales_invoice,
+            details_attributes: buildSalesInvoiceDetailsAttributes(
+              input.lines,
+              autoDefaults,
+            ),
+          },
+        };
+        raw = await postInvoice(retryBody);
+        break;
+      }
+
+      if (error instanceof MoneybirdApiError && error.status === 422) {
+        logSalesInvoicePayloadKeys(
+          "POST /sales_invoices.json 422",
+          body,
+          { detail: error.message.slice(0, 200) },
+        );
+      }
       throw error;
     }
+  }
+
+  if (!raw) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("Moneybird factuur aanmaken mislukt.");
   }
 
   const invoice = sanitizeMoneybirdInvoice(raw);
@@ -862,7 +1020,7 @@ export async function updateMoneybirdSalesInvoice(
     throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
   }
 
-  const customerId = resolveSalesInvoiceCustomerId(input.contactId);
+  const contactId = resolveSalesInvoiceContactId(input.contactId);
   if (!input.lines.length) {
     throw new Error("Minimaal één factuurregel is verplicht.");
   }
@@ -893,8 +1051,8 @@ export async function updateMoneybirdSalesInvoice(
 
   const payload = {
     sales_invoice: {
-      customer_id: customerId,
-      contact_id: customerId,
+      contact_id: contactId,
+      customer_id: contactId,
       reference: input.reference?.trim() || "Helping Hands factuur",
       invoice_date:
         input.invoiceDate ||
@@ -910,6 +1068,10 @@ export async function updateMoneybirdSalesInvoice(
       details_attributes,
     },
   };
+
+  logSalesInvoicePayloadKeys("PATCH /sales_invoices/{id}.json", payload, {
+    moneybirdInvoiceId: id,
+  });
 
   const raw = await moneybirdFetch<Record<string, unknown>>(
     `/sales_invoices/${encodeURIComponent(id)}.json`,
