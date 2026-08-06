@@ -201,8 +201,15 @@ export function SalesMvpClient({
                         disabled={pending}
                         title={
                           c.moneybird_contact_id
-                            ? `Gekoppeld: ${c.moneybird_contact_id}`
-                            : "Zoek of maak Moneybird-contact"
+                            ? [
+                                `Gekoppeld: ${c.moneybird_contact_id}`,
+                                c.contact_name
+                                  ? `Contactpersoon: ${c.contact_name}`
+                                  : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")
+                            : "Zoek of maak Moneybird-contact (incl. contactpersoon)"
                         }
                         onClick={() => {
                           startTransition(async () => {
@@ -214,7 +221,9 @@ export function SalesMvpClient({
                         }}
                       >
                         {c.moneybird_contact_id
-                          ? "Moneybird gekoppeld"
+                          ? c.contact_name
+                            ? `MB · ${c.contact_name}`
+                            : "Moneybird gekoppeld"
                           : "Koppel Moneybird"}
                       </Button>
                       <Button

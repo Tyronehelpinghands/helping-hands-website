@@ -12,6 +12,8 @@ type CreateContactBody = {
   companyName?: string;
   firstname?: string;
   lastname?: string;
+  /** Contactpersoon / t.a.v. */
+  attention?: string;
   email?: string;
   phone?: string;
   address1?: string;
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
       companyName: body.companyName,
       firstname: body.firstname,
       lastname: body.lastname,
+      attention: body.attention,
       email: body.email,
       phone: body.phone,
       address1: body.address1,
@@ -82,6 +85,8 @@ export async function POST(request: Request) {
       contact: {
         id: contact.id,
         company_name: contact.company_name,
+        contact_person: contact.contact_person,
+        attention: contact.attention,
         email: contact.email,
       },
     });

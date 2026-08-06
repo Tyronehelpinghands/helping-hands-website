@@ -19,10 +19,13 @@ Zonder env-variabelen blijven concepten in Supabase; CSV-export blijft beschikba
 | `MONEYBIRD_API_TOKEN` | Alias | Zelfde als `MONEYBIRD_ACCESS_TOKEN` |
 | `MONEYBIRD_ADMINISTRATION_ID` | Voor API | Administratie-ID (uit Moneybird-URL of API) |
 | `MONEYBIRD_DEFAULT_TAX_RATE_ID` | Optioneel | Override standaard btw-tarief; anders auto uit API |
-| `MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID` | Optioneel | Override standaard omzet-grootboek; anders auto uit API |
+| `MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID` | Optioneel | Fallback omzet-grootboek als rol/km niet matcht |
+| `MONEYBIRD_LEDGER_SITECREW_ID` | Optioneel | Grootboek “omzet sitecrew” (stagehands / site crew / event / productie / logistiek) |
+| `MONEYBIRD_LEDGER_HORECA_ID` | Optioneel | Grootboek “horeca personeel” / “omzet horeca” |
+| `MONEYBIRD_LEDGER_KM_ID` | Optioneel | Grootboek “kilometer vergoeding” |
 | `MONEYBIRD_BASE_URL` | Nee | Default: `https://moneybird.com/api/v2` |
 
-**Minimaal nodig:** token + administration ID. Tax/ledger worden automatisch opgehaald uit Moneybird (voorkeur: actief 21% BTW / `sales_invoice`, en een `revenue`-omzetrekening geschikt voor sales invoices). Optionele env-overrides blijven beschikbaar.
+**Minimaal nodig:** token + administration ID. Tax/ledger worden automatisch opgehaald uit Moneybird (voorkeur: actief 21% BTW / `sales_invoice`, en een `revenue`-omzetrekening geschikt voor sales invoices). Rol- en km-grootboeken worden via naam-match gezocht als de optionele IDs niet gezet zijn.
 
 **Nooit** `NEXT_PUBLIC_MONEYBIRD_*` zetten. Tokens blijven server-side; nooit in frontend of logs.
 
@@ -40,12 +43,39 @@ Zonder env-variabelen blijven concepten in Supabase; CSV-export blijft beschikba
 
 Bij elke factuursync (en bij health/status):
 
-1. Gebruik env-overrides als beide gezet zijn.
+1. Gebruik env tax + default ledger als die gezet zijn; rol/km-IDs zijn optionele overrides.
 2. Anders: haal `tax_rates` (filter `sales_invoice`) en `ledger_accounts` op.
-3. Kies beste match (21% BTW / omzet + `sales_invoice`).
-4. Cache in geheugen (TTL ~15 minuten) per administratie.
+3. Kies beste match (21% BTW / omzet + `sales_invoice`) als default ledger.
+4. Zoek daarnaast op naam (case-insensitive contains):
+   - sitecrew → `omzet sitecrew` / `sitecrew` / `site crew` (of `MONEYBIRD_LEDGER_SITECREW_ID`)
+   - horeca → `horeca personeel` / `omzet horeca` / `horeca` (of `MONEYBIRD_LEDGER_HORECA_ID`)
+   - km → `kilometer vergoeding` / `kilometervergoeding` / `kilometer` (of `MONEYBIRD_LEDGER_KM_ID`)
+5. Cache in geheugen (TTL ~15 minuten) per administratie.
 
 Als auto-resolve faalt: duidelijke Nederlandse fout + link naar deze docs — niet “niet gekoppeld”.
+
+### Grootboek per factuurregel
+
+Bij sync naar Moneybird krijgt **elke regel** een `ledger_account_id` op basis van de omschrijving:
+
+| Categorie | Matches in omschrijving | Grootboek |
+|---|---|---|
+| Sitecrew | site crew, stagehands, event crew, productie, logistiek, arbeidsuren, reistijd | omzet sitecrew |
+| Horeca | horeca, bar, keuken, hospitality, restaurant | horeca personeel / omzet horeca |
+| KM | kilometervergoeding, “X km” | kilometer vergoeding |
+| Default | geen match | `MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID` of auto omzet |
+
+### Factuurregel-omschrijvingen (week + datum)
+
+Conceptregels worden per ISO-week opgebouwd uit `time_entries.work_date`, met Nederlands datumformaat:
+
+- Arbeid: `Site crew — week 28 — 28 jun 2026` (of datumrange `28 jun 2026 – 4 jul 2026`)
+- KM: `Kilometervergoeding — week 28 — 28 jun 2026 (150 km)`
+- Reistijd: `Reistijd — Site crew — week 28 — 28 jun 2026`
+
+Rol-label komt uit `projects.project_type` (o.a. Site crew, Stagehands, Event crew, Horeca, Productie, Logistiek).
+
+Broncode: `src/lib/dashboard/invoiceLineBuilder.ts`.
 
 ## Contacten / relaties (auto-koppeling)
 
@@ -59,8 +89,11 @@ Bij **Naar Moneybird als concept** (en bij Sales → **Koppel Moneybird**):
 4. Anders: zoek op **bedrijfsnaam** (case-insensitive; “Crewstars” ≈ “Crewstars B.V.”).
 5. Anders: **maak** een Moneybird-contact aan uit de opdrachtgever (`company_name`, `contact_name`, `email`, …) met `customer_id` = `hh-<client-id>` (lege `customer_id` wordt **niet** meegestuurd — dat gaf 422).
 6. Sla het teruggekomen id op in `clients.moneybird_contact_id`.
+7. **Contactpersoon:** `clients.contact_name` → Moneybird `attention` + `send_invoices_to_attention`, en gesplitst naar `firstname` / `lastname`. Bij bestaande koppelingen wordt dit bijgewerkt (niet-blokkerend). Weergave: `contact_person` = attention, anders naam, anders eerste `contact_people`-entry.
 
 **E-mail is verplicht** om een nieuw contact aan te maken. Zonder e-mail én zonder bestaande match krijg je een duidelijke Nederlandse fout: vul e-mail in bij Sales → Opdrachtgevers.
+
+In **Sales** toont **Koppel Moneybird** na koppeling bedrijf + contactpersoon (toast en knoptitel).
 
 Factuur-create stuurt `contact_id` + `customer_id` (zelfde Moneybird-contact-id). Bij 422 “blank” worden payload-varianten (`contact_id` only / `customer_id` only) geprobeerd; logs tonen alleen keys/lengtes (geen tokens).
 

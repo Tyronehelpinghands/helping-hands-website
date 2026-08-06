@@ -1,5 +1,10 @@
 // Server-only Moneybird helper. Niet importeren in client components.
 
+import {
+  detectMoneybirdLedgerCategory,
+  type MoneybirdLedgerCategory,
+} from "@/lib/dashboard/moneybirdConstants";
+
 const DEFAULT_BASE_URL = "https://moneybird.com/api/v2";
 const DEFAULTS_CACHE_TTL_MS = 15 * 60 * 1000;
 
@@ -9,11 +14,20 @@ export type MoneybirdConfig = {
   baseUrl: string;
   defaultTaxRateId?: string;
   defaultLedgerAccountId?: string;
+  ledgerSitecrewId?: string;
+  ledgerHorecaId?: string;
+  ledgerKmId?: string;
 };
 
 export type MoneybirdInvoiceDefaults = {
   taxRateId: string;
   ledgerAccountId: string;
+  /** Omzet sitecrew / stagehands / event crew / … */
+  ledgerSitecrewId?: string;
+  /** Omzet horeca personeel */
+  ledgerHorecaId?: string;
+  /** Kilometervergoeding */
+  ledgerKmId?: string;
   /** env = expliciete overrides; auto = opgehaald uit Moneybird API */
   source: "env" | "auto";
 };
@@ -46,6 +60,10 @@ export type SafeMoneybirdContact = {
   company_name: string;
   firstname: string;
   lastname: string;
+  /** t.a.v. / contactpersoon op het contact. */
+  attention: string;
+  /** Afgeleide weergavenaam contactpersoon (attention, naam of contact_people). */
+  contact_person: string;
   email: string;
   /** Factuur-e-mail (kan afwijken van `email`). */
   send_invoices_to_email: string;
@@ -89,6 +107,8 @@ export type CreateMoneybirdContactInput = {
   companyName?: string;
   firstname?: string;
   lastname?: string;
+  /** Contactpersoon / t.a.v. (Moneybird `attention`). */
+  attention?: string;
   email?: string;
   phone?: string;
   address1?: string;
@@ -142,6 +162,9 @@ export function getMoneybirdConfig(): MoneybirdConfig | null {
     baseUrl,
     defaultTaxRateId: envTrim("MONEYBIRD_DEFAULT_TAX_RATE_ID"),
     defaultLedgerAccountId: envTrim("MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID"),
+    ledgerSitecrewId: envTrim("MONEYBIRD_LEDGER_SITECREW_ID"),
+    ledgerHorecaId: envTrim("MONEYBIRD_LEDGER_HORECA_ID"),
+    ledgerKmId: envTrim("MONEYBIRD_LEDGER_KM_ID"),
   };
 }
 
@@ -513,10 +536,67 @@ function pickDefaultLedgerAccountId(
   return best.id;
 }
 
+function scoreLedgerNameMatch(
+  account: MoneybirdLedgerAccount,
+  needles: string[],
+): number {
+  const name = String(account.name ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+  if (!account.id || account.active === false) return -1;
+  let score = 0;
+  for (const needle of needles) {
+    if (name.includes(needle)) score += 50 + needle.length;
+  }
+  if (score <= 0) return -1;
+  const type = String(account.account_type ?? "").toLowerCase();
+  if (type === "revenue") score += 20;
+  if (account.active === true) score += 5;
+  return score;
+}
+
+function pickLedgerAccountIdByName(
+  accounts: MoneybirdLedgerAccount[],
+  needles: string[],
+): string | undefined {
+  const scored = accounts
+    .map((a) => ({ id: String(a.id ?? ""), score: scoreLedgerNameMatch(a, needles) }))
+    .filter((x) => x.id && x.score > 0);
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.id;
+}
+
+/** Kiest ledger_account_id per categorie; valt terug op default. */
+export function resolveLedgerAccountIdForCategory(
+  category: MoneybirdLedgerCategory,
+  defaults: MoneybirdInvoiceDefaults,
+): string {
+  if (category === "km" && defaults.ledgerKmId) return defaults.ledgerKmId;
+  if (category === "horeca" && defaults.ledgerHorecaId) {
+    return defaults.ledgerHorecaId;
+  }
+  if (category === "sitecrew" && defaults.ledgerSitecrewId) {
+    return defaults.ledgerSitecrewId;
+  }
+  return defaults.ledgerAccountId;
+}
+
+/** Bepaalt ledger voor een factuurregel-omschrijving. */
+export function resolveLedgerAccountIdForLineDescription(
+  description: string,
+  defaults: MoneybirdInvoiceDefaults,
+): string {
+  return resolveLedgerAccountIdForCategory(
+    detectMoneybirdLedgerCategory(description),
+    defaults,
+  );
+}
+
 /**
- * Bepaalt tax_rate_id + ledger_account_id:
+ * Bepaalt tax_rate_id + ledger_account_id (+ optionele rol-ledgers):
  * 1) optionele env-overrides (tenzij ignoreEnv)
  * 2) anders Moneybird API (in-memory cache, TTL 15 min)
+ * Rol-ledgers: MONEYBIRD_LEDGER_SITECREW_ID / HORECA_ID / KM_ID of naam-match.
  */
 export async function resolveMoneybirdInvoiceDefaults(options?: {
   ignoreEnv?: boolean;
@@ -527,19 +607,9 @@ export async function resolveMoneybirdInvoiceDefaults(options?: {
   const ignoreEnv = Boolean(options?.ignoreEnv);
   const envTax = ignoreEnv ? undefined : config.defaultTaxRateId;
   const envLedger = ignoreEnv ? undefined : config.defaultLedgerAccountId;
-  if (envTax && envLedger) {
-    const resolved: MoneybirdInvoiceDefaults = {
-      taxRateId: envTax,
-      ledgerAccountId: envLedger,
-      source: "env",
-    };
-    invoiceDefaultsCache = {
-      ...resolved,
-      administrationId: config.administrationId,
-      fetchedAt: Date.now(),
-    };
-    return resolved;
-  }
+  const envSitecrew = ignoreEnv ? undefined : config.ledgerSitecrewId;
+  const envHoreca = ignoreEnv ? undefined : config.ledgerHorecaId;
+  const envKm = ignoreEnv ? undefined : config.ledgerKmId;
 
   if (
     !ignoreEnv &&
@@ -552,12 +622,28 @@ export async function resolveMoneybirdInvoiceDefaults(options?: {
     return {
       taxRateId: envTax || invoiceDefaultsCache.taxRateId,
       ledgerAccountId: envLedger || invoiceDefaultsCache.ledgerAccountId,
+      ledgerSitecrewId: envSitecrew || invoiceDefaultsCache.ledgerSitecrewId,
+      ledgerHorecaId: envHoreca || invoiceDefaultsCache.ledgerHorecaId,
+      ledgerKmId: envKm || invoiceDefaultsCache.ledgerKmId,
       source: envTax && envLedger ? "env" : invoiceDefaultsCache.source,
     };
   }
 
   let taxRateId = envTax;
   let ledgerAccountId = envLedger;
+  let ledgerSitecrewId = envSitecrew;
+  let ledgerHorecaId = envHoreca;
+  let ledgerKmId = envKm;
+  let accounts: MoneybirdLedgerAccount[] | null = null;
+
+  const loadAccounts = async () => {
+    if (accounts) return accounts;
+    accounts = await moneybirdFetch<MoneybirdLedgerAccount[]>(
+      "/ledger_accounts.json",
+    );
+    if (!Array.isArray(accounts)) accounts = [];
+    return accounts;
+  };
 
   if (!taxRateId) {
     let rates: MoneybirdTaxRate[] = [];
@@ -571,13 +657,35 @@ export async function resolveMoneybirdInvoiceDefaults(options?: {
     taxRateId = pickDefaultTaxRateId(Array.isArray(rates) ? rates : []);
   }
 
-  if (!ledgerAccountId) {
-    const accounts = await moneybirdFetch<MoneybirdLedgerAccount[]>(
-      "/ledger_accounts.json",
-    );
-    ledgerAccountId = pickDefaultLedgerAccountId(
-      Array.isArray(accounts) ? accounts : [],
-    );
+  const needLedgerLookup =
+    !ledgerAccountId || !ledgerSitecrewId || !ledgerHorecaId || !ledgerKmId;
+
+  if (needLedgerLookup) {
+    const list = await loadAccounts();
+    if (!ledgerAccountId) {
+      ledgerAccountId = pickDefaultLedgerAccountId(list);
+    }
+    if (!ledgerSitecrewId) {
+      ledgerSitecrewId = pickLedgerAccountIdByName(list, [
+        "omzet sitecrew",
+        "sitecrew",
+        "site crew",
+      ]);
+    }
+    if (!ledgerHorecaId) {
+      ledgerHorecaId = pickLedgerAccountIdByName(list, [
+        "horeca personeel",
+        "omzet horeca",
+        "horeca",
+      ]);
+    }
+    if (!ledgerKmId) {
+      ledgerKmId = pickLedgerAccountIdByName(list, [
+        "kilometer vergoeding",
+        "kilometervergoeding",
+        "kilometer",
+      ]);
+    }
   }
 
   if (!taxRateId || !ledgerAccountId) return null;
@@ -585,6 +693,9 @@ export async function resolveMoneybirdInvoiceDefaults(options?: {
   const resolved: MoneybirdInvoiceDefaults = {
     taxRateId,
     ledgerAccountId,
+    ledgerSitecrewId,
+    ledgerHorecaId,
+    ledgerKmId,
     source: envTax && envLedger ? "env" : "auto",
   };
   invoiceDefaultsCache = {
@@ -595,14 +706,31 @@ export async function resolveMoneybirdInvoiceDefaults(options?: {
   return resolved;
 }
 
+function contactPersonFromPeople(raw: Record<string, unknown>): string {
+  const people = raw.contact_people;
+  if (!Array.isArray(people) || people.length === 0) return "";
+  const first = people[0] as Record<string, unknown> | undefined;
+  if (!first) return "";
+  return [first.firstname, first.lastname].filter(Boolean).join(" ").trim();
+}
+
 export function sanitizeMoneybirdContact(
   raw: Record<string, unknown>,
 ): SafeMoneybirdContact {
+  const firstname = String(raw.firstname ?? "");
+  const lastname = String(raw.lastname ?? "");
+  const attention = String(raw.attention ?? "");
+  const fromPeople = contactPersonFromPeople(raw);
+  const fromName = [firstname, lastname].filter(Boolean).join(" ").trim();
+  const contact_person = (attention || fromPeople || fromName).trim();
+
   return {
     id: String(raw.id ?? ""),
     company_name: String(raw.company_name ?? ""),
-    firstname: String(raw.firstname ?? ""),
-    lastname: String(raw.lastname ?? ""),
+    firstname,
+    lastname,
+    attention,
+    contact_person,
     email: String(raw.email ?? ""),
     send_invoices_to_email: String(raw.send_invoices_to_email ?? ""),
     city: String(raw.city ?? ""),
@@ -670,14 +798,15 @@ function buildSalesInvoiceDetailsAttributes(
     if (!description) {
       throw new Error(`Factuurregel ${index + 1} heeft geen omschrijving.`);
     }
+    const ledgerAccountId =
+      line.ledgerAccountId ||
+      resolveLedgerAccountIdForLineDescription(description, defaults);
     return {
       description,
       price: formatMoneybirdPrice(Number(line.price)),
       amount: formatMoneybirdAmount(Number(line.amount)),
       tax_rate_id: String(line.taxRateId || defaults.taxRateId),
-      ledger_account_id: String(
-        line.ledgerAccountId || defaults.ledgerAccountId,
-      ),
+      ledger_account_id: String(ledgerAccountId),
     };
   });
 }
@@ -685,31 +814,38 @@ function buildSalesInvoiceDetailsAttributes(
 /** Bouwt een contact-payload; lege strings worden weggelaten (Moneybird auto-vult customer_id). */
 function buildMoneybirdContactPayload(
   input: CreateMoneybirdContactInput,
+  options?: { requireEmail?: boolean },
 ): Record<string, string> {
   const companyName = input.companyName?.trim() ?? "";
   const firstname = input.firstname?.trim() ?? "";
   const lastname = input.lastname?.trim() ?? "";
+  const attention = input.attention?.trim() ?? "";
   const email = input.email?.trim() ?? "";
   const customerId = input.customerId?.trim() ?? "";
+  const requireEmail = options?.requireEmail !== false;
 
-  if (!companyName && !firstname && !lastname) {
+  if (!companyName && !firstname && !lastname && !attention) {
     throw new Error(
-      "Moneybird-contact vereist een bedrijfsnaam of voor-/achternaam.",
+      "Moneybird-contact vereist een bedrijfsnaam, contactpersoon of voor-/achternaam.",
     );
   }
-  if (!email) {
+  if (requireEmail && !email) {
     throw new Error(
       "E-mailadres ontbreekt bij de opdrachtgever. Vul een e-mail in om een Moneybird-contact aan te maken.",
     );
   }
 
   const contact: Record<string, string> = {
-    email,
     country: input.country?.trim() || "NL",
   };
+  if (email) contact.email = email;
   if (companyName) contact.company_name = companyName;
   if (firstname) contact.firstname = firstname;
   if (lastname) contact.lastname = lastname;
+  if (attention) {
+    contact.attention = attention;
+    contact.send_invoices_to_attention = attention;
+  }
   const phone = input.phone?.trim() ?? "";
   if (phone) contact.phone = phone;
   const address1 = input.address1?.trim() ?? "";
@@ -730,7 +866,7 @@ export async function createMoneybirdContact(
 ): Promise<SafeMoneybirdContact> {
   assertMoneybirdConfigured();
 
-  const contact = buildMoneybirdContactPayload(input);
+  const contact = buildMoneybirdContactPayload(input, { requireEmail: true });
   const payload = { contact };
 
   logMoneybirdSafe(
@@ -738,6 +874,7 @@ export async function createMoneybirdContact(
     {
       keys: Object.keys(contact),
       hasCompany: Boolean(contact.company_name),
+      hasAttention: Boolean(contact.attention),
       hasEmail: Boolean(contact.email),
       hasCustomerId: Boolean(contact.customer_id),
     },
@@ -764,6 +901,48 @@ export async function createMoneybirdContact(
     });
     throw error;
   }
+}
+
+/**
+ * Werkt contactpersoon-velden bij op een bestaand Moneybird-contact
+ * (`attention`, `firstname`, `lastname`, optioneel adres/telefoon).
+ */
+export async function updateMoneybirdContact(
+  contactId: string,
+  input: CreateMoneybirdContactInput,
+): Promise<SafeMoneybirdContact> {
+  assertMoneybirdConfigured();
+  const id = contactId.trim();
+  if (!id) throw new Error("contactId is verplicht.");
+
+  const contact = buildMoneybirdContactPayload(input, { requireEmail: false });
+  // Bij update geen country forceren tenzij gezet; vermijd onnodige overwrites.
+  if (!input.country?.trim()) {
+    delete contact.country;
+  }
+
+  logMoneybirdSafe(
+    "PATCH /contacts/{id}.json",
+    {
+      contactId: id,
+      keys: Object.keys(contact),
+      hasAttention: Boolean(contact.attention),
+    },
+    "info",
+  );
+
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    `/contacts/${encodeURIComponent(id)}.json`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ contact }),
+    },
+  );
+  const updated = sanitizeMoneybirdContact(raw);
+  if (!updated.id) {
+    throw new Error("Moneybird-contact bijgewerkt, maar er kwam geen id terug.");
+  }
+  return updated;
 }
 
 export function sanitizeMoneybirdInvoice(
