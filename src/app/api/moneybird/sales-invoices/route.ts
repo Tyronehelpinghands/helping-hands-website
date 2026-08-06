@@ -7,6 +7,7 @@ import {
   createMoneybirdSalesInvoice,
   formatMoneybirdError,
   isMoneybirdConfigured,
+  logMoneybirdSafe,
   moneybirdFetch,
   sanitizeMoneybirdInvoice,
   sendMoneybirdSalesInvoice,
@@ -56,11 +57,9 @@ export async function GET() {
     );
     return NextResponse.json({ ok: true, invoices });
   } catch (error) {
-    console.error("[Moneybird] Facturen ophalen mislukt");
-    return NextResponse.json(
-      { ok: false, error: formatMoneybirdError(error) },
-      { status: 502 },
-    );
+    const message = formatMoneybirdError(error);
+    logMoneybirdSafe("Facturen ophalen mislukt", { error: message.slice(0, 240) });
+    return NextResponse.json({ ok: false, error: message }, { status: 502 });
   }
 }
 
@@ -150,10 +149,10 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("[Moneybird] Conceptfactuur aanmaken mislukt");
-    return NextResponse.json(
-      { ok: false, error: formatMoneybirdError(error) },
-      { status: 502 },
-    );
+    const message = formatMoneybirdError(error);
+    logMoneybirdSafe("Conceptfactuur aanmaken mislukt", {
+      error: message.slice(0, 240),
+    });
+    return NextResponse.json({ ok: false, error: message }, { status: 502 });
   }
 }

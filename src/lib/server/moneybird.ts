@@ -189,9 +189,146 @@ export function assertMoneybirdConfigured(): MoneybirdConfig {
   return config;
 }
 
+export class MoneybirdApiError extends Error {
+  readonly status: number;
+  readonly bodySnippet: string;
+
+  constructor(status: number, detail: string, bodySnippet = "") {
+    const hint = dutchMoneybirdStatusHint(status);
+    const parts = [
+      `Moneybird API-fout (${status})`,
+      detail.trim(),
+      hint,
+    ].filter(Boolean);
+    super(parts.join(" — "));
+    this.name = "MoneybirdApiError";
+    this.status = status;
+    this.bodySnippet = bodySnippet;
+  }
+}
+
+function dutchMoneybirdStatusHint(status: number): string {
+  if (status === 401 || status === 403) {
+    return "Controleer MONEYBIRD_ACCESS_TOKEN en scopes (sales_invoices + contacts).";
+  }
+  if (status === 404) {
+    return "Niet gevonden. Controleer MONEYBIRD_ADMINISTRATION_ID of of het contact/factuur bestaat.";
+  }
+  if (status === 422) {
+    return "Ongeldige gegevens (contact_id, tax_rate_id, ledger_account_id of factuurregels).";
+  }
+  return "";
+}
+
+/** Flatten Moneybird error payloads without throwing (strings, arrays, nested objects). */
+function flattenMoneybirdErrorValue(value: unknown, depth = 0): string[] {
+  if (value == null || depth > 4) return [];
+  if (typeof value === "string") {
+    const t = value.trim();
+    return t && t !== "true" && t !== "false" ? [t] : [];
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((v) => flattenMoneybirdErrorValue(v, depth + 1));
+  }
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>).flatMap(
+      ([key, vals]) => {
+        const nested = flattenMoneybirdErrorValue(vals, depth + 1);
+        if (nested.length === 0) return [];
+        return nested.map((n) => `${key}: ${n}`);
+      },
+    );
+  }
+  return [];
+}
+
+function parseMoneybirdErrorBody(rawText: string): string {
+  const snippet = rawText.replace(/\s+/g, " ").trim().slice(0, 280);
+  if (!snippet) return "";
+
+  try {
+    const body = JSON.parse(rawText) as Record<string, unknown>;
+    const parts: string[] = [];
+
+    if (typeof body.error === "string" && body.error.trim()) {
+      parts.push(body.error.trim());
+    }
+    if (typeof body.message === "string" && body.message.trim()) {
+      parts.push(body.message.trim());
+    }
+    if (body.errors != null) {
+      parts.push(...flattenMoneybirdErrorValue(body.errors));
+    }
+    if (body.symbolic != null) {
+      parts.push(...flattenMoneybirdErrorValue(body.symbolic));
+    }
+
+    const detail = [...new Set(parts.filter(Boolean))].join("; ");
+    if (detail) return detail.slice(0, 400);
+  } catch {
+    // non-JSON body
+  }
+
+  return snippet;
+}
+
 export function formatMoneybirdError(error: unknown): string {
+  if (error instanceof MoneybirdApiError) return error.message;
   if (error instanceof Error) return error.message;
   return "Moneybird API-fout";
+}
+
+export function isMoneybirdNotFoundError(error: unknown): boolean {
+  if (error instanceof MoneybirdApiError) return error.status === 404;
+  const msg = formatMoneybirdError(error);
+  return /\b404\b|not found|niet gevonden|bestaat niet/i.test(msg);
+}
+
+/** Log veilig (geen tokens/secrets). */
+export function logMoneybirdSafe(
+  label: string,
+  extra?: Record<string, unknown>,
+  level: "error" | "info" | "warn" = "error",
+): void {
+  const safe = extra
+    ? Object.fromEntries(
+        Object.entries(extra).filter(
+          ([key]) => !/token|authorization|secret|password/i.test(key),
+        ),
+      )
+    : undefined;
+  const fn =
+    level === "info"
+      ? console.info
+      : level === "warn"
+        ? console.warn
+        : console.error;
+  fn(`[Moneybird] ${label}`, safe ?? "");
+}
+
+export function clearMoneybirdInvoiceDefaultsCache(): void {
+  invoiceDefaultsCache = null;
+}
+
+/** Prijs als string met 2 decimalen (Moneybird: ^-?\\d+\\.\\d{1,2}$). */
+export function formatMoneybirdPrice(price: number): string {
+  if (!Number.isFinite(price)) {
+    throw new Error("Ongeldige prijs op factuurregel.");
+  }
+  return Number(price).toFixed(2);
+}
+
+/** Aantal/hoeveelheid als schone decimale string. */
+export function formatMoneybirdAmount(amount: number): string {
+  if (!Number.isFinite(amount)) {
+    throw new Error("Ongeldig aantal op factuurregel.");
+  }
+  const rounded = Math.round(amount * 10000) / 10000;
+  if (Number.isInteger(rounded)) return String(rounded);
+  return String(rounded);
 }
 
 export async function moneybirdFetch<T>(
@@ -201,9 +338,11 @@ export async function moneybirdFetch<T>(
   const config = assertMoneybirdConfigured();
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const url = `${config.baseUrl}/${config.administrationId}${normalizedPath}`;
+  const method = (options.method || "GET").toUpperCase();
 
   const res = await fetch(url, {
     ...options,
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${config.accessToken}`,
@@ -212,28 +351,34 @@ export async function moneybirdFetch<T>(
   });
 
   if (!res.ok) {
-    let message = `Moneybird API-fout (${res.status})`;
-    try {
-      const body = (await res.json()) as {
-        error?: string;
-        errors?: string[] | Record<string, string[]>;
-      };
-      if (body.error) message = body.error;
-      else if (Array.isArray(body.errors) && body.errors.length > 0) {
-        message = body.errors.join(", ");
-      } else if (body.errors && typeof body.errors === "object") {
-        message = Object.entries(body.errors)
-          .map(([key, vals]) => `${key}: ${vals.join(", ")}`)
-          .join("; ");
-      }
-    } catch {
-      // ignore parse errors
-    }
-    throw new Error(message);
+    const rawText = await res.text().catch(() => "");
+    const detail = parseMoneybirdErrorBody(rawText);
+    logMoneybirdSafe(`${method} ${normalizedPath} mislukt`, {
+      status: res.status,
+      detail: detail.slice(0, 200),
+      administrationId: config.administrationId,
+    });
+    throw new MoneybirdApiError(res.status, detail, rawText.slice(0, 280));
   }
 
   if (res.status === 204) return {} as T;
-  return res.json() as Promise<T>;
+
+  const rawText = await res.text();
+  if (!rawText.trim()) return {} as T;
+
+  try {
+    return JSON.parse(rawText) as T;
+  } catch {
+    logMoneybirdSafe(`${method} ${normalizedPath}: ongeldige JSON-response`, {
+      status: res.status,
+      snippet: rawText.slice(0, 120),
+    });
+    throw new MoneybirdApiError(
+      res.status,
+      "Ongeldige JSON-response van Moneybird",
+      rawText.slice(0, 280),
+    );
+  }
 }
 
 function parsePercentage(value: string | number | null | undefined): number {
@@ -314,15 +459,18 @@ function pickDefaultLedgerAccountId(
 
 /**
  * Bepaalt tax_rate_id + ledger_account_id:
- * 1) optionele env-overrides
+ * 1) optionele env-overrides (tenzij ignoreEnv)
  * 2) anders Moneybird API (in-memory cache, TTL 15 min)
  */
-export async function resolveMoneybirdInvoiceDefaults(): Promise<MoneybirdInvoiceDefaults | null> {
+export async function resolveMoneybirdInvoiceDefaults(options?: {
+  ignoreEnv?: boolean;
+}): Promise<MoneybirdInvoiceDefaults | null> {
   const config = getMoneybirdConfig();
   if (!config) return null;
 
-  const envTax = config.defaultTaxRateId;
-  const envLedger = config.defaultLedgerAccountId;
+  const ignoreEnv = Boolean(options?.ignoreEnv);
+  const envTax = ignoreEnv ? undefined : config.defaultTaxRateId;
+  const envLedger = ignoreEnv ? undefined : config.defaultLedgerAccountId;
   if (envTax && envLedger) {
     const resolved: MoneybirdInvoiceDefaults = {
       taxRateId: envTax,
@@ -338,6 +486,7 @@ export async function resolveMoneybirdInvoiceDefaults(): Promise<MoneybirdInvoic
   }
 
   if (
+    !ignoreEnv &&
     invoiceDefaultsCache &&
     invoiceDefaultsCache.administrationId === config.administrationId &&
     Date.now() - invoiceDefaultsCache.fetchedAt < DEFAULTS_CACHE_TTL_MS &&
@@ -414,6 +563,45 @@ export async function searchMoneybirdContacts(
   const path = `/contacts.json?query=${encodeURIComponent(q)}&per_page=50`;
   const raw = await moneybirdFetch<Record<string, unknown>[]>(path);
   return (Array.isArray(raw) ? raw : []).map((c) => sanitizeMoneybirdContact(c));
+}
+
+/** Haalt één contact op; gooit MoneybirdApiError (404) als het niet bestaat. */
+export async function getMoneybirdContact(
+  contactId: string,
+): Promise<SafeMoneybirdContact> {
+  const id = contactId.trim();
+  if (!id) {
+    throw new Error("contactId is verplicht.");
+  }
+  const raw = await moneybirdFetch<Record<string, unknown>>(
+    `/contacts/${encodeURIComponent(id)}.json`,
+  );
+  const contact = sanitizeMoneybirdContact(raw);
+  if (!contact.id) {
+    throw new MoneybirdApiError(404, "Moneybird-contact zonder id");
+  }
+  return contact;
+}
+
+function buildSalesInvoiceDetailsAttributes(
+  lines: MoneybirdInvoiceLineInput[],
+  defaults: MoneybirdInvoiceDefaults,
+): Array<Record<string, string>> {
+  return lines.map((line, index) => {
+    const description = String(line.description ?? "").trim();
+    if (!description) {
+      throw new Error(`Factuurregel ${index + 1} heeft geen omschrijving.`);
+    }
+    return {
+      description,
+      price: formatMoneybirdPrice(Number(line.price)),
+      amount: formatMoneybirdAmount(Number(line.amount)),
+      tax_rate_id: String(line.taxRateId || defaults.taxRateId),
+      ledger_account_id: String(
+        line.ledgerAccountId || defaults.ledgerAccountId,
+      ),
+    };
+  });
 }
 
 /** Maakt een contact/relatie in Moneybird. */
@@ -502,6 +690,11 @@ export async function createMoneybirdSalesInvoice(
     throw new Error("Minimaal één factuurregel is verplicht.");
   }
 
+  const details_attributes = buildSalesInvoiceDetailsAttributes(
+    input.lines,
+    defaults,
+  );
+
   const payload = {
     sales_invoice: {
       contact_id: input.contactId.trim(),
@@ -512,25 +705,77 @@ export async function createMoneybirdSalesInvoice(
         input.dueDate ||
         new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
       currency: input.currency || "EUR",
-      details_attributes: input.lines.map((line) => ({
-        description: line.description.trim(),
-        price: Number(line.price).toFixed(2),
-        amount: String(line.amount),
-        tax_rate_id: line.taxRateId || defaults.taxRateId,
-        ledger_account_id: line.ledgerAccountId || defaults.ledgerAccountId,
-      })),
+      prices_are_incl_tax: false,
+      details_attributes,
     },
   };
 
-  const raw = await moneybirdFetch<Record<string, unknown>>(
-    "/sales_invoices.json",
+  logMoneybirdSafe(
+    "POST /sales_invoices.json",
     {
-      method: "POST",
-      body: JSON.stringify(payload),
+      contactId: input.contactId.trim(),
+      lineCount: details_attributes.length,
+      taxRateId: defaults.taxRateId,
+      ledgerAccountId: defaults.ledgerAccountId,
+      defaultsSource: defaults.source,
     },
+    "info",
   );
 
-  return sanitizeMoneybirdInvoice(raw);
+  const postInvoice = async (body: typeof payload) =>
+    moneybirdFetch<Record<string, unknown>>("/sales_invoices.json", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+
+  let raw: Record<string, unknown>;
+  try {
+    raw = await postInvoice(payload);
+  } catch (error) {
+    // Ongeldige env TAX/LEDGER IDs: één retry met auto-resolve uit de API.
+    if (
+      defaults.source === "env" &&
+      error instanceof MoneybirdApiError &&
+      (error.status === 422 || error.status === 404)
+    ) {
+      clearMoneybirdInvoiceDefaultsCache();
+      const autoDefaults = await resolveMoneybirdInvoiceDefaults({
+        ignoreEnv: true,
+      });
+      if (!autoDefaults) throw error;
+      logMoneybirdSafe(
+        "POST /sales_invoices.json retry met auto tax/ledger",
+        {
+          taxRateId: autoDefaults.taxRateId,
+          ledgerAccountId: autoDefaults.ledgerAccountId,
+        },
+        "warn",
+      );
+      const retryPayload = {
+        sales_invoice: {
+          ...payload.sales_invoice,
+          details_attributes: buildSalesInvoiceDetailsAttributes(
+            input.lines,
+            autoDefaults,
+          ),
+        },
+      };
+      raw = await postInvoice(retryPayload);
+    } else {
+      throw error;
+    }
+  }
+
+  const invoice = sanitizeMoneybirdInvoice(raw);
+  if (!invoice.id) {
+    logMoneybirdSafe("POST /sales_invoices.json: geen id in response", {
+      keys: Object.keys(raw ?? {}),
+    });
+    throw new Error(
+      "Moneybird gaf geen factuur-id terug. Controleer administratie en API-rechten (sales_invoices).",
+    );
+  }
+  return invoice;
 }
 
 /**
@@ -573,20 +818,14 @@ export async function updateMoneybirdSalesInvoice(
     ? (existing.details as Array<Record<string, unknown>>)
     : [];
 
-  const details_attributes = [
+  const details_attributes: Array<Record<string, string | boolean>> = [
     ...existingDetails
       .filter((detail) => detail.id != null)
       .map((detail) => ({
         id: String(detail.id),
         _destroy: true,
       })),
-    ...input.lines.map((line) => ({
-      description: line.description.trim(),
-      price: Number(line.price).toFixed(2),
-      amount: String(line.amount),
-      tax_rate_id: line.taxRateId || defaults.taxRateId,
-      ledger_account_id: line.ledgerAccountId || defaults.ledgerAccountId,
-    })),
+    ...buildSalesInvoiceDetailsAttributes(input.lines, defaults),
   ];
 
   const payload = {
@@ -603,6 +842,7 @@ export async function updateMoneybirdSalesInvoice(
             new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
         ),
       currency: input.currency || String(existing.currency ?? "EUR"),
+      prices_are_incl_tax: false,
       details_attributes,
     },
   };
@@ -615,7 +855,13 @@ export async function updateMoneybirdSalesInvoice(
     },
   );
 
-  return sanitizeMoneybirdInvoice(raw);
+  const invoice = sanitizeMoneybirdInvoice(raw);
+  if (!invoice.id) {
+    throw new Error(
+      "Moneybird gaf geen factuur-id terug bij bijwerken van het concept.",
+    );
+  }
+  return invoice;
 }
 
 /**
