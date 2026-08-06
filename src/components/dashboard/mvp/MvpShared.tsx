@@ -36,8 +36,19 @@ export function MvpEmptyState({
 
 export function MvpToast({ message }: { message: string | null }) {
   if (!message) return null;
+  const isError = /fout|mislukt|ongeldig|controleer|verplicht|ontbreekt/i.test(
+    message,
+  );
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-[#0B1F4D] shadow-lg">
+    <div
+      className={cn(
+        "fixed bottom-4 right-4 z-50 max-w-lg whitespace-pre-wrap rounded-xl border px-4 py-3 text-sm font-medium shadow-lg",
+        isError
+          ? "border-red-200 bg-red-50 text-red-900"
+          : "border-slate-200 bg-white text-[#0B1F4D]",
+      )}
+      role="status"
+    >
       {message}
     </div>
   );
@@ -47,7 +58,10 @@ export function useToast() {
   const [toast, setToast] = useState<string | null>(null);
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4000);
+    const long =
+      toast.length > 80 ||
+      /fout|mislukt|ongeldig|controleer|verplicht|ontbreekt/i.test(toast);
+    const t = setTimeout(() => setToast(null), long ? 14000 : 4000);
     return () => clearTimeout(t);
   }, [toast]);
   return { toast, showToast: setToast };

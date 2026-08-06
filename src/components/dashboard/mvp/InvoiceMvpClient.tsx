@@ -378,10 +378,15 @@ export function InvoiceMvpClient({
                     </span>
                   ) : d.moneybird_sync_status === "fout" ? (
                     <span
-                      className="text-red-600"
+                      className="max-w-[14rem] cursor-help text-red-600"
                       title={d.moneybird_sync_error ?? ""}
                     >
                       Fout
+                      {d.moneybird_sync_error ? (
+                        <span className="mt-0.5 block truncate text-[10px] font-normal leading-snug text-red-500/90">
+                          {d.moneybird_sync_error}
+                        </span>
+                      ) : null}
                     </span>
                   ) : (
                     "—"
