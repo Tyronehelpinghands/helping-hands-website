@@ -909,7 +909,9 @@ async function refreshOpenInvoiceDraftsForProject(
 
   const { data: entries, error: entriesError } = await supabase
     .from("time_entries")
-    .select("*")
+    .select(
+      "id, work_date, hours, kilometers, travel_time_hours, crew_member_id, crew_members(full_name)",
+    )
     .eq("project_id", projectId)
     .in("status", ["approved", "invoiced"]);
 
@@ -1217,7 +1219,9 @@ async function createInvoiceDraftFromHoursForProject(
 
   const { data: entries, error: entriesError } = await supabase
     .from("time_entries")
-    .select("*")
+    .select(
+      "id, work_date, hours, kilometers, travel_time_hours, crew_member_id, crew_members(full_name)",
+    )
     .eq("project_id", project_id)
     .eq("status", entryStatus);
 
