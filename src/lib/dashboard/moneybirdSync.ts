@@ -476,7 +476,14 @@ export async function pushInvoiceDraftToMoneybird(options: {
   });
   if (!contactResolved.ok) return contactResolved;
 
-  const contactId = contactResolved.contactId;
+  const contactId = contactResolved.contactId?.trim();
+  if (!contactId) {
+    return {
+      ok: false,
+      error:
+        "Geen geldig Moneybird customer_id/contact_id na contact-resolve. Factuur wordt niet aangemaakt.",
+    };
+  }
 
   const lines = Array.isArray(draft.invoice_draft_lines)
     ? draft.invoice_draft_lines
