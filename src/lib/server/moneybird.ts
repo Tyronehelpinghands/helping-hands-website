@@ -215,9 +215,34 @@ function dutchMoneybirdStatusHint(status: number): string {
     return "Niet gevonden. Controleer MONEYBIRD_ADMINISTRATION_ID of of het contact/factuur bestaat.";
   }
   if (status === 422) {
-    return "Ongeldige gegevens (contact_id, tax_rate_id, ledger_account_id of factuurregels).";
+    return "Ongeldige gegevens (customer_id/contact_id, tax_rate_id, ledger_account_id of factuurregels).";
   }
   return "";
+}
+
+/** Vertaalt bekende Moneybird-veldfouten naar bruikbare NL-tekst. */
+function mapMoneybirdFieldError(field: string, message: string): string {
+  const fieldKey = field.trim().toLowerCase();
+  const msg = message.trim().toLowerCase();
+  const blank =
+    msg.includes("blank") ||
+    msg.includes("can't be blank") ||
+    msg.includes("can't be empty") ||
+    msg.includes("is verplicht");
+
+  if (
+    (fieldKey === "customer_id" || fieldKey === "contact_id") &&
+    blank
+  ) {
+    return "Klant ontbreekt (customer_id/contact_id). Koppel of maak eerst een Moneybird-contact.";
+  }
+  if (fieldKey === "tax_rate_id" && blank) {
+    return "BTW-tarief ontbreekt (tax_rate_id).";
+  }
+  if (fieldKey === "ledger_account_id" && blank) {
+    return "Omzetrekening ontbreekt (ledger_account_id).";
+  }
+  return `${field}: ${message}`.trim();
 }
 
 /** Flatten Moneybird error payloads without throwing (strings, arrays, nested objects). */
@@ -255,12 +280,40 @@ function parseMoneybirdErrorBody(rawText: string): string {
 
     if (typeof body.error === "string" && body.error.trim()) {
       parts.push(body.error.trim());
+    } else if (body.error != null && typeof body.error === "object") {
+      for (const [field, vals] of Object.entries(
+        body.error as Record<string, unknown>,
+      )) {
+        const nested = flattenMoneybirdErrorValue(vals);
+        if (nested.length === 0) {
+          parts.push(mapMoneybirdFieldError(field, "ongeldig"));
+          continue;
+        }
+        for (const n of nested) {
+          // flatten kan "key: msg" teruggeven; strip nested keys voor mapping.
+          const msg = n.includes(": ") ? n.slice(n.indexOf(": ") + 2) : n;
+          parts.push(mapMoneybirdFieldError(field, msg));
+        }
+      }
     }
     if (typeof body.message === "string" && body.message.trim()) {
       parts.push(body.message.trim());
     }
     if (body.errors != null) {
       parts.push(...flattenMoneybirdErrorValue(body.errors));
+    }
+    if (body.details != null && typeof body.details === "object") {
+      for (const [field, vals] of Object.entries(
+        body.details as Record<string, unknown>,
+      )) {
+        const nested = flattenMoneybirdErrorValue(vals);
+        for (const n of nested) {
+          const msg = n.includes(": ") ? n.slice(n.indexOf(": ") + 2) : n;
+          if (msg === "blank" || msg === "error") {
+            parts.push(mapMoneybirdFieldError(field, "can't be blank"));
+          }
+        }
+      }
     }
     if (body.symbolic != null) {
       parts.push(...flattenMoneybirdErrorValue(body.symbolic));
@@ -673,6 +726,17 @@ export function sanitizeMoneybirdInvoice(
   };
 }
 
+/** Moneybird contact-id = klant-id op sales invoices (customer_id + contact_id). */
+function resolveSalesInvoiceCustomerId(contactId: string): string {
+  const id = contactId.trim();
+  if (!id) {
+    throw new Error(
+      "Moneybird customer_id/contact_id ontbreekt. Los eerst een geldig contact op voordat je een factuur aanmaakt.",
+    );
+  }
+  return id;
+}
+
 /** Maakt een conceptfactuur (draft) in Moneybird. Verzendt niet. */
 export async function createMoneybirdSalesInvoice(
   input: CreateMoneybirdSalesInvoiceInput,
@@ -683,9 +747,7 @@ export async function createMoneybirdSalesInvoice(
     throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
   }
 
-  if (!input.contactId.trim()) {
-    throw new Error("contactId is verplicht.");
-  }
+  const customerId = resolveSalesInvoiceCustomerId(input.contactId);
   if (!input.lines.length) {
     throw new Error("Minimaal één factuurregel is verplicht.");
   }
@@ -695,9 +757,11 @@ export async function createMoneybirdSalesInvoice(
     defaults,
   );
 
+  // Moneybird vereist customer_id; contact_id blijft voor compatibiliteit.
   const payload = {
     sales_invoice: {
-      contact_id: input.contactId.trim(),
+      customer_id: customerId,
+      contact_id: customerId,
       reference: input.reference?.trim() || "Helping Hands factuur",
       invoice_date:
         input.invoiceDate || new Date().toISOString().slice(0, 10),
@@ -713,7 +777,8 @@ export async function createMoneybirdSalesInvoice(
   logMoneybirdSafe(
     "POST /sales_invoices.json",
     {
-      contactId: input.contactId.trim(),
+      customerId,
+      contactId: customerId,
       lineCount: details_attributes.length,
       taxRateId: defaults.taxRateId,
       ledgerAccountId: defaults.ledgerAccountId,
@@ -797,9 +862,7 @@ export async function updateMoneybirdSalesInvoice(
     throw new Error(MONEYBIRD_DEFAULTS_RESOLVE_ERROR);
   }
 
-  if (!input.contactId.trim()) {
-    throw new Error("contactId is verplicht.");
-  }
+  const customerId = resolveSalesInvoiceCustomerId(input.contactId);
   if (!input.lines.length) {
     throw new Error("Minimaal één factuurregel is verplicht.");
   }
@@ -830,7 +893,8 @@ export async function updateMoneybirdSalesInvoice(
 
   const payload = {
     sales_invoice: {
-      contact_id: input.contactId.trim(),
+      customer_id: customerId,
+      contact_id: customerId,
       reference: input.reference?.trim() || "Helping Hands factuur",
       invoice_date:
         input.invoiceDate ||
