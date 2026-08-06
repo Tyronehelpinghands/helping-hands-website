@@ -19,6 +19,8 @@ export type MoneybirdContactOption = {
   company_name: string;
   email: string;
   city: string;
+  contact_person?: string;
+  attention?: string;
 };
 
 type MoneybirdContactSelectorProps = {
@@ -96,7 +98,12 @@ export default function MoneybirdContactSelector({
             <SelectContent>
               {options.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.company_name} · {c.email} · {c.city}
+                  {c.company_name}
+                  {c.contact_person || c.attention
+                    ? ` · ${c.contact_person || c.attention}`
+                    : ""}
+                  {c.email ? ` · ${c.email}` : ""}
+                  {c.city ? ` · ${c.city}` : ""}
                 </SelectItem>
               ))}
             </SelectContent>

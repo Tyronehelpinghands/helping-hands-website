@@ -10,9 +10,11 @@ import {
   isMoneybirdNotFoundError,
   logMoneybirdSafe,
   MONEYBIRD_DEFAULTS_RESOLVE_ERROR,
+  resolveLedgerAccountIdForLineDescription,
   resolveMoneybirdInvoiceDefaults,
   searchMoneybirdContacts,
   sendMoneybirdSalesInvoice,
+  updateMoneybirdContact,
   updateMoneybirdSalesInvoice,
   type SafeMoneybirdContact,
 } from "@/lib/server/moneybird";
@@ -43,6 +45,8 @@ export type SyncClientContactResult =
         | "company_name"
         | "external_customer_id"
         | "created";
+      contactPerson: string | null;
+      companyName: string | null;
       message: string;
     }
   | { ok: false; error: string };
@@ -130,8 +134,88 @@ function splitContactName(contactName: string | null | undefined): {
   if (parts.length === 0) return { firstname: "", lastname: "" };
   if (parts.length === 1) return { firstname: parts[0], lastname: "" };
   return {
-    firstname: parts[0],
+    firstname: parts[0]!,
     lastname: parts.slice(1).join(" "),
+  };
+}
+
+function contactPersonLabel(
+  contact: SafeMoneybirdContact | null | undefined,
+  fallback?: string | null,
+): string | null {
+  const fromMb = contact?.contact_person?.trim();
+  if (fromMb) return fromMb;
+  const local = fallback?.trim();
+  return local || null;
+}
+
+/** Schrijft contactpersoon (attention + naam) naar Moneybird; faalt soft. */
+async function syncContactPersonFields(
+  contactId: string,
+  client: ClientForMoneybird,
+): Promise<SafeMoneybirdContact | null> {
+  const attention = (client.contact_name ?? "").trim();
+  if (!attention) {
+    try {
+      return await getMoneybirdContact(contactId);
+    } catch {
+      return null;
+    }
+  }
+  const { firstname, lastname } = splitContactName(attention);
+  try {
+    return await updateMoneybirdContact(contactId, {
+      attention,
+      firstname: firstname || undefined,
+      lastname: lastname || undefined,
+      phone: client.phone ?? undefined,
+      address1: client.address ?? undefined,
+      city: client.city ?? undefined,
+    });
+  } catch (error) {
+    logMoneybirdSafe("Contactpersoon bijwerken mislukt (niet-blokkerend)", {
+      contactId,
+      error: formatMoneybirdError(error).slice(0, 200),
+    });
+    try {
+      return await getMoneybirdContact(contactId);
+    } catch {
+      return null;
+    }
+  }
+}
+
+type SyncMatchedBy =
+  | "stored"
+  | "email"
+  | "company_name"
+  | "external_customer_id"
+  | "created";
+
+function syncSuccess(
+  contact: SafeMoneybirdContact,
+  options: {
+    created: boolean;
+    matchedBy: SyncMatchedBy;
+    localContactName?: string | null;
+    companyName?: string | null;
+    baseMessage: string;
+  },
+): Extract<SyncClientContactResult, { ok: true }> {
+  const contactPerson = contactPersonLabel(contact, options.localContactName);
+  const company =
+    contact.company_name?.trim() || options.companyName?.trim() || null;
+  const personSuffix = contactPerson
+    ? ` Contactpersoon: ${contactPerson}.`
+    : "";
+  return {
+    ok: true,
+    contactId: contact.id,
+    created: options.created,
+    matchedBy: options.matchedBy,
+    contactPerson,
+    companyName: company,
+    message: `${options.baseMessage}${personSuffix}`,
   };
 }
 
@@ -271,13 +355,28 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
       override,
       loaded.persistContactColumn,
     );
-    return {
-      ok: true,
-      contactId: override,
-      created: false,
-      matchedBy: "stored",
-      message: `Moneybird-contact gekoppeld (${override}).`,
-    };
+    const mb = await syncContactPersonFields(override, loaded.client);
+    return syncSuccess(
+      mb ?? {
+        id: override,
+        company_name: loaded.client.company_name ?? "",
+        firstname: "",
+        lastname: "",
+        attention: loaded.client.contact_name ?? "",
+        contact_person: loaded.client.contact_name ?? "",
+        email: loaded.client.email ?? "",
+        send_invoices_to_email: "",
+        city: loaded.client.city ?? "",
+        customer_id: "",
+      },
+      {
+        created: false,
+        matchedBy: "stored",
+        localContactName: loaded.client.contact_name,
+        companyName: loaded.client.company_name,
+        baseMessage: `Moneybird-contact gekoppeld (${override}).`,
+      },
+    );
   }
 
   const loaded = await loadClientForMoneybird(options.clientId);
@@ -288,13 +387,28 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
   if (stored) {
     const exists = await assertMoneybirdContactExists(stored);
     if (exists.ok) {
-      return {
-        ok: true,
-        contactId: stored,
-        created: false,
-        matchedBy: "stored",
-        message: `Bestaande Moneybird-koppeling gebruikt (${stored}).`,
-      };
+      const mb = await syncContactPersonFields(stored, client);
+      return syncSuccess(
+        mb ?? {
+          id: stored,
+          company_name: client.company_name ?? "",
+          firstname: "",
+          lastname: "",
+          attention: client.contact_name ?? "",
+          contact_person: client.contact_name ?? "",
+          email: client.email ?? "",
+          send_invoices_to_email: "",
+          city: client.city ?? "",
+          customer_id: "",
+        },
+        {
+          created: false,
+          matchedBy: "stored",
+          localContactName: client.contact_name,
+          companyName: client.company_name,
+          baseMessage: `Bestaande Moneybird-koppeling gebruikt (${stored}).`,
+        },
+      );
     }
     // Stale/verwijderd contact-id mag factuur-sync niet blokkeren: wis en zoek opnieuw.
     if (exists.notFound) {
@@ -317,22 +431,35 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
   const externalCustomerId = moneybirdExternalCustomerId(client.id);
 
   try {
+    const finishMatch = async (
+      contact: SafeMoneybirdContact,
+      matchedBy: SyncMatchedBy,
+      baseMessage: string,
+    ): Promise<Extract<SyncClientContactResult, { ok: true }>> => {
+      await persistClientMoneybirdContactId(
+        client.id,
+        contact.id,
+        persistContactColumn,
+      );
+      const mb = await syncContactPersonFields(contact.id, client);
+      return syncSuccess(mb ?? contact, {
+        created: false,
+        matchedBy,
+        localContactName: client.contact_name,
+        companyName: client.company_name,
+        baseMessage,
+      });
+    };
+
     // 1) Stabiele externe customer_id (hh-<supabase-client-id>)
     const byExternal =
       await findMoneybirdContactByCustomerId(externalCustomerId);
     if (byExternal?.id) {
-      await persistClientMoneybirdContactId(
-        client.id,
-        byExternal.id,
-        persistContactColumn,
+      return finishMatch(
+        byExternal,
+        "external_customer_id",
+        `Moneybird-contact gevonden via externe customer_id en gekoppeld (${byExternal.id}).`,
       );
-      return {
-        ok: true,
-        contactId: byExternal.id,
-        created: false,
-        matchedBy: "external_customer_id",
-        message: `Moneybird-contact gevonden via externe customer_id en gekoppeld (${byExternal.id}).`,
-      };
     }
 
     // 2) E-mail (ook send_invoices_to_email)
@@ -342,18 +469,11 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
         contactEmails(c).includes(email),
       );
       if (exactEmail?.id) {
-        await persistClientMoneybirdContactId(
-          client.id,
-          exactEmail.id,
-          persistContactColumn,
+        return finishMatch(
+          exactEmail,
+          "email",
+          `Moneybird-contact gevonden op e-mail en gekoppeld (${exactEmail.id}).`,
         );
-        return {
-          ok: true,
-          contactId: exactEmail.id,
-          created: false,
-          matchedBy: "email",
-          message: `Moneybird-contact gevonden op e-mail en gekoppeld (${exactEmail.id}).`,
-        };
       }
     }
 
@@ -364,18 +484,11 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
         companyNamesMatch(c.company_name, company),
       );
       if (companyMatch?.id) {
-        await persistClientMoneybirdContactId(
-          client.id,
-          companyMatch.id,
-          persistContactColumn,
+        return finishMatch(
+          companyMatch,
+          "company_name",
+          `Moneybird-contact gevonden op bedrijfsnaam (“${companyMatch.company_name || company}”) en gekoppeld (${companyMatch.id}).`,
         );
-        return {
-          ok: true,
-          contactId: companyMatch.id,
-          created: false,
-          matchedBy: "company_name",
-          message: `Moneybird-contact gevonden op bedrijfsnaam (“${companyMatch.company_name || company}”) en gekoppeld (${companyMatch.id}).`,
-        };
       }
 
       // Extra zoekterm zonder spaties / lowercase query
@@ -386,18 +499,11 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
           companyNamesMatch(c.company_name, company),
         );
         if (looseMatch?.id) {
-          await persistClientMoneybirdContactId(
-            client.id,
-            looseMatch.id,
-            persistContactColumn,
+          return finishMatch(
+            looseMatch,
+            "company_name",
+            `Moneybird-contact gevonden op bedrijfsnaam (“${looseMatch.company_name || company}”) en gekoppeld (${looseMatch.id}).`,
           );
-          return {
-            ok: true,
-            contactId: looseMatch.id,
-            created: false,
-            matchedBy: "company_name",
-            message: `Moneybird-contact gevonden op bedrijfsnaam (“${looseMatch.company_name || company}”) en gekoppeld (${looseMatch.id}).`,
-          };
         }
       }
     }
@@ -410,13 +516,15 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
       };
     }
 
-    const { firstname, lastname } = splitContactName(client.contact_name);
+    const attention = (client.contact_name ?? "").trim();
+    const { firstname, lastname } = splitContactName(attention);
     let created: SafeMoneybirdContact;
     try {
       created = await createMoneybirdContact({
         companyName: company || undefined,
         firstname: firstname || undefined,
         lastname: lastname || undefined,
+        attention: attention || undefined,
         email,
         phone: client.phone ?? undefined,
         address1: client.address ?? undefined,
@@ -430,18 +538,11 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
       const existingAfterConflict =
         await findMoneybirdContactByCustomerId(externalCustomerId);
       if (existingAfterConflict?.id) {
-        await persistClientMoneybirdContactId(
-          client.id,
-          existingAfterConflict.id,
-          persistContactColumn,
+        return finishMatch(
+          existingAfterConflict,
+          "external_customer_id",
+          `Moneybird-contact bestond al (customer_id) en is gekoppeld (${existingAfterConflict.id}).`,
         );
-        return {
-          ok: true,
-          contactId: existingAfterConflict.id,
-          created: false,
-          matchedBy: "external_customer_id",
-          message: `Moneybird-contact bestond al (customer_id) en is gekoppeld (${existingAfterConflict.id}).`,
-        };
       }
       logMoneybirdSafe("Contact aanmaken mislukt voor opdrachtgever", {
         clientId: client.id,
@@ -468,13 +569,13 @@ export async function resolveOrCreateMoneybirdContactForClient(options: {
       persistContactColumn,
     );
 
-    return {
-      ok: true,
-      contactId: created.id,
+    return syncSuccess(created, {
       created: true,
       matchedBy: "created",
-      message: `Nieuw Moneybird-contact aangemaakt en gekoppeld (${created.id}).`,
-    };
+      localContactName: client.contact_name,
+      companyName: client.company_name,
+      baseMessage: `Nieuw Moneybird-contact aangemaakt en gekoppeld (${created.id}).`,
+    });
   } catch (error) {
     return { ok: false, error: formatMoneybirdError(error) };
   }
@@ -614,6 +715,7 @@ export async function pushInvoiceDraftToMoneybird(options: {
     description: string;
     amount: number;
     price: number;
+    ledgerAccountId?: string;
   }> = [];
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
@@ -640,7 +742,15 @@ export async function pushInvoiceDraftToMoneybird(options: {
         error: `Factuurregel ${i + 1} heeft een ongeldige prijs.`,
       };
     }
-    linePayload.push({ description, amount, price });
+    linePayload.push({
+      description,
+      amount,
+      price,
+      ledgerAccountId: resolveLedgerAccountIdForLineDescription(
+        description,
+        defaults,
+      ),
+    });
   }
 
   const reference = draft.invoice_number?.trim() || "Helping Hands factuur";

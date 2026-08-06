@@ -12,6 +12,7 @@ import {
   calculateInvoiceTotals,
   calculateWorkedHours,
 } from "@/lib/dashboard/calculations";
+import { buildInvoiceDraftLinesFromEntries } from "@/lib/dashboard/invoiceLineBuilder";
 import { getRateSettings } from "@/lib/dashboard/queries";
 import { OUTDATED_MONEYBIRD_DRAFT_MSG } from "@/lib/dashboard/moneybirdConstants";
 import {
@@ -894,7 +895,7 @@ async function refreshOpenInvoiceDraftsForProject(
   const rates = await getRateSettings();
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, project_name, default_hourly_rate")
+    .select("id, project_name, default_hourly_rate, project_type")
     .eq("id", projectId)
     .single();
 
@@ -968,37 +969,21 @@ async function refreshOpenInvoiceDraftsForProject(
       };
     }
 
-    const lines = [
-      {
-        invoice_draft_id: draft.id,
-        description: `Arbeidsuren — ${project.project_name}`,
-        quantity: totalHours,
-        unit_price: hourlyRate,
-        vat_rate: rates.vat_percent,
-        line_total: totals.laborAmount,
-      },
-    ];
+    const lines = buildInvoiceDraftLinesFromEntries({
+      invoiceDraftId: draft.id,
+      entries,
+      projectType: project.project_type as ProjectType | null,
+      hourlyRate,
+      kmRate: rates.km_rate,
+      vatPercent: rates.vat_percent,
+    });
 
-    if (totals.travelCosts > 0) {
-      lines.push({
-        invoice_draft_id: draft.id,
-        description: `Kilometervergoeding (${totalKm} km × €${rates.km_rate})`,
-        quantity: totalKm,
-        unit_price: rates.km_rate,
-        vat_rate: rates.vat_percent,
-        line_total: totals.travelCosts,
-      });
-    }
-
-    if (totals.travelTimeAmount > 0) {
-      lines.push({
-        invoice_draft_id: draft.id,
-        description: `Reistijd (${totalTravelTime} u)`,
-        quantity: totalTravelTime,
-        unit_price: hourlyRate,
-        vat_rate: rates.vat_percent,
-        line_total: totals.travelTimeAmount,
-      });
+    if (lines.length === 0) {
+      return {
+        refreshedDrafts,
+        markedDirty,
+        error: "Geen factuurregels kunnen worden opgebouwd uit de uren.",
+      };
     }
 
     const { error: linesError } = await supabase
@@ -1222,7 +1207,7 @@ async function createInvoiceDraftFromHoursForProject(
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, client_id, project_name, default_hourly_rate")
+    .select("id, client_id, project_name, default_hourly_rate, project_type")
     .eq("id", project_id)
     .single();
 
@@ -1288,37 +1273,18 @@ async function createInvoiceDraftFromHoursForProject(
     return fail(draftError?.message ?? "Factuurconcept aanmaken mislukt.");
   }
 
-  const lines = [
-    {
-      invoice_draft_id: draft.id,
-      description: `Arbeidsuren — ${project.project_name}`,
-      quantity: totalHours,
-      unit_price: hourlyRate,
-      vat_rate: rates.vat_percent,
-      line_total: totals.laborAmount,
-    },
-  ];
+  const lines = buildInvoiceDraftLinesFromEntries({
+    invoiceDraftId: draft.id,
+    entries,
+    projectType: project.project_type as ProjectType | null,
+    hourlyRate,
+    kmRate: rates.km_rate,
+    vatPercent: rates.vat_percent,
+  });
 
-  if (totals.travelCosts > 0) {
-    lines.push({
-      invoice_draft_id: draft.id,
-      description: `Kilometervergoeding (${totalKm} km × €${rates.km_rate})`,
-      quantity: totalKm,
-      unit_price: rates.km_rate,
-      vat_rate: rates.vat_percent,
-      line_total: totals.travelCosts,
-    });
-  }
-
-  if (totals.travelTimeAmount > 0) {
-    lines.push({
-      invoice_draft_id: draft.id,
-      description: `Reistijd (${totalTravelTime} u)`,
-      quantity: totalTravelTime,
-      unit_price: hourlyRate,
-      vat_rate: rates.vat_percent,
-      line_total: totals.travelTimeAmount,
-    });
+  if (lines.length === 0) {
+    await supabase.from("invoice_drafts").delete().eq("id", draft.id);
+    return fail("Geen factuurregels kunnen worden opgebouwd uit de uren.");
   }
 
   const { error: linesError } = await supabase
@@ -1887,6 +1853,8 @@ export async function syncClientToMoneybirdAction(
   ActionResult<{
     contactId: string;
     created: boolean;
+    contactPerson: string | null;
+    companyName: string | null;
     message: string;
   }>
 > {
@@ -1908,6 +1876,8 @@ export async function syncClientToMoneybirdAction(
   return ok({
     contactId: result.contactId,
     created: result.created,
+    contactPerson: result.contactPerson,
+    companyName: result.companyName,
     message: result.message,
   });
 }
