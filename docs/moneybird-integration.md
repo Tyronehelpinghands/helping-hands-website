@@ -65,19 +65,21 @@ Bij sync naar Moneybird krijgt **elke regel** een `ledger_account_id` op basis v
 | KM | kilometervergoeding, “X km” | kilometer vergoeding |
 | Default | geen match | `MONEYBIRD_DEFAULT_LEDGER_ACCOUNT_ID` of auto omzet |
 
-### Factuurregel-omschrijvingen (week + datum)
+### Factuurregel-omschrijvingen (crew + week + datum)
 
-Conceptregels worden per ISO-week opgebouwd uit `time_entries.work_date`, met Nederlands datumformaat:
+Conceptregels worden per crewlid + ISO-week opgebouwd uit `time_entries` (incl. `crew_members.full_name`), met Nederlands datumformaat:
 
-- Arbeid: `Site crew — week 28 — 28 jun 2026` (of datumrange `28 jun 2026 – 4 jul 2026`)
-- KM: `Kilometervergoeding — week 28 — 28 jun 2026 (150 km)`
-- Reistijd: `Reistijd — Site crew — week 28 — 28 jun 2026`
+- Arbeid: `Site crew — Fabrice Da Graca — week 28 — 28 jun 2026` (of datumrange `28 jun 2026 – 4 jul 2026`)
+- KM: `Kilometervergoeding — Fabrice Da Graca — week 28 — 28 jun 2026 (150 km)`
+- Reistijd: `Reistijd — Site crew — Fabrice Da Graca — week 28 — 28 jun 2026`
+
+Meerdere crewleden in dezelfde week krijgen elk een eigen regel. Alleen als namen in één bucket belanden (zeldzaam), worden ze komma-gescheiden.
 
 Rol-label komt uit `projects.project_type` (o.a. Site crew, Stagehands, Event crew, Horeca, Productie, Logistiek).
 
 **Aanmaken / urenwijziging:** `buildInvoiceDraftLinesFromEntries` schrijft deze omschrijvingen naar `invoice_draft_lines`.
 
-**Moneybird-sync:** vóór elke push (`Vernieuw Moneybird` / `Naar Moneybird als concept`) herbouwt `regenerateInvoiceDraftLinesFromHours` de lokale regels opnieuw uit uren, zodat ook oude concepten week/datum krijgen — daarna gaan die omschrijvingen naar Moneybird `details_attributes`.
+**Moneybird-sync:** vóór elke push (`Vernieuw Moneybird` / `Naar Moneybird als concept`) herbouwt `regenerateInvoiceDraftLinesFromHours` de lokale regels opnieuw uit uren, zodat ook oude concepten crew/week/datum krijgen — daarna gaan die omschrijvingen naar Moneybird `details_attributes`.
 
 Broncode: `src/lib/dashboard/invoiceLineBuilder.ts`, `src/lib/dashboard/invoiceDraftLineRefresh.ts`.
 

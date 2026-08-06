@@ -6,6 +6,13 @@ export type TimeEntryForInvoiceLines = {
   hours?: number | null;
   kilometers?: number | null;
   travel_time_hours?: number | null;
+  crew_member_id?: string | null;
+  /** Directe naam (optioneel; anders uit crew_members). */
+  crew_full_name?: string | null;
+  crew_members?:
+    | { full_name?: string | null }
+    | { full_name?: string | null }[]
+    | null;
 };
 
 export type BuiltInvoiceDraftLine = {
@@ -78,16 +85,31 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+/** Haalt full_name uit entry of geneste crew_members-relatie. */
+export function resolveCrewFullName(
+  entry: TimeEntryForInvoiceLines,
+): string {
+  const direct = String(entry.crew_full_name ?? "").trim();
+  if (direct) return direct;
+  const nested = entry.crew_members;
+  if (Array.isArray(nested)) {
+    return String(nested[0]?.full_name ?? "").trim();
+  }
+  return String(nested?.full_name ?? "").trim();
+}
+
 type WeekBucket = {
   year: number;
   week: number;
+  crewKey: string;
+  names: Set<string>;
   dates: string[];
   hours: number;
   kilometers: number;
   travelTimeHours: number;
 };
 
-function groupEntriesByIsoWeek(
+function groupEntriesByCrewAndIsoWeek(
   entries: TimeEntryForInvoiceLines[],
 ): WeekBucket[] {
   const map = new Map<string, WeekBucket>();
@@ -96,12 +118,18 @@ function groupEntriesByIsoWeek(
     const workDate = String(entry.work_date ?? "").trim();
     if (!workDate) continue;
     const { year, week } = isoWeekParts(workDate);
-    const key = `${year}-W${String(week).padStart(2, "0")}`;
+    const name = resolveCrewFullName(entry);
+    const crewId = String(entry.crew_member_id ?? "").trim();
+    // Eén bucket per crewlid (of onbekend) per ISO-week.
+    const crewKey = crewId || (name ? `name:${name.toLowerCase()}` : "_unknown");
+    const key = `${crewKey}|${year}-W${String(week).padStart(2, "0")}`;
     let bucket = map.get(key);
     if (!bucket) {
       bucket = {
         year,
         week,
+        crewKey,
+        names: new Set(),
         dates: [],
         hours: 0,
         kilometers: 0,
@@ -109,6 +137,7 @@ function groupEntriesByIsoWeek(
       };
       map.set(key, bucket);
     }
+    if (name) bucket.names.add(name);
     bucket.dates.push(workDate);
     bucket.hours += Number(entry.hours) || 0;
     bucket.kilometers += Number(entry.kilometers) || 0;
@@ -116,13 +145,33 @@ function groupEntriesByIsoWeek(
   }
 
   return [...map.values()].sort(
-    (a, b) => a.year - b.year || a.week - b.week,
+    (a, b) =>
+      a.year - b.year ||
+      a.week - b.week ||
+      [...a.names].join(", ").localeCompare([...b.names].join(", "), "nl"),
   );
 }
 
+function formatCrewNames(names: Set<string>): string {
+  return [...names].sort((a, b) => a.localeCompare(b, "nl")).join(", ");
+}
+
+function withCrewInDescription(
+  prefix: string,
+  crewNames: string,
+  when: string,
+  suffix = "",
+): string {
+  const parts = [prefix];
+  if (crewNames) parts.push(crewNames);
+  parts.push(when);
+  return `${parts.join(" — ")}${suffix}`;
+}
+
 /**
- * Bouwt factuurregels gegroepeerd per ISO-week, met weeknummer + datum(range)
- * in de omschrijving. Voorbeeld: "Site crew — week 28 — 28 jun 2026".
+ * Bouwt factuurregels gegroepeerd per crewlid + ISO-week, met naam, weeknummer
+ * en datum(range) in de omschrijving.
+ * Voorbeeld: "Site crew — Fabrice Da Graca — week 28 — 28 jun 2026".
  */
 export function buildInvoiceDraftLinesFromEntries(options: {
   invoiceDraftId: string;
@@ -133,20 +182,21 @@ export function buildInvoiceDraftLinesFromEntries(options: {
   vatPercent: number;
 }): BuiltInvoiceDraftLine[] {
   const roleLabel = invoiceRoleLabel(options.projectType);
-  const buckets = groupEntriesByIsoWeek(options.entries);
+  const buckets = groupEntriesByCrewAndIsoWeek(options.entries);
   const lines: BuiltInvoiceDraftLine[] = [];
 
   for (const bucket of buckets) {
     const dateSpan = formatDateSpan(bucket.dates);
     const weekPart = `week ${bucket.week}`;
     const when = dateSpan ? `${weekPart} — ${dateSpan}` : weekPart;
+    const crewNames = formatCrewNames(bucket.names);
 
     const hours = round2(bucket.hours);
     if (hours > 0) {
       const lineTotal = round2(hours * options.hourlyRate);
       lines.push({
         invoice_draft_id: options.invoiceDraftId,
-        description: `${roleLabel} — ${when}`,
+        description: withCrewInDescription(roleLabel, crewNames, when),
         quantity: hours,
         unit_price: options.hourlyRate,
         vat_rate: options.vatPercent,
@@ -159,7 +209,12 @@ export function buildInvoiceDraftLinesFromEntries(options: {
       const lineTotal = round2(km * options.kmRate);
       lines.push({
         invoice_draft_id: options.invoiceDraftId,
-        description: `Kilometervergoeding — ${when} (${km} km)`,
+        description: withCrewInDescription(
+          "Kilometervergoeding",
+          crewNames,
+          when,
+          ` (${km} km)`,
+        ),
         quantity: km,
         unit_price: options.kmRate,
         vat_rate: options.vatPercent,
@@ -172,7 +227,11 @@ export function buildInvoiceDraftLinesFromEntries(options: {
       const lineTotal = round2(travelHours * options.hourlyRate);
       lines.push({
         invoice_draft_id: options.invoiceDraftId,
-        description: `Reistijd — ${roleLabel} — ${when}`,
+        description: withCrewInDescription(
+          `Reistijd — ${roleLabel}`,
+          crewNames,
+          when,
+        ),
         quantity: travelHours,
         unit_price: options.hourlyRate,
         vat_rate: options.vatPercent,

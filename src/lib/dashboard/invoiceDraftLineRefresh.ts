@@ -16,9 +16,10 @@ export type RegenerateDraftLinesResult =
 
 /**
  * Herbouwt `invoice_draft_lines` voor één concept uit goedgekeurde/gefactureerde
- * uren van het project — met weeknummer + Nederlandse datum in de omschrijving.
+ * uren van het project — met crewlid, weeknummer + Nederlandse datum in de
+ * omschrijving.
  *
- * Gebruikt vóór Moneybird-sync zodat oude concepten (zonder week/datum) ook
+ * Gebruikt vóór Moneybird-sync zodat oude concepten (zonder week/datum/naam) ook
  * bijgewerkt worden bij “Vernieuw Moneybird”, niet alleen bij nieuw aanmaken.
  */
 export async function regenerateInvoiceDraftLinesFromHours(
@@ -78,7 +79,9 @@ export async function regenerateInvoiceDraftLinesFromHours(
 
   const { data: entries, error: entriesError } = await supabase
     .from("time_entries")
-    .select("work_date, hours, kilometers, travel_time_hours")
+    .select(
+      "work_date, hours, kilometers, travel_time_hours, crew_member_id, crew_members(full_name)",
+    )
     .eq("project_id", projectId)
     .in("status", ["approved", "invoiced"]);
 
