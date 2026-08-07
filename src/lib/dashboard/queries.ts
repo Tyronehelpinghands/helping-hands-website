@@ -4,6 +4,11 @@ import {
   startOfWeek,
   toDateString,
 } from "@/lib/dashboard/calculations";
+import {
+  aggregateFinanceOverview,
+  resolveFinancePeriod,
+  type FinanceOverview,
+} from "@/lib/dashboard/financeOverview";
 import type {
   Client,
   CompanySetting,
@@ -401,6 +406,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   }
 }
 
+export type {
+  FinanceBreakdownRow,
+  FinanceOverview,
+  FinancePeriod,
+  FinancePeriodKey,
+} from "@/lib/dashboard/financeOverview";
+
 export type FinanceSummary = {
   draftRevenue: number;
   readyRevenue: number;
@@ -413,59 +425,44 @@ export type FinanceSummary = {
   openDraftCount: number;
 };
 
-export async function getFinanceSummary(): Promise<FinanceSummary> {
-  const [drafts, entries, rates] = await Promise.all([
+/**
+ * Finance overview: omzet (facturen excl. BTW) − personeelskosten (uren × uurkost).
+ * Periode filtert facturen op `created_at` en uren op `work_date`.
+ */
+export async function getFinanceOverview(options?: {
+  period?: string | null;
+  from?: string | null;
+  to?: string | null;
+}): Promise<FinanceOverview> {
+  const [drafts, entries] = await Promise.all([
     getInvoiceDrafts(),
     getTimeEntries(),
-    getRateSettings(),
   ]);
 
-  const activeDrafts = drafts.filter(
-    (d) => d.status !== "cancelled" && d.status !== "gecrediteerd",
+  const period = resolveFinancePeriod(
+    options?.period,
+    options?.from,
+    options?.to,
   );
-  const draftRevenue = activeDrafts
-    .filter((d) => d.status === "draft")
-    .reduce((sum, d) => sum + Number(d.total_amount || 0), 0);
-  const readyRevenue = activeDrafts
-    .filter((d) => d.status === "ready" || d.status === "sent")
-    .reduce((sum, d) => sum + Number(d.total_amount || 0), 0);
-  const paidRevenue = activeDrafts
-    .filter((d) => d.status === "paid")
-    .reduce((sum, d) => sum + Number(d.total_amount || 0), 0);
+  return aggregateFinanceOverview(drafts, entries, period);
+}
 
-  const approvedOrInvoiced = entries.filter((e) =>
-    ["approved", "invoiced"].includes(e.status),
-  );
-  const totalHours = approvedOrInvoiced.reduce(
-    (sum, e) => sum + Number(e.hours || 0),
-    0,
-  );
-  const travelCosts = approvedOrInvoiced.reduce(
-    (sum, e) =>
-      sum + Number(e.kilometers || 0) * Number(rates.km_rate || 0.25),
-    0,
-  );
-  const crewCostEstimate = approvedOrInvoiced.reduce((sum, e) => {
-    const cost = Number(e.crew_members?.hourly_cost || 0);
-    return sum + cost * Number(e.hours || 0);
-  }, 0);
-
-  const revenue = draftRevenue + readyRevenue + paidRevenue;
-  const marginEstimate = Math.round((revenue - crewCostEstimate) * 100) / 100;
-  const marginPercent =
-    revenue > 0 ? Math.round((marginEstimate / revenue) * 1000) / 10 : null;
+/** @deprecated Prefer getFinanceOverview — kept for legacy KPI shapes. */
+export async function getFinanceSummary(): Promise<FinanceSummary> {
+  const overview = await getFinanceOverview({ period: "all" });
+  const openDraftCount = (
+    await getInvoiceDrafts()
+  ).filter((d) => ["draft", "ready"].includes(d.status)).length;
 
   return {
-    draftRevenue: Math.round(draftRevenue * 100) / 100,
-    readyRevenue: Math.round(readyRevenue * 100) / 100,
-    paidRevenue: Math.round(paidRevenue * 100) / 100,
-    totalHours: Math.round(totalHours * 100) / 100,
-    travelCosts: Math.round(travelCosts * 100) / 100,
-    crewCostEstimate: Math.round(crewCostEstimate * 100) / 100,
-    marginEstimate,
-    marginPercent,
-    openDraftCount: drafts.filter((d) =>
-      ["draft", "ready"].includes(d.status),
-    ).length,
+    draftRevenue: overview.conceptOmzet,
+    readyRevenue: overview.omzet - overview.betaaldeOmzet,
+    paidRevenue: overview.betaaldeOmzet,
+    totalHours: overview.totalHours,
+    travelCosts: overview.gefactureerdeReiskosten,
+    crewCostEstimate: overview.personeelskosten,
+    marginEstimate: overview.marge,
+    marginPercent: overview.margePercent,
+    openDraftCount,
   };
 }
