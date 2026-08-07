@@ -41,7 +41,7 @@ RLS: alleen internal roles via `get_my_role()` / `is_internal_role()`.
 | `/dashboard/intern/crew` | Crew CRUD, skills, Fooks uurkost (payroll/vast) + Shiftbase sync |
 | `/dashboard/intern/urenregistratie` | Uren invoeren, berekenen, approve/reject |
 | `/dashboard/intern/facturatie` | Concept uit goedgekeurde uren, CSV-export |
-| `/dashboard/intern/financien` | Aggregaten uit concepten/uren (geen fake charts) |
+| `/dashboard/intern/financien` | Omzet (facturen excl. BTW) − personeelskosten (uren × uurkost); periodefilter; breakdown project/crew |
 | `/dashboard/intern/risico-acties` | Taken CRUD |
 | `/dashboard/intern/berichten` | Concepten + kopieer / mailto / wa.me |
 | `/dashboard/intern/integraties` | Eerlijke status Actief/Voorbereid/Ontbreekt |
@@ -74,6 +74,21 @@ Code: `src/lib/dashboard/*` + `src/components/dashboard/mvp/*`.
 - BTW uit `company_settings.rates.vat_percent` (default 21%)
 - Uren worden daarna `invoiced`
 - Moneybird: optioneel concept aanmaken; verzenden alleen als expliciet aangevinkt
+
+## Financiën — berekening
+
+Bron: `src/lib/dashboard/financeOverview.ts` (echte Supabase-data, geen democijfers).
+
+| KPI | Bron |
+| --- | --- |
+| **Omzet** | `invoice_drafts.subtotal` (excl. BTW) voor status `sent` + `paid` |
+| **Openstaand** | `subtotal` van status `sent` (nog niet betaald) |
+| **Personeelskosten** | `time_entries` status `approved`/`invoiced`: `hours × crew_members.hourly_cost` (Fooks/uurkost) |
+| **Marge** | Omzet − personeelskosten (en %) |
+| **Concept/klaar** | `draft`/`ready` — zichtbaar, telt niet als omzet |
+| **Reiskosten in facturen** | Gefactureerde km aan klant (zit in omzet); geen interne kost |
+
+Periode: facturen op `created_at`, uren op `work_date`. Rollen: owner / admin / finance / planner.
 
 ## Rollen
 
