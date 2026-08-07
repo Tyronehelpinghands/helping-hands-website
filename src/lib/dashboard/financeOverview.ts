@@ -1,4 +1,5 @@
 import { calculateMarginEstimate, toDateString } from "@/lib/dashboard/calculations";
+import { calculateCrewHourlyCost } from "@/lib/dashboard/fooksRates";
 import type { InvoiceDraft, TimeEntry } from "@/lib/dashboard/types";
 
 export type FinancePeriodKey =
@@ -36,7 +37,7 @@ export type FinanceOverview = {
   conceptOmzet: number;
   /** Verstuurd, nog niet betaald — excl. BTW. */
   openstaand: number;
-  /** Som uren × crew `hourly_cost` (approved/invoiced). */
+  /** Som uren × crew-uurkost (approved/invoiced); Fooks-fallback als uurkost ontbreekt. */
   personeelskosten: number;
   marge: number;
   margePercent: number | null;
@@ -44,9 +45,47 @@ export type FinanceOverview = {
   /** Km/reiskosten die in factuursubtotal zitten (geen interne kost). */
   gefactureerdeReiskosten: number;
   missingHourlyCostHours: number;
+  /** Uren waarvan kosten via bruto × Fooks zijn afgeleid (uurkost ontbrak). */
+  derivedFooksHours: number;
   byProject: FinanceBreakdownRow[];
   byCrew: FinanceBreakdownRow[];
 };
+
+export type CrewUnitCostSource = "hourly_cost" | "fooks" | "none";
+
+/**
+ * Unit cost for a time entry: prefer stored hourly_cost (> 0), else Fooks
+ * (bruto × factor for vast/payroll/freelance, fixed €25 for zzp).
+ */
+export function resolveCrewUnitCost(
+  crew:
+    | Pick<
+        NonNullable<TimeEntry["crew_members"]>,
+        "hourly_cost" | "gross_hourly_wage" | "employment_type"
+      >
+    | null
+    | undefined,
+): { rate: number; source: CrewUnitCostSource } {
+  if (!crew) return { rate: 0, source: "none" };
+
+  const stored = crew.hourly_cost;
+  if (stored != null) {
+    const rate = Number(stored);
+    if (Number.isFinite(rate) && rate > 0) {
+      return { rate, source: "hourly_cost" };
+    }
+  }
+
+  const derived = calculateCrewHourlyCost({
+    employmentType: crew.employment_type,
+    bruto: crew.gross_hourly_wage,
+  });
+  if (derived != null && derived > 0) {
+    return { rate: derived, source: "fooks" };
+  }
+
+  return { rate: 0, source: "none" };
+}
 
 const COST_ENTRY_STATUSES = new Set(["approved", "invoiced"]);
 const OMZET_STATUSES = new Set(["sent", "paid"]);
@@ -142,7 +181,8 @@ export function resolveFinancePeriod(
 /**
  * Aggregates real invoice drafts + time entries into a finance overview.
  * Omzet = factuur `subtotal` (excl. BTW) voor sent/paid.
- * Personeelskosten = approved/invoiced uren × crew hourly_cost (Fooks/uurkost).
+ * Personeelskosten = approved/invoiced uren × uurkost
+ * (stored hourly_cost, else bruto × Fooks / ZZP-vaste kost).
  */
 export function aggregateFinanceOverview(
   drafts: InvoiceDraft[],
@@ -194,6 +234,7 @@ export function aggregateFinanceOverview(
   let personeelskosten = 0;
   let totalHours = 0;
   let missingHourlyCostHours = 0;
+  let derivedFooksHours = 0;
 
   const projectCosts = new Map<
     string,
@@ -206,14 +247,15 @@ export function aggregateFinanceOverview(
 
   for (const e of costEntries) {
     const hours = Number(e.hours || 0);
-    const hourly = e.crew_members?.hourly_cost;
-    const rate = hourly == null ? 0 : Number(hourly);
+    const { rate, source } = resolveCrewUnitCost(e.crew_members);
     const cost = round2(hours * rate);
 
     totalHours += hours;
     personeelskosten += cost;
-    if (hourly == null || Number.isNaN(rate) || rate <= 0) {
+    if (source === "none") {
       missingHourlyCostHours += hours;
+    } else if (source === "fooks") {
+      derivedFooksHours += hours;
     }
 
     const projectId = e.project_id ?? "geen-project";
@@ -293,6 +335,7 @@ export function aggregateFinanceOverview(
     totalHours: round2(totalHours),
     gefactureerdeReiskosten: round2(gefactureerdeReiskosten),
     missingHourlyCostHours: round2(missingHourlyCostHours),
+    derivedFooksHours: round2(derivedFooksHours),
     byProject,
     byCrew,
   };

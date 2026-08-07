@@ -299,19 +299,27 @@ export function FinanceMvpClient({
             />
           </div>
 
+          {overview.derivedFooksHours > 0 ? (
+            <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
+              {formatHours(overview.derivedFooksHours)} uren: uurkost afgeleid
+              uit bruto × Fooks (opgeslagen uurkost ontbrak).
+            </div>
+          ) : null}
+
           {overview.missingHourlyCostHours > 0 ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               {formatHours(overview.missingHourlyCostHours)} uren zonder
-              (geldige) uurkost — die tellen niet mee in personeelskosten. Vul
-              uurkost in bij Crew (Fooks of handmatig).
+              (geldige) uurkost of bruto/Fooks — die tellen niet mee in
+              personeelskosten. Vul uurkost of bruto uurloon in bij Crew.
             </div>
           ) : null}
 
           <p className="text-xs text-[#101828]/45">
             Omzet = factuurconcepten met status verstuurd/betaald (`subtotal`
             excl. BTW). Personeelskosten = goedgekeurde of gefactureerde uren ×
-            crew-uurkost. Betaalde facturen bevestigen omzet; loonkosten blijven
-            gebaseerd op uren × uurkost.
+            crew-uurkost (of bruto × Fooks als uurkost ontbreekt). Betaalde
+            facturen bevestigen omzet; loonkosten blijven gebaseerd op uren ×
+            uurkost.
           </p>
 
           <BreakdownTable

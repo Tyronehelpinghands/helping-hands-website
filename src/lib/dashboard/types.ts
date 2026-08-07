@@ -213,7 +213,12 @@ export type TimeEntry = {
   projects?: Pick<Project, "id" | "project_name" | "default_hourly_rate" | "client_id"> | null;
   crew_members?: Pick<
     CrewMember,
-    "id" | "full_name" | "hourly_cost" | "shiftbase_user_id"
+    | "id"
+    | "full_name"
+    | "hourly_cost"
+    | "gross_hourly_wage"
+    | "employment_type"
+    | "shiftbase_user_id"
   > | null;
 };
 
