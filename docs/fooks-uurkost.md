@@ -21,5 +21,5 @@ Werkgeverskost (`hourly_cost`) uit bruto uurloon × Fooks payrolling-factor.
 - Factoren: `src/lib/dashboard/fooksRates.ts`
 - UI: `src/components/dashboard/mvp/CrewMvpClient.tsx`
 - Mutaties: `createCrewMemberAction` / `updateCrewMemberAction`
-- Financiën: `hours × hourly_cost` → personeelskosten in `src/lib/dashboard/financeOverview.ts`
+- Financiën: `hours × uurkost` → personeelskosten in `src/lib/dashboard/financeOverview.ts` (prefer `hourly_cost`, anders `calculateCrewHourlyCost` / bruto × Fooks)
 - Kolommen: `gross_hourly_wage`, `fooks_ww_tariff` — migrate via [`supabase/crew-fooks-columns.sql`](../supabase/crew-fooks-columns.sql)

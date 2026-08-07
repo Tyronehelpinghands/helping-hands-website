@@ -123,7 +123,7 @@ export async function getTimeEntries(): Promise<TimeEntry[]> {
     supabase
       .from("time_entries")
       .select(
-        "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, shiftbase_user_id)",
+        "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, gross_hourly_wage, employment_type, shiftbase_user_id)",
       )
       .order("work_date", { ascending: false }),
   );
