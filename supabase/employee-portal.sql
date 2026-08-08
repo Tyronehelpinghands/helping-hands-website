@@ -130,8 +130,17 @@ create policy "Crew can select own time_entries"
   on public.time_entries for select to authenticated
   using (crew_member_id = public.my_crew_member_id());
 
+drop policy if exists "Crew can insert own time_entries" on public.time_entries;
+create policy "Crew can insert own time_entries"
+  on public.time_entries for insert to authenticated
+  with check (
+    crew_member_id = public.my_crew_member_id()
+    and status in ('draft', 'submitted')
+  );
+
 drop policy if exists "Crew can update own time_entries correction" on public.time_entries;
-create policy "Crew can update own time_entries correction"
+drop policy if exists "Crew can update own time_entries" on public.time_entries;
+create policy "Crew can update own time_entries"
   on public.time_entries for update to authenticated
   using (crew_member_id = public.my_crew_member_id())
   with check (crew_member_id = public.my_crew_member_id());

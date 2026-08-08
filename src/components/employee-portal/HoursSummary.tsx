@@ -60,6 +60,9 @@ export default function HoursSummary({
                 </p>
                 <p className="text-xs text-slate-500">
                   {formatShiftDate(entry.date)} · {entry.workedHours.toFixed(2)} u
+                  {entry.kilometers
+                    ? ` · ${entry.kilometers.toLocaleString("nl-NL")} km`
+                    : ""}
                 </p>
               </div>
               <EmployeeStatusBadge status={entry.status} variant="hours" />

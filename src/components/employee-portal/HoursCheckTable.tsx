@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * Medewerkersportaal uren — bekijken en correcties doorgeven.
+ * Medewerkersportaal uren — bekijken, indienen/bewerken (uren+km), correcties.
  * Goedkeuring gebeurt alleen in het interne dashboard.
  */
 
-import { useState, useTransition } from "react";
-import { Eye, PencilLine } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, Pencil, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,25 +30,41 @@ import HoursCorrectionModal, {
   type HoursCorrectionFormData,
 } from "@/components/employee-portal/HoursCorrectionModal";
 import HoursDetailDrawer from "@/components/employee-portal/HoursDetailDrawer";
+import HoursEditModal, {
+  type HoursEditFormData,
+} from "@/components/employee-portal/HoursEditModal";
 import type { EmployeeHoursEntry } from "@/lib/employeePortal";
 import {
+  canEmployeeEditOwnHours,
   canEmployeeSubmitHoursCorrection,
   formatShiftDate,
 } from "@/lib/employeePortal";
-import { submitHoursCorrectionAction } from "@/lib/employee-portal/mutations";
+import { calculateWorkedHours } from "@/lib/dashboard/calculations";
+import { formatKilometersNl } from "@/lib/time-entries/shared";
+import {
+  submitHoursCorrectionAction,
+  updateOwnTimeEntryAction,
+} from "@/lib/employee-portal/mutations";
 
 export default function HoursCheckTable({
   entries = [],
 }: {
   entries?: EmployeeHoursEntry[];
 }) {
+  const router = useRouter();
   const [localEntries, setLocalEntries] = useState(entries);
   const [correctionEntry, setCorrectionEntry] = useState<EmployeeHoursEntry | null>(null);
   const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState<EmployeeHoursEntry | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const [viewEntry, setViewEntry] = useState<EmployeeHoursEntry | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setLocalEntries(entries);
+  }, [entries]);
 
   function openView(entry: EmployeeHoursEntry) {
     setViewEntry(entry);
@@ -59,6 +76,11 @@ export default function HoursCheckTable({
     setCorrectionOpen(true);
   }
 
+  function openEdit(entry: EmployeeHoursEntry) {
+    setEditEntry(entry);
+    setEditOpen(true);
+  }
+
   function handleCorrectionSubmit(entryId: string, data: HoursCorrectionFormData) {
     setError(null);
     startTransition(async () => {
@@ -68,6 +90,7 @@ export default function HoursCheckTable({
         requestedStartTime: data.requestedStartTime,
         requestedEndTime: data.requestedEndTime,
         requestedBreakMinutes: data.requestedBreakMinutes,
+        requestedKilometers: data.requestedKilometers,
         explanation: data.explanation,
       });
       if (!result.ok) {
@@ -97,6 +120,47 @@ export default function HoursCheckTable({
             : prev,
         );
       }
+      router.refresh();
+    });
+  }
+
+  function handleEditSubmit(entryId: string, data: HoursEditFormData) {
+    setError(null);
+    startTransition(async () => {
+      const result = await updateOwnTimeEntryAction(entryId, {
+        startTime: data.startTime,
+        endTime: data.endTime,
+        breakMinutes: Number(data.breakMinutes) || 0,
+        kilometers: Number(data.kilometers) || 0,
+        travelTimeHours: Number(data.travelTimeHours) || 0,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      const workedHours = calculateWorkedHours(
+        data.startTime,
+        data.endTime,
+        Number(data.breakMinutes) || 0,
+      );
+      const patch = {
+        startTime: data.startTime,
+        endTime: data.endTime,
+        breakMinutes: Number(data.breakMinutes) || 0,
+        workedHours,
+        kilometers: Number(data.kilometers) || 0,
+        travelTimeHours: Number(data.travelTimeHours) || 0,
+        status: "Ingediend" as const,
+        dbStatus: "submitted" as const,
+        correctionRequest: undefined,
+      };
+      setLocalEntries((prev) =>
+        prev.map((entry) =>
+          entry.id === entryId ? { ...entry, ...patch } : entry,
+        ),
+      );
+      setEditOpen(false);
+      router.refresh();
     });
   }
 
@@ -104,10 +168,12 @@ export default function HoursCheckTable({
     <>
       <Card className="border-slate-200/80 bg-white shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-black text-[#0B1F4D]">Mijn uren</CardTitle>
+          <CardTitle className="text-lg font-black text-[#0B1F4D]">
+            Mijn uren & kilometers
+          </CardTitle>
           <CardDescription>
-            Bekijk je gewerkte uren. Klopt er iets niet? Geef een wijziging door — planning
-            beoordeelt dit in het interne dashboard.
+            Bekijk en bewerk je registraties. Goedgekeurde uren: geef een wijziging door —
+            planning beoordeelt dit in het interne dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,7 +184,7 @@ export default function HoursCheckTable({
           ) : null}
           {localEntries.length === 0 ? (
             <p className="text-sm text-slate-500">
-              Nog geen uren voor jou geregistreerd.
+              Nog geen uren voor jou geregistreerd. Dien hierboven uren & kilometers in.
             </p>
           ) : (
             <>
@@ -130,8 +196,8 @@ export default function HoursCheckTable({
                       <TableHead>Project</TableHead>
                       <TableHead>Start</TableHead>
                       <TableHead>Eind</TableHead>
-                      <TableHead>Pauze</TableHead>
                       <TableHead>Uren</TableHead>
+                      <TableHead>Km</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Acties</TableHead>
                     </TableRow>
@@ -145,8 +211,10 @@ export default function HoursCheckTable({
                         </TableCell>
                         <TableCell>{entry.startTime}</TableCell>
                         <TableCell>{entry.endTime}</TableCell>
-                        <TableCell>{entry.breakMinutes} min</TableCell>
                         <TableCell>{entry.workedHours.toFixed(2)}</TableCell>
+                        <TableCell>
+                          {formatKilometersNl(entry.kilometers ?? 0)}
+                        </TableCell>
                         <TableCell>
                           <EmployeeStatusBadge status={entry.status} variant="hours" />
                         </TableCell>
@@ -154,6 +222,7 @@ export default function HoursCheckTable({
                           <HoursActions
                             entry={entry}
                             onView={() => openView(entry)}
+                            onEdit={() => openEdit(entry)}
                             onCorrection={() => openCorrection(entry)}
                             disabled={pending}
                           />
@@ -180,13 +249,14 @@ export default function HoursCheckTable({
                       <EmployeeStatusBadge status={entry.status} variant="hours" />
                     </div>
                     <p className="mt-2 text-sm text-slate-600">
-                      {entry.startTime} – {entry.endTime} · Pauze {entry.breakMinutes} min ·{" "}
-                      {entry.workedHours.toFixed(2)} u
+                      {entry.startTime} – {entry.endTime} · {entry.workedHours.toFixed(2)} u ·{" "}
+                      {formatKilometersNl(entry.kilometers ?? 0)}
                     </p>
                     <div className="mt-3">
                       <HoursActions
                         entry={entry}
                         onView={() => openView(entry)}
+                        onEdit={() => openEdit(entry)}
                         onCorrection={() => openCorrection(entry)}
                         stacked
                         disabled={pending}
@@ -205,6 +275,15 @@ export default function HoursCheckTable({
         open={viewOpen}
         onOpenChange={setViewOpen}
         onRequestCorrection={openCorrection}
+        onEdit={openEdit}
+      />
+
+      <HoursEditModal
+        entry={editEntry}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSubmit={handleEditSubmit}
+        pending={pending}
       />
 
       <HoursCorrectionModal
@@ -220,17 +299,20 @@ export default function HoursCheckTable({
 function HoursActions({
   entry,
   onView,
+  onEdit,
   onCorrection,
   stacked = false,
   disabled = false,
 }: {
   entry: EmployeeHoursEntry;
   onView: () => void;
+  onEdit: () => void;
   onCorrection: () => void;
   stacked?: boolean;
   disabled?: boolean;
 }) {
-  const canCorrect = canEmployeeSubmitHoursCorrection(entry);
+  const canEdit = canEmployeeEditOwnHours(entry);
+  const canCorrect = canEmployeeSubmitHoursCorrection(entry) && !canEdit;
 
   return (
     <div className={stacked ? "flex flex-col gap-2" : "flex justify-end gap-1"}>
@@ -244,6 +326,19 @@ function HoursActions({
         <Eye className="mr-1 h-4 w-4" />
         Bekijken
       </Button>
+      {canEdit ? (
+        <Button
+          type="button"
+          variant={stacked ? "outline" : "ghost"}
+          size="sm"
+          disabled={disabled}
+          className={stacked ? "min-h-11 w-full justify-center" : ""}
+          onClick={onEdit}
+        >
+          <Pencil className="mr-1 h-4 w-4" />
+          Bewerken
+        </Button>
+      ) : null}
       {canCorrect ? (
         <Button
           type="button"

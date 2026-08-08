@@ -11,14 +11,20 @@ import {
 } from "@/components/ui/sheet";
 import EmployeeStatusBadge from "@/components/employee-portal/EmployeeStatusBadge";
 import type { EmployeeHoursEntry } from "@/lib/employeePortal";
-import { canEmployeeSubmitHoursCorrection, formatShiftDate } from "@/lib/employeePortal";
+import {
+  canEmployeeEditOwnHours,
+  canEmployeeSubmitHoursCorrection,
+  formatShiftDate,
+} from "@/lib/employeePortal";
 import { formatDateTime } from "@/lib/dashboardHelpers";
+import { formatKilometersNl } from "@/lib/time-entries/shared";
 
 type HoursDetailDrawerProps = {
   entry: EmployeeHoursEntry | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRequestCorrection: (entry: EmployeeHoursEntry) => void;
+  onEdit?: (entry: EmployeeHoursEntry) => void;
 };
 
 export default function HoursDetailDrawer({
@@ -26,10 +32,12 @@ export default function HoursDetailDrawer({
   open,
   onOpenChange,
   onRequestCorrection,
+  onEdit,
 }: HoursDetailDrawerProps) {
   if (!entry) return null;
 
-  const canCorrect = canEmployeeSubmitHoursCorrection(entry);
+  const canEdit = canEmployeeEditOwnHours(entry);
+  const canCorrect = canEmployeeSubmitHoursCorrection(entry) && !canEdit;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -47,6 +55,18 @@ export default function HoursDetailDrawer({
           <DetailRow label="Eindtijd" value={entry.endTime} />
           <DetailRow label="Pauze" value={`${entry.breakMinutes} minuten`} />
           <DetailRow label="Gewerkte uren" value={`${entry.workedHours.toFixed(2)} uur`} />
+          <DetailRow
+            label="Kilometers"
+            value={formatKilometersNl(entry.kilometers ?? 0)}
+          />
+          <DetailRow
+            label="Reistijd"
+            value={
+              entry.travelTimeHours
+                ? `${entry.travelTimeHours.toFixed(2)} uur`
+                : "—"
+            }
+          />
           {entry.notes ? (
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -85,6 +105,18 @@ export default function HoursDetailDrawer({
         </div>
 
         <SheetFooter className="flex-col gap-2 sm:flex-col">
+          {canEdit && onEdit ? (
+            <Button
+              type="button"
+              className="w-full bg-[#173A8A] hover:bg-[#0B1F4D]"
+              onClick={() => {
+                onOpenChange(false);
+                onEdit(entry);
+              }}
+            >
+              Uren & km bewerken
+            </Button>
+          ) : null}
           {canCorrect ? (
             <Button
               type="button"
