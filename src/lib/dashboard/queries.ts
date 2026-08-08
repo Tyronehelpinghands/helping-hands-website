@@ -27,12 +27,25 @@ import type {
 function isMissingTableError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false;
   const msg = error.message ?? "";
+  // Column-missing errors also contain "does not exist" — do not treat those as
+  // a missing table (that previously emptied time_entries and zeroed finance costs).
+  if (/column\b/i.test(msg) && /does not exist|schema cache/i.test(msg)) {
+    return false;
+  }
   return (
     error.code === "42P01" ||
     error.code === "PGRST205" ||
-    msg.includes("does not exist") ||
-    msg.includes("relation") ||
-    msg.includes("Could not find the table")
+    msg.includes("Could not find the table") ||
+    (/relation/i.test(msg) && /does not exist/i.test(msg)) ||
+    (/Could not find the table/i.test(msg))
+  );
+}
+
+function isMissingColumnError(message: string | null | undefined): boolean {
+  if (!message) return false;
+  return (
+    (/column\b/i.test(message) || /schema cache/i.test(message)) &&
+    (/does not exist/i.test(message) || /schema cache/i.test(message))
   );
 }
 
@@ -117,17 +130,100 @@ export async function getShifts(options?: {
   return result.data;
 }
 
+const TIME_ENTRY_SELECT_FULL =
+  "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, gross_hourly_wage, employment_type, fooks_ww_tariff, shiftbase_user_id)";
+
+const TIME_ENTRY_SELECT_BASIC =
+  "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, employment_type, shiftbase_user_id)";
+
+const TIME_ENTRY_SELECT_MINIMAL =
+  "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, shiftbase_user_id)";
+
+/**
+ * Normalize nested crew embed (object | array) and optionally fill missing
+ * cost fields from a crew_members map (same path as Crew UI).
+ */
+function attachCrewCostFields(
+  entries: TimeEntry[],
+  crewById?: Map<string, CrewMember>,
+): TimeEntry[] {
+  return entries.map((entry) => {
+    // PostgREST may return a one-to-many embed as an array; normalize to object.
+    const raw = entry.crew_members as
+      | TimeEntry["crew_members"]
+      | NonNullable<TimeEntry["crew_members"]>[]
+      | null
+      | undefined;
+    const fromEmbed = Array.isArray(raw) ? (raw[0] ?? null) : (raw ?? null);
+    const fromMap =
+      entry.crew_member_id && crewById
+        ? crewById.get(entry.crew_member_id)
+        : undefined;
+
+    if (!fromEmbed && !fromMap) {
+      return { ...entry, crew_members: null };
+    }
+
+    const merged = {
+      id: fromEmbed?.id ?? fromMap?.id ?? entry.crew_member_id ?? "",
+      full_name: fromEmbed?.full_name ?? fromMap?.full_name ?? "Onbekende crew",
+      hourly_cost: fromEmbed?.hourly_cost ?? fromMap?.hourly_cost ?? null,
+      gross_hourly_wage:
+        fromEmbed?.gross_hourly_wage ?? fromMap?.gross_hourly_wage ?? null,
+      employment_type:
+        fromEmbed?.employment_type ?? fromMap?.employment_type ?? "other",
+      shiftbase_user_id:
+        fromEmbed?.shiftbase_user_id ?? fromMap?.shiftbase_user_id ?? null,
+    } satisfies NonNullable<TimeEntry["crew_members"]>;
+
+    return { ...entry, crew_members: merged };
+  });
+}
+
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const supabase = await createClient();
-  const result = await safeSelect<TimeEntry>(() =>
+
+  const full = await safeSelect<TimeEntry>(() =>
     supabase
       .from("time_entries")
-      .select(
-        "*, projects(id, project_name, default_hourly_rate, client_id), crew_members(id, full_name, hourly_cost, gross_hourly_wage, employment_type, shiftbase_user_id)",
-      )
+      .select(TIME_ENTRY_SELECT_FULL)
       .order("work_date", { ascending: false }),
   );
-  return result.data;
+  if (!full.error) {
+    return attachCrewCostFields(full.data);
+  }
+
+  // Fooks columns may be absent until supabase/crew-fooks-columns.sql is run.
+  if (isMissingColumnError(full.error)) {
+    const basic = await safeSelect<TimeEntry>(() =>
+      supabase
+        .from("time_entries")
+        .select(TIME_ENTRY_SELECT_BASIC)
+        .order("work_date", { ascending: false }),
+    );
+    if (!basic.error) {
+      return attachCrewCostFields(basic.data);
+    }
+
+    const minimal = await safeSelect<TimeEntry>(() =>
+      supabase
+        .from("time_entries")
+        .select(TIME_ENTRY_SELECT_MINIMAL)
+        .order("work_date", { ascending: false }),
+    );
+    if (!minimal.error) {
+      return attachCrewCostFields(minimal.data);
+    }
+  }
+
+  // Last resort: bare rows (caller/finance may still enrich via getCrewMembers).
+  const bare = await safeSelect<TimeEntry>(() =>
+    supabase
+      .from("time_entries")
+      .select("*")
+      .order("work_date", { ascending: false }),
+  );
+  return attachCrewCostFields(bare.data);
 }
 
 export async function getApprovedUninvoicedTimeEntries(): Promise<TimeEntry[]> {
@@ -427,24 +523,30 @@ export type FinanceSummary = {
 
 /**
  * Finance overview: omzet (facturen excl. BTW) − personeelskosten (uren × uurkost).
- * Periode filtert facturen op `created_at` en uren op `work_date`.
+ * Facturen op `created_at`; uren via work_date in periode óf invoiced uren op
+ * hetzelfde project als een verstuurde/betaalde factuur in die periode.
+ * Crew-uurkost: hourly_cost > 0, anders bruto × Fooks (via crew map fallback).
  */
 export async function getFinanceOverview(options?: {
   period?: string | null;
   from?: string | null;
   to?: string | null;
 }): Promise<FinanceOverview> {
-  const [drafts, entries] = await Promise.all([
+  const [drafts, entries, crew] = await Promise.all([
     getInvoiceDrafts(),
     getTimeEntries(),
+    getCrewMembers(),
   ]);
+
+  const crewById = new Map(crew.map((c) => [c.id, c]));
+  const enriched = attachCrewCostFields(entries, crewById);
 
   const period = resolveFinancePeriod(
     options?.period,
     options?.from,
     options?.to,
   );
-  return aggregateFinanceOverview(drafts, entries, period);
+  return aggregateFinanceOverview(drafts, enriched, period);
 }
 
 /** @deprecated Prefer getFinanceOverview — kept for legacy KPI shapes. */
