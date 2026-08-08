@@ -22,6 +22,7 @@ import type {
   EmployeeAvailability,
   EmployeeDocument,
   EmployeeHoursEntry,
+  EmployeeHoursShiftOption,
   EmployeeMessage,
   EmployeePortalStats,
   EmployeeProfile,
@@ -33,6 +34,11 @@ import {
   getPendingActions,
   getUpcomingShifts,
 } from "@/lib/employeePortal";
+import {
+  mapTimeEntryStatusToEmployeeNl,
+  normalizeKilometers,
+  normalizeTravelTimeHours,
+} from "@/lib/time-entries/shared";
 
 type ShiftWithProject = Shift & {
   projects?: {
@@ -59,6 +65,8 @@ export type EmployeePortalBundle = {
   employeeProfile: EmployeeProfile | null;
   shifts: EmployeeShift[];
   hours: EmployeeHoursEntry[];
+  /** Shifts available for submitting own uren + km. */
+  hoursShiftOptions: EmployeeHoursShiftOption[];
   messages: EmployeeMessage[];
   documents: EmployeeDocument[];
   availability: EmployeeAvailability[];
@@ -101,26 +109,6 @@ function mapShiftStatus(status: Shift["status"]): EmployeeShift["status"] {
     case "open":
     default:
       return "Aangevraagd";
-  }
-}
-
-function mapHoursStatus(
-  entry: TimeEntry,
-): EmployeeHoursEntry["status"] {
-  if (entry.correction_reason) return "Correctie aangevraagd";
-  switch (entry.status) {
-    case "draft":
-      return "Concept";
-    case "submitted":
-      return "Ingediend";
-    case "approved":
-      return "Goedgekeurd";
-    case "rejected":
-      return "Afgekeurd";
-    case "invoiced":
-      return "Gefactureerd";
-    default:
-      return "Ingediend";
   }
 }
 
@@ -228,19 +216,24 @@ export function mapShiftToEmployeeShift(shift: ShiftWithProject): EmployeeShift 
 export function mapTimeEntryToEmployeeHours(
   entry: TimeEntryWithProject,
 ): EmployeeHoursEntry {
-  const hours =
-    entry.hours ??
-    0;
+  const hours = entry.hours ?? 0;
   return {
     id: entry.id,
     shiftId: entry.shift_id ?? undefined,
+    projectId: entry.project_id ?? entry.projects?.id ?? undefined,
     projectName: entry.projects?.project_name ?? "Project",
     date: entry.work_date,
     startTime: formatTime(entry.start_time),
     endTime: formatTime(entry.end_time),
     breakMinutes: entry.break_minutes ?? 0,
     workedHours: Number(hours) || 0,
-    status: mapHoursStatus(entry),
+    kilometers: normalizeKilometers(entry.kilometers),
+    travelTimeHours: normalizeTravelTimeHours(entry.travel_time_hours),
+    dbStatus: entry.status,
+    status: mapTimeEntryStatusToEmployeeNl(
+      entry.status,
+      Boolean(entry.correction_reason),
+    ),
     notes: entry.internal_notes ?? undefined,
     correctionRequest: entry.correction_reason
       ? {
@@ -373,6 +366,55 @@ async function fetchCrewHours(crewId: string): Promise<EmployeeHoursEntry[]> {
   );
 }
 
+async function fetchHoursShiftOptions(
+  crewId: string,
+  hours: EmployeeHoursEntry[],
+): Promise<EmployeeHoursShiftOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shifts")
+    .select("id, project_id, shift_date, start_time, end_time, status, projects(id, project_name)")
+    .eq("crew_member_id", crewId)
+    .neq("status", "cancelled")
+    .order("shift_date", { ascending: false })
+    .limit(60);
+
+  if (error) {
+    if (isMissingTableError(error)) return [];
+    console.error("[employee-portal] hours shift options:", error.message);
+    return [];
+  }
+
+  const entryShiftIds = new Set(
+    hours.map((h) => h.shiftId).filter(Boolean) as string[],
+  );
+
+  type ShiftOptionRow = {
+    id: string;
+    project_id: string | null;
+    shift_date: string;
+    start_time: string | null;
+    end_time: string | null;
+    projects?: { id: string; project_name: string } | null;
+  };
+
+  const rows = (data ?? []) as unknown as ShiftOptionRow[];
+
+  return rows
+    .filter((row): row is ShiftOptionRow & { project_id: string } =>
+      Boolean(row.project_id),
+    )
+    .map((row) => ({
+      id: row.id,
+      projectId: row.project_id,
+      projectName: row.projects?.project_name ?? "Project",
+      date: row.shift_date,
+      startTime: formatTime(row.start_time),
+      endTime: formatTime(row.end_time),
+      hasTimeEntry: entryShiftIds.has(row.id),
+    }));
+}
+
 async function fetchCrewMessages(
   email: string | null | undefined,
 ): Promise<EmployeeMessage[]> {
@@ -452,6 +494,7 @@ function emptyBundle(
     employeeProfile: null,
     shifts,
     hours,
+    hoursShiftOptions: [],
     messages,
     documents,
     availability: [],
@@ -483,6 +526,7 @@ export const getEmployeePortalBundle = cache(
       fetchCrewMessages(crew.email ?? email),
       fetchCrewAvailability(crew.id),
     ]);
+    const hoursShiftOptions = await fetchHoursShiftOptions(crew.id, hours);
 
     const documents = documentsFromCrew(crew);
     const employeeProfile = mapCrewToEmployeeProfile(crew);
@@ -503,6 +547,7 @@ export const getEmployeePortalBundle = cache(
       employeeProfile,
       shifts,
       hours,
+      hoursShiftOptions,
       messages,
       documents,
       availability,

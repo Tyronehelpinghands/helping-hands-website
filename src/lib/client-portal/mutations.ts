@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { clientRoles } from "@/lib/auth/roles";
 import { requireRole } from "@/lib/auth/requireRole";
+import { resolveClientIdForUser } from "@/lib/client-portal/data";
 import type { ActionResult } from "@/lib/dashboard/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,26 +13,6 @@ function fail(error: string): ActionResult<never> {
 
 function ok<T>(data: T): ActionResult<T> {
   return { ok: true, data };
-}
-
-async function resolveClientIdForUser(userId: string, email: string | null) {
-  const supabase = await createClient();
-  const { data: byProfile } = await supabase
-    .from("clients")
-    .select("id")
-    .eq("profile_id", userId)
-    .maybeSingle();
-  if (byProfile?.id) return byProfile.id;
-
-  if (email) {
-    const { data: byEmail } = await supabase
-      .from("clients")
-      .select("id")
-      .ilike("email", email)
-      .maybeSingle();
-    if (byEmail?.id) return byEmail.id;
-  }
-  return null;
 }
 
 export type ClientRequestInput = {

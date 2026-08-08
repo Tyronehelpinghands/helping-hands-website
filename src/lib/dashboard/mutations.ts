@@ -148,6 +148,18 @@ function ok<T>(data: T): ActionResult<T> {
 function revalidateDashboard(paths: string[] = []) {
   revalidatePath("/dashboard/intern");
   for (const p of paths) revalidatePath(p);
+  // Keep portal hours/km in sync with the same time_entries rows
+  if (
+    paths.some(
+      (p) =>
+        p.includes("urenregistratie") ||
+        p.includes("facturatie") ||
+        p.includes("/uren"),
+    )
+  ) {
+    revalidatePath("/portaal/medewerkers/uren");
+    revalidatePath("/portaal/opdrachtgevers/uren");
+  }
 }
 
 function numOrNull(value: FormDataEntryValue | null): number | null {

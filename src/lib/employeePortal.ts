@@ -55,6 +55,7 @@ export type EmployeeHoursCorrectionRequest = {
   requestedStartTime?: string;
   requestedEndTime?: string;
   requestedBreakMinutes?: number;
+  requestedKilometers?: number;
   explanation: string;
   requestedAt: string;
   status: "Ingediend" | "In behandeling" | "Afgehandeld";
@@ -63,12 +64,17 @@ export type EmployeeHoursCorrectionRequest = {
 export type EmployeeHoursEntry = {
   id: string;
   shiftId?: string;
+  projectId?: string;
   projectName: string;
   date: string;
   startTime: string;
   endTime: string;
   breakMinutes: number;
   workedHours: number;
+  kilometers: number;
+  travelTimeHours: number;
+  /** Raw DB status for edit rules (shared ecosystem). */
+  dbStatus?: "draft" | "submitted" | "approved" | "rejected" | "invoiced";
   status:
     | "Concept"
     | "Ingediend"
@@ -78,6 +84,17 @@ export type EmployeeHoursEntry = {
     | "Correctie aangevraagd";
   notes?: string;
   correctionRequest?: EmployeeHoursCorrectionRequest;
+};
+
+/** Shift option for submitting own uren + km. */
+export type EmployeeHoursShiftOption = {
+  id: string;
+  projectId: string;
+  projectName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  hasTimeEntry: boolean;
 };
 
 /**
@@ -91,6 +108,22 @@ export function canEmployeeSubmitHoursCorrection(entry: EmployeeHoursEntry): boo
     entry.status === "Concept" ||
     entry.status === "Ingediend" ||
     entry.status === "Goedgekeurd" ||
+    entry.status === "Afgekeurd"
+  );
+}
+
+/** Direct edit of uren/km — only concept / ingediend / afgekeurd (not approved/invoiced). */
+export function canEmployeeEditOwnHours(entry: EmployeeHoursEntry): boolean {
+  if (entry.dbStatus) {
+    return (
+      entry.dbStatus === "draft" ||
+      entry.dbStatus === "submitted" ||
+      entry.dbStatus === "rejected"
+    );
+  }
+  return (
+    entry.status === "Concept" ||
+    entry.status === "Ingediend" ||
     entry.status === "Afgekeurd"
   );
 }

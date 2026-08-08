@@ -109,13 +109,17 @@ export type ClientBriefing = {
 
 export type ClientHoursSummary = {
   id: string;
+  projectId?: string;
   projectName: string;
   date: string;
   totalHours: number;
   billableHours: number;
+  /** Total kilometers for the day/project aggregate. */
+  totalKilometers: number;
   travelCost: number;
   status: "Nog te controleren" | "Goedgekeurd door planning" | "Gefactureerd";
   notes?: string;
+  entryCount?: number;
 };
 
 export type ClientInvoice = {
@@ -393,6 +397,7 @@ export const DEMO_CLIENT_HOURS: ClientHoursSummary[] = [
     date: "2026-06-28",
     totalHours: 48,
     billableHours: 48,
+    totalKilometers: 480,
     travelCost: 120,
     status: "Gefactureerd",
   },
@@ -402,6 +407,7 @@ export const DEMO_CLIENT_HOURS: ClientHoursSummary[] = [
     date: "2026-07-25",
     totalHours: 62,
     billableHours: 60,
+    totalKilometers: 340,
     travelCost: 85,
     status: "Nog te controleren",
     notes: "Uren worden gecontroleerd door Helping Hands.",
@@ -412,6 +418,7 @@ export const DEMO_CLIENT_HOURS: ClientHoursSummary[] = [
     date: "2026-08-02",
     totalHours: 0,
     billableHours: 0,
+    totalKilometers: 0,
     travelCost: 0,
     status: "Goedgekeurd door planning",
   },

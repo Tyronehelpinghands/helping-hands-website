@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import HoursCheckTable from "@/components/employee-portal/HoursCheckTable";
 import NoCrewProfileState from "@/components/employee-portal/NoCrewProfileState";
 import { getEmployeePortalBundle } from "@/lib/employee-portal/data";
+import EmployeeHoursPageClient from "./EmployeeHoursPageClient";
 
 export const metadata: Metadata = {
   title: "Mijn uren | Medewerkersportaal",
   description:
-    "Bekijk je gewerkte uren en geef wijzigingen door. Goedkeuring gebeurt door planning.",
+    "Bekijk, dien in en bewerk je uren en kilometers. Goedkeuring gebeurt door planning.",
 };
 
 export default async function EmployeeHoursPage() {
@@ -17,5 +17,10 @@ export default async function EmployeeHoursPage() {
     return <NoCrewProfileState displayName={bundle.displayName} />;
   }
 
-  return <HoursCheckTable entries={bundle.hours} />;
+  return (
+    <EmployeeHoursPageClient
+      entries={bundle.hours}
+      shiftOptions={bundle.hoursShiftOptions}
+    />
+  );
 }

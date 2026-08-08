@@ -24,6 +24,7 @@ export type HoursCorrectionFormData = {
   requestedStartTime: string;
   requestedEndTime: string;
   requestedBreakMinutes: string;
+  requestedKilometers: string;
   explanation: string;
 };
 
@@ -61,6 +62,7 @@ export default function HoursCorrectionModal({
       requestedStartTime: String(data.get("requestedStartTime") ?? ""),
       requestedEndTime: String(data.get("requestedEndTime") ?? ""),
       requestedBreakMinutes: String(data.get("requestedBreakMinutes") ?? ""),
+      requestedKilometers: String(data.get("requestedKilometers") ?? ""),
       explanation: String(data.get("explanation") ?? ""),
     });
     setSubmitted(true);
@@ -114,15 +116,28 @@ export default function HoursCorrectionModal({
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="requestedBreakMinutes">Gewenste pauze (minuten)</Label>
-              <Input
-                id="requestedBreakMinutes"
-                name="requestedBreakMinutes"
-                type="number"
-                min={0}
-                defaultValue={entry?.breakMinutes}
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="requestedBreakMinutes">Gewenste pauze (minuten)</Label>
+                <Input
+                  id="requestedBreakMinutes"
+                  name="requestedBreakMinutes"
+                  type="number"
+                  min={0}
+                  defaultValue={entry?.breakMinutes}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="requestedKilometers">Gewenste kilometers</Label>
+                <Input
+                  id="requestedKilometers"
+                  name="requestedKilometers"
+                  type="number"
+                  min={0}
+                  step="0.1"
+                  defaultValue={entry?.kilometers ?? 0}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="explanation">Toelichting</Label>
@@ -164,6 +179,9 @@ export function buildCorrectionRequest(
     requestedEndTime: data.requestedEndTime || undefined,
     requestedBreakMinutes: data.requestedBreakMinutes
       ? Number(data.requestedBreakMinutes)
+      : undefined,
+    requestedKilometers: data.requestedKilometers
+      ? Number(data.requestedKilometers)
       : undefined,
     explanation: data.explanation,
     requestedAt: new Date().toISOString(),
