@@ -21,5 +21,5 @@ Werkgeverskost (`hourly_cost`) uit bruto uurloon × Fooks payrolling-factor.
 - Factoren: `src/lib/dashboard/fooksRates.ts`
 - UI: `src/components/dashboard/mvp/CrewMvpClient.tsx`
 - Mutaties: `createCrewMemberAction` / `updateCrewMemberAction`
-- Financiën: `hours × uurkost` → personeelskosten in `src/lib/dashboard/financeOverview.ts` (prefer `hourly_cost`, anders `calculateCrewHourlyCost` / bruto × Fooks)
+- Financiën: `hours × uurkost` → personeelskosten in `src/lib/dashboard/financeOverview.ts` (prefer `hourly_cost` > 0, anders bruto × Fooks / ZZP €25). Verstuurde facturen koppelen via project aan `invoiced` uren zodat omzet én kosten in dezelfde periode staan.
 - Kolommen: `gross_hourly_wage`, `fooks_ww_tariff` — migrate via [`supabase/crew-fooks-columns.sql`](../supabase/crew-fooks-columns.sql)

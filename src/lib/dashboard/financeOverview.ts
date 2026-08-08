@@ -47,38 +47,53 @@ export type FinanceOverview = {
   missingHourlyCostHours: number;
   /** Uren waarvan kosten via bruto × Fooks zijn afgeleid (uurkost ontbrak). */
   derivedFooksHours: number;
+  /**
+   * True when omzet > 0 but personeelskosten is still 0 — margin % is not reliable
+   * (missing hours join, missing bruto/uurkost, or period mismatch before link fix).
+   */
+  costsIncomplete: boolean;
   byProject: FinanceBreakdownRow[];
   byCrew: FinanceBreakdownRow[];
 };
 
 export type CrewUnitCostSource = "hourly_cost" | "fooks" | "none";
 
+type CrewCostFields = {
+  hourly_cost?: number | null;
+  gross_hourly_wage?: number | null;
+  employment_type?: string | null;
+};
+
+/**
+ * PostgREST may return a nested relation as object or single-element array.
+ */
+export function normalizeCrewRelation<T>(
+  crew: T | T[] | null | undefined,
+): T | null {
+  if (crew == null) return null;
+  if (Array.isArray(crew)) return crew[0] ?? null;
+  return crew;
+}
+
 /**
  * Unit cost for a time entry: prefer stored hourly_cost (> 0), else Fooks
  * (bruto × factor for vast/payroll/freelance, fixed €25 for zzp).
+ * Treats hourly_cost <= 0 as missing so bruto × factor still applies.
  */
 export function resolveCrewUnitCost(
-  crew:
-    | Pick<
-        NonNullable<TimeEntry["crew_members"]>,
-        "hourly_cost" | "gross_hourly_wage" | "employment_type"
-      >
-    | null
-    | undefined,
+  crew: CrewCostFields | null | undefined,
 ): { rate: number; source: CrewUnitCostSource } {
   if (!crew) return { rate: 0, source: "none" };
 
-  const stored = crew.hourly_cost;
-  if (stored != null) {
-    const rate = Number(stored);
-    if (Number.isFinite(rate) && rate > 0) {
-      return { rate, source: "hourly_cost" };
-    }
+  const hc = Number(crew.hourly_cost);
+  if (Number.isFinite(hc) && hc > 0) {
+    return { rate: hc, source: "hourly_cost" };
   }
 
+  const bruto = Number(crew.gross_hourly_wage);
   const derived = calculateCrewHourlyCost({
     employmentType: crew.employment_type,
-    bruto: crew.gross_hourly_wage,
+    bruto: Number.isFinite(bruto) && bruto > 0 ? bruto : null,
   });
   if (derived != null && derived > 0) {
     return { rate: derived, source: "fooks" };
@@ -179,10 +194,36 @@ export function resolveFinancePeriod(
 }
 
 /**
+ * Hours count toward personeelskosten when:
+ * - approved/invoiced and work_date is in the finance period, OR
+ * - invoiced on a project that has a sent/paid invoice in the period
+ *   (links invoice-omzet to the underlying hours even if work_date differs).
+ */
+export function isFinanceCostEntry(
+  entry: Pick<TimeEntry, "status" | "work_date" | "project_id">,
+  period: Pick<FinancePeriod, "from" | "to">,
+  projectsWithOmzetInPeriod: ReadonlySet<string>,
+): boolean {
+  if (!COST_ENTRY_STATUSES.has(entry.status)) return false;
+
+  if (inPeriod(dateOnly(entry.work_date), period.from, period.to)) {
+    return true;
+  }
+
+  // Same project as a sent/paid invoice in this period → include invoiced hours
+  // so approving + sending updates both omzet and kosten together.
+  return (
+    entry.status === "invoiced" &&
+    Boolean(entry.project_id) &&
+    projectsWithOmzetInPeriod.has(entry.project_id!)
+  );
+}
+
+/**
  * Aggregates real invoice drafts + time entries into a finance overview.
- * Omzet = factuur `subtotal` (excl. BTW) voor sent/paid.
- * Personeelskosten = approved/invoiced uren × uurkost
- * (stored hourly_cost, else bruto × Fooks / ZZP-vaste kost).
+ * Omzet = factuur `subtotal` (excl. BTW) voor sent/paid in periode (`created_at`).
+ * Personeelskosten = approved/invoiced uren × uurkost, gekoppeld via work_date
+ * of via hetzelfde project als een verstuurde factuur in de periode.
  */
 export function aggregateFinanceOverview(
   drafts: InvoiceDraft[],
@@ -198,12 +239,6 @@ export function aggregateFinanceOverview(
     inPeriod(dateOnly(d.created_at), from, to),
   );
 
-  const costEntries = entries.filter(
-    (e) =>
-      COST_ENTRY_STATUSES.has(e.status) &&
-      inPeriod(dateOnly(e.work_date), from, to),
-  );
-
   let omzet = 0;
   let betaaldeOmzet = 0;
   let conceptOmzet = 0;
@@ -211,6 +246,7 @@ export function aggregateFinanceOverview(
   let gefactureerdeReiskosten = 0;
 
   const projectOmzet = new Map<string, { name: string; omzet: number }>();
+  const projectsWithOmzetInPeriod = new Set<string>();
 
   for (const d of draftsInPeriod) {
     const sub = Number(d.subtotal || 0);
@@ -221,6 +257,7 @@ export function aggregateFinanceOverview(
     if (OMZET_STATUSES.has(d.status)) {
       omzet += sub;
       gefactureerdeReiskosten += travel;
+      if (d.project_id) projectsWithOmzetInPeriod.add(d.project_id);
       const cur = projectOmzet.get(projectId) ?? { name: projectName, omzet: 0 };
       cur.omzet += sub;
       cur.name = projectName;
@@ -230,6 +267,10 @@ export function aggregateFinanceOverview(
     if (OPEN_STATUSES.has(d.status)) openstaand += sub;
     if (CONCEPT_STATUSES.has(d.status)) conceptOmzet += sub;
   }
+
+  const costEntries = entries.filter((e) =>
+    isFinanceCostEntry(e, period, projectsWithOmzetInPeriod),
+  );
 
   let personeelskosten = 0;
   let totalHours = 0;
@@ -247,7 +288,14 @@ export function aggregateFinanceOverview(
 
   for (const e of costEntries) {
     const hours = Number(e.hours || 0);
-    const { rate, source } = resolveCrewUnitCost(e.crew_members);
+    const crew = normalizeCrewRelation(
+      e.crew_members as
+        | TimeEntry["crew_members"]
+        | NonNullable<TimeEntry["crew_members"]>[]
+        | null
+        | undefined,
+    );
+    const { rate, source } = resolveCrewUnitCost(crew);
     const cost = round2(hours * rate);
 
     totalHours += hours;
@@ -271,7 +319,9 @@ export function aggregateFinanceOverview(
     projectCosts.set(projectId, p);
 
     const crewId = e.crew_member_id ?? "geen-crew";
-    const crewName = e.crew_members?.full_name ?? "Onbekende crew";
+    const crewName =
+      (crew && "full_name" in crew ? crew.full_name : null) ??
+      "Onbekende crew";
     const c = crewCosts.get(crewId) ?? { name: crewName, hours: 0, cost: 0 };
     c.hours += hours;
     c.cost += cost;
@@ -283,6 +333,8 @@ export function aggregateFinanceOverview(
     omzet,
     personeelskosten,
   );
+
+  const costsIncomplete = omzet > 0 && personeelskosten <= 0;
 
   const projectIds = new Set([
     ...projectOmzet.keys(),
@@ -336,6 +388,7 @@ export function aggregateFinanceOverview(
     gefactureerdeReiskosten: round2(gefactureerdeReiskosten),
     missingHourlyCostHours: round2(missingHourlyCostHours),
     derivedFooksHours: round2(derivedFooksHours),
+    costsIncomplete,
     byProject,
     byCrew,
   };
