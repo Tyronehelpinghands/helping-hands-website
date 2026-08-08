@@ -289,6 +289,11 @@ export function getSharedMailboxes(): SharedMailbox[] {
       purpose: "Crewaanmeldingen & sollicitaties",
     },
     {
+      id: "hr",
+      email: siteConfig.hrEmail,
+      purpose: "H&R / personeelszaken",
+    },
+    {
       id: "info",
       email: siteConfig.email,
       purpose: "Algemene vragen",

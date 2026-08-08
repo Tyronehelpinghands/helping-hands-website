@@ -146,6 +146,7 @@ export type TeamMember = {
   role: string;
   initials: string;
   note?: string;
+  email?: string;
   image?: { src: string; alt: string };
 };
 
@@ -154,6 +155,7 @@ export const teamMembers: TeamMember[] = [
     name: "Tyrone van der Schagt",
     role: "Eigenaar en opdrachtgeverrelaties",
     initials: "TS",
+    email: "tyrone@helpinghandsagency.nl",
     image: {
       src: "/images/team/tyrone.png",
       alt: "Tyrone van der Schagt — oprichter Helping Hands Agency",
@@ -163,11 +165,13 @@ export const teamMembers: TeamMember[] = [
     name: "Mesbah Kashit",
     role: "Planning en crewcoördinatie",
     initials: "MK",
+    email: "mesbah@helpinghandsagency.nl",
   },
   {
     name: "Marieke",
-    role: "HR en personeelszaken",
+    role: "H&R-manager",
     initials: "M",
+    email: "marieke@helpinghandsagency.nl",
   },
 ];
 

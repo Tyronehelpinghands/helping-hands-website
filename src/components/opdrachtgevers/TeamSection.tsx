@@ -7,7 +7,19 @@ import {
   teamMembers,
 } from "@/lib/opdrachtgeversContent";
 
-export default function TeamSection() {
+type TeamSectionProps = {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  showNotes?: boolean;
+};
+
+export default function TeamSection({
+  eyebrow = "Team achter de planning",
+  title = "Wie je aan de lijn krijgt",
+  description = "Geen anoniem callcenter — een klein, vast team dat jouw opdracht kent.",
+  showNotes = true,
+}: TeamSectionProps) {
   return (
     <section className="relative overflow-hidden bg-[#0B1F4D] py-16 text-white sm:py-24">
       <div
@@ -18,14 +30,13 @@ export default function TeamSection() {
         <RevealOnScroll>
           <div className="max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
-              Team achter de planning
+              {eyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-              Wie je aan de lijn krijgt
+              {title}
             </h2>
             <p className="mt-4 text-base leading-7 text-white/75">
-              Geen anoniem callcenter — een klein, vast team dat jouw opdracht
-              kent.
+              {description}
             </p>
           </div>
         </RevealOnScroll>
@@ -54,6 +65,14 @@ export default function TeamSection() {
                 {member.name}
               </p>
               <p className="mt-1 text-sm text-white/70">{member.role}</p>
+              {member.email ? (
+                <a
+                  href={`mailto:${member.email}`}
+                  className="mt-3 block text-sm font-semibold text-[#F28C28] underline-offset-4 hover:underline"
+                >
+                  {member.email}
+                </a>
+              ) : null}
               {member.note ? (
                 <p className="mt-3 text-sm leading-6 text-white/60">
                   {member.note}
@@ -63,20 +82,26 @@ export default function TeamSection() {
           ))}
         </StaggerReveal>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm">
-            <p className="text-sm font-black text-white">{teamAvondDienst.role}</p>
-            <p className="mt-2 text-sm leading-6 text-white/70">
-              {teamAvondDienst.text}
-            </p>
+        {showNotes ? (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm">
+              <p className="text-sm font-black text-white">
+                {teamAvondDienst.role}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/70">
+                {teamAvondDienst.text}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm">
+              <p className="text-sm font-black text-white">
+                {teamCaptainsNote.role}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/70">
+                {teamCaptainsNote.text}
+              </p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm">
-            <p className="text-sm font-black text-white">{teamCaptainsNote.role}</p>
-            <p className="mt-2 text-sm leading-6 text-white/70">
-              {teamCaptainsNote.text}
-            </p>
-          </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );

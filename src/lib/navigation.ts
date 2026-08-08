@@ -18,6 +18,7 @@ export const contactEmail = siteConfig.email;
 export const planningEmail = siteConfig.planningEmail;
 export const plannerEmail = siteConfig.plannerEmail;
 export const applicationsEmail = siteConfig.applicationsEmail;
+export const hrEmail = siteConfig.hrEmail;
 export const employeeApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
   "Aanmelding medewerker Helping Hands",
 )}`;
