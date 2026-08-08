@@ -5,9 +5,13 @@ import {
   inviteClientToPortal,
   inviteResultMessage,
 } from "@/lib/auth/inviteClient";
+import { getRoleLabel } from "@/lib/auth/roles";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { requireRole } from "@/lib/auth/requireRole";
+import { sendOutboundMessageEmail } from "@/lib/email/sendOutboundMessageEmail";
 import type { UserRole } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/server";
+import { siteConfig } from "@/lib/siteConfig";
 import {
   calculateInvoiceTotals,
   calculateWorkedHours,
@@ -1975,11 +1979,68 @@ export async function updateTaskStatusAction(
 
 // ——— Messages ———
 
+export type SaveInternalMessageResult = {
+  id: string;
+  emailSent: boolean;
+  emailError?: string;
+  from?: string;
+  replyTo?: string;
+};
+
+async function resolveStaffEmailSender(): Promise<
+  | {
+      name: string;
+      role: string;
+      email: string;
+      phone?: string | null;
+    }
+  | { error: string }
+> {
+  const { user, profile } = await getCurrentUser();
+  const email =
+    profile?.email?.trim() || user?.email?.trim() || "";
+  if (!email) {
+    return {
+      error:
+        "Geen e-mailadres gevonden voor de ingelogde gebruiker. Vul profiles.email of auth e-mail in.",
+    };
+  }
+  const name =
+    profile?.full_name?.trim() ||
+    email.split("@")[0] ||
+    siteConfig.shortName;
+  const role = profile?.role
+    ? getRoleLabel(profile.role)
+    : "Team";
+  return {
+    name,
+    role,
+    email,
+    phone: profile?.phone ?? null,
+  };
+}
+
+/**
+ * Persist an internal message. When intent=send (or status=sent), also send
+ * via Resend immediately after save. DB write is not rolled back if Resend fails.
+ *
+ * From: prefers `Name <staff@helpinghandsagency.nl>` on the verified domain;
+ * otherwise uses CONTACT_FROM_EMAIL mailbox with staff display name + Reply-To.
+ */
 export async function saveInternalMessageDraftAction(
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<SaveInternalMessageResult>> {
   await requireRole(ALL_INTERNAL);
   const id = strOrNull(formData.get("id"));
+  const intent = strOrNull(formData.get("intent")) || "save";
+  const wantsSend = intent === "send";
+  let status =
+    (strOrNull(formData.get("status")) as InternalMessageStatus) || "draft";
+
+  if (wantsSend) {
+    status = "ready";
+  }
+
   const payload = {
     message_type: strOrNull(formData.get("message_type")) || "other",
     recipient_name: strOrNull(formData.get("recipient_name")),
@@ -1987,29 +2048,94 @@ export async function saveInternalMessageDraftAction(
     recipient_phone: strOrNull(formData.get("recipient_phone")),
     subject: strOrNull(formData.get("subject")),
     body: strOrNull(formData.get("body")),
-    status:
-      (strOrNull(formData.get("status")) as InternalMessageStatus) || "draft",
+    status,
   };
 
+  if (wantsSend) {
+    if (!payload.recipient_email) {
+      return fail("Vul een ontvanger-e-mailadres in om te versturen.");
+    }
+    if (!payload.subject?.trim() && !payload.body?.trim()) {
+      return fail("Vul een onderwerp of bericht in om te versturen.");
+    }
+  }
+
   const supabase = await createClient();
+  let messageId = id;
+
   if (id) {
     const { error } = await supabase
       .from("internal_messages")
       .update(payload)
       .eq("id", id);
     if (error) return fail(error.message);
-    revalidateDashboard(["/dashboard/intern/berichten"]);
-    return ok({ id });
+  } else {
+    const { data, error } = await supabase
+      .from("internal_messages")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) return fail(error.message);
+    messageId = data.id;
   }
 
-  const { data, error } = await supabase
-    .from("internal_messages")
-    .insert(payload)
-    .select("id")
-    .single();
-  if (error) return fail(error.message);
+  if (!messageId) {
+    return fail("Bericht opslaan mislukt (geen id).");
+  }
+
+  if (!wantsSend) {
+    revalidateDashboard(["/dashboard/intern/berichten"]);
+    return ok({ id: messageId, emailSent: false });
+  }
+
+  const sender = await resolveStaffEmailSender();
+  if ("error" in sender) {
+    revalidateDashboard(["/dashboard/intern/berichten"]);
+    return ok({
+      id: messageId,
+      emailSent: false,
+      emailError: sender.error,
+    });
+  }
+
+  const sendResult = await sendOutboundMessageEmail({
+    to: payload.recipient_email!,
+    subject: payload.subject ?? "",
+    body: payload.body ?? "",
+    recipientName: payload.recipient_name,
+    sender,
+  });
+
+  if (sendResult.ok) {
+    const { error: sentError } = await supabase
+      .from("internal_messages")
+      .update({ status: "sent" satisfies InternalMessageStatus })
+      .eq("id", messageId);
+    if (sentError) {
+      revalidateDashboard(["/dashboard/intern/berichten"]);
+      return ok({
+        id: messageId,
+        emailSent: true,
+        from: sendResult.from,
+        replyTo: sendResult.replyTo,
+        emailError: `Mail verstuurd, maar status bijwerken mislukt: ${sentError.message}`,
+      });
+    }
+    revalidateDashboard(["/dashboard/intern/berichten"]);
+    return ok({
+      id: messageId,
+      emailSent: true,
+      from: sendResult.from,
+      replyTo: sendResult.replyTo,
+    });
+  }
+
   revalidateDashboard(["/dashboard/intern/berichten"]);
-  return ok({ id: data.id });
+  return ok({
+    id: messageId,
+    emailSent: false,
+    emailError: sendResult.error,
+  });
 }
 
 // ——— Settings ———
