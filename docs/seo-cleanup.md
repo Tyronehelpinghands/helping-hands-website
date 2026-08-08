@@ -1,11 +1,11 @@
 # SEO cleanup — Helping Hands Agency
 
-Datum: 2026-08-02  
+Datum: 2026-08-08  
 Domein: `https://www.helpinghandsagency.nl`
 
-## Oude page_id URL’s
+## Legacy WordPress query-URL’s (`src/proxy.ts`)
 
-WordPress-achtige query-URL’s worden via `src/proxy.ts` permanent (301) doorgestuurd:
+Alle onderstaande query’s krijgen een **301** (nooit 5xx, nooit soft-noindex feedpagina’s):
 
 | Oude URL | Bestemming |
 |----------|------------|
@@ -13,18 +13,53 @@ WordPress-achtige query-URL’s worden via `src/proxy.ts` permanent (301) doorge
 | `/?page_id=16` | `/opdrachtgevers` |
 | `/?page_id=17` | `/vacatures` |
 | `/?page_id=23` | `/over-ons` |
+| `/?page_id=*` (onbekend, o.a. 137, 122) | `/` |
+| `/?p=*`, `/?p=24`, `/?p=331`, `/en/?p=366` | `/` |
+| `/?feed=rss2`, `/?feed=rss2&cat=1`, `/?feed=comments-rss2`, `/?feed=rss2&p=*` | `/` |
+| `/?m=2026`, `/?m=202606`, `/?m=20260613`, `/?m=20260622` | `/` |
+| `/?cat=*`, `/?paged=*`, `/?attachment_id=*`, `/?author=*` | `/` |
+| `/index.php` (+ eventuele WP-query) | `/` |
+| `/en`, `/en/*` | `/` (geen Engelse site) |
 
-Ook `/index.php?page_id=…` valt onder dezelfde mapping wanneer die path gematcht wordt.
+Catch-all: aanwezigheid van `page_id` / `p` / `feed` / `cat` / `m` / `paged` / `attachment_id` / `author` → 301 naar schone path (homepage voor `/` en `/en`).
 
-## Overige redirects (`next.config.ts`)
+## Path redirects (`next.config.ts`)
 
-- `/medewerkers` → `/werken-bij`
-- Overlappende `/diensten/*` → `/personeel-inhuren/*`
-- Overlappende `/locaties/*` → root SEO-locatie-URL’s (bijv. `/event-crew-amsterdam`)
+| Oude path | Bestemming |
+|-----------|------------|
+| `/medewerkers`, `/crew-aanmelden`, `/sign-up` | `/werken-bij` |
+| `/about-us` | `/over-ons` |
+| `/privacy-policy` | `/contact` (geen `/privacy`-pagina) |
+| `/rigger` | `/personeel-inhuren/stagehands` |
+| `/catering-assistant` | `/personeel-inhuren/catering-personeel` |
+| `/hospitality-assistant` | `/personeel-inhuren/hospitality-personeel` |
+| `/site-crew` | `/personeel-inhuren/site-crew` |
+| `/en`, `/en/:path*` | `/` |
+| `/wp-content/:path*`, `/wp-includes/:path*`, `/wp-json/:path*` | `/` |
+| `/index.php` | `/` |
+| Overlappende `/diensten/*` | `/personeel-inhuren/*` |
+| Overlappende `/locaties/*` (o.a. horeca-personeel-hilversum) | canonieke root-SEO-URL |
+
+`trailingSlash: false` → `/contact/` wordt doorgestuurd naar `/contact`.
+
+## Pagina’s die wél 200 OK zijn (geen bug)
+
+- `/over-ons`, `/opdrachtgevers`, `/diensten`, `/locaties/productiecrew-eindhoven` op **www** → echte pagina’s.
+- GSC “Pagina met omleiding” voor `https://helpinghandsagency.nl/over-ons` e.d. = alleen **apex → www**, geen inhoudsredirect.
+- `/contact?type=crew-aanmelden` → 200; canonical blijft `/contact` (query is UX voor formulier-tab).
+
+## Apex / http → www (Vercel)
+
+Code kan host-redirects niet betrouwbaar forceren op Vercel. Stel in:
+
+1. Vercel → Project → **Settings → Domains**
+2. `www.helpinghandsagency.nl` = Primary
+3. `helpinghandsagency.nl` → **Redirect to www** (één hop)
+4. HTTP→HTTPS laat Vercel standaard afhandelen; doel: **één** 301/308 naar `https://www.…` zonder keten `http apex → https apex → https www`
 
 ## Canonicals
 
-Marketingpagina’s gebruiken `buildPageMetadata()` met schone canonicals op `siteConfig.url` (default `https://www.helpinghandsagency.nl`).
+Marketingpagina’s gebruiken `buildPageMetadata()` met schone canonicals op `siteConfig.url` (`https://www.helpinghandsagency.nl`). Querystrings horen niet in de canonical.
 
 ## NAP (enige bron)
 
@@ -33,56 +68,32 @@ Marketingpagina’s gebruiken `buildPageMetadata()` met schone canonicals op `si
 - 06 5741 6338  
 - planning@ / aanmeldingen@ / info@helpinghandsagency.nl  
 
-Placeholders (`info@eventcrew.nl`, nepnummers/adressen) horen niet in de codebase.
-
-## Nieuwe SEO-structuur
-
-- `/personeel-inhuren` + dienstlandings (core + o.a. eventpersoneel, horeca-uitzendbureau, festival-medewerkers, spoed, catering, bediening, load-in/out)  
-- `/werken-bij` + `/werken-als/*`  
-- Lokale root-URL’s (o.a. `/event-crew-amsterdam`, `/festival-crew-randstad`)  
-- Extra `/locaties/*` (hilversum-hub, festival-crew-*, eventpersoneel-*, stagehands-hilversum) — overlapping `/locaties/*` → root 301  
-- Data: `src/lib/seo/*`, `src/data/locations.ts`, `src/data/additionalLocations.ts`  
-- UI: `src/components/seo/*` (+ `GoogleBusinessCta`)  
-- GSC-plan: `docs/google-search-console-plan.md`
-
 ## Sitemap & robots
 
-- `src/app/sitemap.ts` — bevat nieuwe SEO-routes; redirect-doelen niet dubbel  
-- `src/app/robots.ts` — disallow `/dashboard`, `/portaal`, `/api`, `/login` (+ auth-hulproutes)
+- `src/app/sitemap.ts` — publieke SEO-routes; geen dashboard/portaal/login/api; geen redirect-bronnen dubbel  
+- `src/app/robots.ts` — disallow `/dashboard`, `/portaal`, `/api`, `/login` (+ auth-hulproutes) → verwacht noindex/uitgesloten
 
-## Structured data
+## GSC: wat is normaal vs actie
 
-- Organization + LocalBusiness + WebSite (root layout)  
-- BreadcrumbList, Service, FAQPage op SEO-pagina’s  
-- JobPosting alleen op echte vacaturepagina’s (`VacancyJobPostingsJsonLd`)
+| GSC-categorie | Normaal? | Actie |
+|---------------|----------|-------|
+| Pagina met omleiding (apex/http, oude WP, `/locaties/…`→root) | Ja | Negeren; Google indexeert bestemming |
+| Uitgesloten door noindex (`/login`, dashboard) | Ja | Negeren |
+| Alternatieve pagina met correcte canonieke tag (`/contact?type=…`) | Ja | Negeren |
+| Gecrawld – momenteel niet geïndexeerd | Vaak wachten | Kern-URL’s desnoods “Indexering aanvragen” |
+| Niet gevonden (404) op oude WP-slugs | Nee → gefixt met 301’s | Na deploy: **Validatie starten** |
+| Serverfout (5xx) op `?p=` / feeds | Nee → gefixt (301 i.p.v. crash/soft page) | Na deploy: **Validatie starten** |
 
-## Google Search Console — stappen
+### Na deploy in GSC
 
-1. Sitemap opnieuw indienen: `https://www.helpinghandsagency.nl/sitemap.xml`  
-2. URL-inspectie voor `/`, `/personeel-inhuren`, `/werken-bij`, `/contact`, top locatiepagina’s  
-3. Oude `page_id`-URL’s laten verdwijnen via 301 + canonical (geen handmatige removal tenzij soft-404 blijft hangen)  
-4. Coverage/errors controleren (redirects, 404’s, duplicate canonicals)
+1. Sitemap opnieuw indienen  
+2. Op 404- en 5xx-rapporten: **Validatie starten**  
+3. P0-URL’s inspecteren + indexering aanvragen: `/`, `/personeel-inhuren`, `/over-ons`, `/contact`, `/werken-bij`
 
 ## Sitelinks
 
-Google kiest sitelinks **automatisch**. Je kunt ze niet forceren of handmatig instellen (alleen demoten in Search Console als ze slecht zijn).
-
-Wat wél helpt:
-
-1. Belangrijke pagina’s live, geïndexeerd, met unieke title/H1  
-2. Duidelijke interne links vanaf homepage, header en footer (descriptieve anchors: Personeel inhuren, Werken bij, Vacatures, Over ons, Contact, Opdrachtgevers)  
-3. Sitemap indienen + URL-inspectie (“Indexering aanvragen”) voor die URL’s  
-4. Wachten op recrawl (dagen tot weken); nieuwe/gewijzigde structuur heeft tijd nodig  
-
-Gewenste sitelink-kandidaten: `/personeel-inhuren`, `/werken-bij`, `/vacatures`, `/over-ons`, `/contact`, `/opdrachtgevers`.
-
-Search Console: Sitemap → opnieuw indienen → per kern-URL inspecteren → indexering aanvragen. Geen garantie op specifieke labels.
+Google kiest sitelinks automatisch. Helpen: sterke interne links, unieke title/H1, indexering kern-URL’s, geduld (dagen–weken).
 
 ## GBP
 
-`ReviewCta` toont consistente NAP en linkt naar Google Maps-zoek-URL. Geen nep-reviews, geen review-incentives.
-
-**Handmatig in Google Business Profile controleren/corrigeren** (site is bron van waarheid):
-
-- Postcode: `1211 GN` (niet QN)  
-- Mobiel: `06 5741 6338` (niet 06 87416338)
+Handmatig controleren: postcode `1211 GN`, telefoon `06 5741 6338`, website `https://www.helpinghandsagency.nl`.
