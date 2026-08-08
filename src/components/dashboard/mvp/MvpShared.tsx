@@ -188,6 +188,8 @@ export function MvpFormDialog({
   children,
   onSubmit,
   submitLabel = "Opslaan",
+  /** Optional second submit (e.g. “Opslaan concept”) — merges fields into FormData. */
+  secondarySubmit,
   pending,
 }: {
   open: boolean;
@@ -197,8 +199,24 @@ export function MvpFormDialog({
   children: ReactNode;
   onSubmit: (formData: FormData) => Promise<void>;
   submitLabel?: string;
+  secondarySubmit?: {
+    label: string;
+    fields: Record<string, string>;
+  };
   pending?: boolean;
 }) {
+  async function runSubmit(
+    fd: FormData,
+    extra?: Record<string, string>,
+  ) {
+    if (extra) {
+      for (const [key, value] of Object.entries(extra)) {
+        fd.set(key, value);
+      }
+    }
+    await onSubmit(fd);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
@@ -208,12 +226,7 @@ export function MvpFormDialog({
             <DialogDescription>{description}</DialogDescription>
           ) : null}
         </DialogHeader>
-        <form
-          className="space-y-3"
-          action={async (fd) => {
-            await onSubmit(fd);
-          }}
-        >
+        <form className="space-y-3">
           {children}
           <DialogFooter className="gap-2 pt-2">
             <Button
@@ -223,10 +236,28 @@ export function MvpFormDialog({
             >
               Annuleren
             </Button>
+            {secondarySubmit ? (
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={pending}
+                formAction={async (fd) => {
+                  await runSubmit(fd, secondarySubmit.fields);
+                }}
+              >
+                {pending ? "Bezig…" : secondarySubmit.label}
+              </Button>
+            ) : null}
             <Button
               type="submit"
               disabled={pending}
               className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              formAction={async (fd) => {
+                await runSubmit(
+                  fd,
+                  secondarySubmit ? { intent: "send" } : undefined,
+                );
+              }}
             >
               {pending ? "Bezig…" : submitLabel}
             </Button>

@@ -8,7 +8,7 @@ import {
 export const metadata: Metadata = {
   title: "Berichten | Intern dashboard",
   description:
-    "Berichtconcepten met mailto/WhatsApp-fallbacks. Automatisch verzenden later.",
+    "Berichten opslaan of direct per e-mail versturen via Resend, met afzender van de ingelogde medewerker.",
 };
 
 export default async function InternBerichtenPage() {

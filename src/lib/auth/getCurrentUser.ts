@@ -33,7 +33,7 @@ export async function getCurrentUser(): Promise<CurrentUserResult> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, email, role, full_name")
+    .select("id, email, role, full_name, phone")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -43,6 +43,12 @@ export async function getCurrentUser(): Promise<CurrentUserResult> {
 
   return {
     user: { id: user.id, email: user.email ?? undefined },
-    profile: profile as Profile,
+    profile: {
+      id: profile.id,
+      email: profile.email,
+      role: profile.role,
+      full_name: profile.full_name,
+      phone: profile.phone ?? null,
+    } as Profile,
   };
 }

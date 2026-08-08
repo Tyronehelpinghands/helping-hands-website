@@ -22,6 +22,8 @@ export type Profile = {
   email: string | null;
   role: UserRole;
   full_name: string | null;
+  /** Optional; used for outbound e-mail signatures. */
+  phone?: string | null;
 };
 
 export function isValidRole(role: string | null | undefined): role is UserRole {

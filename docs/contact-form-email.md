@@ -51,3 +51,12 @@ Mailto-links blijven alleen zichtbaar als **fout-fallback** onder de foutmelding
 - Resend alleen server-side
 - Reply-to is de invuller
 - Fallback mailto alleen bij foutmelding
+
+## Interne Berichten (dashboard)
+
+`/dashboard/intern/berichten` verstuurt outbound mail via dezelfde `RESEND_API_KEY`.
+
+- **From:** `Naam <medewerker@helpinghandsagency.nl>` als het auth/profiel-adres op het geverifieerde domein zit.
+- **Fallback:** mailbox uit `CONTACT_FROM_EMAIL` (bijv. `noreply@…`) met display name van de medewerker; **Reply-To** = e-mail van de ingelogde gebruiker.
+- Handtekening: `src/lib/email/buildEmailSignature.ts` (naam, rol, telefoon, bedrijf, logo, socials).
+- Profielvelden: `profiles.full_name`, `profiles.email`, `profiles.role`, optioneel `profiles.phone`.

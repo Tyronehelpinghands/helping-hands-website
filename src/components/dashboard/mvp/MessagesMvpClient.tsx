@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Copy, Mail, MessageCircle, Plus } from "lucide-react";
+import { Copy, Mail, MessageCircle, Plus, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,14 +69,63 @@ export function MessagesMvpClient({
     }
   }
 
+  function handleSaveResult(
+    res: Awaited<ReturnType<typeof saveInternalMessageDraftAction>>,
+    intent: "save" | "send",
+  ) {
+    if (!res.ok) {
+      showToast(res.error);
+      return;
+    }
+    setOpen(false);
+    router.refresh();
+    if (intent === "save") {
+      showToast("Concept opgeslagen.");
+      return;
+    }
+    if (res.data.emailSent) {
+      const hint = res.data.emailError
+        ? ` ${res.data.emailError}`
+        : "";
+      showToast(`Mail verstuurd.${hint}`);
+      return;
+    }
+    showToast(
+      res.data.emailError
+        ? `Bericht opgeslagen, maar mail mislukt: ${res.data.emailError}`
+        : "Bericht opgeslagen, maar mail is niet verstuurd.",
+    );
+  }
+
+  function sendExisting(message: InternalMessage) {
+    if (!message.recipient_email?.trim()) {
+      showToast("Geen ontvanger-e-mailadres — vul eerst een e-mail in.");
+      return;
+    }
+    const fd = new FormData();
+    fd.set("id", message.id);
+    fd.set("intent", "send");
+    fd.set("message_type", message.message_type ?? "other");
+    fd.set("recipient_name", message.recipient_name ?? "");
+    fd.set("recipient_email", message.recipient_email ?? "");
+    fd.set("recipient_phone", message.recipient_phone ?? "");
+    fd.set("subject", message.subject ?? "");
+    fd.set("body", message.body ?? "");
+    fd.set("status", "ready");
+    startTransition(async () => {
+      const res = await saveInternalMessageDraftAction(fd);
+      handleSaveResult(res, "send");
+    });
+  }
+
   return (
     <div className="space-y-6">
       <MvpPageHeader
         title="Berichten"
-        description="Berichtconcepten met Gmail/WhatsApp-fallbacks (mailto / wa.me)."
+        description="Concepten opslaan of direct per e-mail versturen via Resend (afzender = ingelogde medewerker)."
         notice={
           tablesReady
-            ? "WhatsApp/Gmail API: Voorbereid — gebruik kopieer / mailto / wa.me."
+            ? "E-mail gaat via Resend met handtekening. WhatsApp blijft beschikbaar via wa.me."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
@@ -87,17 +136,17 @@ export function MessagesMvpClient({
               setOpen(true);
             }}
           >
-            <Plus className="mr-1 h-4 w-4" /> Concept maken
+            <Plus className="mr-1 h-4 w-4" /> Nieuw bericht
           </Button>
         }
       />
 
       {messages.length === 0 ? (
         <MvpEmptyState
-          title="Nog geen berichtconcepten"
-          description="Maak een briefing, reminder of factuurmail als concept."
+          title="Nog geen berichten"
+          description="Maak een briefing, reminder of factuurmail en verstuur direct per e-mail."
           action={
-            <Button onClick={() => setOpen(true)}>Concept maken</Button>
+            <Button onClick={() => setOpen(true)}>Nieuw bericht</Button>
           }
         />
       ) : (
@@ -141,10 +190,31 @@ export function MessagesMvpClient({
                     </div>
                   </td>
                   <td className="px-3 py-2">
-                    <MvpBadge>{messageStatusLabel(m.status)}</MvpBadge>
+                    <MvpBadge
+                      tone={
+                        m.status === "sent"
+                          ? "ok"
+                          : m.status === "ready"
+                            ? "warn"
+                            : "neutral"
+                      }
+                    >
+                      {messageStatusLabel(m.status)}
+                    </MvpBadge>
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
+                      {m.recipient_email && m.status !== "sent" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={pending}
+                          title="Direct versturen via Resend"
+                          onClick={() => sendExisting(m)}
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : null}
                       <Button
                         size="sm"
                         variant="ghost"
@@ -188,27 +258,34 @@ export function MessagesMvpClient({
       <MvpFormDialog
         open={open}
         onOpenChange={setOpen}
-        title={edit ? "Concept bewerken" : "Berichtconcept"}
+        title={edit ? "Bericht bewerken" : "Nieuw bericht"}
+        description="Versturen stuurt meteen een echte e-mail via Resend, met jouw naam als afzender en handtekening."
         pending={pending}
+        submitLabel="Versturen per e-mail"
+        secondarySubmit={{
+          label: "Opslaan als concept",
+          fields: { intent: "save" },
+        }}
         onSubmit={async (fd) => {
           if (edit) fd.set("id", edit.id);
+          const intent =
+            fd.get("intent") === "send" ? ("send" as const) : ("save" as const);
+          if (intent === "save" && !fd.get("status")) {
+            fd.set("status", "draft");
+          }
           startTransition(async () => {
             const res = await saveInternalMessageDraftAction(fd);
-            if (res.ok) {
-              setOpen(false);
-              showToast("Concept opgeslagen.");
-              router.refresh();
-            } else showToast(res.error);
+            handleSaveResult(res, intent);
           });
         }}
       >
         <Field label="Type" name="message_type">
           <TextSelect
             name="message_type"
-            defaultValue={edit?.message_type ?? "whatsapp_briefing"}
+            defaultValue={edit?.message_type ?? "email_client"}
           >
-            <option value="whatsapp_briefing">WhatsApp briefing</option>
             <option value="email_client">E-mail opdrachtgever</option>
+            <option value="whatsapp_briefing">WhatsApp briefing</option>
             <option value="crew_reminder">Crew reminder</option>
             <option value="invoice_reminder">Factuur reminder</option>
             <option value="other">Overig</option>
@@ -226,6 +303,7 @@ export function MessagesMvpClient({
               name="recipient_email"
               type="email"
               defaultValue={edit?.recipient_email ?? ""}
+              placeholder="ontvanger@voorbeeld.nl"
             />
           </Field>
           <Field label="Telefoon" name="recipient_phone">
@@ -241,11 +319,11 @@ export function MessagesMvpClient({
         <Field label="Bericht" name="body">
           <TextTextarea name="body" defaultValue={edit?.body ?? ""} />
         </Field>
-        <Field label="Status" name="status">
+        <Field label="Status (bij concept)" name="status">
           <TextSelect name="status" defaultValue={edit?.status ?? "draft"}>
             <option value="draft">Concept</option>
             <option value="ready">Klaar</option>
-            <option value="sent">Verstuurd (handmatig)</option>
+            <option value="sent">Verstuurd</option>
             <option value="archived">Gearchiveerd</option>
           </TextSelect>
         </Field>
