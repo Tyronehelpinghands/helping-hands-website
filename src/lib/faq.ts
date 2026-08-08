@@ -72,7 +72,7 @@ export const contactFaqs: FaqItem[] = [
   {
     question: "Waar mail ik als opdrachtgever of als crew?",
     answer:
-      "Personeelsaanvragen: planning@helpinghandsagency.nl (planner: mesbah@helpinghandsagency.nl). Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl. Algemene vragen: info@helpinghandsagency.nl.",
+      "Personeelsaanvragen: planning@helpinghandsagency.nl (planner: mesbah@helpinghandsagency.nl). Crewaanmeldingen en sollicitaties: aanmeldingen@helpinghandsagency.nl (H&R: marieke@helpinghandsagency.nl). Algemene vragen: info@helpinghandsagency.nl.",
   },
   {
     question: "Wordt mijn aanvraag automatisch verstuurd?",

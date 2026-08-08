@@ -10,6 +10,7 @@ import AboutGrowthPath from "@/components/about/AboutGrowthPath";
 import AboutHero from "@/components/about/AboutHero";
 import AboutValues from "@/components/about/AboutValues";
 import FounderStory from "@/components/about/FounderStory";
+import TeamSection from "@/components/opdrachtgevers/TeamSection";
 import OverOnsTimeline from "@/components/over-ons/OverOnsTimeline";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
@@ -28,6 +29,7 @@ export const metadata: Metadata = buildPageMetadata({
 const pageAnchors = [
   { href: "#missie", label: "Missie" },
   { href: "#verhaal", label: "Verhaal" },
+  { href: "#team", label: "Team" },
   { href: "#aanpak", label: "Aanpak" },
   { href: "#opdrachtgevers", label: "Opdrachtgevers" },
   { href: "#groei", label: "Groei" },
@@ -99,6 +101,15 @@ export default function OverOnsPage() {
       </div>
 
       <FounderStory />
+
+      <div id="team" className="scroll-mt-28">
+        <TeamSection
+          eyebrow="Ons team"
+          title="De mensen achter Helping Hands"
+          description="Een klein, vast team voor planning, H&R en opdrachtgeverrelaties — met korte lijnen en persoonlijk contact."
+          showNotes={false}
+        />
+      </div>
 
       <AboutBentoGrid />
 

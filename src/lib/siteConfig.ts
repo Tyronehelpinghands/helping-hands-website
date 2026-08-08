@@ -11,6 +11,8 @@ export const siteConfig = {
   plannerEmail: "mesbah@helpinghandsagency.nl" as string,
   /** Crewaanmeldingen & sollicitaties */
   applicationsEmail: "aanmeldingen@helpinghandsagency.nl" as string,
+  /** H&R-manager (Marieke) — HR / personeelszaken */
+  hrEmail: "marieke@helpinghandsagency.nl" as string,
   /** Direct contact (eigenaar / operationeel) */
   ownerEmail: "tyrone@helpinghandsagency.nl" as string,
   /** Primary Helping Hands mobile (WhatsApp-capable) */

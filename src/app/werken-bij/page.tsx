@@ -14,7 +14,7 @@ import {
   hubWorkLinks,
   werkenBijFaqs,
 } from "@/lib/seo";
-import { applicationsEmail } from "@/lib/navigation";
+import { applicationsEmail, hrEmail } from "@/lib/navigation";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Werken bij | Event crew, horeca & stagebouw",
@@ -63,7 +63,14 @@ export default function WerkenBijPage() {
           >
             {applicationsEmail}
           </a>{" "}
-          of bekijk openstaande{" "}
+          of onze H&R-manager via{" "}
+          <a
+            href={`mailto:${hrEmail}`}
+            className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
+          >
+            {hrEmail}
+          </a>
+          , of bekijk openstaande{" "}
           <Link
             href="/vacatures"
             className="font-bold text-[#173A8A] underline-offset-4 hover:underline"

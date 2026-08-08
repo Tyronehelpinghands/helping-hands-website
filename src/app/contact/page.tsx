@@ -21,6 +21,7 @@ import { getPageHeroContent } from "@/lib/pageHeroContent";
 import {
   applicationsEmail,
   contactEmail,
+  hrEmail,
   plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
@@ -148,6 +149,15 @@ export default function ContactPage() {
                 className="mt-2 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
               >
                 {applicationsEmail}
+              </a>
+              <p className="mt-3 text-xs font-bold uppercase tracking-wide text-white/55">
+                H&R (Marieke)
+              </p>
+              <a
+                href={`mailto:${hrEmail}`}
+                className="mt-1 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
+              >
+                {hrEmail}
               </a>
               <Link
                 href="/vacatures"

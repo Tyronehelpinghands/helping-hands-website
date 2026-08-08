@@ -9,6 +9,7 @@ import {
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
+  hrEmail,
   plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
@@ -188,6 +189,17 @@ export default function Footer() {
                   className="mt-1 block transition hover:text-white"
                 >
                   {applicationsEmail}
+                </a>
+              </li>
+              <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  H&R (Marieke)
+                </p>
+                <a
+                  href={`mailto:${hrEmail}`}
+                  className="mt-1 block transition hover:text-white"
+                >
+                  {hrEmail}
                 </a>
               </li>
               <li>
