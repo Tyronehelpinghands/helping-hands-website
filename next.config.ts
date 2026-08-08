@@ -1,11 +1,40 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Prefer /contact over /contact/ (Next default); consistent non-trailing URLs.
+  trailingSlash: false,
   async redirects() {
     return [
       // Legacy WordPress-ish / marketing aliases
       { source: "/medewerkers", destination: "/werken-bij", permanent: true },
       { source: "/crew-aanmelden", destination: "/werken-bij", permanent: true },
+      { source: "/sign-up", destination: "/werken-bij", permanent: true },
+      { source: "/about-us", destination: "/over-ons", permanent: true },
+      { source: "/privacy-policy", destination: "/contact", permanent: true },
+      { source: "/rigger", destination: "/personeel-inhuren/stagehands", permanent: true },
+      {
+        source: "/catering-assistant",
+        destination: "/personeel-inhuren/catering-personeel",
+        permanent: true,
+      },
+      {
+        source: "/hospitality-assistant",
+        destination: "/personeel-inhuren/hospitality-personeel",
+        permanent: true,
+      },
+      {
+        source: "/site-crew",
+        destination: "/personeel-inhuren/site-crew",
+        permanent: true,
+      },
+      // No English site — strip /en to Dutch homepage
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/", permanent: true },
+      // Gone WordPress media / PHP entrypoints
+      { source: "/wp-content/:path*", destination: "/", permanent: true },
+      { source: "/wp-includes/:path*", destination: "/", permanent: true },
+      { source: "/wp-json/:path*", destination: "/", permanent: true },
+      { source: "/index.php", destination: "/", permanent: true },
 
       // Consolidate overlapping diensten landings → personeel-inhuren
       {

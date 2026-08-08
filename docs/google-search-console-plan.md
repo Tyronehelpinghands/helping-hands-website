@@ -30,18 +30,30 @@ Per URL: Inspecteren → **Indexering aanvragen** als “URL staat niet op Googl
 
 ## 3. Redirects & legacy cleanup
 
-Permanente 301’s (al in code):
+Zie volledig overzicht in `docs/seo-cleanup.md`.
 
-- `/?page_id=19` → `/contact`
-- `/?page_id=16` → `/opdrachtgevers`
-- `/?page_id=17` → `/vacatures`
-- `/?page_id=23` → `/over-ons`
+Permanente 301’s (code: `src/proxy.ts` + `next.config.ts`):
 
-Overlappende `/locaties/{dienst}-{stad}` → canonieke **root** SEO-URL’s (geen thin duplicates).
+- Bekende `/?page_id=` → marketingpagina’s; onbekende `page_id` → `/`
+- WP-noise (`p`, `feed`, `cat`, `m`, `paged`, `attachment_id`, `author`) → `/`
+- Oude slugs (`/about-us`, `/rigger`, `/sign-up`, `/wp-content/…`, `/en/…`, …) → moderne routes
+- Overlappende `/locaties/{dienst}-{stad}` → canonieke **root** SEO-URL’s
+
+### “Pagina met omleiding” = meestal géén bug
+
+Google sluit de **bron-URL** uit en indexeert de **bestemming**. Verwacht voor:
+
+- `http://…` en `https://helpinghandsagency.nl/…` → `https://www.helpinghandsagency.nl/…`
+- Oude WP-query’s en path-aliases met 301
+
+Controleer wel **redirect-ketens**: idealiter 1 hop. Apex→www instellen in **Vercel → Domains** (primary = www).
+
+`/over-ons` en `/opdrachtgevers` op www zijn **200 OK**; GSC-omleiding op die paden is vrijwel altijd de non-www variant.
 
 In Coverage/Pages:
 
-- Verwacht: oude `page_id`-URL’s als redirect, niet als soft-404.
+- Verwacht: oude WP-URL’s als redirect, niet als 5xx/soft-404.
+- Na fix: op 404/5xx-rapporten **Validatie starten**.
 - Geen handmatige Removals tenzij soft-404 blijft hangen na 2–4 weken.
 
 ## 4. Brand & disambiguation signals
