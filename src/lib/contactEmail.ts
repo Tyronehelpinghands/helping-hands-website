@@ -39,6 +39,22 @@ export function getRecipientForFormType(formType: string): string {
   }
 }
 
+/**
+ * Optional CC recipients. Crew applications CC H&R (Marieke) so both
+ * aanmeldingen@ and marieke@ get the same mail.
+ */
+export function getCcForFormType(formType: string): string | undefined {
+  if (formType !== "crew_application") return undefined;
+
+  const cc =
+    process.env.CREW_APPLICATION_CC_EMAIL ||
+    process.env.HR_EMAIL ||
+    siteConfig.hrEmail;
+  const to = getRecipientForFormType(formType);
+  if (!cc || cc.toLowerCase() === to.toLowerCase()) return undefined;
+  return cc;
+}
+
 export function getContactFromEmail(): string {
   return process.env.CONTACT_FROM_EMAIL || DEFAULT_FROM;
 }

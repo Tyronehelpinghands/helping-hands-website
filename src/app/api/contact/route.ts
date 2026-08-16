@@ -6,6 +6,7 @@ import {
   type ContactFormType,
 } from "@/lib/email/formatContactEmail";
 import {
+  getCcForFormType,
   getContactFromEmail,
   getRecipientForFormType,
   getSuccessMessage,
@@ -137,6 +138,7 @@ export async function POST(request: Request) {
   }
 
   const recipient = getRecipientForFormType(formType);
+  const cc = getCcForFormType(formType);
   const from = getContactFromEmail();
   const payload = buildPayload(formType, body, recipient);
   const { subject, text, html } = formatContactEmail(payload);
@@ -145,6 +147,7 @@ export async function POST(request: Request) {
   const { data, error } = await resend.emails.send({
     from,
     to: recipient,
+    ...(cc ? { cc } : {}),
     replyTo: payload.email,
     subject,
     text,

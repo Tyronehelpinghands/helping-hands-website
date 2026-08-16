@@ -10,19 +10,22 @@ CONTACT_FROM_EMAIL=Helping Hands Agency <noreply@helpinghandsagency.nl>
 
 STAFF_REQUEST_TO_EMAIL=planning@helpinghandsagency.nl
 CREW_APPLICATION_TO_EMAIL=aanmeldingen@helpinghandsagency.nl
+CREW_APPLICATION_CC_EMAIL=marieke@helpinghandsagency.nl
+# of: HR_EMAIL=marieke@helpinghandsagency.nl
 GENERAL_CONTACT_TO_EMAIL=info@helpinghandsagency.nl
 ```
 
 - `RESEND_API_KEY` is **server-only** — nooit `NEXT_PUBLIC_RESEND_API_KEY`.
 - Ontbrekende `*_TO_EMAIL` / `CONTACT_FROM_EMAIL` vallen terug op de defaults hierboven.
+- Crewaanmeldingen CC’en standaard `siteConfig.hrEmail` (Marieke); override via `CREW_APPLICATION_CC_EMAIL` of `HR_EMAIL`.
 
 ## Routing
 
-| formType | Formulier | Ontvanger |
-|---|---|---|
-| `staff_request` | Personeel aanvragen | `planning@helpinghandsagency.nl` |
-| `crew_application` | Aanmelden als medewerker | `aanmeldingen@helpinghandsagency.nl` |
-| `general_contact` | Algemene vraag | `info@helpinghandsagency.nl` |
+| formType | Formulier | Ontvanger | CC |
+|---|---|---|---|
+| `staff_request` | Personeel aanvragen | `planning@helpinghandsagency.nl` | — |
+| `crew_application` | Aanmelden als medewerker | `aanmeldingen@helpinghandsagency.nl` | `marieke@helpinghandsagency.nl` (H&R) |
+| `general_contact` | Algemene vraag | `info@helpinghandsagency.nl` | — |
 
 Legacy aliases die worden gemapt:
 
@@ -35,7 +38,7 @@ Legacy aliases die worden gemapt:
 `POST /api/contact` (`src/app/api/contact/route.ts`)
 
 - Leest JSON body met `formType` + velden
-- Kiest ontvanger via `getRecipientForFormType`
+- Kiest ontvanger via `getRecipientForFormType` (+ CC via `getCcForFormType` voor crewaanmeldingen)
 - Verstuurt met Resend: `from = CONTACT_FROM_EMAIL`, `replyTo =` e-mail van de invuller
 - Honeypot-veld `website`: bij invulling geen mail, wel `{ ok: true }`
 - Geen fake success als Resend faalt
