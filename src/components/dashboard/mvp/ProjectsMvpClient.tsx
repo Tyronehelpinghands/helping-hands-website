@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -242,9 +243,14 @@ export function ProjectsMvpClient({
                 {detail.location || "—"}
               </p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => setDetail(null)}>
-              Sluiten
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" render={<Link href={`/dashboard/intern/berichten?projectId=${detail.id}`} />}>
+                Accreditatielijst mailen
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setDetail(null)}>
+                Sluiten
+              </Button>
+            </div>
           </div>
           <p className="text-sm text-slate-700 whitespace-pre-wrap">
             {detail.briefing || "Nog geen briefing."}

@@ -6,12 +6,21 @@ import type { EmailSignaturePerson } from "@/lib/email/buildEmailSignature";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 const VERIFIED_DOMAIN = "helpinghandsagency.nl";
 
+export type OutboundEmailAttachment = {
+  filename: string;
+  content: Buffer | string;
+  contentType?: string;
+};
+
 export type SendOutboundMessageInput = {
   to: string | string[];
   subject: string;
   body: string;
   recipientName?: string | null;
   sender: EmailSignaturePerson;
+  extraHtml?: string | null;
+  extraText?: string | null;
+  attachments?: OutboundEmailAttachment[];
 };
 
 export type SendOutboundMessageResult =
@@ -77,7 +86,7 @@ export function resolveOutboundSenderIdentity(sender: EmailSignaturePerson): {
 }
 
 /**
- * Send a dashboard Berichten e-mail via Resend with staff signature.
+ * Send a Berichten e-mail via Resend with staff signature (no dashboard meta footer).
  */
 export async function sendOutboundMessageEmail(
   input: SendOutboundMessageInput,
@@ -116,6 +125,8 @@ export async function sendOutboundMessageEmail(
     body: input.body,
     recipientName: input.recipientName,
     sender: input.sender,
+    extraHtml: input.extraHtml,
+    extraText: input.extraText,
   });
 
   try {
@@ -127,6 +138,18 @@ export async function sendOutboundMessageEmail(
       subject,
       text,
       html,
+      ...(input.attachments?.length
+        ? {
+            attachments: input.attachments.map((a) => ({
+              filename: a.filename,
+              content:
+                typeof a.content === "string"
+                  ? Buffer.from(a.content, "utf8")
+                  : a.content,
+              contentType: a.contentType,
+            })),
+          }
+        : {}),
     });
 
     if (error) {

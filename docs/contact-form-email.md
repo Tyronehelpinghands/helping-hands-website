@@ -62,4 +62,6 @@ Mailto-links blijven alleen zichtbaar als **fout-fallback** onder de foutmelding
 - **From:** `Naam <medewerker@helpinghandsagency.nl>` als het auth/profiel-adres op het geverifieerde domein zit.
 - **Fallback:** mailbox uit `CONTACT_FROM_EMAIL` (bijv. `noreply@…`) met display name van de medewerker; **Reply-To** = e-mail van de ingelogde gebruiker.
 - Handtekening: `src/lib/email/buildEmailSignature.ts` (naam, rol, telefoon, bedrijf, logo, socials).
+- Geen meta-footer over “intern dashboard” — de mail oogt als een normale professionele mail.
 - Profielvelden: `profiles.full_name`, `profiles.email`, `profiles.role`, optioneel `profiles.phone`.
+- **Accreditatielijst:** in Berichten kun je een project kiezen en de toegewezen crew meesturen (HTML-tabel + CSV-bijlage via Resend attachments).
