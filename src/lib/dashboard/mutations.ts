@@ -8,7 +8,14 @@ import {
 import { getRoleLabel } from "@/lib/auth/roles";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { requireRole } from "@/lib/auth/requireRole";
+import {
+  accreditationListFilename,
+  buildAccreditationListCsv,
+  buildAccreditationListHtmlSection,
+  buildAccreditationListTextSection,
+} from "@/lib/email/formatAccreditationList";
 import { sendOutboundMessageEmail } from "@/lib/email/sendOutboundMessageEmail";
+import { getProjectAccreditationList } from "@/lib/dashboard/queries";
 import type { UserRole } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/server";
 import { siteConfig } from "@/lib/siteConfig";
@@ -2098,12 +2105,73 @@ export async function saveInternalMessageDraftAction(
     });
   }
 
+  const attachAccreditation =
+    formData.get("attach_accreditation") === "1" ||
+    formData.get("attach_accreditation") === "on" ||
+    formData.get("attach_accreditation") === "true";
+  const accreditationProjectId = strOrNull(formData.get("project_id"));
+
+  let extraHtml: string | null = null;
+  let extraText: string | null = null;
+  let attachments:
+    | Array<{ filename: string; content: string; contentType: string }>
+    | undefined;
+
+  if (attachAccreditation) {
+    if (!accreditationProjectId) {
+      revalidateDashboard(["/dashboard/intern/berichten"]);
+      return ok({
+        id: messageId,
+        emailSent: false,
+        emailError:
+          "Kies een project om een accreditatielijst bij te voegen.",
+      });
+    }
+
+    const list = await getProjectAccreditationList(accreditationProjectId);
+    if (!list) {
+      revalidateDashboard(["/dashboard/intern/berichten"]);
+      return ok({
+        id: messageId,
+        emailSent: false,
+        emailError: "Project niet gevonden voor accreditatielijst.",
+      });
+    }
+    if (list.rows.length === 0) {
+      revalidateDashboard(["/dashboard/intern/berichten"]);
+      return ok({
+        id: messageId,
+        emailSent: false,
+        emailError:
+          "Geen toegewezen crew op dit project — accreditatielijst is leeg.",
+      });
+    }
+
+    const listPayload = {
+      projectName: list.projectName,
+      location: list.location,
+      rows: list.rows,
+    };
+    extraHtml = buildAccreditationListHtmlSection(listPayload);
+    extraText = buildAccreditationListTextSection(listPayload);
+    attachments = [
+      {
+        filename: accreditationListFilename(list.projectName, "csv"),
+        content: buildAccreditationListCsv(listPayload),
+        contentType: "text/csv; charset=utf-8",
+      },
+    ];
+  }
+
   const sendResult = await sendOutboundMessageEmail({
     to: payload.recipient_email!,
     subject: payload.subject ?? "",
     body: payload.body ?? "",
     recipientName: payload.recipient_name,
     sender,
+    extraHtml,
+    extraText,
+    attachments,
   });
 
   if (sendResult.ok) {

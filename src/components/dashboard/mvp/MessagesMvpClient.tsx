@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Copy, Mail, MessageCircle, Plus, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   messageStatusLabel,
   messageTypeLabel,
 } from "@/lib/dashboard/formatters";
-import type { InternalMessage } from "@/lib/dashboard/types";
+import type { InternalMessage, Project } from "@/lib/dashboard/types";
 
 function waLink(phone: string | null | undefined, body: string | null) {
   if (!phone) return null;
@@ -49,16 +49,29 @@ function mailLink(
 
 export function MessagesMvpClient({
   messages,
+  projects,
   tablesReady,
+  initialProjectId,
 }: {
   messages: InternalMessage[];
+  projects: Project[];
   tablesReady: boolean;
+  initialProjectId?: string | null;
 }) {
   const router = useRouter();
   const { toast, showToast } = useToast();
   const [pending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(Boolean(initialProjectId));
   const [edit, setEdit] = useState<InternalMessage | null>(null);
+  const [projectId, setProjectId] = useState(initialProjectId ?? "");
+  const [attachAccreditation, setAttachAccreditation] = useState(
+    Boolean(initialProjectId),
+  );
+
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.id === projectId) ?? null,
+    [projects, projectId],
+  );
 
   async function copyText(text: string) {
     try {
@@ -118,6 +131,19 @@ export function MessagesMvpClient({
     });
   }
 
+  function openComposer(opts?: {
+    message?: InternalMessage | null;
+    withAccreditation?: boolean;
+    project?: string;
+  }) {
+    setEdit(opts?.message ?? null);
+    setProjectId(opts?.project ?? initialProjectId ?? "");
+    setAttachAccreditation(
+      Boolean(opts?.withAccreditation ?? (opts?.project || initialProjectId)),
+    );
+    setOpen(true);
+  }
+
   return (
     <div className="space-y-6">
       <MvpPageHeader
@@ -125,28 +151,35 @@ export function MessagesMvpClient({
         description="Concepten opslaan of direct per e-mail versturen via Resend (afzender = ingelogde medewerker)."
         notice={
           tablesReady
-            ? "E-mail gaat via Resend met handtekening. WhatsApp blijft beschikbaar via wa.me."
+            ? "E-mail gaat via Resend met handtekening. Optioneel: accreditatielijst (CSV) van projectcrew bijvoegen."
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
-          <Button
-            className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-            onClick={() => {
-              setEdit(null);
-              setOpen(true);
-            }}
-          >
-            <Plus className="mr-1 h-4 w-4" /> Nieuw bericht
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                openComposer({ withAccreditation: true, project: projectId })
+              }
+            >
+              Accreditatielijst
+            </Button>
+            <Button
+              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              onClick={() => openComposer()}
+            >
+              <Plus className="mr-1 h-4 w-4" /> Nieuw bericht
+            </Button>
+          </div>
         }
       />
 
       {messages.length === 0 ? (
         <MvpEmptyState
           title="Nog geen berichten"
-          description="Maak een briefing, reminder of factuurmail en verstuur direct per e-mail."
+          description="Maak een briefing, reminder of accreditatielijst en verstuur direct per e-mail."
           action={
-            <Button onClick={() => setOpen(true)}>Nieuw bericht</Button>
+            <Button onClick={() => openComposer()}>Nieuw bericht</Button>
           }
         />
       ) : (
@@ -239,10 +272,7 @@ export function MessagesMvpClient({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          setEdit(m);
-                          setOpen(true);
-                        }}
+                        onClick={() => openComposer({ message: m })}
                       >
                         Bewerken
                       </Button>
@@ -268,6 +298,10 @@ export function MessagesMvpClient({
         }}
         onSubmit={async (fd) => {
           if (edit) fd.set("id", edit.id);
+          if (attachAccreditation) {
+            fd.set("attach_accreditation", "1");
+            if (projectId) fd.set("project_id", projectId);
+          }
           const intent =
             fd.get("intent") === "send" ? ("send" as const) : ("save" as const);
           if (intent === "save" && !fd.get("status")) {
@@ -282,9 +316,17 @@ export function MessagesMvpClient({
         <Field label="Type" name="message_type">
           <TextSelect
             name="message_type"
-            defaultValue={edit?.message_type ?? "email_client"}
+            defaultValue={
+              edit?.message_type ??
+              (attachAccreditation ? "accreditation_list" : "email_client")
+            }
+            key={
+              edit?.id ??
+              (attachAccreditation ? "accreditation_list" : "email_client")
+            }
           >
             <option value="email_client">E-mail opdrachtgever</option>
+            <option value="accreditation_list">Accreditatielijst</option>
             <option value="whatsapp_briefing">WhatsApp briefing</option>
             <option value="crew_reminder">Crew reminder</option>
             <option value="invoice_reminder">Factuur reminder</option>
@@ -314,11 +356,68 @@ export function MessagesMvpClient({
           </Field>
         </div>
         <Field label="Onderwerp" name="subject">
-          <TextInput name="subject" defaultValue={edit?.subject ?? ""} />
+          <TextInput
+            name="subject"
+            defaultValue={
+              edit?.subject ??
+              (attachAccreditation && selectedProject
+                ? `Accreditatielijst — ${selectedProject.project_name}`
+                : "")
+            }
+            key={`subject-${edit?.id ?? "new"}-${attachAccreditation}-${projectId}`}
+          />
         </Field>
         <Field label="Bericht" name="body">
-          <TextTextarea name="body" defaultValue={edit?.body ?? ""} />
+          <TextTextarea
+            name="body"
+            defaultValue={
+              edit?.body ??
+              (attachAccreditation
+                ? "In de bijlage en hieronder vind je de accreditatielijst met de ingeplande crew."
+                : "")
+            }
+            key={`body-${edit?.id ?? "new"}-${attachAccreditation}`}
+          />
         </Field>
+
+        <div className="rounded-lg border border-slate-200 bg-[#F5F7FA]/60 p-3 space-y-3">
+          <label className="flex items-start gap-2 text-sm text-[#0B1F4D]">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={attachAccreditation}
+              onChange={(e) => setAttachAccreditation(e.target.checked)}
+            />
+            <span>
+              <span className="font-semibold">Accreditatielijst bijvoegen</span>
+              <span className="block text-xs text-slate-600">
+                Tabel in de mail + CSV-bijlage met crew van het gekozen project
+                (naam, functie, telefoon, bedrijf, datum, tijd).
+              </span>
+            </span>
+          </label>
+          {attachAccreditation ? (
+            <Field label="Project" name="project_id">
+              <TextSelect
+                name="project_id"
+                required
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+              >
+                <option value="" disabled>
+                  Kies project
+                </option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.project_name}
+                    {p.location ? ` · ${p.location}` : ""}
+                  </option>
+                ))}
+              </TextSelect>
+            </Field>
+          ) : null}
+        </div>
+
         <Field label="Status (bij concept)" name="status">
           <TextSelect name="status" defaultValue={edit?.status ?? "draft"}>
             <option value="draft">Concept</option>

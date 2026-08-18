@@ -5,13 +5,16 @@ import {
 } from "@/lib/email/buildEmailSignature";
 
 const TEXT = "#101828";
-const MUTED = "#64748B";
 
 export type OutboundMessageEmailPayload = {
   subject: string;
   body: string;
   recipientName?: string | null;
   sender: EmailSignaturePerson;
+  /** Optional HTML block inserted between body and signature (e.g. accreditation table). */
+  extraHtml?: string | null;
+  /** Optional plain-text block for the text alternative. */
+  extraText?: string | null;
 };
 
 function escapeHtml(text: string): string {
@@ -38,11 +41,15 @@ export function formatOutboundMessageEmail(
   const signatureHtml = buildEmailSignatureHtml(payload.sender);
   const signatureText = buildEmailSignatureText(payload.sender);
   const greeting = payload.recipientName?.trim();
+  const extraHtml = payload.extraHtml?.trim() || "";
+  const extraText = payload.extraText?.trim() || "";
 
   const textParts = [
     greeting ? `Hallo ${greeting},` : null,
     greeting ? "" : null,
     body,
+    extraText ? "" : null,
+    extraText || null,
     "",
     signatureText,
   ].filter((line): line is string => line !== null);
@@ -62,10 +69,8 @@ export function formatOutboundMessageEmail(
         <div style="margin:0;font-size:15px;line-height:1.55;color:${TEXT};">
           ${bodyToHtml(body)}
         </div>
+        ${extraHtml}
         ${signatureHtml}
-        <p style="margin:24px 0 0;font-size:11px;line-height:1.4;color:${MUTED};">
-          Dit bericht is verstuurd via het interne dashboard van Helping Hands Agency.
-        </p>
       </td>
     </tr>
   </table>

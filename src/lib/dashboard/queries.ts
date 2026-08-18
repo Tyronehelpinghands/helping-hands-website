@@ -23,6 +23,7 @@ import type {
   Task,
   TimeEntry,
 } from "@/lib/dashboard/types";
+import { defaultAccreditationCompany } from "@/lib/email/formatAccreditationList";
 
 function isMissingTableError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false;
@@ -354,6 +355,91 @@ export async function getInternalMessages(): Promise<InternalMessage[]> {
       .order("created_at", { ascending: false }),
   );
   return result.data;
+}
+
+export type ProjectAccreditationList = {
+  projectId: string;
+  projectName: string;
+  location: string | null;
+  rows: Array<{
+    fullName: string;
+    roleName: string | null;
+    phone: string | null;
+    company: string;
+    shiftDate: string;
+    startTime: string | null;
+    endTime: string | null;
+  }>;
+};
+
+/**
+ * Crew assigned to a project's shifts — source for accreditatielijsten.
+ * One row per non-cancelled shift with a crew member.
+ */
+export async function getProjectAccreditationList(
+  projectId: string,
+): Promise<ProjectAccreditationList | null> {
+  if (!projectId.trim()) return null;
+
+  const supabase = await createClient();
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id, project_name, location")
+    .eq("id", projectId)
+    .maybeSingle();
+
+  if (projectError || !project) return null;
+
+  const { data: shifts, error: shiftsError } = await supabase
+    .from("shifts")
+    .select(
+      "id, shift_date, start_time, end_time, role_name, status, crew_member_id, crew_members(id, full_name, phone, role_type)",
+    )
+    .eq("project_id", projectId)
+    .order("shift_date", { ascending: true })
+    .order("start_time", { ascending: true, nullsFirst: true });
+
+  if (shiftsError) return null;
+
+  const company = defaultAccreditationCompany();
+
+  const rows = (shifts ?? [])
+    .filter((s) => s.status !== "cancelled" && s.crew_member_id)
+    .map((s) => {
+      const crewRel = s.crew_members as
+        | {
+            id: string;
+            full_name: string;
+            phone: string | null;
+            role_type: string | null;
+          }
+        | {
+            id: string;
+            full_name: string;
+            phone: string | null;
+            role_type: string | null;
+          }[]
+        | null;
+      const crew = Array.isArray(crewRel) ? crewRel[0] : crewRel;
+      if (!crew?.full_name) return null;
+      return {
+        fullName: crew.full_name,
+        roleName: s.role_name || crew.role_type || null,
+        phone: crew.phone ?? null,
+        company,
+        shiftDate: s.shift_date,
+        startTime: s.start_time,
+        endTime: s.end_time,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
+
+  return {
+    projectId: project.id,
+    projectName: project.project_name,
+    location: project.location ?? null,
+    rows,
+  };
 }
 
 export async function getCompanySettings(): Promise<CompanySetting[]> {

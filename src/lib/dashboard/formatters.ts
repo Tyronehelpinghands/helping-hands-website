@@ -245,6 +245,8 @@ export function messageTypeLabel(type: string | null | undefined): string {
       return "WhatsApp briefing";
     case "email_client":
       return "E-mail opdrachtgever";
+    case "accreditation_list":
+      return "Accreditatielijst";
     case "crew_reminder":
       return "Crew reminder";
     case "invoice_reminder":

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,12 +91,20 @@ export function PlanningMvpClient({
             : "Voer docs/internal-dashboard-database.md uit in Supabase."
         }
         actions={
-          <Button
-            className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
-            onClick={() => setOpen(true)}
-          >
-            <Plus className="mr-1 h-4 w-4" /> Shift toevoegen
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              render={<Link href="/dashboard/intern/berichten" />}
+            >
+              Accreditatielijst
+            </Button>
+            <Button
+              className="bg-[#173A8A] text-white hover:bg-[#0B1F4D]"
+              onClick={() => setOpen(true)}
+            >
+              <Plus className="mr-1 h-4 w-4" /> Shift toevoegen
+            </Button>
+          </div>
         }
       />
 
