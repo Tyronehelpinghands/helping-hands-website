@@ -102,10 +102,48 @@ export async function getProjectById(id: string): Promise<Project | null> {
 
 export async function getCrewMembers(): Promise<CrewMember[]> {
   const supabase = await createClient();
-  const result = await safeSelect<CrewMember>(() =>
-    supabase.from("crew_members").select("*").order("full_name", { ascending: true }),
+
+  const full = await safeSelect<CrewMember>(() =>
+    supabase
+      .from("crew_members")
+      .select(
+        "id, profile_id, full_name, email, phone, city, employment_type, role_type, skills, certificates, has_drivers_license, has_car, hourly_cost, gross_hourly_wage, fooks_ww_tariff, status, notes, shiftbase_user_id, created_at, updated_at",
+      )
+      .order("full_name", { ascending: true }),
   );
-  return result.data.map((row) => ({
+
+  let rows = full.data;
+  if (full.error && isMissingColumnError(full.error)) {
+    const basic = await safeSelect<CrewMember>(() =>
+      supabase
+        .from("crew_members")
+        .select(
+          "id, profile_id, full_name, email, phone, city, employment_type, role_type, skills, certificates, has_drivers_license, has_car, hourly_cost, status, notes, shiftbase_user_id, created_at, updated_at",
+        )
+        .order("full_name", { ascending: true }),
+    );
+    if (!basic.error) {
+      rows = basic.data;
+    } else {
+      const star = await safeSelect<CrewMember>(() =>
+        supabase
+          .from("crew_members")
+          .select("*")
+          .order("full_name", { ascending: true }),
+      );
+      rows = star.data;
+    }
+  } else if (full.error) {
+    const star = await safeSelect<CrewMember>(() =>
+      supabase
+        .from("crew_members")
+        .select("*")
+        .order("full_name", { ascending: true }),
+    );
+    rows = star.data;
+  }
+
+  return rows.map((row) => ({
     ...row,
     skills: row.skills ?? [],
     certificates: row.certificates ?? [],
@@ -143,6 +181,10 @@ const TIME_ENTRY_SELECT_MINIMAL =
 /**
  * Normalize nested crew embed (object | array) and optionally fill missing
  * cost fields from a crew_members map (same path as Crew UI).
+ *
+ * Prefer positive hourly_cost / bruto from either source — embed `0` must not
+ * block map enrichment via `??`. Never default employment_type to `other`
+ * when bruto exists (that previously disabled Fooks and zeroed finance costs).
  */
 function attachCrewCostFields(
   entries: TimeEntry[],
@@ -165,14 +207,39 @@ function attachCrewCostFields(
       return { ...entry, crew_members: null };
     }
 
+    const pickPositive = (
+      a: number | null | undefined,
+      b: number | null | undefined,
+    ): number | null => {
+      const na = Number(a);
+      if (Number.isFinite(na) && na > 0) return na;
+      const nb = Number(b);
+      if (Number.isFinite(nb) && nb > 0) return nb;
+      if (a != null && Number.isFinite(Number(a))) return Number(a);
+      if (b != null && Number.isFinite(Number(b))) return Number(b);
+      return null;
+    };
+
+    const bruto = pickPositive(
+      fromEmbed?.gross_hourly_wage,
+      fromMap?.gross_hourly_wage,
+    );
+    const hourly = pickPositive(fromEmbed?.hourly_cost, fromMap?.hourly_cost);
+
+    const rawType =
+      fromEmbed?.employment_type ?? fromMap?.employment_type ?? null;
+    const employment_type =
+      (rawType && String(rawType).trim()) ||
+      (bruto != null && bruto > 0 ? "vast" : "other");
+
     const merged = {
       id: fromEmbed?.id ?? fromMap?.id ?? entry.crew_member_id ?? "",
       full_name: fromEmbed?.full_name ?? fromMap?.full_name ?? "Onbekende crew",
-      hourly_cost: fromEmbed?.hourly_cost ?? fromMap?.hourly_cost ?? null,
-      gross_hourly_wage:
-        fromEmbed?.gross_hourly_wage ?? fromMap?.gross_hourly_wage ?? null,
-      employment_type:
-        fromEmbed?.employment_type ?? fromMap?.employment_type ?? "other",
+      hourly_cost: hourly,
+      gross_hourly_wage: bruto,
+      employment_type: employment_type as NonNullable<
+        TimeEntry["crew_members"]
+      >["employment_type"],
       shiftbase_user_id:
         fromEmbed?.shiftbase_user_id ?? fromMap?.shiftbase_user_id ?? null,
     } satisfies NonNullable<TimeEntry["crew_members"]>;

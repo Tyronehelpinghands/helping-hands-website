@@ -36,6 +36,15 @@ export function formatFooksFactor(tariff: FooksWwTariff): string {
   return fooksWwFactor(tariff).toFixed(3).replace(".", ",");
 }
 
+/** Normalize employment_type from DB/UI (trim + lowercase). */
+export function normalizeEmploymentType(
+  employmentType: string | null | undefined,
+): string | null {
+  if (employmentType == null) return null;
+  const t = String(employmentType).trim().toLowerCase();
+  return t.length ? t : null;
+}
+
 /**
  * WW tariff implied by employment type (stored for audit).
  * zzp / other → null
@@ -43,7 +52,7 @@ export function formatFooksFactor(tariff: FooksWwTariff): string {
 export function getWwTariffForEmploymentType(
   employmentType: string | null | undefined,
 ): FooksWwTariff | null {
-  switch (employmentType) {
+  switch (normalizeEmploymentType(employmentType)) {
     case "vast":
     case "payroll":
       return "laag";
@@ -70,17 +79,14 @@ export function getCostFactorForEmploymentType(
 export function usesBrutoFactor(
   employmentType: string | null | undefined,
 ): boolean {
-  return (
-    employmentType === "vast" ||
-    employmentType === "payroll" ||
-    employmentType === "freelance"
-  );
+  const t = normalizeEmploymentType(employmentType);
+  return t === "vast" || t === "payroll" || t === "freelance";
 }
 
 export function isZzpEmploymentType(
   employmentType: string | null | undefined,
 ): boolean {
-  return employmentType === "zzp";
+  return normalizeEmploymentType(employmentType) === "zzp";
 }
 
 /** @deprecated Prefer usesBrutoFactor / calculateCrewHourlyCost. */
@@ -109,7 +115,7 @@ export function calculateCrewHourlyCost(input: {
   employmentType: EmploymentType | string | null | undefined;
   bruto?: number | null;
 }): number | null {
-  const type = input.employmentType;
+  const type = normalizeEmploymentType(input.employmentType);
 
   if (isZzpEmploymentType(type)) {
     return FOOKS_ZZP_HOURLY_COST;
@@ -117,8 +123,8 @@ export function calculateCrewHourlyCost(input: {
 
   const tariff = getWwTariffForEmploymentType(type);
   if (tariff != null) {
-    const bruto = input.bruto;
-    if (bruto == null || !Number.isFinite(bruto)) return null;
+    const bruto = Number(input.bruto);
+    if (!Number.isFinite(bruto) || bruto <= 0) return null;
     return calculateFooksHourlyCost(bruto, tariff);
   }
 
