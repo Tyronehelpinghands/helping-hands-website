@@ -110,9 +110,11 @@ function BreakdownTable({
                     </td>
                     <td className="px-4 py-3 text-[#101828]/75">
                       {formatCurrency(row.marge)}
-                      {row.margePercent !== null
-                        ? ` (${formatNumber(row.margePercent, 1)}%)`
-                        : ""}
+                      {row.omzet > 0 && row.personeelskosten <= 0
+                        ? " (geen kostdata)"
+                        : row.margePercent !== null
+                          ? ` (${formatNumber(row.margePercent, 1)}%)`
+                          : ""}
                     </td>
                   </>
                 ) : null}
@@ -261,14 +263,18 @@ export function FinanceMvpClient({
             />
             <KpiCard
               label="Marge"
-              value={`${formatCurrency(overview.marge)}${
-                overview.margePercent !== null
-                  ? ` (${formatNumber(overview.margePercent, 1)}%)`
-                  : ""
-              }`}
+              value={
+                overview.costsIncomplete
+                  ? `${formatCurrency(overview.marge)} (n.v.t.)`
+                  : `${formatCurrency(overview.marge)}${
+                      overview.margePercent !== null
+                        ? ` (${formatNumber(overview.margePercent, 1)}%)`
+                        : ""
+                    }`
+              }
               hint={
                 overview.costsIncomplete
-                  ? "Onbetrouwbaar: omzet zonder personeelskosten"
+                  ? "Geen kostdata — percentage niet betrouwbaar"
                   : "Omzet − personeelskosten"
               }
               accent={overview.costsIncomplete ? "orange" : undefined}
@@ -306,12 +312,24 @@ export function FinanceMvpClient({
 
           {overview.costsIncomplete ? (
             <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-              Omzet zonder personeelskosten — marge van{" "}
-              {overview.margePercent !== null
-                ? `${formatNumber(overview.margePercent, 1)}%`
-                : "100%"}{" "}
-              is niet betrouwbaar. Controleer of uren op hetzelfde project
-              goedgekeurd/gefactureerd zijn en of crew bruto/uurkost heeft.
+              <p className="font-semibold">Omzet zonder personeelskosten</p>
+              <p className="mt-1">
+                Marge-% is n.v.t. (geen kostdata). Controleer of uren op hetzelfde
+                project goedgekeurd/gefactureerd zijn en of crew bruto/uurkost
+                heeft (vast/payroll × 1,580).
+                {overview.totalHours > 0
+                  ? ` Er zijn ${formatHours(overview.totalHours)} uren in deze periode zonder bruikbare uurkost.`
+                  : " Er zijn geen goedgekeurde/gefactureerde uren gekoppeld aan deze omzet."}
+              </p>
+            </div>
+          ) : null}
+
+          {overview.missingHourlyCostHours > 0 ? (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              {formatHours(overview.missingHourlyCostHours)} uren zonder
+              kostprijs (geen bruto/uurkost) — vul bij crew bruto in
+              (vast/payroll × 1,580) of sla opnieuw op zodat uurkost wordt
+              bewaard.
             </div>
           ) : null}
 
@@ -319,13 +337,6 @@ export function FinanceMvpClient({
             <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
               {formatHours(overview.derivedFooksHours)} uren: uurkost afgeleid
               uit bruto × Fooks (opgeslagen uurkost ontbrak of ≤ 0).
-            </div>
-          ) : null}
-
-          {overview.missingHourlyCostHours > 0 ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              {formatHours(overview.missingHourlyCostHours)} uren zonder
-              uurkost/bruto — vul bruto bij crew in (vast/payroll × 1,580).
             </div>
           ) : null}
 

@@ -1,5 +1,12 @@
-import { calculateMarginEstimate, toDateString } from "@/lib/dashboard/calculations";
-import { calculateCrewHourlyCost } from "@/lib/dashboard/fooksRates";
+import {
+  calculateMarginEstimate,
+  calculateWorkedHours,
+  toDateString,
+} from "@/lib/dashboard/calculations";
+import {
+  calculateCrewHourlyCost,
+  normalizeEmploymentType,
+} from "@/lib/dashboard/fooksRates";
 import type { InvoiceDraft, TimeEntry } from "@/lib/dashboard/types";
 
 export type FinancePeriodKey =
@@ -79,6 +86,9 @@ export function normalizeCrewRelation<T>(
  * Unit cost for a time entry: prefer stored hourly_cost (> 0), else Fooks
  * (bruto × factor for vast/payroll/freelance, fixed €25 for zzp).
  * Treats hourly_cost <= 0 as missing so bruto × factor still applies.
+ *
+ * If bruto > 0 but employment_type is missing/other/unknown, assume vast
+ * (WW Laag 1,580) so finance never silently stays at €0 when bruto exists.
  */
 export function resolveCrewUnitCost(
   crew: CrewCostFields | null | undefined,
@@ -90,16 +100,47 @@ export function resolveCrewUnitCost(
     return { rate: hc, source: "hourly_cost" };
   }
 
-  const bruto = Number(crew.gross_hourly_wage);
-  const derived = calculateCrewHourlyCost({
-    employmentType: crew.employment_type,
-    bruto: Number.isFinite(bruto) && bruto > 0 ? bruto : null,
+  const brutoRaw = Number(crew.gross_hourly_wage);
+  const bruto = Number.isFinite(brutoRaw) && brutoRaw > 0 ? brutoRaw : null;
+  const type = normalizeEmploymentType(crew.employment_type);
+
+  let derived = calculateCrewHourlyCost({
+    employmentType: type,
+    bruto,
   });
+
+  // Bruto known but type missing/other → default Fooks WW Laag (vast/payroll).
+  if ((derived == null || derived <= 0) && bruto != null && type !== "zzp") {
+    derived = calculateCrewHourlyCost({
+      employmentType: "vast",
+      bruto,
+    });
+  }
+
   if (derived != null && derived > 0) {
     return { rate: derived, source: "fooks" };
   }
 
   return { rate: 0, source: "none" };
+}
+
+/** Alias used across finance — same as resolveCrewUnitCost. */
+export const resolveUnitCost = resolveCrewUnitCost;
+
+/** Billable hours on a time entry; fall back to start/end − break when hours is empty. */
+export function resolveEntryHours(
+  entry: Pick<
+    TimeEntry,
+    "hours" | "start_time" | "end_time" | "break_minutes"
+  >,
+): number {
+  const stored = Number(entry.hours);
+  if (Number.isFinite(stored) && stored > 0) return stored;
+  return calculateWorkedHours(
+    entry.start_time,
+    entry.end_time,
+    entry.break_minutes ?? 0,
+  );
 }
 
 const COST_ENTRY_STATUSES = new Set(["approved", "invoiced"]);
@@ -196,8 +237,9 @@ export function resolveFinancePeriod(
 /**
  * Hours count toward personeelskosten when:
  * - approved/invoiced and work_date is in the finance period, OR
- * - invoiced on a project that has a sent/paid invoice in the period
- *   (links invoice-omzet to the underlying hours even if work_date differs).
+ * - approved/invoiced on a project that has a sent/paid invoice in the period
+ *   (links invoice-omzet to the underlying hours even if work_date differs,
+ *   including hours still `approved` if the invoice path didn't flip status).
  */
 export function isFinanceCostEntry(
   entry: Pick<TimeEntry, "status" | "work_date" | "project_id">,
@@ -210,10 +252,9 @@ export function isFinanceCostEntry(
     return true;
   }
 
-  // Same project as a sent/paid invoice in this period → include invoiced hours
+  // Same project as a sent/paid invoice in this period → include cost hours
   // so approving + sending updates both omzet and kosten together.
   return (
-    entry.status === "invoiced" &&
     Boolean(entry.project_id) &&
     projectsWithOmzetInPeriod.has(entry.project_id!)
   );
@@ -287,7 +328,7 @@ export function aggregateFinanceOverview(
   >();
 
   for (const e of costEntries) {
-    const hours = Number(e.hours || 0);
+    const hours = resolveEntryHours(e);
     const crew = normalizeCrewRelation(
       e.crew_members as
         | TimeEntry["crew_members"]
@@ -295,7 +336,7 @@ export function aggregateFinanceOverview(
         | null
         | undefined,
     );
-    const { rate, source } = resolveCrewUnitCost(crew);
+    const { rate, source } = resolveUnitCost(crew);
     const cost = round2(hours * rate);
 
     totalHours += hours;
@@ -329,12 +370,13 @@ export function aggregateFinanceOverview(
     crewCosts.set(crewId, c);
   }
 
-  const { margin, marginPercent } = calculateMarginEstimate(
+  const costsIncomplete = omzet > 0 && personeelskosten <= 0;
+  const { margin, marginPercent: rawMarginPercent } = calculateMarginEstimate(
     omzet,
     personeelskosten,
   );
-
-  const costsIncomplete = omzet > 0 && personeelskosten <= 0;
+  // Never present a celebratory 100% when there is no cost data.
+  const marginPercent = costsIncomplete ? null : rawMarginPercent;
 
   const projectIds = new Set([
     ...projectOmzet.keys(),
@@ -348,6 +390,7 @@ export function aggregateFinanceOverview(
       const name =
         projectOmzet.get(id)?.name ?? costRow?.name ?? "Zonder project";
       const m = calculateMarginEstimate(rev, cost);
+      const projectCostsIncomplete = rev > 0 && cost <= 0;
       return {
         id,
         name,
@@ -355,7 +398,7 @@ export function aggregateFinanceOverview(
         personeelskosten: round2(cost),
         omzet: round2(rev),
         marge: m.margin,
-        margePercent: m.marginPercent,
+        margePercent: projectCostsIncomplete ? null : m.marginPercent,
       };
     })
     .sort((a, b) => b.omzet - a.omzet || b.personeelskosten - a.personeelskosten);

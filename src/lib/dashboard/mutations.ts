@@ -598,7 +598,11 @@ export async function createCrewMemberAction(
     }
     return fail(error.message);
   }
-  revalidateDashboard(["/dashboard/intern/crew", "/dashboard/intern/planning"]);
+  revalidateDashboard([
+    "/dashboard/intern/crew",
+    "/dashboard/intern/planning",
+    "/dashboard/intern/financien",
+  ]);
   return ok({ id: data!.id });
 }
 
@@ -653,7 +657,11 @@ export async function updateCrewMemberAction(
     }
     return fail(error.message);
   }
-  revalidateDashboard(["/dashboard/intern/crew", "/dashboard/intern/planning"]);
+  revalidateDashboard([
+    "/dashboard/intern/crew",
+    "/dashboard/intern/planning",
+    "/dashboard/intern/financien",
+  ]);
   return ok({ id });
 }
 
