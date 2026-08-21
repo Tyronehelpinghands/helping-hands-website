@@ -40,11 +40,30 @@ const nextConfig: NextConfig = {
       // No English site — strip /en to Dutch homepage
       { source: "/en", destination: "/", permanent: true },
       { source: "/en/:path*", destination: "/", permanent: true },
-      // Gone WordPress media / PHP entrypoints
+      // Gone WordPress media / PHP / feed / archive leftovers (GSC 404s)
+      { source: "/feed", destination: "/", permanent: true },
+      { source: "/feed/:path*", destination: "/", permanent: true },
+      { source: "/rss", destination: "/", permanent: true },
+      { source: "/rss.xml", destination: "/", permanent: true },
+      { source: "/comments/feed", destination: "/", permanent: true },
+      { source: "/comments/feed/:path*", destination: "/", permanent: true },
+      { source: "/xmlrpc.php", destination: "/", permanent: true },
+      { source: "/wp-login.php", destination: "/", permanent: true },
+      { source: "/wp-admin", destination: "/", permanent: true },
+      { source: "/wp-admin/:path*", destination: "/", permanent: true },
+      { source: "/wp-json", destination: "/", permanent: true },
       { source: "/wp-content/:path*", destination: "/", permanent: true },
       { source: "/wp-includes/:path*", destination: "/", permanent: true },
       { source: "/wp-json/:path*", destination: "/", permanent: true },
       { source: "/index.php", destination: "/", permanent: true },
+      { source: "/index.html", destination: "/", permanent: true },
+      { source: "/home", destination: "/", permanent: true },
+      { source: "/blog", destination: "/", permanent: true },
+      { source: "/blog/:path*", destination: "/", permanent: true },
+      { source: "/category/:path*", destination: "/", permanent: true },
+      { source: "/author/:path*", destination: "/", permanent: true },
+      { source: "/page/:path*", destination: "/", permanent: true },
+      { source: "/privacy", destination: "/contact", permanent: true },
 
       // Consolidate overlapping diensten landings → personeel-inhuren
       {
