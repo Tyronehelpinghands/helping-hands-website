@@ -1703,10 +1703,29 @@ export const servicePages: ServicePage[] = [
   ...additionalServicePages,
 ];
 
+/** Synonym landings → the page Google should index. */
+export const SERVICE_SYNONYM_CANONICAL: Record<string, string> = {
+  eventpersoneel: "/personeel-inhuren/event-crew",
+  "horeca-uitzendbureau": "/personeel-inhuren/horeca-personeel",
+  "personeel-evenementenbureau": "/personeel-inhuren",
+  "festival-medewerkers": "/personeel-inhuren/festival-crew",
+  "op-en-afbouw-crew": "/personeel-inhuren/stagehands",
+  "load-in-load-out-crew": "/personeel-inhuren/stagehands",
+  "bediening-inhuren": "/personeel-inhuren/horeca-personeel",
+  "afwassers-keukenpersoneel": "/personeel-inhuren/keukenhulp",
+  "spoed-personeel-evenementen": "/personeel-inhuren",
+};
+
+function withCanonical(page: ServicePage): ServicePage {
+  const canonicalPath = SERVICE_SYNONYM_CANONICAL[page.slug];
+  return canonicalPath ? { ...page, canonicalPath } : page;
+}
+
 export function getAllServicePages(): ServicePage[] {
-  return servicePages;
+  return servicePages.map(withCanonical);
 }
 
 export function getServicePage(slug: string): ServicePage | undefined {
-  return servicePages.find((page) => page.slug === slug);
+  const page = servicePages.find((item) => item.slug === slug);
+  return page ? withCanonical(page) : undefined;
 }

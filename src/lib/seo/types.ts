@@ -25,6 +25,11 @@ export type ServicePage = {
   ctaPrimary: SeoCta;
   ctaSecondary: SeoCta;
   relatedPages: SeoRelatedLink[];
+  /**
+   * Keyword-synonym of another URL. Google should index `canonicalPath`, not this path.
+   * Omit from the sitemap when set.
+   */
+  canonicalPath?: string;
 };
 
 export type WorkPage = {

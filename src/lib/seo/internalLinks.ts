@@ -65,7 +65,7 @@ export function relatedForLocation(slug: string): SeoRelatedLink[] {
     }));
 
   const relatedServices = getAllServicePages()
-    .filter((item) => item.slug !== location.serviceSlug)
+    .filter((item) => !item.canonicalPath && item.slug !== location.serviceSlug)
     .slice(0, 2)
     .map((item) => ({ href: item.path, label: item.title }));
 
@@ -79,10 +79,12 @@ export function relatedForLocation(slug: string): SeoRelatedLink[] {
 }
 
 export function hubServiceLinks(): SeoRelatedLink[] {
-  return getAllServicePages().map((page) => ({
-    href: page.path,
-    label: page.title,
-  }));
+  return getAllServicePages()
+    .filter((page) => !page.canonicalPath)
+    .map((page) => ({
+      href: page.path,
+      label: page.title,
+    }));
 }
 
 export function hubWorkLinks(): SeoRelatedLink[] {

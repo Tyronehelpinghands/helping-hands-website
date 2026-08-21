@@ -7,6 +7,8 @@ type BuildPageMetadataInput = {
   description: string;
   path: string;
   noIndex?: boolean;
+  /** Override canonical/OG url when this page is a synonym of another route. */
+  canonicalPath?: string;
   /** Skip title template (`%s | Helping Hands Agency`). */
   absoluteTitle?: boolean;
   ogImage?: string;
@@ -17,10 +19,11 @@ export function buildPageMetadata({
   description,
   path,
   noIndex = false,
+  canonicalPath,
   absoluteTitle = false,
   ogImage = siteConfig.defaultOgImage,
 }: BuildPageMetadataInput): Metadata {
-  const url = absoluteUrl(path);
+  const url = absoluteUrl(canonicalPath ?? path);
   const imageUrl = absoluteUrl(ogImage);
   const fullTitle = absoluteTitle
     ? title

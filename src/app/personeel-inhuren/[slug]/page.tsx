@@ -40,6 +40,7 @@ export async function generateMetadata({
     title: page.metaTitle,
     description: page.metaDescription,
     path: page.path,
+    canonicalPath: page.canonicalPath,
     absoluteTitle: true,
   });
 }
@@ -65,7 +66,7 @@ export default async function PersoneelInhurenServicePage({
           serviceSchema({
             name: page.title,
             description: page.metaDescription,
-            path: page.path,
+            path: page.canonicalPath ?? page.path,
           }),
           faqPageSchema(page.faqs),
         ]}

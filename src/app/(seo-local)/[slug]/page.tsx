@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import SeoFaqSection from "@/components/seo/FaqSection";
 import JsonLd from "@/components/seo/JsonLd";
@@ -25,6 +25,10 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+function isSitemapSlug(slug: string): boolean {
+  return slug === "sitemap" || slug === "sitemap.xml" || slug === "sitemap.txt";
+}
+
 export function generateStaticParams() {
   return getSeoLocationSlugs().map((slug) => ({ slug }));
 }
@@ -33,6 +37,9 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (isSitemapSlug(slug)) {
+    return {};
+  }
   const page = getSeoLocationPage(slug);
   if (!page) return {};
 
@@ -45,6 +52,9 @@ export async function generateMetadata({
 
 export default async function SeoLocationPage({ params }: PageProps) {
   const { slug } = await params;
+  if (isSitemapSlug(slug)) {
+    redirect("/sitemap.xml");
+  }
   const page = getSeoLocationPage(slug);
   if (!page) notFound();
 
