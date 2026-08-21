@@ -5,9 +5,13 @@ Doel: duidelijker ranken op **commerciële event-staffing keywords** t.o.v. unre
 
 ## 1. Property & sitemap
 
-1. Bevestig Search Console-property op **www** (`https://www.helpinghandsagency.nl`).
-2. Dien sitemap opnieuw in: `https://www.helpinghandsagency.nl/sitemap.xml`
-3. Controleer of `robots.txt` de sitemap noemt en `/dashboard`, `/portaal`, `/api`, `/login` disallows.
+1. Bevestig Search Console-property op **www** (`https://www.helpinghandsagency.nl`) of het **domein-property**.
+2. Dien **exact** deze sitemap in (niet `/sitemap` zonder `.xml`):
+
+   `https://www.helpinghandsagency.nl/sitemap.xml`
+
+   `/sitemap` of `/sitemap.txt` gaf eerder **404** via de stad-catch-all. Dat is nu een rewrite naar dezelfde XML.
+3. Controleer of `robots.txt` die sitemap noemt en `/dashboard`, `/portaal`, `/api`, `/login` disallows.
 
 ## 2. URL-inspectie (indexering aanvragen)
 
@@ -102,7 +106,21 @@ Alleen demoten in GSC als een sitelink structureel verkeerd is.
 - Geen nep-reviews, geen review-incentives
 - Site CTA gebruikt Maps-zoek-URL of echte GBP-URL via `NEXT_PUBLIC_GOOGLE_BUSINESS_URL` indien bekend
 
-## 8. Checklist na elke SEO-deploy
+## 8. “72 pagina’s niet geïndexeerd” (augustus 2026)
+
+Dat getal is bijna de hele sitemap (74 URL’s live). Alle 74 geven **200 OK** — de site is niet stuk.
+
+GSC telt in **Niet geïndexeerd** ook:
+
+- Oude WordPress-URL’s en `/diensten/*` / `/locaties/event-crew-*` die **308/301** naar de canonieke pagina gaan (gewenst)
+- Apex (`helpinghandsagency.nl`) → www
+- Trailing slash (`/contact/` → `/contact`)
+- Synoniem-landings (`/personeel-inhuren/eventpersoneel` e.d.) die nu naar de hoofd-URL canonicaliseren
+- Login/dashboard (`noindex` / robots)
+
+Na deploy: sitemap opnieuw indienen. P0-URL’s inspecteren + indexering aanvragen. Het oude “72” blijft even staan tot Google de redirects opnieuw classificeert — start **Validatie** op het rapport.
+
+## 9. Checklist na elke SEO-deploy
 
 - [ ] `npm run build` groen
 - [ ] Sitemap opnieuw indienen

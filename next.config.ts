@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Prefer /contact over /contact/ (Next default); consistent non-trailing URLs.
   trailingSlash: false,
+  async rewrites() {
+    // GSC often submits /sitemap or /sitemap.txt → those hit (seo-local)/[slug] and 404.
+    // Serve the real XML with 200 so Google does not need a redirect hop.
+    return {
+      beforeFiles: [
+        { source: "/sitemap", destination: "/sitemap.xml" },
+        { source: "/sitemap.txt", destination: "/sitemap.xml" },
+      ],
+    };
+  },
   async redirects() {
     return [
       // Legacy WordPress-ish / marketing aliases

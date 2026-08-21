@@ -51,13 +51,14 @@ const redirectedLocatieSlugs = new Set([
   "eventpersoneel-den-haag",
 ]);
 
+/** Build-time XML so /sitemap.xml stays 200 for Googlebot (no on-demand miss). */
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
   const base = siteConfig.url.replace(/\/$/, "");
 
   const core = marketingRoutes.map((path) => ({
     url: `${base}${path === "/" ? "" : path}`,
-    lastModified,
     changeFrequency: (path === "/" ? "weekly" : "monthly") as
       | "weekly"
       | "monthly",
@@ -69,23 +70,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
           : 0.8,
   }));
 
-  const servicePages = getAllServicePages().map((page) => ({
-    url: `${base}${page.path}`,
-    lastModified,
-    changeFrequency: "monthly" as const,
-    priority: 0.85,
-  }));
+  const servicePages = getAllServicePages()
+    .filter((page) => !page.canonicalPath)
+    .map((page) => ({
+      url: `${base}${page.path}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    }));
 
   const workPages = getAllWorkPages().map((page) => ({
     url: `${base}${page.path}`,
-    lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.75,
   }));
 
   const seoLocations = getAllSeoLocationPages().map((page) => ({
     url: `${base}${page.path}`,
-    lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
@@ -94,7 +94,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((landing) => !redirectedDienstenSlugs.has(landing.slug))
     .map((landing) => ({
       url: `${base}${landing.path}`,
-      lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     }));
@@ -103,14 +102,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((location) => !redirectedLocatieSlugs.has(location.slug))
     .map((location) => ({
       url: `${base}${location.path}`,
-      lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.65,
     }));
 
   const projectCases = getAllProjectCases().map((item) => ({
     url: `${base}/projecten/${item.slug}`,
-    lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
