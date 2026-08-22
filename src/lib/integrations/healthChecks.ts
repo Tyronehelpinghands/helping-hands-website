@@ -5,6 +5,7 @@
 
 import { getDashboardStats } from "@/lib/dashboard/queries";
 import { probeGmailConnection } from "@/lib/integrations/gmail";
+import { probeOpenClawConnection } from "@/lib/integrations/openclaw";
 import { probeWhatsAppConnection } from "@/lib/integrations/whatsapp";
 import {
   formatMoneybirdError,
@@ -29,6 +30,7 @@ export const INTEGRATION_PROVIDERS = [
   "moneybird",
   "whatsapp",
   "gmail",
+  "openclaw",
 ] as const;
 
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
@@ -274,6 +276,15 @@ async function checkGmail(): Promise<Omit<IntegrationHealthResult, "provider" | 
   return { ok: false, status: "Fout", message: result.message };
 }
 
+async function checkOpenClaw(): Promise<Omit<IntegrationHealthResult, "provider" | "checkedAt">> {
+  const result = await probeOpenClawConnection();
+  return {
+    ok: result.ok,
+    status: result.status,
+    message: result.message,
+  };
+}
+
 export async function runIntegrationHealthCheck(
   provider: IntegrationProvider,
 ): Promise<IntegrationHealthResult> {
@@ -304,6 +315,9 @@ export async function runIntegrationHealthCheck(
       break;
     case "gmail":
       partial = await checkGmail();
+      break;
+    case "openclaw":
+      partial = await checkOpenClaw();
       break;
     default:
       partial = {

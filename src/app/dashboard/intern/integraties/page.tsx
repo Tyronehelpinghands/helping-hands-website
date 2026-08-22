@@ -15,6 +15,7 @@ import {
   getWhatsAppConfigStatus,
   WHATSAPP_MESSAGE_TEMPLATES,
 } from "@/lib/integrations/whatsapp";
+import { getOpenClawConfigStatus } from "@/lib/integrations/openclaw";
 import {
   ensureMoneybirdInvoiceReady,
   isMoneybirdConfigured,
@@ -28,7 +29,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 export const metadata: Metadata = {
   title: "Integraties | Intern dashboard",
   description:
-    "Status en live healthchecks voor Supabase, Gmail, Shiftbase, Resend en overige koppelingen.",
+    "Status en live healthchecks voor Supabase, Gmail, Shiftbase, Resend, OpenClaw en overige koppelingen.",
 };
 
 export default async function InternIntegratiesPage({
@@ -50,6 +51,7 @@ export default async function InternIntegratiesPage({
       : null;
 
   const whatsapp = getWhatsAppConfigStatus();
+  const openclaw = getOpenClawConfigStatus();
   const gmail = await getGmailConfigStatusAsync();
   const stats = await getDashboardStats();
   const supabaseConfigured = isSupabaseConfigured();
@@ -139,6 +141,14 @@ export default async function InternIntegratiesPage({
         ? "OAuth aanwezig — klik Test om refresh token te valideren"
         : "OAuth incompleet — mailto fallback · Gmail koppelen",
     },
+    {
+      provider: "openclaw",
+      name: "OpenClaw",
+      status: openclaw.configured ? "Voorbereid" : "Niet gekoppeld",
+      note: openclaw.configured
+        ? `Hooks-token aanwezig · host ${openclaw.gatewayHost} · klik Test`
+        : "Zet OPENCLAW_HOOKS_TOKEN (+ optioneel OPENCLAW_GATEWAY_URL)",
+    },
   ];
 
   return (
@@ -165,6 +175,9 @@ export default async function InternIntegratiesPage({
         moneybirdInvoiceReady={moneybirdInvoiceReady}
         mailboxes={gmail.mailboxes}
         whatsappTemplates={[...WHATSAPP_MESSAGE_TEMPLATES]}
+        openclawConfigured={openclaw.configured}
+        openclawMissing={openclaw.missing}
+        openclawHost={openclaw.gatewayHost}
         gmailFlash={
           gmailStatusParam
             ? {

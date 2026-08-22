@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Bot,
   CalendarDays,
   Clock,
   FileText,
@@ -28,6 +29,7 @@ export const DASHBOARD_ROUTES = {
   financien: "/dashboard/intern/financien",
   risicoActies: "/dashboard/intern/risico-acties",
   berichten: "/dashboard/intern/berichten",
+  openclaw: "/dashboard/intern/openclaw",
   integraties: "/dashboard/intern/integraties",
   instellingen: "/dashboard/intern/instellingen",
 } as const;
@@ -58,6 +60,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
     icon: AlertTriangle,
   },
   { href: DASHBOARD_ROUTES.berichten, label: "Berichten", icon: MessageSquare },
+  { href: DASHBOARD_ROUTES.openclaw, label: "OpenClaw", icon: Bot },
   {
     href: DASHBOARD_ROUTES.integraties,
     label: "Integraties",
@@ -81,6 +84,7 @@ export type DashboardModuleName =
   | "Financiën"
   | "Risico & Acties"
   | "Berichten"
+  | "OpenClaw"
   | "Integraties"
   | "Instellingen";
 
@@ -96,6 +100,7 @@ export const MODULE_LINKS: Record<DashboardModuleName, string> = {
   Financiën: DASHBOARD_ROUTES.financien,
   "Risico & Acties": DASHBOARD_ROUTES.risicoActies,
   Berichten: DASHBOARD_ROUTES.berichten,
+  OpenClaw: DASHBOARD_ROUTES.openclaw,
   Integraties: DASHBOARD_ROUTES.integraties,
   Instellingen: DASHBOARD_ROUTES.instellingen,
 };

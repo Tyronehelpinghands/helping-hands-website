@@ -5,6 +5,7 @@ import {
   type ContactEmailPayload,
   type ContactFormType,
 } from "@/lib/email/formatContactEmail";
+import { notifyOpenClawFromWebsite } from "@/lib/integrations/openclaw";
 import {
   getCcForFormType,
   getContactFromEmail,
@@ -164,6 +165,11 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+
+  void notifyOpenClawFromWebsite({
+    title: `${formType} · ${payload.companyName || payload.contactName || payload.name || payload.email}`,
+    body: text,
+  }).catch(() => undefined);
 
   return NextResponse.json({
     ok: true,

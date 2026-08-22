@@ -66,6 +66,13 @@ export const SHARED_INTEGRATION_DEFINITIONS: IntegrationDefinition[] = [
     checkable: true,
   },
   {
+    id: "openclaw",
+    name: "OpenClaw",
+    description: "Interne AI-agent via Gateway hooks.",
+    checkUrl: "/api/integrations/health?provider=openclaw",
+    checkable: true,
+  },
+  {
     id: "supabase",
     name: "Supabase",
     description: "Database, auth en realtime data.",
