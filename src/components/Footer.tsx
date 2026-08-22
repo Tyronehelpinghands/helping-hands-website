@@ -239,11 +239,6 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/login" className="transition hover:text-white">
-                  Login
-                </Link>
-              </li>
-              <li>
                 <Link
                   href="/login?type=intern"
                   className="transition hover:text-white"

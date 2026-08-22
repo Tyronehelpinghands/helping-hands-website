@@ -1,13 +1,55 @@
 import { getAllSeoLocationPages } from "@/lib/seo/locationPages";
-import { getAllServicePages, getServicePage } from "@/lib/seo/servicePages";
+import {
+  getAllServicePages,
+  getServicePage,
+  SERVICE_SYNONYM_CANONICAL,
+} from "@/lib/seo/servicePages";
 import type { SeoRelatedLink } from "@/lib/seo/types";
 import { getAllWorkPages, getWorkPage } from "@/lib/seo/workPages";
+
+const DIENSTEN_CANONICAL: Record<string, string> = {
+  "event-crew": "/personeel-inhuren/event-crew",
+  stagehands: "/personeel-inhuren/stagehands",
+  "horeca-personeel": "/personeel-inhuren/horeca-personeel",
+  barpersoneel: "/personeel-inhuren/barpersoneel",
+  keukenpersoneel: "/personeel-inhuren/keukenhulp",
+  "productie-assistentie": "/personeel-inhuren/productie-assistenten",
+  logistiek: "/personeel-inhuren/logistiek-personeel",
+  hospitality: "/personeel-inhuren/hospitality-personeel",
+};
+
+/** Rewrite synonym and old /diensten landings to the URL Google should index. */
+export function canonicalizeInternalHref(href: string): string {
+  const [path, query] = href.split("?");
+  const suffix = query ? `?${query}` : "";
+
+  const serviceMatch = path.match(/^\/personeel-inhuren\/([^/]+)\/?$/);
+  if (serviceMatch) {
+    const canonical = SERVICE_SYNONYM_CANONICAL[serviceMatch[1]];
+    if (canonical) return `${canonical}${suffix}`;
+  }
+
+  const dienstenMatch = path.match(/^\/diensten\/([^/]+)\/?$/);
+  if (dienstenMatch) {
+    const canonical = DIENSTEN_CANONICAL[dienstenMatch[1]];
+    if (canonical) return `${canonical}${suffix}`;
+  }
+
+  return href;
+}
+
+function canonicalizeRelatedLinks(links: SeoRelatedLink[]): SeoRelatedLink[] {
+  return links.map((link) => ({
+    ...link,
+    href: canonicalizeInternalHref(link.href),
+  }));
+}
 
 export function relatedForService(slug: string): SeoRelatedLink[] {
   const page = getServicePage(slug);
   if (!page) return [];
 
-  const fromPage = page.relatedPages.slice(0, 4);
+  const fromPage = canonicalizeRelatedLinks(page.relatedPages).slice(0, 4);
   const locations = getAllSeoLocationPages()
     .filter((location) => location.serviceSlug === slug)
     .slice(0, 2)
@@ -42,7 +84,7 @@ export function relatedForWork(slug: string): SeoRelatedLink[] {
 
   return [
     ...(service
-      ? [{ href: service.path, label: service.title }]
+      ? [{ href: service.canonicalPath ?? service.path, label: service.title }]
       : []),
     ...otherWork,
     { href: "/werken-bij", label: "Werken bij Helping Hands Agency" },
@@ -70,7 +112,9 @@ export function relatedForLocation(slug: string): SeoRelatedLink[] {
     .map((item) => ({ href: item.path, label: item.title }));
 
   return [
-    ...(service ? [{ href: service.path, label: service.title }] : []),
+    ...(service
+      ? [{ href: service.canonicalPath ?? service.path, label: service.title }]
+      : []),
     ...siblingLocations,
     ...relatedServices,
     { href: "/personeel-inhuren", label: "Alle personeel inhuren" },

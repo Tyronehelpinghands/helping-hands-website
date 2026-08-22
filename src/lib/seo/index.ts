@@ -1,5 +1,6 @@
 export { personeelInhurenFaqs, werkenBijFaqs } from "@/lib/seo/faq";
 export {
+  canonicalizeInternalHref,
   hubLocationLinks,
   hubServiceLinks,
   hubWorkLinks,
