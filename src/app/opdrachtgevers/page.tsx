@@ -120,21 +120,21 @@ export default function OpdrachtgeversPage() {
             </Link>{" "}
             of ga gericht naar{" "}
             <Link
-              href="/diensten/event-crew"
+              href="/personeel-inhuren/event-crew"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               event crew
             </Link>
             ,{" "}
             <Link
-              href="/diensten/stagehands"
+              href="/personeel-inhuren/stagehands"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               stagehands
             </Link>{" "}
             of{" "}
             <Link
-              href="/diensten/horeca-personeel"
+              href="/personeel-inhuren/horeca-personeel"
               className="font-bold text-[#173A8A] underline-offset-4 hover:underline"
             >
               horeca personeel

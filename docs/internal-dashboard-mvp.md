@@ -122,6 +122,7 @@ Layout blijft `requireRole(internalRoles)`. Mutaties checken opnieuw server-side
 | Moneybird | Optioneel — conceptfactuur vanuit Facturatie (`docs/moneybird-integration.md`) |
 | WhatsApp | Voorbereid (+ wa.me) |
 | Gmail | Voorbereid (+ mailto) |
+| OpenClaw | Voorbereid — intern dashboard + contact-forward + Cursor MCP (`docs/openclaw-integration.md`) |
 
 ## Data-laag
 

@@ -107,6 +107,7 @@ export function OverviewMvpClient({
     { label: "Nieuw project", href: DASHBOARD_ROUTES.projecten },
     { label: "Crew toevoegen", href: DASHBOARD_ROUTES.crew },
     { label: "Uren invoeren", href: DASHBOARD_ROUTES.urenregistratie },
+    { label: "Vraag OpenClaw", href: DASHBOARD_ROUTES.openclaw },
   ];
 
   return (

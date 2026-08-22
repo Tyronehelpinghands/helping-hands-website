@@ -282,13 +282,6 @@ export default function MobileMenu({
             >
               Crew aanmelden
             </a>
-            <Link
-              href="/login"
-              onClick={onClose}
-              className="flex min-h-11 w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-[#F5F7FA] hover:text-[#173A8A] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
-            >
-              Login
-            </Link>
           </div>
         </div>
 

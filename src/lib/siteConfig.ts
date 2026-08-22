@@ -38,7 +38,12 @@ export const siteConfig = {
   /** Alleen tonen in footer/contact legal — niet op marketing-hero */
   iban: "NL59 INGB 0107 7286 13" as string,
   locale: "nl_NL",
-  defaultOgImage: "/images/brand/helping-hands-logo.png",
+  /** Organization / LocalBusiness logo in JSON-LD — not the social share image. */
+  logo: "/images/brand/helping-hands-logo.png",
+  /** Default Open Graph / Twitter image (1200×630 crop). */
+  defaultOgImage: "/images/crew/concert-globe-stage.webp",
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
   description:
     "Helping Hands Agency: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, één aanspreekpunt vanuit Hilversum.",
   /** Google Maps search URL for NAP / GBP support (no fake reviews). */

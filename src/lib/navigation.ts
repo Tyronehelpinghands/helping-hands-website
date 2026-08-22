@@ -11,7 +11,6 @@ export const navLinks = [
   { href: "/locaties", label: "Locaties" },
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
-  { href: "/login", label: "Login" },
 ] as const;
 
 export const contactEmail = siteConfig.email;
@@ -255,5 +254,4 @@ export const simpleNavLinks = [
   { href: "/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
   { href: "/projecten", label: "Projecten" },
-  { href: "/login", label: "Login" },
 ] as const;

@@ -12,7 +12,7 @@ export function organizationSchema() {
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
-    logo: absoluteUrl(siteConfig.defaultOgImage),
+    logo: absoluteUrl(siteConfig.logo),
     description: siteConfig.description,
     address: {
       "@type": "PostalAddress",
@@ -196,7 +196,7 @@ export function jobPostingSchema(input: {
       "@type": "Organization",
       name: siteConfig.name,
       sameAs: [siteConfig.url, ...socialSameAs()],
-      logo: absoluteUrl(siteConfig.defaultOgImage),
+      logo: absoluteUrl(siteConfig.logo),
     },
     jobLocation: {
       "@type": "Place",

@@ -67,6 +67,7 @@ Supabase is the **source of truth** for planning, crew, hours and client request
 - [`shiftbase-integration.md`](./shiftbase-integration.md) — dual mode + hours limitation
 - [`gmail-integration.md`](./gmail-integration.md)
 - [`whatsapp-integration.md`](./whatsapp-integration.md)
+- [`openclaw-integration.md`](./openclaw-integration.md)
 - [`supabase-auth-setup.md`](./supabase-auth-setup.md) — auth, roles, client portal invites
 
 ## Client portal invites (sales)
