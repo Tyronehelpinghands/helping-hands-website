@@ -23,5 +23,6 @@ Op Vercel productie: laat `ALLOW_DEMO_API_ACCESS` uit tenzij je bewust demo-inte
 2. Echte Supabase-rollen + RLS in de database
 3. Portal UX polish (bottom tabs medewerkers)
 4. HubSpot/form backend voor contactaanvragen
+5. OpenClaw: Gateway + dashboard (`/dashboard/intern/openclaw`) + Cursor MCP — zie [`openclaw-integration.md`](./openclaw-integration.md)
 
 Zie ook `.env.example`.

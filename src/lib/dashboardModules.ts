@@ -83,6 +83,13 @@ export const DASHBOARD_MODULE_CARDS: DashboardModuleCard[] = [
     status: "live",
   },
   {
+    id: "openclaw",
+    title: "OpenClaw",
+    description: "Interne AI-agent: opdrachten naar Gateway.",
+    href: DASHBOARD_ROUTES.openclaw,
+    status: "live",
+  },
+  {
     id: "integraties",
     title: "Integraties",
     description: "Eerlijke status Actief/Voorbereid.",

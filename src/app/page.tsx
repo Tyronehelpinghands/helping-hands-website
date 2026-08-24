@@ -26,7 +26,6 @@ export const metadata: Metadata = buildPageMetadata({
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,
-  ogImage: "/images/crew/concert-globe-stage.webp",
 });
 
 export default function Home() {

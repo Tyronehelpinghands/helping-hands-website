@@ -55,6 +55,8 @@ export const metadata: Metadata = {
       {
         url: absoluteUrl(siteConfig.defaultOgImage),
         alt: siteConfig.name,
+        width: siteConfig.ogImageWidth,
+        height: siteConfig.ogImageHeight,
       },
     ],
   },

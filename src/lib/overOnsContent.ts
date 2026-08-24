@@ -29,43 +29,43 @@ export const overOnsGrowth = {
   roles: [
     {
       label: "Sitecrew en stagehands",
-      href: "/diensten/stagehands",
+      href: "/personeel-inhuren/stagehands",
     },
     {
       label: "Productie- en eventmedewerkers",
-      href: "/diensten/event-crew",
+      href: "/personeel-inhuren/event-crew",
     },
     {
       label: "Podium- en tentenbouwers",
-      href: "/diensten/stagehands",
+      href: "/personeel-inhuren/stagehands",
     },
     {
       label: "Logistieke medewerkers",
-      href: "/diensten/logistiek",
+      href: "/personeel-inhuren/logistiek-personeel",
     },
     {
       label: "Heftruckchauffeurs en gecertificeerde krachten",
-      href: "/diensten/logistiek",
+      href: "/personeel-inhuren/logistiek-personeel",
     },
     {
       label: "Horecamedewerkers en runners",
-      href: "/diensten/horeca-personeel",
+      href: "/personeel-inhuren/horeca-personeel",
     },
     {
       label: "Keukenmedewerkers en zelfstandig werkende koks",
-      href: "/diensten/keukenpersoneel",
+      href: "/personeel-inhuren/keukenhulp",
     },
     {
       label: "Productie-assistentie",
-      href: "/diensten/productie-assistentie",
+      href: "/personeel-inhuren/productie-assistenten",
     },
     {
       label: "Hospitality en ontvangst",
-      href: "/diensten/hospitality",
+      href: "/personeel-inhuren/hospitality-personeel",
     },
     {
       label: "Teamleiders en voormannen",
-      href: "/medewerkers",
+      href: "/werken-bij",
     },
   ],
 };

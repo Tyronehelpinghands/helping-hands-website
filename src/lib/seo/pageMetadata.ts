@@ -24,7 +24,12 @@ export function buildPageMetadata({
   ogImage = siteConfig.defaultOgImage,
 }: BuildPageMetadataInput): Metadata {
   const url = absoluteUrl(canonicalPath ?? path);
-  const imageUrl = absoluteUrl(ogImage);
+  const image = {
+    url: absoluteUrl(ogImage),
+    alt: siteConfig.name,
+    width: siteConfig.ogImageWidth,
+    height: siteConfig.ogImageHeight,
+  };
   const fullTitle = absoluteTitle
     ? title
     : title.includes(siteConfig.name)
@@ -46,13 +51,13 @@ export function buildPageMetadata({
       siteName: siteConfig.name,
       locale: siteConfig.locale,
       type: "website",
-      images: [{ url: imageUrl, alt: siteConfig.name }],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [imageUrl],
+      images: [image.url],
     },
     robots: noIndex
       ? { index: false, follow: false, googleBot: { index: false, follow: false } }
@@ -83,7 +88,7 @@ export function organizationJsonLd() {
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
-    logo: absoluteUrl(siteConfig.defaultOgImage),
+    logo: absoluteUrl(siteConfig.logo),
     description: siteConfig.description,
     address: {
       "@type": "PostalAddress",
@@ -283,7 +288,7 @@ export function jobPostingJsonLd(input: {
       "@type": "Organization",
       name: siteConfig.name,
       sameAs: [siteConfig.url, ...socialSameAs()],
-      logo: absoluteUrl(siteConfig.defaultOgImage),
+      logo: absoluteUrl(siteConfig.logo),
     },
     jobLocation: {
       "@type": "Place",
@@ -402,7 +407,7 @@ export function projectCaseCreativeWorkJsonLd(input: {
       "@type": "Organization",
       name: siteConfig.name,
       url: siteConfig.url,
-      logo: absoluteUrl(siteConfig.defaultOgImage),
+      logo: absoluteUrl(siteConfig.logo),
     },
   };
 

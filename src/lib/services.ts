@@ -72,7 +72,7 @@ export type ServiceLanding = {
 export const serviceLandings: ServiceLanding[] = [
   {
     slug: "event-crew",
-    path: "/diensten/event-crew",
+    path: "/personeel-inhuren/event-crew",
     title: "Event crew inhuren",
     h1: "Event crew inhuren voor festivals, concerten en beurzen",
     description:
@@ -140,7 +140,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "horeca-personeel",
-    path: "/diensten/horeca-personeel",
+    path: "/personeel-inhuren/horeca-personeel",
     title: "Horeca personeel inhuren",
     h1: "Horeca personeel inhuren voor events en locaties",
     description:
@@ -208,7 +208,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "stagehands",
-    path: "/diensten/stagehands",
+    path: "/personeel-inhuren/stagehands",
     title: "Stagehands inhuren",
     h1: "Stagehands inhuren voor load-in, opbouw en afbouw",
     description:
@@ -344,7 +344,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "keukenpersoneel",
-    path: "/diensten/keukenpersoneel",
+    path: "/personeel-inhuren/keukenhulp",
     title: "Keukenpersoneel inhuren",
     h1: "Keukenpersoneel en koks inhuren",
     description:
@@ -412,7 +412,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "barpersoneel",
-    path: "/diensten/barpersoneel",
+    path: "/personeel-inhuren/barpersoneel",
     title: "Barpersoneel inhuren",
     h1: "Barpersoneel inhuren voor bars, festivals en events",
     description:
@@ -480,7 +480,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "productie-assistentie",
-    path: "/diensten/productie-assistentie",
+    path: "/personeel-inhuren/productie-assistenten",
     title: "Productie assistentie",
     h1: "Productie assistentie en runners voor live producties",
     description:
@@ -548,7 +548,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "logistiek",
-    path: "/diensten/logistiek",
+    path: "/personeel-inhuren/logistiek-personeel",
     title: "Logistiek personeel evenementen",
     h1: "Logistiek personeel voor evenementen en locaties",
     description:
@@ -616,7 +616,7 @@ export const serviceLandings: ServiceLanding[] = [
   },
   {
     slug: "hospitality",
-    path: "/diensten/hospitality",
+    path: "/personeel-inhuren/hospitality-personeel",
     title: "Hospitality crew",
     h1: "Hospitality crew voor events, VIP en ontvangst",
     description:

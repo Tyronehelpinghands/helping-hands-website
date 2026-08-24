@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  Bot,
   CheckCircle2,
   Copy,
   ExternalLink,
@@ -49,6 +50,9 @@ export type IntegrationHubProps = {
   moneybirdInvoiceReady?: boolean;
   mailboxes: SharedMailbox[];
   whatsappTemplates: Array<{ id: string; label: string; body: string }>;
+  openclawConfigured?: boolean;
+  openclawMissing?: string[];
+  openclawHost?: string;
   gmailFlash?: GmailFlash | null;
 };
 
@@ -82,6 +86,9 @@ export default function IntegrationsHubClient({
   moneybirdInvoiceReady = false,
   mailboxes,
   whatsappTemplates,
+  openclawConfigured = false,
+  openclawMissing = [],
+  openclawHost = "127.0.0.1:18789",
   gmailFlash = null,
 }: IntegrationHubProps) {
   const [waTo, setWaTo] = useState(siteConfig.phoneTel.replace("+", ""));
@@ -427,6 +434,41 @@ export default function IntegrationsHubClient({
                 <ExternalLink className="h-3 w-3" />
               </a>
               <LiveTestButton provider="whatsapp" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200/80 bg-white shadow-sm shadow-[#0B1F4D]/5">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-base font-black text-[#0B1F4D]">
+                OpenClaw
+              </CardTitle>
+              <SettingsStatusBadge status={configBadge(openclawConfigured)} />
+            </div>
+            <CardDescription>
+              Interne agent · dashboard + Cursor MCP.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-xs text-[#101828]/65">
+            <p>
+              Host: {openclawHost}.{" "}
+              {openclawConfigured
+                ? "Hooks-token aanwezig (server-side)."
+                : `Ontbreekt: ${openclawMissing.join(", ") || "OPENCLAW_HOOKS_TOKEN"}.`}
+            </p>
+            <div className="flex flex-wrap items-start gap-2">
+              <Link
+                href="/dashboard/intern/openclaw"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "w-fit gap-1.5",
+                )}
+              >
+                <Bot className="h-3.5 w-3.5" />
+                Open assistent
+              </Link>
+              <LiveTestButton provider="openclaw" />
             </div>
           </CardContent>
         </Card>
@@ -852,6 +894,10 @@ export default function IntegrationsHubClient({
         ·{" "}
         <code className="rounded bg-slate-100 px-1">
           docs/gmail-integration.md
+        </code>{" "}
+        ·{" "}
+        <code className="rounded bg-slate-100 px-1">
+          docs/openclaw-integration.md
         </code>
       </p>
     </div>

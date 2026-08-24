@@ -375,6 +375,13 @@ export const INTEGRATION_DEFINITIONS = [
     checkable: true,
   },
   {
+    id: "openclaw",
+    name: "OpenClaw",
+    description: "Interne Helping Hands-agent (Gateway + dashboard + Cursor MCP).",
+    checkUrl: "/api/integrations/openclaw/status",
+    checkable: true,
+  },
+  {
     id: "fooks",
     name: "Fooks / Payroll",
     description: "Payrollstatus, loonkosten en contractvormen.",
@@ -389,6 +396,7 @@ export const SECURITY_CHECKLIST = [
   "Shiftbase token server-side",
   "Google Maps key server-side",
   "WhatsApp / Gmail tokens server-side",
+  "OpenClaw hooks-token server-side (niet het Gateway-token)",
   "Supabase Auth + requireRole op interne routes",
   "Integratie-API’s via requireInternApiAccess",
   "Audit logs later toevoegen",
