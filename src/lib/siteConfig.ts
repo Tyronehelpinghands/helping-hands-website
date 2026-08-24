@@ -45,7 +45,7 @@ export const siteConfig = {
   ogImageWidth: 1200,
   ogImageHeight: 630,
   description:
-    "Helping Hands Agency: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, één aanspreekpunt vanuit Hilversum.",
+    "Event crew, stagehands en horecapersoneel inhuren vanuit Hilversum. Voor festivals, stadions en horeca — geen thuiszorg. Eén planning, duidelijke briefing. Bel 06 5741 6338.",
   /** Google Maps search URL for NAP / GBP support (no fake reviews). */
   googleMapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Helping%20Hands%20Agency%20Wandelpad%2030%20Hilversum" as string,

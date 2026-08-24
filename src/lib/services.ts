@@ -416,20 +416,21 @@ export const serviceLandings: ServiceLanding[] = [
     title: "Barpersoneel inhuren",
     h1: "Barpersoneel inhuren voor bars, festivals en events",
     description:
-      "Barpersoneel inhuren: bartenders, barbacks en dranken runners voor bars, clubs, festivals en eventbars in Nederland.",
+      "Bar huren met personeel: bartenders, barbacks en runners op jouw festivalbar, tapwagen of pop-up. Wij leveren de crew, niet de bar-unit.",
     category: "Bar",
     hubSummary:
       "Bartenders, barbacks en dranken runners voor bars, festivals en eventbars.",
     anchorId: "bar",
     keywords: [
+      "bar huren met personeel",
       "barpersoneel inhuren",
       "bartender inhuren",
       "barback inhuren",
       "festival bar crew",
     ],
     intro: [
-      "Achter de bar moet de flow doorlopen. Helping Hands levert bartenders, barbacks en dranken runners zodat service blijft draaien tijdens drukte.",
-      "Inzetbaar op vaste barlocaties, pop-up bars, festivals, clubs en corporate events.",
+      "Zoek je een bar met personeel voor een event? Wij leveren bartenders, barbacks en dranken runners op jouw tap, pop-up of festivalbar.",
+      "De bar-unit zelf verhuur je elders; Helping Hands bezet de mensen achter de kraan, inclusief briefing over leeftijdscheck en piek.",
     ],
     bullets: [
       "Bartenders voor service en cocktails",
@@ -467,9 +468,9 @@ export const serviceLandings: ServiceLanding[] = [
           "Ja. We bezetten wat jij nodig hebt — alleen barback, alleen bartender, of een complete barcrew.",
       },
       {
-        question: "Doen jullie ook bar opbouw en afbouw?",
+        question: "Huren jullie een complete bar met personeel?",
         answer:
-          "Op verzoek wel. Geef dat aan in de briefing zodat we de juiste bezetting en call-times plannen.",
+          "Nee. Wij zijn staffing: bartenders en barbacks op de bar die jij huurt of al hebt. De tapwagen of tentbar regel je via een verhuurder.",
       },
     ],
     image: {

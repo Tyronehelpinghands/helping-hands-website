@@ -22,7 +22,7 @@ import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+  title: `Event crew inhuren | ${siteConfig.name} Hilversum`,
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,

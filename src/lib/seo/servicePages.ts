@@ -852,21 +852,22 @@ const coreServicePages: ServicePage[] = [
   {
     "slug": "barpersoneel",
     "title": "Barpersoneel inhuren",
-    "metaTitle": "Barpersoneel inhuren | Helping Hands Agency",
-    "metaDescription": "Barpersoneel inhuren voor events, festivals en locaties. Bartenders en barbacks met heldere briefing. Vraag barcrew aan.",
-    "h1": "Barpersoneel inhuren voor events, festivals en locaties",
-    "intro": "Een soepel draaiende bar vraagt om tempo, overzicht en goede barbacks. Helping Hands Agency levert barpersoneel voor events, festivals, pop-ups en vaste locaties. Wij stemmen af of je bartenders, barbacks of een mix nodig hebt, inclusief kleding en werkwijze. Gevestigd in Hilversum en inzetbaar door heel Nederland. Deel je barplan en shifts — wij bezetten mee. Personeel aanvragen via contact of bel 06 5741 6338.",
+    "metaTitle": "Barpersoneel inhuren | Bar met personeel voor events",
+    "metaDescription": "Bar huren met personeel voor een event of festival? Wij leveren bartenders en barbacks op jouw tap, pop-up of festivalbar. Vanuit Hilversum. Bel 06 5741 6338.",
+    "h1": "Barpersoneel inhuren — ook als je een bar huurt voor je event",
+    "intro": "Zoek je een bar met personeel voor een bruiloft, festival, bedrijfsfeest of pop-up? Helping Hands Agency levert de mensen achter de tap: bartenders, barbacks en bar-runners. De bar-unit, tapwagen of tentbar regel je zelf of via je leverancier — wij bezetten die bar zodat de rij blijft lopen. We briefen leeftijdscheck, huisregels, kleding en wie wanneer opent. Eén vestiging in Hilversum, inzet door heel Nederland. Deel datum, locatie, aantal taps en shifts via planning@helpinghandsagency.nl of 06 5741 6338.",
     "targetKeywords": [
+      "bar huren met personeel",
       "barpersoneel inhuren",
       "bartender inhuren",
       "barcrew events"
     ],
     "services": [
-      "Bartenders voor events",
-      "Barbacks en glazen spoelen",
-      "Bevoorrading en ijs",
-      "Pop-up bars en festivalbars",
-      "Ondersteuning tijdens piekuren"
+      "Bartenders op gehuurde bars, tapwagens en festivalbars",
+      "Barbacks: ijs, glaswerk en voorraad",
+      "Bar-runners tussen stations",
+      "Piekbezetting bij bruiloften, corporate en clubs",
+      "Briefing leeftijdscheck en huisregels"
     ],
     "roles": [
       {
@@ -888,59 +889,59 @@ const coreServicePages: ServicePage[] = [
     ],
     "path": "/personeel-inhuren/barpersoneel",
     "whyUs": [
-      "Snelle schakeling bij wijzigingen of spoedaanvragen",
-      "Duidelijke briefing en één aanspreekpunt bij planning",
-      "Gemotiveerde crew met praktijkervaring op events en horeca",
-      "Ervaring met festivals, producties, horeca en logistiek",
-      "Jongeren ontwikkelen via echte werkervaring op locatie",
-      "Korte lijnen: gevestigd in Hilversum, actief door heel Nederland"
+      "Personeel op jouw gehuurde bar, tapwagen of festivalbar — wij leveren geen bar-unit",
+      "Mix van bartenders, barbacks en runners afgestemd op aantal taps en piek",
+      "Briefing over leeftijdscheck, huisregels en opening van de bar",
+      "Eén aanspreekpunt bij planning, ook bij late wijzigingen in shifts",
+      "Ervaring met festivalbars, bedrijfsfeesten, pop-ups en vaste horeca",
+      "Vanuit Hilversum, inzetbaar door heel Nederland"
     ],
     "processSteps": [
       {
-        "title": "Aanvraag",
-        "description": "Deel datum, locatie, tijden, functies en aantallen via het contactformulier of planning@helpinghandsagency.nl."
+        "title": "Barplan",
+        "description": "Deel datum, locatie, aantal taps of barstations, openingstijden en of de bar gehuurd is of vast staat."
       },
       {
-        "title": "Planning check",
-        "description": "Wij checken beschikbaarheid en stemmen de bezetting af op jouw productie."
+        "title": "Bezetting",
+        "description": "Wij stellen bartenders, barbacks en eventueel runners voor, passend bij doorloop en drankkaart."
       },
       {
         "title": "Briefing",
-        "description": "Taken, kleding/PBM, verzamelpunt en aanspreekpunt worden helder gecommuniceerd."
+        "description": "Leeftijdscheck, kleding, verzamelpunt, wie de kassa of tap opent, en contact met jouw barleverancier."
       },
       {
-        "title": "Inzet",
-        "description": "Crew staat op tijd klaar op locatie met duidelijke instructies."
+        "title": "Service",
+        "description": "Crew staat klaar vóór opening, houdt voorraad en glaswerk bij, en sluit de bar netjes af."
       },
       {
-        "title": "Uren en afronding",
-        "description": "Urenregistratie en terugkoppeling na afloop — kort en overzichtelijk."
+        "title": "Uren",
+        "description": "Urenregistratie na afloop. Tarief op aanvraag — geen standaardpakket ‘bar huren’."
       }
     ],
     "faqs": [
       {
-        "question": "Hoe vraag ik barpersoneel inhuren aan?",
-        "answer": "Via /contact of planning@helpinghandsagency.nl. Vermeld datum, locatie, tijden, functies en aantal mensen. Bij spoed: bel of app 06 5741 6338."
+        "question": "Huren jullie de bar zelf, of alleen het personeel?",
+        "answer": "Alleen het personeel. Helping Hands Agency is event staffing, geen barverhuur. Huur je een tapwagen, tentbar of festivalbar elders? Wij zetten bartenders en barbacks op die bar. De unit, tap en drank regel je via je leverancier of locatie."
+      },
+      {
+        "question": "Kan ik een bar huren met personeel via jullie?",
+        "answer": "Je huurt de bar bij een verhuurder; wij leveren de crew erbij. Stuur ons de leverancier, opbouwtijd en het aantal kranen — dan bezetten we mee. Aanvragen via /contact of planning@helpinghandsagency.nl, of bel 06 5741 6338."
+      },
+      {
+        "question": "Hoeveel barpersoneel heb ik nodig?",
+        "answer": "Hangt af van taps, cocktailkaart en piek. Een eenvoudige biertap vraagt minder bartenders dan een cocktailbar. Deel je opzet; wij stellen een bezetting voor."
+      },
+      {
+        "question": "Leveren jullie ook alleen barbacks?",
+        "answer": "Ja. Alleen barback, alleen bartender, of een complete barcrew. Geen minimumpakket verplicht."
+      },
+      {
+        "question": "Wat kost barpersoneel?",
+        "answer": "Tarief op aanvraag. Functie, tijden, locatie en aantallen bepalen de prijs. Geen all-in ‘bar huren met personeel’-pakketprijs, omdat de bar zelf niet van ons is."
       },
       {
         "question": "Werken jullie landelijk?",
-        "answer": "Ja. Helping Hands Agency is gevestigd in Hilversum (Wandelpad 30) en levert personeel door heel Nederland."
-      },
-      {
-        "question": "Kunnen jullie ook op korte termijn leveren?",
-        "answer": "Vaak wel, afhankelijk van beschikbaarheid. Deel zo vroeg mogelijk je planning; bij spoed kijken we wat nog haalbaar is."
-      },
-      {
-        "question": "Hoe werkt de briefing?",
-        "answer": "Vooraf stemmen we taken, kleding/PBM, verzamelpunt en aanspreekpunt af. Zo weet iedereen wat er van hen verwacht wordt."
-      },
-      {
-        "question": "Wat kosten jullie diensten?",
-        "answer": "Tarief op aanvraag. De prijs hangt af van functie, tijden, locatie en aantallen. Deel je planning — wij sturen een passende indicatie."
-      },
-      {
-        "question": "Voor wie is Helping Hands Agency bedoeld?",
-        "answer": "Voor opdrachtgevers die betrouwbare event-, horeca- of productiemeewerkers nodig hebben — en voor crew die wil werken op echte producties in de live branche."
+        "answer": "Ja. Vestiging Hilversum (Wandelpad 30), inzet door heel Nederland op events en horeca."
       }
     ],
     "ctaPrimary": {
