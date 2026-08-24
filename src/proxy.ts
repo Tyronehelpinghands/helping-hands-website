@@ -21,6 +21,7 @@ const WP_JUNK_PARAMS = [
   "paged",
   "attachment_id",
   "author",
+  "s",
 ] as const;
 
 function isEnglishPath(pathname: string): boolean {
@@ -96,6 +97,7 @@ export const config = {
     "/",
     "/index.php",
     "/en",
+    "/en/",
     "/en/:path*",
     "/dashboard/:path*",
     "/portaal/medewerkers",
