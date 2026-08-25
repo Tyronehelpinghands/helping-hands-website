@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   clientInzetTypes,
   getFallbackMailtoHint,
+  resolveContactAudienceFromUrl,
   type ContactAudience,
   type ContactFormType,
   workerInterestOptions,
@@ -289,6 +291,28 @@ function buildRequestBody(
 }
 
 export default function ContactTabs() {
+  return (
+    <Suspense fallback={<ContactTabsFallback />}>
+      <ContactTabsInner />
+    </Suspense>
+  );
+}
+
+function ContactTabsFallback() {
+  return (
+    <div
+      id="aanvraag"
+      className="scroll-mt-28 rounded-[2rem] bg-white p-4 shadow-2xl shadow-[#0B1F4D]/10 sm:p-6"
+      aria-busy="true"
+    >
+      <div className="h-14 animate-pulse rounded-2xl bg-[#F5F7FA]" />
+      <div className="mt-8 h-64 animate-pulse rounded-2xl bg-[#F5F7FA]" />
+    </div>
+  );
+}
+
+function ContactTabsInner() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<ContactAudience>("client");
   const [isUrgent, setIsUrgent] = useState(false);
   const [inzetType, setInzetType] = useState<string>(clientInzetTypes[0]);
@@ -307,24 +331,41 @@ export default function ContactTabs() {
   }
 
   useEffect(() => {
-    function applyHash(hash: string) {
-      if (hash === "#aanmelden") {
-        setActiveTab("worker");
-        setSuccessMessage(null);
-        setErrorMessage(null);
-        setSubmittedFormType(null);
-      } else if (hash === "#aanvraag") {
-        setActiveTab("client");
-        setSuccessMessage(null);
-        setErrorMessage(null);
-        setSubmittedFormType(null);
-      }
+    function applyAudience(audience: ContactAudience | null, scroll: boolean) {
+      if (!audience) return;
+      setActiveTab(audience);
+      setSuccessMessage(null);
+      setErrorMessage(null);
+      setSubmittedFormType(null);
+      if (!scroll || typeof document === "undefined") return;
+      // Defer so the worker tab content is in the DOM before scrolling.
+      requestAnimationFrame(() => {
+        const target =
+          document.getElementById(
+            audience === "worker" ? "aanmelden" : "aanvraag",
+          ) ?? document.getElementById("aanvraag");
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
 
-    applyHash(window.location.hash);
+    const fromUrl = resolveContactAudienceFromUrl({
+      search: searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : typeof window !== "undefined"
+          ? window.location.search
+          : "",
+      hash: typeof window !== "undefined" ? window.location.hash : "",
+    });
+    applyAudience(fromUrl, Boolean(fromUrl));
 
     function handleHashChange() {
-      applyHash(window.location.hash);
+      applyAudience(
+        resolveContactAudienceFromUrl({
+          search: window.location.search,
+          hash: window.location.hash,
+        }),
+        true,
+      );
     }
 
     function handleClick(event: MouseEvent) {
@@ -333,9 +374,19 @@ export default function ContactTabs() {
       const anchor = target.closest("a[href]");
       if (!anchor) return;
       const href = anchor.getAttribute("href") ?? "";
-      const hashIndex = href.indexOf("#");
-      if (hashIndex === -1) return;
-      applyHash(href.slice(hashIndex));
+      if (!href.includes("/contact") && !href.startsWith("#")) return;
+
+      try {
+        const url = new URL(href, window.location.origin);
+        if (url.pathname !== "/contact" && !href.startsWith("#")) return;
+        const audience = resolveContactAudienceFromUrl({
+          search: href.startsWith("#") ? window.location.search : url.search,
+          hash: url.hash || (href.startsWith("#") ? href : ""),
+        });
+        applyAudience(audience, Boolean(audience));
+      } catch {
+        // Ignore malformed hrefs
+      }
     }
 
     window.addEventListener("hashchange", handleHashChange);
@@ -344,7 +395,7 @@ export default function ContactTabs() {
       window.removeEventListener("hashchange", handleHashChange);
       document.removeEventListener("click", handleClick);
     };
-  }, []);
+  }, [searchParams]);
 
   function toggleInterest(option: string) {
     setInterests((current) =>

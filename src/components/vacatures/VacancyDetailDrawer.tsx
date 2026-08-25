@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
+import Link from "next/link";
 import {
-  vacancyApplyMailto,
+  openApplyHref,
   vacancyQuestionMailto,
   type Vacancy,
 } from "@/lib/vacancies";
@@ -113,12 +114,12 @@ export default function VacancyDetailDrawer({
 
         <div className="border-t border-slate-200 bg-white p-4 sm:p-5">
           <div className="flex flex-col gap-2 sm:flex-row">
-            <a
-              href={vacancyApplyMailto(vacancy)}
+            <Link
+              href={openApplyHref}
               className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-[#F28C28] px-4 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
             >
               Solliciteer op deze functie
-            </a>
+            </Link>
             <a
               href={vacancyQuestionMailto(vacancy)}
               className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-[#173A8A] px-4 text-sm font-bold text-[#173A8A] transition hover:bg-[#F5F7FA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"

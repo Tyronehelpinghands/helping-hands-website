@@ -7,6 +7,70 @@ export type ContactFormType =
   | "crew_application"
   | "general_contact";
 
+/** Canonical deep links for contact form tabs (query + hash both supported). */
+export const staffRequestHref = "/contact?type=personeel-aanvragen";
+export const crewApplyHref = "/contact?type=crew-aanmelden";
+export const generalContactHref = "/contact?type=algemene-vraag";
+
+const workerTypeValues = new Set([
+  "crew-aanmelden",
+  "crew",
+  "worker",
+  "medewerker",
+  "aanmelden",
+  "crew_application",
+  "employee",
+]);
+
+const clientTypeValues = new Set([
+  "personeel-aanvragen",
+  "personeel",
+  "client",
+  "staff",
+  "aanvraag",
+  "staff_request",
+]);
+
+const generalTypeValues = new Set([
+  "algemene-vraag",
+  "algemeen",
+  "general",
+  "vraag",
+  "general_contact",
+]);
+
+/**
+ * Resolve which contact tab to open from `?type=` / `?tab=` / hash.
+ * Used by ContactTabs so CTAs like `/contact?type=crew-aanmelden` work.
+ */
+export function resolveContactAudienceFromUrl(input: {
+  search?: string;
+  hash?: string;
+}): ContactAudience | null {
+  const search = input.search ?? "";
+  const query = search.startsWith("?") ? search.slice(1) : search;
+  const params = new URLSearchParams(query);
+  const raw = (
+    params.get("type") ??
+    params.get("tab") ??
+    params.get("form") ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (workerTypeValues.has(raw)) return "worker";
+  if (clientTypeValues.has(raw)) return "client";
+  if (generalTypeValues.has(raw)) return "general";
+
+  const hash = (input.hash ?? "").trim().toLowerCase();
+  if (hash === "#aanmelden" || hash === "#crew") return "worker";
+  if (hash === "#aanvraag" || hash === "#personeel") return "client";
+  if (hash === "#algemeen" || hash === "#vraag") return "general";
+
+  return null;
+}
+
 export function getFallbackMailtoHint(formType: ContactFormType): {
   email: string;
   text: string;

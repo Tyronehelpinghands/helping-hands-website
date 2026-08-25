@@ -997,7 +997,7 @@ export function vacancyQuestionMailto(vacancy: Vacancy): string {
   return `mailto:${vacancy.applicationEmail}?subject=${subject}&body=${body}`;
 }
 
-/** Open aanmelding zonder specifieke functie. */
+/** Open aanmelding zonder specifieke functie (mailto fallback). */
 export const openApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
   "Aanmelding medewerker Helping Hands",
 )}&body=${encodeURIComponent(
@@ -1017,6 +1017,9 @@ export const openApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIC
     "Groet,",
   ].join("\n"),
 )}`;
+
+/** Primary CTA: contact form crew tab (works without a mail client). */
+export { crewApplyHref as openApplyHref } from "@/lib/contact";
 
 /** @deprecated Use vacancyApplyMailto */
 export function vacancyMailto(title: string, email = applicationsEmail) {

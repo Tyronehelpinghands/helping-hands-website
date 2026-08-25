@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { openApplyMailto } from "@/lib/vacancies";
+import { openApplyHref } from "@/lib/vacancies";
 
 /**
  * Sticky mobile CTA for /vacatures only.
@@ -12,12 +12,12 @@ export default function MobileVacancyCta() {
       className="fixed inset-x-0 bottom-0 z-40 max-w-[100vw] border-t border-white/20 bg-[#0B1F4D]/95 p-3 shadow-2xl backdrop-blur-md lg:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
-        <a
-          href={openApplyMailto}
+        <Link
+          href={openApplyHref}
           className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#F28C28] px-4 py-3 text-center text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           Aanmelden
-        </a>
+        </Link>
         <Link
           href="#vacatures"
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-3 text-center text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"

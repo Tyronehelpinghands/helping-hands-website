@@ -57,7 +57,11 @@ export type EmployeeGrowthStage = {
   description: string;
 };
 
-export { employeeApplyMailto } from "@/lib/navigation";
+export {
+  crewApplyHref as employeeApplyHref,
+  employeeApplyMailto,
+} from "@/lib/navigation";
+export { crewApplyHref } from "@/lib/contact";
 
 export const employeeHeroTrust = [
   "Duidelijke planning",

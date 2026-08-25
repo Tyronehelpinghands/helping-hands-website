@@ -31,8 +31,8 @@ const options = {
     ],
     cta: "Bekijk vacatures",
     href: "/vacatures",
-    secondaryCta: "Werken bij",
-    secondaryHref: "/werken-bij",
+    secondaryCta: "Meld je aan",
+    secondaryHref: "/contact?type=crew-aanmelden",
   },
 } as const;
 

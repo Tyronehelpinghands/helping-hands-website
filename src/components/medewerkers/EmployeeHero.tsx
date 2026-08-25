@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  employeeApplyMailto,
+  crewApplyHref,
   employeeHeroPhotos,
   employeeHeroTrust,
 } from "@/lib/employeePage";
@@ -81,7 +81,7 @@ export default function EmployeeHero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <HeroCta
-              href={employeeApplyMailto}
+              href={crewApplyHref}
               label="Aanmelden als crewlid"
               variant="primary"
             />

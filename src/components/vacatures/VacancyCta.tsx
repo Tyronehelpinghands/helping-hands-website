@@ -1,6 +1,6 @@
 import Link from "next/link";
 import RevealOnScroll from "@/components/RevealOnScroll";
-import { openApplyMailto } from "@/lib/vacancies";
+import { openApplyHref, openApplyMailto } from "@/lib/vacancies";
 import { applicationsEmail } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,7 @@ export default function VacancyCta() {
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <CtaLink
-                  href={openApplyMailto}
+                  href={openApplyHref}
                   label="Aanmelden als crewlid"
                   variant="primary"
                 />

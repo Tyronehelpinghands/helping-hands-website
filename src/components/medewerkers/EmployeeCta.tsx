@@ -1,6 +1,6 @@
 import Link from "next/link";
 import RevealOnScroll from "@/components/RevealOnScroll";
-import { employeeApplyMailto } from "@/lib/employeePage";
+import { crewApplyHref, employeeApplyMailto } from "@/lib/employeePage";
 import { applicationsEmail } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +71,7 @@ export default function EmployeeCta({ variant = "end" }: EmployeeCtaProps) {
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <CtaLink
-                  href={employeeApplyMailto}
+                  href={crewApplyHref}
                   label={isMid ? "Meld je aan" : "Aanmelden als medewerker"}
                   variant="primary"
                 />

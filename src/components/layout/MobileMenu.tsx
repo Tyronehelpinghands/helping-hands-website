@@ -11,7 +11,7 @@ import {
   planningEmail,
   type NavDropdownConfig,
 } from "@/lib/navigation";
-import { openApplyMailto } from "@/lib/vacancies";
+import { crewApplyHref } from "@/lib/contact";
 import { cn } from "@/lib/utils";
 
 type MobileMenuProps = {
@@ -275,13 +275,13 @@ export default function MobileMenu({
             >
               Personeel aanvragen
             </Link>
-            <a
-              href={openApplyMailto}
+            <Link
+              href={crewApplyHref}
               onClick={onClose}
               className="flex min-h-11 w-full items-center justify-center rounded-xl border-2 border-[#173A8A] px-5 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-[#173A8A]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
             >
               Crew aanmelden
-            </a>
+            </Link>
           </div>
         </div>
 

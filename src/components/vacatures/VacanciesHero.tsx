@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { openApplyMailto } from "@/lib/vacancies";
+import { openApplyHref } from "@/lib/vacancies";
 import { cn } from "@/lib/utils";
 
 const trustBullets = [
@@ -97,7 +97,7 @@ export default function VacanciesHero() {
               variant="primary"
             />
             <HeroCta
-              href={openApplyMailto}
+              href={openApplyHref}
               label="Crew aanmelden"
               variant="secondary"
             />
