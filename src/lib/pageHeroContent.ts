@@ -1,4 +1,4 @@
-import { employeeApplyMailto } from "@/lib/navigation";
+import { crewApplyHref } from "@/lib/navigation";
 
 export type PageHeroTheme =
   | "staffing"
@@ -44,7 +44,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       "Van last-minute extra handen tot complete projectinzet: Helping Hands Agency levert event crew, stagehands en horecapersoneel die begrijpen wat er op locatie nodig is.",
     theme: "staffing",
     primaryCta: { label: "Personeel aanvragen", href: "/contact" },
-    secondaryCta: { label: "Crew aanmelden", href: "/vacatures" },
+    secondaryCta: { label: "Crew aanmelden", href: crewApplyHref },
     highlights: [
       { label: "Snel schakelen" },
       { label: "Duidelijke briefing" },
@@ -117,7 +117,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     description:
       "Schrijf je in voor event-, horeca-, keuken-, stagebouw- en productiewerk. Jij geeft je beschikbaarheid door, wij koppelen je aan passende opdrachten.",
     theme: "vacatures",
-    primaryCta: { label: "Crew aanmelden", href: "/vacatures#vacatures" },
+    primaryCta: { label: "Crew aanmelden", href: crewApplyHref },
     secondaryCta: { label: "Bekijk functies", href: "/vacatures#vacatures" },
     highlights: [
       { label: "Flexibel" },
@@ -261,7 +261,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
     description:
       "Bij Helping Hands werk je op events, horeca, stagebouw, productie en logistiek. Je krijgt duidelijke afspraken, begeleiding en de kans om jezelf te ontwikkelen op echte producties.",
     theme: "medewerkers",
-    primaryCta: { label: "Aanmelden als crewlid", href: employeeApplyMailto },
+    primaryCta: { label: "Aanmelden als crewlid", href: crewApplyHref },
     secondaryCta: { label: "Bekijk vacatures", href: "/vacatures" },
     highlights: [
       { label: "Planning" },
@@ -295,7 +295,7 @@ const pageHeroByPath: Record<string, PageHeroContent> = {
       "Vertel ons wat je nodig hebt. Voor personeelsaanvragen, samenwerkingen en crew-aanmeldingen helpen we je snel naar de juiste vervolgstap.",
     theme: "contact",
     primaryCta: { label: "Personeel aanvragen", href: "/contact#aanvraag" },
-    secondaryCta: { label: "Crew aanmelden", href: "/contact#aanmelden" },
+    secondaryCta: { label: "Crew aanmelden", href: crewApplyHref },
     highlights: [
       { label: "Snel schakelen" },
       { label: "Duidelijke briefing" },

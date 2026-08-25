@@ -73,7 +73,7 @@ export default function BrandLogo({
     <Link
       href={href}
       onClick={onClick}
-      className="inline-flex shrink-0 items-center rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+      className="inline-flex min-w-0 items-center rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
       aria-label={`${brandAlt} home`}
     >
       {image}
@@ -81,6 +81,10 @@ export default function BrandLogo({
   );
 }
 
+/**
+ * Compact mark (+ optional wordmark) on mobile/tablet so header actions
+ * (CTA + hamburger) never get clipped. Full logo from `lg` upward.
+ */
 export function HeaderBrandLogo({
   scrolled,
   inverted = false,
@@ -91,40 +95,40 @@ export function HeaderBrandLogo({
   onNavigate?: () => void;
 }) {
   const logoWidth = scrolled
-    ? "w-[120px] sm:w-[135px] lg:w-[155px] max-h-[44px]"
-    : "w-[145px] sm:w-[160px] lg:w-[195px] max-h-[68px]";
+    ? "w-[135px] xl:w-[155px] max-h-[44px]"
+    : "w-[160px] xl:w-[195px] max-h-[52px]";
 
   return (
-    <>
+    <div className="flex min-w-0 max-w-full items-center">
       <BrandLogo
         href="/"
         onClick={onNavigate}
         priority
         variant={inverted ? "fullWhite" : "full"}
-        className="hidden min-[400px]:inline-flex"
+        className="hidden lg:inline-flex"
         imageClassName={`${logoWidth} transition-[width,max-height] duration-300`}
       />
       <Link
         href="/"
         onClick={onNavigate}
-        className="inline-flex min-[400px]:hidden shrink-0 items-center gap-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+        className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:hidden"
         aria-label={`${brandAlt} home`}
       >
         <BrandLogoImage
           variant={inverted ? "markWhite" : "mark"}
           priority
-          imageClassName="h-9 w-9 sm:h-10 sm:w-10"
+          imageClassName="h-9 w-9 shrink-0"
         />
-        <span className="flex flex-col leading-tight">
+        <span className="min-w-0 truncate leading-tight">
           <span
-            className={`text-sm font-extrabold tracking-tight ${
+            className={`block truncate text-sm font-extrabold tracking-tight ${
               inverted ? "text-white" : "text-[#173A8A]"
             }`}
           >
             Helping Hands
           </span>
           <span
-            className={`text-[0.6rem] font-semibold uppercase tracking-[0.1em] ${
+            className={`block truncate text-[0.6rem] font-semibold uppercase tracking-[0.1em] ${
               inverted ? "text-white/70" : "text-slate-500"
             }`}
           >
@@ -132,6 +136,6 @@ export function HeaderBrandLogo({
           </span>
         </span>
       </Link>
-    </>
+    </div>
   );
 }

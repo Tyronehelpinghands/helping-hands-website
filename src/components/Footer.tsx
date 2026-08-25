@@ -13,6 +13,7 @@ import {
   plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
+import { crewApplyHref } from "@/lib/contact";
 import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 
 /** Curated footer nav — descriptive anchors for pages we want as Google sitelinks. */
@@ -231,12 +232,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href={`mailto:${applicationsEmail}`}
-                  className="transition hover:text-white"
-                >
+                <Link href={crewApplyHref} className="transition hover:text-white">
                   Aanmelden als medewerker
-                </a>
+                </Link>
               </li>
               <li>
                 <Link

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import VacancyCard from "@/components/vacatures/VacancyCard";
 import VacancyDetailDrawer from "@/components/vacatures/VacancyDetailDrawer";
 import VacancyFilters from "@/components/vacatures/VacancyFilters";
@@ -10,7 +11,7 @@ import {
   filterVacancies,
   type VacancyFilterState,
 } from "@/lib/vacancyFilters";
-import { openApplyMailto, vacancies, type Vacancy } from "@/lib/vacancies";
+import { openApplyHref, vacancies, type Vacancy } from "@/lib/vacancies";
 
 const RESULTS_ID = "vacancy-results";
 
@@ -87,12 +88,12 @@ export default function VacancyExplorer() {
                 >
                   Reset filters
                 </button>
-                <a
-                  href={openApplyMailto}
+                <Link
+                  href={openApplyHref}
                   className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-[#F28C28] px-6 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
                 >
                   Open aanmelden
-                </a>
+                </Link>
               </div>
             </div>
           )}

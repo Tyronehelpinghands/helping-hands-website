@@ -1,7 +1,8 @@
 "use client";
 
 import type { Vacancy } from "@/lib/vacancies";
-import { vacancyApplyMailto } from "@/lib/vacancies";
+import { openApplyHref } from "@/lib/vacancies";
+import Link from "next/link";
 import {
   categoryAccent,
   categoryInitials,
@@ -108,12 +109,12 @@ export default function VacancyCard({ vacancy, onView }: VacancyCardProps) {
         >
           Bekijk functie
         </button>
-        <a
-          href={vacancyApplyMailto(vacancy)}
+        <Link
+          href={openApplyHref}
           className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-[#F28C28] px-4 text-sm font-bold text-white transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
         >
           Solliciteer
-        </a>
+        </Link>
       </div>
     </article>
   );

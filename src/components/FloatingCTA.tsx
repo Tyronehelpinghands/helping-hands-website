@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
+import { crewApplyHref } from "@/lib/contact";
 import { cn } from "@/lib/utils";
 
 export default function FloatingCTA() {
@@ -35,7 +36,7 @@ export default function FloatingCTA() {
             Personeel aanvragen
           </Link>
           <Link
-            href="/vacatures"
+            href={crewApplyHref}
             className="mt-2 block rounded-full px-5 py-2 text-center text-xs font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F4D]"
           >
             Crew aanmelden
@@ -55,7 +56,7 @@ export default function FloatingCTA() {
             Personeel
           </Link>
           <Link
-            href="/vacatures"
+            href={crewApplyHref}
             className="rounded-full border border-white/20 bg-white/10 px-4 py-3 text-center text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]"
           >
             Werken
@@ -65,4 +66,3 @@ export default function FloatingCTA() {
     </>
   );
 }
-

@@ -21,6 +21,13 @@ export const hrEmail = siteConfig.hrEmail;
 export const employeeApplyMailto = `mailto:${applicationsEmail}?subject=${encodeURIComponent(
   "Aanmelding medewerker Helping Hands",
 )}`;
+/** Primary crew signup CTA — opens the contact form worker tab. */
+export {
+  crewApplyHref,
+  generalContactHref,
+  staffRequestHref,
+} from "@/lib/contact";
+export { crewApplyHref as employeeApplyHref } from "@/lib/contact";
 export const ownerEmail = siteConfig.ownerEmail;
 export const contactPhoneDisplay = siteConfig.phoneDisplay;
 export const contactPhoneTel = siteConfig.phoneTel;
@@ -164,7 +171,7 @@ export const navDropdowns: NavDropdownConfig[] = [
       {
         title: "Aanmelden als crewlid",
         description: "Meld je aan voor events, horeca en producties.",
-        href: employeeApplyMailto,
+        href: "/contact?type=crew-aanmelden",
       },
       {
         title: "Doorgroeien",
