@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { brandAlt, brandImages } from "@/lib/brand";
+import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
   variant?: "full" | "fullWhite" | "mark" | "markWhite";
@@ -30,7 +31,7 @@ export function BrandLogoImage({
   const height = 272;
 
   return (
-    <span className={`inline-flex shrink-0 ${className}`}>
+    <span className={cn("inline-flex shrink-0", className)}>
       <Image
         src={src}
         alt={brandAlt}
@@ -42,7 +43,10 @@ export function BrandLogoImage({
             ? "40px"
             : "(max-width: 639px) 150px, (max-width: 1023px) 165px, 210px"
         }
-        className={`block h-auto w-auto max-w-full object-contain object-left ${imageClassName}`}
+        className={cn(
+          "block h-auto w-auto max-w-full object-contain object-left",
+          imageClassName,
+        )}
       />
     </span>
   );
@@ -60,7 +64,7 @@ export default function BrandLogo({
     <BrandLogoImage
       variant={variant}
       priority={priority}
-      className={className}
+      className={href ? "" : className}
       imageClassName={imageClassName}
     />
   );
@@ -73,7 +77,10 @@ export default function BrandLogo({
     <Link
       href={href}
       onClick={onClick}
-      className="inline-flex min-w-0 items-center rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2"
+      className={cn(
+        "inline-flex min-w-0 items-center rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2",
+        className,
+      )}
       aria-label={`${brandAlt} home`}
     >
       {image}
@@ -82,8 +89,8 @@ export default function BrandLogo({
 }
 
 /**
- * Compact mark (+ optional wordmark) on mobile/tablet so header actions
- * (CTA + hamburger) never get clipped. Full logo from `lg` upward.
+ * One brand treatment only: compact mark + short wordmark below `lg`
+ * so CTA + hamburger stay visible; full lockup from `lg` upward.
  */
 export function HeaderBrandLogo({
   scrolled,
