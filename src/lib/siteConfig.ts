@@ -52,7 +52,17 @@ export const siteConfig = {
   ogImageWidth: 1200,
   ogImageHeight: 630,
   description:
-    "Helping Hands Agency: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, één aanspreekpunt vanuit Hilversum.",
+    "Helping Hands Agency in Hilversum: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions en horeca. Event staffing — geen zorg- of thuiszorgorganisatie.",
+  /** Short disambiguation for schema / AI crawlers — not healthcare. */
+  disambiguatingDescription:
+    "Event staffing- en crewbedrijf in Hilversum (NL). Levert eventpersoneel, stagehands en horecapersoneel. Geen zorg, thuiszorg, Wmo of zorgbemiddeling.",
+  slogan: "Event crew & horecapersoneel inhuren",
+  /** Alternate names for Organization JSON-LD brand matching. */
+  alternateNames: [
+    "Helping Hands Agency Hilversum",
+    "Helping Hands Agency Nederland",
+    "Helpinghandsagency",
+  ] as string[],
   /** Google Maps search URL for NAP / GBP support (no fake reviews). */
   googleMapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Helping%20Hands%20Agency%20Wandelpad%2030%20Hilversum" as string,

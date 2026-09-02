@@ -7,6 +7,11 @@ export type FaqItem = {
 
 export const homeFaqs: FaqItem[] = [
   {
+    question: "Is Helping Hands Agency een zorg- of thuiszorgorganisatie?",
+    answer:
+      "Nee. Helping Hands Agency is een event staffing- en crewbedrijf in Hilversum. Wij leveren eventpersoneel, stagehands en horecapersoneel voor evenementen, producties en horeca — geen thuiszorg, Wmo-begeleiding of zorgbemiddeling. Andere ‘Helping Hands’-merken in de zorg zijn geen onderdeel van ons bedrijf.",
+  },
+  {
     question: "Welke crew kan ik bij Helping Hands Agency inhuren?",
     answer:
       "Wij leveren event crew, stagehands, horeca- en restaurantpersoneel, keuken- en barpersoneel, productie-assistentie, logistiek en hospitality. Van festivals en concerten tot beurzen, stadions en horecalocaties.",
@@ -154,6 +159,11 @@ export const opdrachtgeversFaqs: FaqItem[] = [
 ];
 
 export const overOnsFaqs: FaqItem[] = [
+  {
+    question: "Is Helping Hands Agency een zorgorganisatie?",
+    answer:
+      "Nee. Wij zijn een event staffing- en crewbedrijf in Hilversum. Andere ‘Helping Hands’-merken in thuiszorg of begeleiding zijn geen onderdeel van ons bedrijf.",
+  },
   {
     question: "Wat is de missie van Helping Hands Agency?",
     answer:

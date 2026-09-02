@@ -19,14 +19,15 @@ import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 /** Curated footer nav — descriptive anchors for pages we want as Google sitelinks. */
 const primaryNavLinks = [
   { href: "/personeel-inhuren", label: "Personeel inhuren" },
-  { href: "/werken-bij", label: "Werken bij" },
-  { href: "/vacatures", label: "Vacatures" },
-  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
-  { href: "/over-ons", label: "Over ons" },
-  { href: "/contact", label: "Contact" },
   { href: "/diensten", label: "Diensten" },
+  { href: "/werken-bij", label: "Werken bij" },
+  { href: "/contact", label: "Contact" },
+  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+  { href: "/vacatures", label: "Vacatures" },
+  { href: "/over-ons", label: "Over ons" },
   { href: "/projecten", label: "Projecten" },
   { href: "/locaties", label: "Locaties" },
+  { href: "/algemene-voorwaarden", label: "Algemene voorwaarden" },
 ];
 
 const serviceLinks = [
@@ -74,9 +75,9 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
-              Helping Hands Agency is een event staffing- en crewbedrijf voor
-              evenementen, horeca, stagebouw, productie en logistiek. Snel
-              inzetbaar op locatie.
+              Helping Hands Agency is een event staffing- en crewbedrijf in
+              Hilversum voor evenementen, horeca, stagebouw, productie en
+              logistiek — geen zorg- of thuiszorgorganisatie.
             </p>
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">
               {formatAddressSingleLine()}

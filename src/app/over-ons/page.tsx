@@ -22,7 +22,7 @@ import { aboutPageJsonLd, buildPageMetadata, faqJsonLd } from "@/lib/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Over ons | Event staffing & crewbedrijf",
   description:
-    "Helping Hands Agency is een event staffing- en crewbedrijf voor evenementen, horeca, stagebouw, productie en logistiek. Opgericht in 2022 door Tyrone van der Schagt — met maatschappelijke missie én professionele uitvoering.",
+    "Helping Hands Agency is een event staffing- en crewbedrijf in Hilversum — geen zorg of thuiszorg. Opgericht in 2022 door Tyrone van der Schagt voor events, horeca en productie.",
   path: "/over-ons",
 });
 
@@ -74,6 +74,11 @@ export default function OverOnsPage() {
               catering en horecalocaties. Wij zijn gevestigd in Hilversum en
               actief door heel Nederland — met duidelijke briefing, één
               aanspreekpunt en tarief op aanvraag.
+            </p>
+            <p className="mt-4 text-base leading-8 text-[#101828]/75">
+              Let op: wij zijn geen zorg-, thuiszorg- of Wmo-organisatie. Andere
+              merken met de naam &ldquo;Helping Hands&rdquo; in de zorgbranche
+              horen niet bij Helping Hands Agency.
             </p>
           </div>
         </div>

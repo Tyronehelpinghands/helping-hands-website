@@ -85,26 +85,55 @@ Brand queries:
 
 - “helping hands agency”, “helpinghandsagency”, “helping hands agency hilversum”
 
-## 6. Sitelinks
+## 6. Sitelinks (Crewstars-benchmark)
 
-Google kiest sitelinks automatisch. Helpen:
+Crewstars rankt sterk op merknaam met sitelinks (Werken bij, Contact, Diensten,
+Flexibel personeel…, Algemene voorwaarden). Dat kunnen wij nabootsen in
+**structuur**, niet in merkeenvoud: “Crewstars” is uniek; “Helping Hands” deelt
+naamruimte met zorgmerken.
 
-1. Sterke interne links (header/footer/homepage) naar `/personeel-inhuren`, `/werken-bij`, `/vacatures`, `/over-ons`, `/contact`, `/opdrachtgevers`
-2. Unieke title + H1 per hub
-3. Indexering aanvragen voor die URL’s
-4. Wachten op recrawl (dagen–weken)
+Google kiest sitelinks automatisch. Wij helpen met:
+
+1. Korte hub-titles: `Diensten`, `Werken bij`, `Contact`, `Personeel inhuren`
+2. Homepage “Direct naar” + footer + `SiteNavigationElement` JSON-LD naar die hubs
+   (incl. `/algemene-voorwaarden`, zoals Crewstars)
+3. Indexering aanvragen voor die URL’s na deploy
+4. Wachten op recrawl (dagen–weken); GBP-categorie + reviews versterken de
+   Knowledge Panel ernaast
 
 Alleen demoten in GSC als een sitelink structureel verkeerd is.
 
 ## 7. Google Business Profile (handmatig)
 
-- Bedrijfsnaam: **Helping Hands Agency**
-- Categorie: uitzendbureau / event services (passend bij staffing)
+**Urgent (SERP sept 2026):** Google toont de Knowledge Panel als
+**“Mediation service in Hilversum”** met slechts **1 review**. Dat komt door
+de GBP-categorie (vaak gekoppeld aan “bemiddelingsbureau”) — niet door de
+website. Wijzig dit handmatig in Google Business Profile.
+
+- Bedrijfsnaam: **Helping Hands Agency** (volledige naam, niet alleen Helping Hands)
+- **Primaire categorie:** Uitzendbureau / Employment agency (of dichtstbijzijnde
+  event-staffing categorie). **Niet** “Mediation service” / bemiddelingsdienst.
+- Secundair (optioneel): Event planner / Event service — alleen als passend
 - Adres: Wandelpad 30, 1211 GN Hilversum (niet QN)
-- Telefoon: 06 5741 6338 (primair)
+- Telefoon: 06 5741 6338 (primair) + vaste lijn 035 785 7307
 - Website: `https://www.helpinghandsagency.nl`
+- Openingstijden: gelijk trekken met LocalBusiness JSON-LD (ma–vr 09:00–17:30)
+- Beschrijving: event staffing / crew — expliciet **geen zorg/thuiszorg**
+- Foto’s: crew/events (niet alleen pand); vraag tevreden opdrachtgevers om
+  echte reviews (geen incentives)
+- LinkedIn-bedrijfspagina: vermijd “bemiddelingsbureau” als hoofdbeschrijving;
+  gebruik “event staffing / uitzendbureau evenementen” zodat Google de
+  categorie niet opnieuw naar Mediation trekt
 - Geen nep-reviews, geen review-incentives
 - Site CTA gebruikt Maps-zoek-URL of echte GBP-URL via `NEXT_PUBLIC_GOOGLE_BUSINESS_URL` indien bekend
+
+### Merkzoekopdrachten
+
+| Query | Verwacht | Actie |
+|-------|----------|-------|
+| `helping hands agency` | Eigen site + GBP #1 | GBP-categorie + reviews |
+| `helping hands` (kort) | Concurrentie met zorgmerken + LinkedIn | Disambiguation on-page; ranken op Agency + Hilversum |
+| `helping hands agency hilversum` | Sterke brand+local match | NAP consistent houden |
 
 ## 8. “72 pagina’s niet geïndexeerd” (augustus 2026)
 

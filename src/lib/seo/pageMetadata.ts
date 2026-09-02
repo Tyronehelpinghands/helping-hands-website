@@ -85,11 +85,14 @@ export function organizationJsonLd() {
     "@type": ["Organization", "EmploymentAgency"],
     name: siteConfig.name,
     legalName: siteConfig.name,
+    alternateName: siteConfig.alternateNames,
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
     logo: absoluteUrl(siteConfig.logo),
     description: siteConfig.description,
+    disambiguatingDescription: siteConfig.disambiguatingDescription,
+    slogan: siteConfig.slogan,
     address: {
       "@type": "PostalAddress",
       streetAddress: address.street,
@@ -126,23 +129,64 @@ export function organizationJsonLd() {
       "Logistiek",
       "Hospitality",
       "Load-in en load-out",
+      "Event staffing",
+      "Uitzendbureau evenementen",
     ],
     sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };
 }
+
+/** Primary hub URLs we want Google to consider for brand sitelinks (Crewstars-style). */
+export const brandSitelinkHubs = [
+  { name: "Personeel inhuren", path: "/personeel-inhuren" },
+  { name: "Diensten", path: "/diensten" },
+  { name: "Werken bij", path: "/werken-bij" },
+  { name: "Contact", path: "/contact" },
+  { name: "Over ons", path: "/over-ons" },
+  { name: "Opdrachtgevers", path: "/opdrachtgevers" },
+  { name: "Vacatures", path: "/vacatures" },
+  { name: "Algemene voorwaarden", path: "/algemene-voorwaarden" },
+] as const;
 
 export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: siteConfig.name,
+    alternateName: siteConfig.alternateNames,
     url: siteConfig.url,
     inLanguage: "nl-NL",
+    description: siteConfig.description,
     publisher: {
       "@type": "Organization",
       name: siteConfig.name,
       url: siteConfig.url,
     },
+    hasPart: brandSitelinkHubs.map((hub) => ({
+      "@type": "WebPage",
+      name: hub.name,
+      url: absoluteUrl(hub.path),
+      isPartOf: { "@type": "WebSite", url: siteConfig.url },
+    })),
+  };
+}
+
+/**
+ * Explicit site navigation hubs for brand SERP sitelinks.
+ * Complements header/footer/homepage links — Google still chooses sitelinks itself.
+ */
+export function siteNavigationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${siteConfig.name} — hoofdnavigatie`,
+    numberOfItems: brandSitelinkHubs.length,
+    itemListElement: brandSitelinkHubs.map((hub, index) => ({
+      "@type": "SiteNavigationElement",
+      position: index + 1,
+      name: hub.name,
+      url: absoluteUrl(hub.path),
+    })),
   };
 }
 

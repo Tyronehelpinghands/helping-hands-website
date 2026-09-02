@@ -20,9 +20,9 @@ import {
 } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Personeel inhuren | Event crew, horeca & productie",
+  title: "Personeel inhuren",
   description:
-    "Personeel inhuren voor events, festivals, horeca, stagebouw en productie. Helping Hands Agency: snelle planning, duidelijke briefing, landelijk inzetbaar. Tarief op aanvraag.",
+    "Personeel inhuren bij Helping Hands Agency: event crew, horeca, stagebouw en productie. Snelle planning, duidelijke briefing, landelijk inzetbaar. Tarief op aanvraag.",
   path: "/personeel-inhuren",
 });
 

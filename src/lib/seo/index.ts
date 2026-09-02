@@ -28,6 +28,7 @@ export {
   organizationJsonLd,
   projectCaseCreativeWorkJsonLd,
   serviceJsonLd,
+  siteNavigationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/pageMetadata";
 export {

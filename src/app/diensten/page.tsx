@@ -13,9 +13,9 @@ import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 import { getPublishedServiceLandings } from "@/lib/services";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Diensten: event crew, stagehands & horecapersoneel",
+  title: "Diensten",
   description:
-    "Event crew inhuren, stagehands, horeca- en restaurantpersoneel, keuken, bar, productie, logistiek en hospitality in Nederland.",
+    "Diensten van Helping Hands Agency: event crew, stagehands, horeca- en restaurantpersoneel, keuken, bar, productie, logistiek en hospitality in Nederland.",
   path: "/diensten",
 });
 

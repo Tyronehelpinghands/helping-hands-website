@@ -22,7 +22,7 @@ import { buildPageMetadata, faqJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+  title: `${siteConfig.name} | Event crew & horecapersoneel`,
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,
@@ -51,11 +51,16 @@ export default function Home() {
             <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold text-[#173A8A] sm:text-base">
               {[
                 { href: "/personeel-inhuren", label: "Personeel inhuren" },
+                { href: "/diensten", label: "Diensten" },
                 { href: "/werken-bij", label: "Werken bij" },
-                { href: "/vacatures", label: "Vacatures" },
-                { href: "/opdrachtgevers", label: "Opdrachtgevers" },
-                { href: "/over-ons", label: "Over ons" },
                 { href: "/contact", label: "Contact" },
+                { href: "/over-ons", label: "Over ons" },
+                { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+                { href: "/vacatures", label: "Vacatures" },
+                {
+                  href: "/algemene-voorwaarden",
+                  label: "Algemene voorwaarden",
+                },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

@@ -21,7 +21,7 @@ export default function GoogleBusinessCta({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-8 sm:px-8">
           <h2 className="text-xl font-black text-[#0B1F4D] sm:text-2xl">
-            Helping Hands Agency — vestiging Hilversum
+            Helping Hands Agency — uitzendbureau event staffing Hilversum
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[#101828]/75">
             {siteConfig.name}
@@ -36,10 +36,10 @@ export default function GoogleBusinessCta({
             </a>
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[#101828]/75">
-            Event staffing &amp; crew voor evenementen, horeca, stagebouw,
-            productie en logistiek. Was je tevreden over onze inzet? Laat gerust
-            een review achter. We vragen geen nep-reviews en bieden geen
-            beloning voor reviews.
+            Uitzendbureau / employment agency voor event crew, stagehands en
+            horecapersoneel — geen zorgbemiddeling. Was je tevreden over onze
+            inzet? Laat gerust een review achter. We vragen geen nep-reviews en
+            bieden geen beloning voor reviews.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <a

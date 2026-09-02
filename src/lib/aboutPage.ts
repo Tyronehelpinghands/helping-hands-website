@@ -5,7 +5,7 @@ export const aboutHero = {
   title:
     "Meer dan crew leveren: wij bouwen aan kansen, groei en professioneel werk.",
   description:
-    "Helping Hands Agency is een event staffing- en crewbedrijf voor evenementen, horeca, stagebouw, productie en logistiek. Opgericht in 2022 door Tyrone van der Schagt om jongeren en jongvolwassenen die moeilijk aan werk komen een eerlijke kans te geven — met persoonlijke begeleiding, duidelijke structuur en professionele inzet voor opdrachtgevers.",
+    "Helping Hands Agency is een event staffing- en crewbedrijf voor evenementen, horeca, stagebouw, productie en logistiek — geen zorg- of thuiszorgorganisatie. Opgericht in 2022 door Tyrone van der Schagt om jongeren en jongvolwassenen die moeilijk aan werk komen een eerlijke kans te geven — met persoonlijke begeleiding, duidelijke structuur en professionele inzet voor opdrachtgevers.",
   primaryCta: { label: "Personeel aanvragen", href: "/contact" },
   secondaryCta: { label: "Werken bij Helping Hands Agency", href: "/werken-bij" },
   tertiaryCta: { label: "Bekijk diensten", href: "/diensten" },
