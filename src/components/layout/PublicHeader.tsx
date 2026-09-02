@@ -53,13 +53,13 @@ export default function PublicHeader() {
 
   const navLinkClass = (active: boolean) =>
     cn(
-      "relative rounded-lg px-2.5 py-2 text-[0.8125rem] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28]",
+      "relative shrink-0 whitespace-nowrap rounded-lg px-2 py-2 text-[0.8125rem] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] xl:px-2.5",
       inverted
         ? active
-          ? "bg-white/15 text-white after:absolute after:bottom-0.5 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-[#F28C28]"
+          ? "bg-white/15 text-white after:absolute after:bottom-0.5 after:left-2 after:right-2 after:h-0.5 after:rounded-full after:bg-[#F28C28] xl:after:left-2.5 xl:after:right-2.5"
           : "text-white/85 hover:bg-white/10 hover:text-white"
         : active
-          ? "bg-[#F28C28]/10 text-[#173A8A] after:absolute after:bottom-0.5 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-[#F28C28]"
+          ? "bg-[#F28C28]/10 text-[#173A8A] after:absolute after:bottom-0.5 after:left-2 after:right-2 after:h-0.5 after:rounded-full after:bg-[#F28C28] xl:after:left-2.5 xl:after:right-2.5"
           : "text-slate-600 hover:bg-[#F5F7FA] hover:text-[#173A8A]",
       !inverted && "focus-visible:ring-offset-2",
     );
@@ -125,11 +125,11 @@ export default function PublicHeader() {
       >
         <div
           className={cn(
-            "mx-auto flex max-w-7xl items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:gap-5 lg:px-8",
+            "mx-auto flex max-w-7xl items-center gap-3 px-3 sm:gap-4 sm:px-6 xl:gap-6 xl:px-8",
             scrolled ? "h-14 sm:h-[3.75rem]" : "h-[3.75rem] sm:h-16",
           )}
         >
-          <div className="shrink-0">
+          <div className="mr-1 shrink-0 sm:mr-2 xl:mr-3">
             <HeaderBrandLogo
               scrolled={scrolled}
               inverted={inverted}
@@ -138,7 +138,7 @@ export default function PublicHeader() {
           </div>
 
           <nav
-            className="hidden min-w-0 items-center gap-0.5 xl:gap-1 lg:flex"
+            className="hidden shrink-0 items-center gap-0.5 xl:flex xl:gap-1"
             aria-label="Hoofdnavigatie"
           >
             {simpleNavLinks
@@ -184,12 +184,12 @@ export default function PublicHeader() {
               ))}
           </nav>
 
-          <div className="relative z-[70] ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          <div className="relative z-[70] ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             <a
               href={`tel:${contactPhoneTel}`}
               aria-label={`Bel ${contactPhoneDisplay}`}
               className={cn(
-                "hidden h-11 min-h-11 w-11 min-w-11 items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex",
+                "hidden h-10 min-h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex xl:h-11 xl:min-h-11 xl:w-11 xl:min-w-11",
                 inverted
                   ? "border-white/25 text-white hover:bg-white/10"
                   : "border-slate-200/80 text-[#173A8A] hover:border-slate-300 hover:bg-[#F5F7FA]",
@@ -214,7 +214,7 @@ export default function PublicHeader() {
               rel="noopener noreferrer"
               aria-label="WhatsApp"
               className={cn(
-                "hidden h-11 min-h-11 w-11 min-w-11 items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex",
+                "hidden h-10 min-h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:inline-flex xl:h-11 xl:min-h-11 xl:w-11 xl:min-w-11",
                 inverted
                   ? "border-white/25 text-white hover:bg-white/10"
                   : "border-slate-200/80 text-[#173A8A] hover:border-slate-300 hover:bg-[#F5F7FA]",
@@ -232,7 +232,7 @@ export default function PublicHeader() {
             <Link
               href={crewApplyHref}
               className={cn(
-                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 lg:inline-flex",
+                "hidden whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 2xl:inline-flex",
                 inverted
                   ? "text-white/90 hover:bg-white/10 hover:text-white"
                   : "text-[#173A8A] hover:bg-[#F5F7FA] hover:text-[#0B1F4D]",
@@ -242,7 +242,7 @@ export default function PublicHeader() {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex h-10 min-h-10 max-w-[7.5rem] shrink-0 items-center justify-center truncate rounded-full bg-[#F28C28] px-3 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:h-11 sm:min-h-11 sm:max-w-none sm:px-5 sm:text-sm"
+              className="inline-flex h-10 min-h-10 max-w-[7.5rem] shrink-0 items-center justify-center truncate rounded-full bg-[#F28C28] px-3 text-xs font-bold text-white shadow-lg shadow-[#F28C28]/30 transition hover:bg-[#de7c1f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:h-11 sm:min-h-11 sm:max-w-none sm:px-4 sm:text-sm xl:px-5"
             >
               <span className="sm:hidden">Aanvraag</span>
               <span className="hidden sm:inline">Personeel aanvragen</span>
@@ -251,7 +251,7 @@ export default function PublicHeader() {
             <button
               type="button"
               className={cn(
-                "inline-flex h-10 min-h-10 w-10 min-w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:h-11 sm:min-h-11 sm:w-11 sm:min-w-11 lg:hidden",
+                "inline-flex h-10 min-h-10 w-10 min-w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 sm:h-11 sm:min-h-11 sm:w-11 sm:min-w-11 xl:hidden",
                 inverted
                   ? "border-white/25 text-white hover:bg-white/10"
                   : "border-slate-200/80 text-[#173A8A] hover:border-slate-300 hover:bg-[#F5F7FA]",

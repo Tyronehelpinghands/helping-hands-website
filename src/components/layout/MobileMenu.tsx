@@ -113,7 +113,7 @@ export default function MobileMenu({
       aria-modal="true"
       aria-label="Mobiel menu"
       className={cn(
-        "fixed inset-0 z-[80] flex max-h-[100dvh] flex-col overflow-x-hidden bg-white transition-all duration-[220ms] ease-out lg:hidden",
+        "fixed inset-0 z-[80] flex max-h-[100dvh] flex-col overflow-x-hidden bg-white transition-all duration-[220ms] ease-out xl:hidden",
         visible
           ? "translate-x-0 opacity-100"
           : "translate-x-3 opacity-0 pointer-events-none",

@@ -89,8 +89,8 @@ export default function BrandLogo({
 }
 
 /**
- * One brand treatment only: compact mark + short wordmark below `lg`
- * so CTA + hamburger stay visible; full lockup from `lg` upward.
+ * Compact mark + short wordmark below `xl` (hamburger range);
+ * full lockup from `xl` upward where the desktop nav is shown.
  */
 export function HeaderBrandLogo({
   scrolled,
@@ -102,8 +102,8 @@ export function HeaderBrandLogo({
   onNavigate?: () => void;
 }) {
   const logoWidth = scrolled
-    ? "w-[135px] xl:w-[155px] max-h-[44px]"
-    : "w-[160px] xl:w-[195px] max-h-[52px]";
+    ? "w-[140px] 2xl:w-[155px] max-h-[44px]"
+    : "w-[155px] 2xl:w-[175px] max-h-[50px]";
 
   return (
     <div className="flex shrink-0 items-center">
@@ -112,13 +112,13 @@ export function HeaderBrandLogo({
         onClick={onNavigate}
         priority
         variant={inverted ? "fullWhite" : "full"}
-        className="hidden shrink-0 lg:inline-flex"
+        className="hidden shrink-0 xl:inline-flex"
         imageClassName={`${logoWidth} transition-[width,max-height] duration-300`}
       />
       <Link
         href="/"
         onClick={onNavigate}
-        className="inline-flex min-w-0 max-w-full shrink-0 items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:hidden"
+        className="inline-flex min-w-0 max-w-full shrink-0 items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 xl:hidden"
         aria-label={`${brandAlt} home`}
       >
         <BrandLogoImage
