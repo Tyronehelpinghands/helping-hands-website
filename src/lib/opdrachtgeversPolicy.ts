@@ -35,6 +35,6 @@ export const cancellationCases: CancellationCase[] = [
 ];
 
 export const requestVoorwaardenCta = {
-  label: "Vraag onze voorwaarden op",
-  href: "/contact",
+  label: "Bekijk onze voorwaarden",
+  href: "/algemene-voorwaarden",
 } as const;
