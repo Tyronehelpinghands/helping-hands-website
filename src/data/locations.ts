@@ -327,7 +327,7 @@ const coreLocationPages: LocationPage[] = [
       "Thuisbasis in Hilversum — korte lijnen en snelle beschikbaarheid",
       "Ervaring in horeca, events en catering in de regio Gooi en Vechtstreek",
       "Flexibele inzet: los, terugkerend of structureel",
-      "Persoonlijk contact met planning (Mesbah) voor snelle afstemming",
+      "Persoonlijk contact met planning voor snelle afstemming",
     ],
     venues: [
       "Horecalocaties en restaurants",

@@ -33,9 +33,9 @@ const CONTACT_CHANNELS = [
     description: "Voor aanvragen, planning en briefings.",
   },
   {
-    title: "Planner (Mesbah)",
-    email: "mesbah@helpinghandsagency.nl",
-    description: "Direct contact met de planner.",
+    title: "Mede-eigenaar (Sieb)",
+    email: "sieb@helpinghandsagency.nl",
+    description: "Direct contact met de mede-eigenaar.",
   },
   {
     title: "Administratie",

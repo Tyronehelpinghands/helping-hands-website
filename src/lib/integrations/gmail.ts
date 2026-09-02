@@ -279,11 +279,6 @@ export function getSharedMailboxes(): SharedMailbox[] {
       purpose: "Personeels- / crewaanvragen van opdrachtgevers",
     },
     {
-      id: "planner",
-      email: siteConfig.plannerEmail,
-      purpose: "Planning & inzet (planner)",
-    },
-    {
       id: "applications",
       email: siteConfig.applicationsEmail,
       purpose: "Crewaanmeldingen & sollicitaties",
@@ -302,6 +297,11 @@ export function getSharedMailboxes(): SharedMailbox[] {
       id: "owner",
       email: siteConfig.ownerEmail,
       purpose: "Direct contact / operationeel",
+    },
+    {
+      id: "coOwner",
+      email: siteConfig.coOwnerEmail,
+      purpose: "Mede-eigenaar",
     },
   ];
 }

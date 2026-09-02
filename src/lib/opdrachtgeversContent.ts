@@ -147,6 +147,8 @@ export type TeamMember = {
   initials: string;
   note?: string;
   email?: string;
+  phoneDisplay?: string;
+  phoneTel?: string;
   image?: { src: string; alt: string };
 };
 
@@ -162,10 +164,16 @@ export const teamMembers: TeamMember[] = [
     },
   },
   {
-    name: "Mesbah Kashit",
-    role: "Planning en crewcoördinatie",
-    initials: "MK",
-    email: "mesbah@helpinghandsagency.nl",
+    name: "Sieb Ludolph Looman",
+    role: "Mede-eigenaar",
+    initials: "SL",
+    email: "sieb@helpinghandsagency.nl",
+    phoneDisplay: "06 4191 2998",
+    phoneTel: "+31641912998",
+    image: {
+      src: "/images/team/sieb-ludolph-looman.webp",
+      alt: "Sieb Ludolph Looman — mede-eigenaar Helping Hands Agency",
+    },
   },
   {
     name: "Marieke",

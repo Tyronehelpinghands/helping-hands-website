@@ -7,10 +7,11 @@ Pragmatische setup: **mailto + gedeelde mailboxen werken direct**. Gmail API sen
 | Adres | Doel |
 |-------|------|
 | `planning@helpinghandsagency.nl` | Crewaanvragen opdrachtgevers |
-| `mesbah@helpinghandsagency.nl` | Planning & inzet |
 | `aanmeldingen@helpinghandsagency.nl` | Crewaanmeldingen |
+| `marieke@helpinghandsagency.nl` | H&R |
 | `info@helpinghandsagency.nl` | Algemeen |
-| `tyrone@helpinghandsagency.nl` | Direct / operationeel |
+| `tyrone@helpinghandsagency.nl` | Eigenaar / operationeel |
+| `sieb@helpinghandsagency.nl` | Mede-eigenaar |
 
 Bron: `src/lib/siteConfig.ts` → `getSharedMailboxes()` in `src/lib/integrations/gmail.ts`.
 

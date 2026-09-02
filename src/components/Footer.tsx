@@ -4,13 +4,13 @@ import SocialLinks from "@/components/SocialLinks";
 import { brandAlt, brandImages } from "@/lib/brand";
 import {
   applicationsEmail,
+  coOwnerEmail,
   contactEmail,
   contactPhoneDisplay,
   contactPhoneLandlineDisplay,
   contactPhoneLandlineTel,
   contactPhoneTel,
   hrEmail,
-  plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
 import { crewApplyHref } from "@/lib/contact";
@@ -172,17 +172,6 @@ export default function Footer() {
               </li>
               <li>
                 <p className="text-xs font-bold uppercase tracking-wide text-white/45">
-                  Planning (Mesbah)
-                </p>
-                <a
-                  href={`mailto:${plannerEmail}`}
-                  className="mt-1 block transition hover:text-white"
-                >
-                  {plannerEmail}
-                </a>
-              </li>
-              <li>
-                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
                   Crew aanmelden &amp; sollicitaties
                 </p>
                 <a
@@ -201,6 +190,17 @@ export default function Footer() {
                   className="mt-1 block transition hover:text-white"
                 >
                   {hrEmail}
+                </a>
+              </li>
+              <li>
+                <p className="text-xs font-bold uppercase tracking-wide text-white/45">
+                  Mede-eigenaar (Sieb)
+                </p>
+                <a
+                  href={`mailto:${coOwnerEmail}`}
+                  className="mt-1 block transition hover:text-white"
+                >
+                  {coOwnerEmail}
                 </a>
               </li>
               <li>

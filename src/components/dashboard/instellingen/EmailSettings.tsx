@@ -36,8 +36,8 @@ export default function EmailSettingsPanel({ settings, onChange }: Props) {
     },
     {
       key: "plannerEmail",
-      label: "Planner (Mesbah)",
-      hint: "mesbah@helpinghandsagency.nl",
+      label: "Planning (extra)",
+      hint: "planning@helpinghandsagency.nl",
     },
     {
       key: "crewApplicationsEmail",

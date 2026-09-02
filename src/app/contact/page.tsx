@@ -20,9 +20,11 @@ import { contactFaqs } from "@/lib/faq";
 import { getPageHeroContent } from "@/lib/pageHeroContent";
 import {
   applicationsEmail,
+  coOwnerEmail,
+  coOwnerPhoneDisplay,
+  coOwnerPhoneTel,
   contactEmail,
   hrEmail,
-  plannerEmail,
   planningEmail,
 } from "@/lib/navigation";
 import {
@@ -101,15 +103,6 @@ export default function ContactPage() {
                 className="mt-2 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
               >
                 {planningEmail}
-              </a>
-              <p className="mt-3 text-xs font-bold uppercase tracking-wide text-white/55">
-                Planning (Mesbah)
-              </p>
-              <a
-                href={`mailto:${plannerEmail}`}
-                className="mt-1 block font-semibold text-[#F28C28] underline-offset-4 hover:underline"
-              >
-                {plannerEmail}
               </a>
               <a
                 href={`tel:${siteConfig.phoneTel}`}
@@ -247,6 +240,27 @@ export default function ContactPage() {
                   {applicationsEmail}
                 </a>
                 <span className="text-[#101828]/55"> (aanmeldingen)</span>
+                <br />
+                <a
+                  href={`mailto:${coOwnerEmail}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {coOwnerEmail}
+                </a>
+                <span className="text-[#101828]/55"> (mede-eigenaar)</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#0B1F4D]">Mede-eigenaar</dt>
+              <dd>
+                Sieb Ludolph Looman
+                <br />
+                <a
+                  href={`tel:${coOwnerPhoneTel}`}
+                  className="font-semibold text-[#173A8A] underline-offset-4 hover:underline"
+                >
+                  {coOwnerPhoneDisplay}
+                </a>
               </dd>
             </div>
             <div>
