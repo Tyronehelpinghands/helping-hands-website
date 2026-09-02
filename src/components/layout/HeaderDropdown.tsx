@@ -92,9 +92,9 @@ export default function HeaderDropdown({
         aria-controls={`nav-${config.id}-panel`}
         aria-haspopup="true"
         onClick={onToggle}
-        className={`inline-flex cursor-pointer items-center gap-1 ${triggerClassName(active)}`}
+        className={`inline-flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap ${triggerClassName(active)}`}
       >
-        {config.label}
+        <span className="whitespace-nowrap">{config.label}</span>
         <ChevronDown open={isOpen} />
       </button>
 
