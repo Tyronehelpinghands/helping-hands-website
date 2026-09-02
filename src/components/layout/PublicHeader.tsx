@@ -125,11 +125,11 @@ export default function PublicHeader() {
       >
         <div
           className={cn(
-            "mx-auto flex max-w-7xl items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8",
+            "mx-auto flex max-w-7xl items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:gap-5 lg:px-8",
             scrolled ? "h-14 sm:h-[3.75rem]" : "h-[3.75rem] sm:h-16",
           )}
         >
-          <div className="min-w-0 flex-1">
+          <div className="shrink-0">
             <HeaderBrandLogo
               scrolled={scrolled}
               inverted={inverted}
@@ -138,7 +138,7 @@ export default function PublicHeader() {
           </div>
 
           <nav
-            className="hidden items-center gap-0.5 xl:gap-1 lg:flex"
+            className="hidden min-w-0 items-center gap-0.5 xl:gap-1 lg:flex"
             aria-label="Hoofdnavigatie"
           >
             {simpleNavLinks
@@ -184,7 +184,7 @@ export default function PublicHeader() {
               ))}
           </nav>
 
-          <div className="relative z-[70] flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          <div className="relative z-[70] ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <a
               href={`tel:${contactPhoneTel}`}
               aria-label={`Bel ${contactPhoneDisplay}`}

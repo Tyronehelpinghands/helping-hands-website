@@ -106,19 +106,19 @@ export function HeaderBrandLogo({
     : "w-[160px] xl:w-[195px] max-h-[52px]";
 
   return (
-    <div className="flex min-w-0 max-w-full items-center">
+    <div className="flex shrink-0 items-center">
       <BrandLogo
         href="/"
         onClick={onNavigate}
         priority
         variant={inverted ? "fullWhite" : "full"}
-        className="hidden lg:inline-flex"
+        className="hidden shrink-0 lg:inline-flex"
         imageClassName={`${logoWidth} transition-[width,max-height] duration-300`}
       />
       <Link
         href="/"
         onClick={onNavigate}
-        className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:hidden"
+        className="inline-flex min-w-0 max-w-full shrink-0 items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F28C28] focus:ring-offset-2 lg:hidden"
         aria-label={`${brandAlt} home`}
       >
         <BrandLogoImage
