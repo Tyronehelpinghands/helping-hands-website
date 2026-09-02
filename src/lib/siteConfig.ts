@@ -7,14 +7,21 @@ export const siteConfig = {
   email: "info@helpinghandsagency.nl" as string,
   /** Personeels- / crewaanvragen (opdrachtgevers) */
   planningEmail: "planning@helpinghandsagency.nl" as string,
-  /** Planner (Mesbah) — planning & inzet */
-  plannerEmail: "mesbah@helpinghandsagency.nl" as string,
+  /**
+   * Extra planning-mailbox alias (settings/gmail).
+   * Was mesbah@; public contact uses planning@ only.
+   */
+  plannerEmail: "planning@helpinghandsagency.nl" as string,
   /** Crewaanmeldingen & sollicitaties */
   applicationsEmail: "aanmeldingen@helpinghandsagency.nl" as string,
   /** H&R-manager (Marieke) — HR / personeelszaken */
   hrEmail: "marieke@helpinghandsagency.nl" as string,
   /** Direct contact (eigenaar / operationeel) */
   ownerEmail: "tyrone@helpinghandsagency.nl" as string,
+  /** Mede-eigenaar (Sieb Ludolph Looman) */
+  coOwnerEmail: "sieb@helpinghandsagency.nl" as string,
+  coOwnerPhoneDisplay: "06 4191 2998" as string,
+  coOwnerPhoneTel: "+31641912998" as string,
   /** Primary Helping Hands mobile (WhatsApp-capable) */
   phone: "0657416338" as string,
   phoneDisplay: "06 5741 6338" as string,

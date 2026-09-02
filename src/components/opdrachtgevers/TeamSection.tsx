@@ -73,6 +73,14 @@ export default function TeamSection({
                   {member.email}
                 </a>
               ) : null}
+              {member.phoneDisplay && member.phoneTel ? (
+                <a
+                  href={`tel:${member.phoneTel}`}
+                  className="mt-1 block text-sm font-semibold text-white/80 underline-offset-4 hover:underline"
+                >
+                  {member.phoneDisplay}
+                </a>
+              ) : null}
               {member.note ? (
                 <p className="mt-3 text-sm leading-6 text-white/60">
                   {member.note}

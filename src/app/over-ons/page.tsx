@@ -106,7 +106,7 @@ export default function OverOnsPage() {
         <TeamSection
           eyebrow="Ons team"
           title="De mensen achter Helping Hands"
-          description="Een klein, vast team voor planning, H&R en opdrachtgeverrelaties — met korte lijnen en persoonlijk contact."
+          description="Een klein, vast team van eigenaren, H&R en planning — met korte lijnen en persoonlijk contact."
           showNotes={false}
         />
       </div>
