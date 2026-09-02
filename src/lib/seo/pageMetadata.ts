@@ -78,24 +78,35 @@ export function noIndexMetadata(title: string, description: string): Metadata {
 }
 
 export function organizationJsonLd() {
-  const { address } = siteConfig;
+  const { address, geo } = siteConfig;
+  const orgId = absoluteUrl("/#organization");
 
   return {
     "@context": "https://schema.org",
     "@type": ["Organization", "EmploymentAgency"],
+    "@id": orgId,
     name: siteConfig.name,
+    alternateName: [...siteConfig.alternateNames],
     legalName: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
     logo: absoluteUrl(siteConfig.logo),
+    image: absoluteUrl(siteConfig.defaultOgImage),
     description: siteConfig.description,
+    slogan: "Event crew & horecapersoneel voor evenementen en producties",
+    foundingDate: siteConfig.foundingDate,
     address: {
       "@type": "PostalAddress",
       streetAddress: address.street,
       postalCode: address.postalCode,
       addressLocality: address.city,
       addressCountry: address.countryCode,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: geo.latitude,
+      longitude: geo.longitude,
     },
     vatID: siteConfig.vat,
     identifier: [
@@ -115,6 +126,7 @@ export function organizationJsonLd() {
       name: "Netherlands",
     },
     knowsAbout: [
+      "Event staffing",
       "Event crew",
       "Eventpersoneel",
       "Festival crew",
@@ -126,22 +138,28 @@ export function organizationJsonLd() {
       "Logistiek",
       "Hospitality",
       "Load-in en load-out",
+      "Uitzendbureau evenementen",
     ],
     sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };
 }
 
 export function websiteJsonLd() {
+  const orgId = absoluteUrl("/#organization");
+
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": absoluteUrl("/#website"),
     name: siteConfig.name,
+    alternateName: [...siteConfig.alternateNames],
     url: siteConfig.url,
     inLanguage: "nl-NL",
     publisher: {
-      "@type": "Organization",
-      name: siteConfig.name,
-      url: siteConfig.url,
+      "@id": orgId,
+    },
+    about: {
+      "@id": orgId,
     },
   };
 }

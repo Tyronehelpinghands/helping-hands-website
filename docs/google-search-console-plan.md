@@ -98,11 +98,18 @@ Alleen demoten in GSC als een sitelink structureel verkeerd is.
 
 ## 7. Google Business Profile (handmatig)
 
-- Bedrijfsnaam: **Helping Hands Agency**
-- Categorie: uitzendbureau / event services (passend bij staffing)
+SERP-check (brand query): GBP toont soms categorie **“Mediation service”** — dat komt waarschijnlijk door LinkedIn-copy met “bemiddelingsbureau”. Corrigeer in GBP naar staffing/events.
+
+- Bedrijfsnaam: **Helping Hands Agency** (volledige merknaam, niet alleen “Helping Hands”)
+- Primaire categorie: **Uitzendbureau** of **Employment agency** (niet Mediation / Bemiddeling)
+- Secundair: Event planner / Event venue service / Staffing agency — wat GBP toestaat en past bij crew
 - Adres: Wandelpad 30, 1211 GN Hilversum (niet QN)
-- Telefoon: 06 5741 6338 (primair)
+- Telefoon: 06 5741 6338 (primair) + vast 035 785 7307
 - Website: `https://www.helpinghandsagency.nl`
+- Openingstijden: ma–vr 09:00–17:30 (of actuele tijden); voorkom structureel “Closed” zonder juiste next-open
+- Beschrijving: event staffing / crew / horecapersoneel — **niet** zorg of thuiszorg
+- LinkedIn-bedrijfsbio: vermijd “bemiddelingsbureau”; gebruik “event staffing” / “uitzendbureau voor evenementen”
+- Reviews: vraag tevreden opdrachtgevers om een echte review (geen incentives)
 - Geen nep-reviews, geen review-incentives
 - Site CTA gebruikt Maps-zoek-URL of echte GBP-URL via `NEXT_PUBLIC_GOOGLE_BUSINESS_URL` indien bekend
 

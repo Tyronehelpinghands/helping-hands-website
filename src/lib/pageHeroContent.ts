@@ -38,10 +38,10 @@ export type PageHeroContent = {
 
 const pageHeroByPath: Record<string, PageHeroContent> = {
   "/": {
-    eyebrow: "Helping Hands Agency",
-    title: "Event crew en horecapersoneel inhuren voor events en producties.",
+    eyebrow: "Event staffing · Hilversum",
+    title: "Helping Hands Agency — event crew en horecapersoneel inhuren.",
     description:
-      "Van last-minute extra handen tot complete projectinzet: Helping Hands Agency levert event crew, stagehands en horecapersoneel die begrijpen wat er op locatie nodig is.",
+      "Van last-minute extra handen tot complete projectinzet: wij leveren event crew, stagehands en horecapersoneel voor festivals, stadions, beurzen, concerten en horeca. Gevestigd in Hilversum, landelijk inzetbaar.",
     theme: "staffing",
     primaryCta: { label: "Personeel aanvragen", href: "/contact" },
     secondaryCta: { label: "Crew aanmelden", href: crewApplyHref },

@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    default: `${siteConfig.name} | Event staffing & horecapersoneel inhuren`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: siteConfig.locale,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    title: `${siteConfig.name} | Event staffing & horecapersoneel inhuren`,
     description: siteConfig.description,
     url: siteConfig.url,
     images: [
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    title: `${siteConfig.name} | Event staffing & horecapersoneel inhuren`,
     description: siteConfig.description,
     images: [absoluteUrl(siteConfig.defaultOgImage)],
   },
