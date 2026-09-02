@@ -3,6 +3,11 @@ import type { FaqItem } from "@/lib/faq";
 /** Veelgestelde vragen voor de /over-ons pagina — missie, kwaliteit, groei en aanmelden. */
 export const aboutFaqs: FaqItem[] = [
   {
+    question: "Is Helping Hands Agency hetzelfde als andere Helping Hands-zorgmerken?",
+    answer:
+      "Nee. Helping Hands Agency is een event staffing- en crewbedrijf in Hilversum (Wandelpad 30). Wij bemiddelen event crew, stagehands en horecapersoneel — geen thuiszorg, wijkverpleging, Wmo of zorgbemiddeling. Merken met een vergelijkbare naam in de zorg zijn onafhankelijke organisaties.",
+  },
+  {
     question: "Wat is de missie van Helping Hands Agency?",
     answer:
       "Helping Hands is in 2022 opgericht door Tyrone van der Schagt om jongeren en jongvolwassenen een eerlijke kans te geven: kijken naar potentieel, motivatie en begeleiding — niet alleen naar het cv — terwijl opdrachtgevers professionele, voorbereide crew krijgen.",

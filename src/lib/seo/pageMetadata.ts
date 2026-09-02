@@ -85,11 +85,14 @@ export function organizationJsonLd() {
     "@type": ["Organization", "EmploymentAgency"],
     name: siteConfig.name,
     legalName: siteConfig.name,
+    alternateName: siteConfig.alternateNames,
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
     logo: absoluteUrl(siteConfig.logo),
     description: siteConfig.description,
+    disambiguatingDescription: siteConfig.disambiguatingDescription,
+    slogan: siteConfig.slogan,
     address: {
       "@type": "PostalAddress",
       streetAddress: address.street,
@@ -126,6 +129,8 @@ export function organizationJsonLd() {
       "Logistiek",
       "Hospitality",
       "Load-in en load-out",
+      "Event staffing",
+      "Uitzendbureau evenementen",
     ],
     sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };

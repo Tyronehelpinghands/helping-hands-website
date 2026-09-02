@@ -74,9 +74,9 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-white/65">
-              Helping Hands Agency is een event staffing- en crewbedrijf voor
-              evenementen, horeca, stagebouw, productie en logistiek. Snel
-              inzetbaar op locatie.
+              Helping Hands Agency is een event staffing- en crewbedrijf in
+              Hilversum voor evenementen, horeca, stagebouw, productie en
+              logistiek — geen zorg- of thuiszorgorganisatie.
             </p>
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">
               {formatAddressSingleLine()}
