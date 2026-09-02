@@ -38,9 +38,9 @@ import {
 } from "@/lib/siteConfig";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact | Personeel aanvragen of crew melden",
+  title: "Contact",
   description:
-    "Vraag crew of personeel aan voor events, horeca, stagebouw, productie, logistiek en hospitality. Neem contact op met Helping Hands Agency of meld je aan als medewerker.",
+    "Contact Helping Hands Agency: vraag event crew of horecapersoneel aan, of meld je aan als medewerker. Hilversum — landelijk inzetbaar.",
   path: "/contact",
 });
 

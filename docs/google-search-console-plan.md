@@ -85,14 +85,21 @@ Brand queries:
 
 - “helping hands agency”, “helpinghandsagency”, “helping hands agency hilversum”
 
-## 6. Sitelinks
+## 6. Sitelinks (Crewstars-benchmark)
 
-Google kiest sitelinks automatisch. Helpen:
+Crewstars rankt sterk op merknaam met sitelinks (Werken bij, Contact, Diensten,
+Flexibel personeel…, Algemene voorwaarden). Dat kunnen wij nabootsen in
+**structuur**, niet in merkeenvoud: “Crewstars” is uniek; “Helping Hands” deelt
+naamruimte met zorgmerken.
 
-1. Sterke interne links (header/footer/homepage) naar `/personeel-inhuren`, `/werken-bij`, `/vacatures`, `/over-ons`, `/contact`, `/opdrachtgevers`
-2. Unieke title + H1 per hub
-3. Indexering aanvragen voor die URL’s
-4. Wachten op recrawl (dagen–weken)
+Google kiest sitelinks automatisch. Wij helpen met:
+
+1. Korte hub-titles: `Diensten`, `Werken bij`, `Contact`, `Personeel inhuren`
+2. Homepage “Direct naar” + footer + `SiteNavigationElement` JSON-LD naar die hubs
+   (incl. `/algemene-voorwaarden`, zoals Crewstars)
+3. Indexering aanvragen voor die URL’s na deploy
+4. Wachten op recrawl (dagen–weken); GBP-categorie + reviews versterken de
+   Knowledge Panel ernaast
 
 Alleen demoten in GSC als een sitelink structureel verkeerd is.
 

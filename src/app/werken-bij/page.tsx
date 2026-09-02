@@ -17,9 +17,9 @@ import {
 import { applicationsEmail, hrEmail } from "@/lib/navigation";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Werken bij | Event crew, horeca & stagebouw",
+  title: "Werken bij",
   description:
-    "Werken in evenementen, als stagehand of met een horeca bijbaan? Meld je aan bij Helping Hands Agency: duidelijke planning, echte producties, doorgroeikansen.",
+    "Werken bij Helping Hands Agency: event crew, stagehand of horeca bijbaan. Duidelijke planning, echte producties en doorgroeikansen.",
   path: "/werken-bij",
 });
 

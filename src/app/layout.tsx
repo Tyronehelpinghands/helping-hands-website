@@ -8,6 +8,7 @@ import { brandImages } from "@/lib/brand";
 import {
   localBusinessSchema,
   organizationJsonLd,
+  siteNavigationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
 import { absoluteUrl, siteConfig } from "@/lib/siteConfig";
@@ -30,7 +31,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    default: `${siteConfig.name} | Event crew & horecapersoneel`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: siteConfig.locale,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    title: `${siteConfig.name} | Event crew & horecapersoneel`,
     description: siteConfig.description,
     url: siteConfig.url,
     images: [
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} | Event crew & horecapersoneel inhuren`,
+    title: `${siteConfig.name} | Event crew & horecapersoneel`,
     description: siteConfig.description,
     images: [absoluteUrl(siteConfig.defaultOgImage)],
   },
@@ -81,7 +82,12 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-[#F5F7FA] pb-20 text-[#101828] lg:pb-0">
         <AuthHashErrorHandler />
         <JsonLd
-          data={[organizationJsonLd(), localBusinessSchema(), websiteJsonLd()]}
+          data={[
+            organizationJsonLd(),
+            localBusinessSchema(),
+            websiteJsonLd(),
+            siteNavigationJsonLd(),
+          ]}
         />
         <ConditionalSiteChrome>
           <main className="flex-1">{children}</main>

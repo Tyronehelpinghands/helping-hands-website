@@ -19,14 +19,15 @@ import { formatAddressSingleLine, siteConfig } from "@/lib/siteConfig";
 /** Curated footer nav — descriptive anchors for pages we want as Google sitelinks. */
 const primaryNavLinks = [
   { href: "/personeel-inhuren", label: "Personeel inhuren" },
-  { href: "/werken-bij", label: "Werken bij" },
-  { href: "/vacatures", label: "Vacatures" },
-  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
-  { href: "/over-ons", label: "Over ons" },
-  { href: "/contact", label: "Contact" },
   { href: "/diensten", label: "Diensten" },
+  { href: "/werken-bij", label: "Werken bij" },
+  { href: "/contact", label: "Contact" },
+  { href: "/opdrachtgevers", label: "Opdrachtgevers" },
+  { href: "/vacatures", label: "Vacatures" },
+  { href: "/over-ons", label: "Over ons" },
   { href: "/projecten", label: "Projecten" },
   { href: "/locaties", label: "Locaties" },
+  { href: "/algemene-voorwaarden", label: "Algemene voorwaarden" },
 ];
 
 const serviceLinks = [
