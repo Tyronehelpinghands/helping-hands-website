@@ -20,6 +20,7 @@ const marketingRoutes = [
   "/locaties",
   "/over-ons",
   "/contact",
+  "/algemene-voorwaarden",
 ] as const;
 
 /** Old /diensten landings that permanently redirect — omit from sitemap. */

@@ -272,6 +272,20 @@ export default function Footer() {
               productie
             </p>
           </div>
+          <p className="flex flex-wrap gap-x-3 gap-y-1">
+            <Link
+              href="/algemene-voorwaarden"
+              className="transition hover:text-white"
+            >
+              Algemene voorwaarden
+            </Link>
+            <span aria-hidden="true" className="text-white/25">
+              ·
+            </span>
+            <Link href="/contact" className="transition hover:text-white">
+              Contact
+            </Link>
+          </p>
           <p>
             {siteConfig.name} · {formatAddressSingleLine()} · KvK{" "}
             {siteConfig.kvk} · BTW {siteConfig.vat}

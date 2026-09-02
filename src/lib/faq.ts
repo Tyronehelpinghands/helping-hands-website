@@ -115,7 +115,7 @@ export const opdrachtgeversFaqs: FaqItem[] = [
   {
     question: "Hoe zit het met verzekering en aansprakelijkheid van jullie medewerkers?",
     answer:
-      "Onze medewerkers zijn voor hun inzet verzekerd op een manier die past bij hun dienstverband. De precieze dekking en aansprakelijkheidsafspraken leggen we niet op de website vast — die staan in de opdrachtbevestiging en onze algemene voorwaarden. Vraag ze gerust op via contact.",
+      "Onze medewerkers zijn voor hun inzet verzekerd op een manier die past bij hun dienstverband. De precieze dekking en aansprakelijkheidsafspraken leggen we niet op de website vast — die staan in de opdrachtbevestiging en onze algemene voorwaarden.",
   },
   {
     question: "Hoe werkt de urenregistratie bij een inzet?",
@@ -149,7 +149,7 @@ export const opdrachtgeversFaqs: FaqItem[] = [
   {
     question: "Waar vind ik jullie algemene voorwaarden?",
     answer:
-      "Onze algemene voorwaarden delen we op aanvraag. Vraag ze op via contact, dan sturen we ze je toe voordat je een opdracht bevestigt.",
+      "Onze algemene voorwaarden staan op de website onder Algemene voorwaarden. Je kunt ze daar lezen of als PDF downloaden voordat je een opdracht bevestigt.",
   },
 ];
 

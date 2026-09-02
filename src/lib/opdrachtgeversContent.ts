@@ -101,7 +101,7 @@ export const personeelsvormenVerzekering = {
   title: "Aansprakelijkheid en verzekering",
   paragraphs: [
     "Onze medewerkers zijn voor hun inzet verzekerd op een manier die past bij hun dienstverband — loondienst, payroll of zzp. Voor payroll loopt dit via onze partner Fooks Payrolling.",
-    "De precieze dekking, aansprakelijkheidsverdeling en verzekeringsvoorwaarden leggen we niet los op deze pagina vast: die staan in de opdrachtbevestiging en onze algemene voorwaarden. Wil je dit vooraf doornemen, vraag dan gerust onze voorwaarden op.",
+    "De precieze dekking, aansprakelijkheidsverdeling en verzekeringsvoorwaarden leggen we niet los op deze pagina vast: die staan in de opdrachtbevestiging en onze algemene voorwaarden. Wil je dit vooraf doornemen, bekijk dan onze algemene voorwaarden.",
   ],
 };
 
