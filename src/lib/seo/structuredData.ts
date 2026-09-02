@@ -2,24 +2,35 @@ import { absoluteUrl, formatAddressSingleLine, siteConfig } from "@/lib/siteConf
 import { socialSameAs } from "@/lib/social";
 
 export function organizationSchema() {
-  const { address } = siteConfig;
+  const { address, geo } = siteConfig;
+  const orgId = absoluteUrl("/#organization");
 
   return {
     "@context": "https://schema.org",
     "@type": ["Organization", "EmploymentAgency"],
+    "@id": orgId,
     name: siteConfig.name,
+    alternateName: [...siteConfig.alternateNames],
     legalName: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
     telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
     logo: absoluteUrl(siteConfig.logo),
+    image: absoluteUrl(siteConfig.defaultOgImage),
     description: siteConfig.description,
+    slogan: "Event crew & horecapersoneel voor evenementen en producties",
+    foundingDate: siteConfig.foundingDate,
     address: {
       "@type": "PostalAddress",
       streetAddress: address.street,
       postalCode: address.postalCode,
       addressLocality: address.city,
       addressCountry: address.countryCode,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: geo.latitude,
+      longitude: geo.longitude,
     },
     vatID: siteConfig.vat,
     identifier: [
@@ -39,6 +50,7 @@ export function organizationSchema() {
       name: "Netherlands",
     },
     knowsAbout: [
+      "Event staffing",
       "Event crew",
       "Eventpersoneel",
       "Festival crew",
@@ -49,6 +61,7 @@ export function organizationSchema() {
       "Hospitality",
       "Productie-assistentie",
       "Logistiek evenementen",
+      "Uitzendbureau evenementen",
     ],
     sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
     contactPoint: [
@@ -73,23 +86,39 @@ export function organizationSchema() {
 
 /** LocalBusiness for GBP / Maps alignment — real NAP only. */
 export function localBusinessSchema() {
-  const { address } = siteConfig;
+  const { address, geo } = siteConfig;
+  const orgId = absoluteUrl("/#organization");
 
   return {
     "@context": "https://schema.org",
-    "@type": ["LocalBusiness", "EmploymentAgency"],
+    "@type": ["EmploymentAgency", "LocalBusiness"],
+    "@id": absoluteUrl("/#localbusiness"),
     name: siteConfig.name,
+    alternateName: [...siteConfig.alternateNames],
     url: siteConfig.url,
     email: siteConfig.email,
-    telephone: siteConfig.phoneTel,
-    image: absoluteUrl(siteConfig.defaultOgImage),
+    telephone: [siteConfig.phoneTel, siteConfig.phoneLandlineTel],
+    image: [
+      absoluteUrl(siteConfig.logo),
+      absoluteUrl(siteConfig.defaultOgImage),
+    ],
+    logo: absoluteUrl(siteConfig.logo),
     description: siteConfig.description,
+    slogan: "Event staffing & crew vanuit Hilversum",
+    foundingDate: siteConfig.foundingDate,
+    parentOrganization: { "@id": orgId },
     address: {
       "@type": "PostalAddress",
       streetAddress: address.street,
       postalCode: address.postalCode,
       addressLocality: address.city,
+      addressRegion: "Noord-Holland",
       addressCountry: address.countryCode,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: geo.latitude,
+      longitude: geo.longitude,
     },
     areaServed: {
       "@type": "Country",
@@ -117,6 +146,7 @@ export function localBusinessSchema() {
       "Horecapersoneel",
       "Stagehands",
       "Festival crew",
+      "Uitzendbureau evenementen",
     ],
     sameAs: [...socialSameAs(), siteConfig.googleMapsUrl],
   };

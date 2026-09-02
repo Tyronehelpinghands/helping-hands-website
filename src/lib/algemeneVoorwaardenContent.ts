@@ -35,7 +35,7 @@ export const avCompanyIntro = {
   email: "info@helpinghandsagency.nl",
   website: "www.helpinghandsagency.nl",
   branche:
-    "Personeelsbemiddeling voor evenementen, horeca, hospitality, productie en logistiek.",
+    "Event staffing en personeelsvoorziening voor evenementen, horeca, hospitality, productie en logistiek.",
   description:
     "Helping Hands Agency levert personeel voor events, festivals, concerten, beurzen, horeca, hospitality, productie, logistiek en andere ondersteunende werkzaamheden.",
   workforce:

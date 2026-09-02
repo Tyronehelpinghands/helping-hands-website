@@ -40,6 +40,18 @@ export const siteConfig = {
     country: "Nederland",
     countryCode: "NL",
   },
+  /** WGS84 for LocalBusiness / Organization geo — Wandelpad 30, Hilversum. */
+  geo: {
+    latitude: 52.2231243,
+    longitude: 5.1837735,
+  },
+  foundingDate: "2022",
+  /** Brand variants for entity / SERP disambiguation (not zorg of thuiszorg). */
+  alternateNames: [
+    "Helping Hands",
+    "Helping Hands Agency Hilversum",
+    "Helpinghandsagency",
+  ] as const,
   kvk: "88091333" as string,
   vat: "NL004540573B46" as string,
   /** Alleen tonen in footer/contact legal — niet op marketing-hero */
@@ -52,7 +64,7 @@ export const siteConfig = {
   ogImageWidth: 1200,
   ogImageHeight: 630,
   description:
-    "Helping Hands Agency: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, één aanspreekpunt vanuit Hilversum.",
+    "Helping Hands Agency is het event staffing- en crewbureau in Hilversum: event crew, stagehands en horecapersoneel inhuren voor festivals, stadions, beurzen, concerten en horeca. Snelle planning, heldere briefing, landelijk inzetbaar.",
   /** Google Maps search URL for NAP / GBP support (no fake reviews). */
   googleMapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Helping%20Hands%20Agency%20Wandelpad%2030%20Hilversum" as string,

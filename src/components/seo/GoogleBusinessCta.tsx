@@ -36,10 +36,11 @@ export default function GoogleBusinessCta({
             </a>
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[#101828]/75">
-            Event staffing &amp; crew voor evenementen, horeca, stagebouw,
-            productie en logistiek. Was je tevreden over onze inzet? Laat gerust
-            een review achter. We vragen geen nep-reviews en bieden geen
-            beloning voor reviews.
+            Helping Hands Agency is een event staffing- en crewbureau (geen
+            zorg of thuiszorg): evenementen, horeca, stagebouw, productie en
+            logistiek. Was je tevreden over onze inzet? Laat gerust een review
+            achter. We vragen geen nep-reviews en bieden geen beloning voor
+            reviews.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <a

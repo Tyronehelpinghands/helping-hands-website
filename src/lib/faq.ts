@@ -7,6 +7,11 @@ export type FaqItem = {
 
 export const homeFaqs: FaqItem[] = [
   {
+    question: "Wat is Helping Hands Agency?",
+    answer:
+      "Helping Hands Agency is een event staffing- en crewbureau in Hilversum. Wij leveren event crew, stagehands en horecapersoneel voor evenementen, horeca, stagebouw, productie en logistiek — geen zorg, thuiszorg of Wmo-begeleiding. Adres: Wandelpad 30, 1211 GN Hilversum.",
+  },
+  {
     question: "Welke crew kan ik bij Helping Hands Agency inhuren?",
     answer:
       "Wij leveren event crew, stagehands, horeca- en restaurantpersoneel, keuken- en barpersoneel, productie-assistentie, logistiek en hospitality. Van festivals en concerten tot beurzen, stadions en horecalocaties.",
