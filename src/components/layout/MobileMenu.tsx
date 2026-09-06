@@ -280,7 +280,7 @@ export default function MobileMenu({
               onClick={onClose}
               className="flex min-h-11 w-full items-center justify-center rounded-xl border-2 border-[#173A8A] px-5 py-3 text-sm font-bold text-[#173A8A] transition hover:bg-[#173A8A]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2"
             >
-              Crew aanmelden
+              Inschrijven
             </Link>
           </div>
         </div>

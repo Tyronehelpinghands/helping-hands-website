@@ -248,7 +248,7 @@ export const mobileNavGroups: MobileNavGroup[] = [
     items: [
       { label: "Werken bij Helping Hands", href: "/werken-bij" },
       { label: "Vacatures bekijken", href: "/vacatures" },
-      { label: "Crew aanmelden", href: "/contact?type=crew-aanmelden" },
+      { label: "Inschrijven", href: "/contact?type=crew-aanmelden" },
       {
         label: "Werken als eventmedewerker",
         href: "/werken-als/eventmedewerker",

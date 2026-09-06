@@ -238,7 +238,7 @@ export default function PublicHeader() {
                   : "text-[#173A8A] hover:bg-[#F5F7FA] hover:text-[#0B1F4D]",
               )}
             >
-              Crew aanmelden
+              Inschrijven
             </Link>
             <Link
               href="/contact"
