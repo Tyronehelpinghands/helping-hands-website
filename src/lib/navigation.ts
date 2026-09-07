@@ -172,7 +172,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/vacatures",
       },
       {
-        title: "Aanmelden als crewlid",
+        title: "Inschrijven",
         description: "Meld je aan voor events, horeca en producties.",
         href: "/contact?type=crew-aanmelden",
       },
@@ -187,7 +187,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/werken-als/eventmedewerker",
       },
     ],
-    cta: { label: "Aanmelden", href: "/contact?type=crew-aanmelden" },
+    cta: { label: "Inschrijven", href: "/contact?type=crew-aanmelden" },
   },
 ];
 
