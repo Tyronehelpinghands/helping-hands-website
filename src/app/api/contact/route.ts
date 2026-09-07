@@ -80,6 +80,9 @@ function buildPayload(
       (typeof body.age === "number" ? body.age : undefined),
     experience: asOptionalString(body.experience),
     availability: asOptionalString(body.availability),
+    hoursPerWeek:
+      asOptionalString(body.hoursPerWeek) ??
+      (typeof body.hoursPerWeek === "number" ? body.hoursPerWeek : undefined),
     contractType: asOptionalString(body.contractType),
     license: asOptionalString(body.license),
     transport: asOptionalString(body.transport),
