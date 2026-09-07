@@ -232,7 +232,7 @@ export default function PublicHeader() {
             <Link
               href={crewApplyHref}
               className={cn(
-                "hidden whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 2xl:inline-flex",
+                "hidden whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 xl:inline-flex",
                 inverted
                   ? "text-white/90 hover:bg-white/10 hover:text-white"
                   : "text-[#173A8A] hover:bg-[#F5F7FA] hover:text-[#0B1F4D]",

@@ -133,7 +133,7 @@ export default function ContactPage() {
             overlayClassName="bg-[#173A8A]/80"
           >
             <div className="p-8 text-white">
-              <h2 className="text-xl font-black">Crew aanmelden</h2>
+              <h2 className="text-xl font-black">Inschrijven</h2>
               <p className="mt-4 text-sm text-white/80">
                 Aanmeldingen &amp; sollicitaties
               </p>

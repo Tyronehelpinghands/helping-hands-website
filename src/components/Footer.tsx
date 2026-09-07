@@ -173,7 +173,7 @@ export default function Footer() {
               </li>
               <li>
                 <p className="text-xs font-bold uppercase tracking-wide text-white/45">
-                  Crew aanmelden &amp; sollicitaties
+                  Inschrijven &amp; sollicitaties
                 </p>
                 <a
                   href={`mailto:${applicationsEmail}`}
