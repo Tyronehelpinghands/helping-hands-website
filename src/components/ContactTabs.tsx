@@ -142,7 +142,13 @@ const workerFields: FieldDef[] = [
     fullWidth: true,
     required: true,
   },
-  { label: "Beschikbaarheid", type: "text", name: "beschikbaarheid" },
+  { label: "Beschikbaarheid", type: "text", name: "beschikbaarheid", placeholder: "Bijv. weekenden, avonden…" },
+  {
+    label: "Uren per week",
+    type: "number",
+    name: "uren-per-week",
+    placeholder: "Bijv. 16",
+  },
   { label: "ZZP of loondienst", type: "text", name: "contractvorm" },
   { label: "Rijbewijs", type: "text", name: "rijbewijs", placeholder: "Ja / Nee" },
   { label: "Vervoer", type: "text", name: "vervoer", placeholder: "OV / auto / anders" },
@@ -202,6 +208,8 @@ function Field({ field }: { field: FieldDef }) {
           type={field.type}
           required={field.required}
           placeholder={field.placeholder}
+          min={field.type === "number" ? "0" : undefined}
+          max={field.name === "uren-per-week" ? "80" : undefined}
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] px-4 py-3 text-sm outline-none transition focus:border-[#F28C28] focus:ring-2 focus:ring-[#F28C28]/20"
         />
       )}
@@ -271,6 +279,7 @@ function buildRequestBody(
       interests: options.interests,
       experience,
       availability: readString(formData, "beschikbaarheid"),
+      hoursPerWeek: readString(formData, "uren-per-week"),
       contractType: readString(formData, "contractvorm"),
       license: readString(formData, "rijbewijs"),
       transport: readString(formData, "vervoer"),

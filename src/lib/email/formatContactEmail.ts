@@ -30,6 +30,7 @@ export type ContactEmailPayload = {
   age?: string | number;
   experience?: string;
   availability?: string;
+  hoursPerWeek?: string | number;
   contractType?: string;
   license?: string;
   transport?: string;
@@ -234,6 +235,7 @@ function buildCrewSections(payload: ContactEmailPayload): Section[] {
         ),
         field("Ervaring", payload.experience),
         field("Beschikbaarheid", payload.availability),
+        field("Uren per week", payload.hoursPerWeek),
         field("ZZP of loondienst", payload.contractType),
         field("Rijbewijs", payload.license),
         field("Vervoer", payload.transport),
