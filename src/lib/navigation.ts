@@ -172,7 +172,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/vacatures",
       },
       {
-        title: "Aanmelden als crewlid",
+        title: "Inschrijven",
         description: "Meld je aan voor events, horeca en producties.",
         href: "/contact?type=crew-aanmelden",
       },
@@ -187,7 +187,7 @@ export const navDropdowns: NavDropdownConfig[] = [
         href: "/werken-als/eventmedewerker",
       },
     ],
-    cta: { label: "Aanmelden", href: "/contact?type=crew-aanmelden" },
+    cta: { label: "Inschrijven", href: "/contact?type=crew-aanmelden" },
   },
 ];
 
@@ -248,7 +248,7 @@ export const mobileNavGroups: MobileNavGroup[] = [
     items: [
       { label: "Werken bij Helping Hands", href: "/werken-bij" },
       { label: "Vacatures bekijken", href: "/vacatures" },
-      { label: "Crew aanmelden", href: "/contact?type=crew-aanmelden" },
+      { label: "Inschrijven", href: "/contact?type=crew-aanmelden" },
       {
         label: "Werken als eventmedewerker",
         href: "/werken-als/eventmedewerker",

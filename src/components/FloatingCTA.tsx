@@ -39,7 +39,7 @@ export default function FloatingCTA() {
             href={crewApplyHref}
             className="mt-2 block rounded-full px-5 py-2 text-center text-xs font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F28C28] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F4D]"
           >
-            Crew aanmelden
+            Inschrijven
           </Link>
         </div>
       </div>

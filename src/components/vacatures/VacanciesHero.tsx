@@ -98,7 +98,7 @@ export default function VacanciesHero() {
             />
             <HeroCta
               href={openApplyHref}
-              label="Crew aanmelden"
+              label="Inschrijven"
               variant="secondary"
             />
           </div>

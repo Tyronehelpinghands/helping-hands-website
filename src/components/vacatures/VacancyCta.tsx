@@ -51,7 +51,7 @@ export default function VacancyCta() {
             />
             <div className="relative mx-auto max-w-3xl text-center">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#F28C28]">
-                Crew aanmelden
+                Inschrijven
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
                 Klaar om te werken bij Helping Hands?

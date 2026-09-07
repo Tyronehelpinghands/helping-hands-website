@@ -214,7 +214,7 @@ export function contactPointsJsonLd() {
         email: siteConfig.applicationsEmail,
         areaServed: "NL",
         availableLanguage: ["nl"],
-        description: "Crew aanmelden en sollicitaties",
+        description: "Inschrijven en sollicitaties",
       },
       {
         "@type": "ContactPoint",
